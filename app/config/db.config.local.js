@@ -1,8 +1,7 @@
 module.exports = {
-    HOST: "containers-us-west-123.railway.app",
+    HOST: "localhost",
     USER: "postgres",
-    PORT: 5655,
-    PASSWORD: "sPamwlPOKx6gKhvfEgTR",
+    PASSWORD: "hm1308!@..",
     DB: "sae",
     dialect: "postgres",
     define: {
