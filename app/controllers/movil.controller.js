@@ -1,5 +1,6 @@
 const db = require("../models");
 const Paquete = db.paquete;
+const Eventos = db.eventos;
 
 exports.paquete = async (req, res) => {
   try {
@@ -93,4 +94,41 @@ exports.camionetas = async (req, res) => {
     res.status(500).send(error);
   }
   
+}
+
+
+exports.createEvento = (req, res) => {
+
+  const campos = [
+    'numero_ot', 'tipo_evento', 'rut_maestro', 'rut_ayudante', 'codigo_turno', 'id_base', 'requerimiento', 'direccion', 'fecha_hora'
+  ];
+  for (let i = 0; i < campos.length; i++) {
+    if (!req.body[campos[i]]) {
+      res.status(400).send({
+        message: "No puede estar vacio el campo " + campos[i]
+      });
+      return;
+    }
+  };
+
+  const evento = {
+      numero_ot: req.body.numero_ot,
+      tipo_evento: req.body.tipo_evento,
+      rut_maestro: req.body.rut_maestro,
+      rut_ayudante: req.body.rut_ayudante,
+      codigo_turno: req.body.codigo_turno,
+      id_base: req.body.id_base,
+      requerimiento: req.body.requerimiento,
+      direccion: req.body.direccion,
+      fecha_hora: req.body.fecha_hora,
+      estado: 1
+  };
+
+  Eventos.create(evento)
+      .then(data => {
+          res.send(data);
+      }).catch(err => {
+          res.status(500).send({ message: err.message });
+      })
+
 }

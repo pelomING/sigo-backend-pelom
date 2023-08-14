@@ -1,4 +1,4 @@
-const config = require("../config/db.config.js");
+const config = require("../config/db.config.local.js");
 
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize(
@@ -46,6 +46,8 @@ db.preciosBase = require("./preciosBase.model.js")(sequelize, Sequelize);
 db.tipoFuncionPersonal = require("./tipoFuncionPersonal.model.js")(sequelize, Sequelize);
 db.turnos = require("./turnos.model.js")(sequelize, Sequelize);
 db.zonal = require("./zonal.model.js")(sequelize, Sequelize);
+db.estados = require("./estados.model.js")(sequelize, Sequelize);
+db.eventos = require("./eventos.model.js")(sequelize, Sequelize);
 
 
 

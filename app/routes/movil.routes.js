@@ -23,4 +23,8 @@ module.exports = function(app) {
     app.get("/api/movil/v1/ayudantes", [authJwt.verifyToken, authJwt.isSistema], movilController.ayudantes);
 
     app.get("/api/movil/v1/camionietas", [authJwt.verifyToken, authJwt.isSistema], movilController.camionetas);
+
+    app.post("/api/movil/v1/creaevento", [authJwt.verifyToken, authJwt.isSistema], movilController.createEvento);
+
+
   };
