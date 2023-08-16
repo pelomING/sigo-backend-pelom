@@ -1,6 +1,7 @@
 const db = require("../models");
 const Paquete = db.paquete;
 const Eventos = db.eventos;
+const Jornada = db.jornada;
 
 exports.paquete = async (req, res) => {
   try {
@@ -97,7 +98,7 @@ exports.camionetas = async (req, res) => {
 }
 
 
-exports.createEvento = (req, res) => {
+exports.createEvento = async (req, res) => {
 
   const campos = [
     'numero_ot', 'tipo_evento', 'rut_maestro', 'rut_ayudante', 'codigo_turno', 'id_base', 'requerimiento', 'direccion', 'fecha_hora'
@@ -105,7 +106,7 @@ exports.createEvento = (req, res) => {
   for (let i = 0; i < campos.length; i++) {
     if (!req.body[campos[i]]) {
       res.status(400).send({
-        message: "No puede estar vacio el campo " + campos[i]
+        message: "No puede estar nulo el campo " + campos[i]
       });
       return;
     }
@@ -124,11 +125,45 @@ exports.createEvento = (req, res) => {
       estado: 1
   };
 
-  Eventos.create(evento)
+  await Eventos.create(evento)
       .then(data => {
           res.send(data);
       }).catch(err => {
           res.status(500).send({ message: err.message });
       })
 
+}
+
+exports.creaJornada = async (req, res) => {
+  try {
+
+    const campos = [
+      'rut_maestro', 'rut_ayudante', 'codigo_turno', 'patente', 'base', 'km_inicial', 'km_final', 'fecha_hora_ini', 'fecha_hora_fin'
+    ];
+    for (let i = 0; i < campos.length; i++) {
+      if (!req.body[campos[i]]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + campos[i]
+        });
+        return;
+      }
+    };
+
+    const jornada = await Jornada.create({
+      rut_maestro: req.body.rut_maestro,
+      rut_ayudante: req.body.rut_ayudante,
+      codigo_turno: req.body.codigo_turno,
+      patente: req.body.patente,
+      base: req.body.base,
+      km_inicial: req.body.km_inicial,
+      km_final: req.body.km_final,
+      fecha_hora_ini: req.body.fecha_hora_ini,
+      fecha_hora_fin: req.body.fecha_hora_fin,
+      estado: 1
+    });
+    res.status(200).send(jornada);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+  
 }
