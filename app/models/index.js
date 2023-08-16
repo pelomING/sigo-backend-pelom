@@ -1,23 +1,36 @@
-const config = require("../config/db.config.js");
+// const config = require("../config/db.config.local.js");
+
+let dbconfig = {};
+if (process.env.NODE_ENV === "production") {
+  dbconfig = require("../config/db.config.prod.js");
+}else if(process.env.NODE_ENV === "development"){
+  dbconfig = require("../config/db.config.dev.js");
+}else if(process.env.NODE_ENV === "local"){
+  dbconfig = require("../config/db.config.local.js");
+}else{
+  dbconfig = require("../config/db.config.local.js");
+}
 
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize(
-  config.DB,
-  config.USER,
-  config.PASSWORD,
+  dbconfig.DB,
+  dbconfig.USER,
+  dbconfig.PASSWORD,
   {
-    host: config.HOST,
-    dialect: config.dialect,
-    define : config.define,
-    port: config.PORT,
+    host: dbconfig.HOST,
+    dialect: dbconfig.dialect,
+    define : dbconfig.define,
+    port: dbconfig.PORT,
     pool: {
-      max: config.pool.max,
-      min: config.pool.min,
-      acquire: config.pool.acquire,
-      idle: config.pool.idle
+      max: dbconfig.pool.max,
+      min: dbconfig.pool.min,
+      acquire: dbconfig.pool.acquire,
+      idle: dbconfig.pool.idle
     }
   }
-);0
+);
+
+console.log(dbconfig.HOST);
 
 const db = {};
 
