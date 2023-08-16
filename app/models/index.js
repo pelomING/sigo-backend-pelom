@@ -61,6 +61,7 @@ db.turnos = require("./turnos.model.js")(sequelize, Sequelize);
 db.zonal = require("./zonal.model.js")(sequelize, Sequelize);
 db.estados = require("./estados.model.js")(sequelize, Sequelize);
 db.eventos = require("./eventos.model.js")(sequelize, Sequelize);
+db.jornada = require("./jornada.model.js")(sequelize, Sequelize);
 
 
 

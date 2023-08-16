@@ -26,5 +26,7 @@ module.exports = function(app) {
 
     app.post("/api/movil/v1/creaevento", [authJwt.verifyToken, authJwt.isSistema], movilController.createEvento);
 
+    app.post("/api/movil/v1/creajornada", [authJwt.verifyToken, authJwt.isSistema], movilController.creaJornada);
+
 
   };
