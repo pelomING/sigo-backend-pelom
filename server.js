@@ -4,10 +4,12 @@ const cookieSession = require("cookie-session");
 
 const app = express();
 
+
+
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:8081"],
+    origin: ["http://localhost"],
   })
 );
 
