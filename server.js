@@ -9,10 +9,13 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost"],
+    origin: ["http://localhost:4200"],
   })
 );
 
+
+// cors acpeta todas las entradas
+// app.use(cors());
 // parse requests of content-type - application/json
 app.use(express.json());
 
@@ -64,6 +67,7 @@ require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/movil.routes')(app);
 require('./app/routes/mantenedor.routes')(app);
+require('./app/routes/reportes.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
