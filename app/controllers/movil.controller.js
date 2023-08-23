@@ -34,7 +34,7 @@ exports.usuariosApp = async (req, res) => {
     '' else ' ' || trim(p.apellido_2) end) as nombre, u.password, tfp.nombre as funcion, r.name as rol, b.nombre as base \
     from users u join personas p on u.username = p.rut join tipo_funcion_personal tfp on p.id_funcion = tfp.id \
     join user_roles ur on ur.\"userId\" = u.id join roles r on r.id = ur.\"roleId\" join base b on p.base = b.id \
-    where p.activo and not r.sistema order by p.rut"
+    where p.activo and not r.sistema and (tfp.maestro or tfp.ayudante) order by p.rut"
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const usuariosApp = await sequelize.query(sql, { type: QueryTypes.SELECT });
