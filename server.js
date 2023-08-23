@@ -1,6 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const options = require('./app/config/swagger.config');
+
+//const options = swaggerConfig;
 
 const app = express();
 
@@ -9,10 +14,13 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost"],
+    origin: ["http://localhost:4200"],
   })
 );
 
+
+// cors acpeta todas las entradas
+// app.use(cors());
 // parse requests of content-type - application/json
 app.use(express.json());
 
@@ -54,6 +62,19 @@ function initial() {
   });
 }
 
+// Swagger
+const specs = swaggerJsdoc(options);
+console.log(options);
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(specs, {
+    explorer: true,
+    customCssUrl:
+      "https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-newspaper.css",
+  })
+);
+
 // simple route
 app.get("/", (req, res) => {
   res.json({ message: "App de ejemplo Authentication" });
@@ -64,6 +85,7 @@ require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/movil.routes')(app);
 require('./app/routes/mantenedor.routes')(app);
+require('./app/routes/reportes.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

@@ -34,7 +34,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false
         },
         fecha_hora_ini: {
-            type : Sequelize.STRING
+            type : Sequelize.STRING,
         },
         fecha_hora_fin: {
             type : Sequelize.STRING
