@@ -1,5 +1,6 @@
 const { authJwt } = require("../middleware");
 const movilController = require("../controllers/movil.controller");
+// const router = require("express").Router();
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -10,6 +11,20 @@ module.exports = function(app) {
       next();
     });
   
+    /**
+     * @swagger
+     * paths:
+     *   /api/movil/v1/paquete:
+     *      get:
+     *        summary: Lista de los paquetes del sistema SAE
+     *        content:
+     *          application/json:
+     *        responses:
+     *          200:
+     *            description: Paquetes
+     *          400:
+     *            description: Error
+     */
     app.get("/api/movil/v1/paquete", movilController.paquete);
 
     app.get("/api/movil/v1/zonaPaqueteBaseSql", [authJwt.verifyToken, authJwt.isTecnico], movilController.zonaPaqueteBaseSql);
@@ -23,6 +38,8 @@ module.exports = function(app) {
     app.get("/api/movil/v1/ayudantes", [authJwt.verifyToken, authJwt.isSistema], movilController.ayudantes);
 
     app.get("/api/movil/v1/camionetas", [authJwt.verifyToken, authJwt.isSistema], movilController.camionetas);
+
+    app.get("/api/movil/v1/oficinas", [authJwt.verifyToken, authJwt.isSistema], movilController.bases);
 
     app.post("/api/movil/v1/creaevento", [authJwt.verifyToken, authJwt.isSistema], movilController.createEvento);
 

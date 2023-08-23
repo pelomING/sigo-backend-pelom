@@ -2,6 +2,7 @@ const db = require("../models");
 const Paquete = db.paquete;
 const Eventos = db.eventos;
 const Jornada = db.jornada;
+const Base = db.base;
 
 exports.paquete = async (req, res) => {
   try {
@@ -103,10 +104,10 @@ exports.createEvento = async (req, res) => {
   const campos = [
     'numero_ot', 'tipo_evento', 'rut_maestro', 'rut_ayudante', 'codigo_turno', 'id_base', 'requerimiento', 'direccion', 'fecha_hora'
   ];
-  for (let i = 0; i < campos.length; i++) {
-    if (!req.body[campos[i]]) {
+  for (const element of campos) {
+    if (!req.body[element]) {
       res.status(400).send({
-        message: "No puede estar nulo el campo " + campos[i]
+        message: "No puede estar nulo el campo " + element
       });
       return;
     }
@@ -140,10 +141,10 @@ exports.creaJornada = async (req, res) => {
     const campos = [
       'rut_maestro', 'rut_ayudante', 'codigo_turno', 'patente', 'base', 'km_inicial', 'km_final', 'fecha_hora_ini', 'fecha_hora_fin'
     ];
-    for (let i = 0; i < campos.length; i++) {
-      if (!req.body[campos[i]]) {
+    for (const element of campos) {
+      if (!req.body[element]) {
         res.status(400).send({
-          message: "No puede estar nulo el campo " + campos[i]
+          message: "No puede estar nulo el campo " + element
         });
         return;
       }
@@ -166,4 +167,14 @@ exports.creaJornada = async (req, res) => {
     res.status(500).send(error);
   }
   
+}
+
+
+exports.bases = async (req, res) => {
+  try {
+    const base = await Base.findAll();
+    res.status(200).send(base);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 }

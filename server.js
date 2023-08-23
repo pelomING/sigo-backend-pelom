@@ -1,6 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const options = require('./app/config/swagger.config');
+
+//const options = swaggerConfig;
 
 const app = express();
 
@@ -56,6 +61,19 @@ function initial() {
     name: "admin"
   });
 }
+
+// Swagger
+const specs = swaggerJsdoc(options);
+console.log(options);
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(specs, {
+    explorer: true,
+    customCssUrl:
+      "https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-newspaper.css",
+  })
+);
 
 // simple route
 app.get("/", (req, res) => {

@@ -9,5 +9,9 @@ module.exports = function(app) {
       next();
     });
 
-    app.get("/api/reportes/v1/alljornada", reportesController.readAllJornada);
+    app.get("/api/reportes/v1/alljornada", reportesController.findAllJornadas);
+
+    app.get("/api/reportes/v1/alleventos", reportesController.findAllEventos);
+
+
 }
