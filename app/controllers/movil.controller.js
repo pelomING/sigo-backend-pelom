@@ -172,8 +172,28 @@ exports.creaJornada = async (req, res) => {
 
 exports.bases = async (req, res) => {
   try {
-    const base = await Base.findAll();
+    const sql = "select p.id, p.nombre, p.id_zonal from public.paquete p join (SELECT distinct sc.paquete \
+      FROM public.servicio_comuna sc inner join public.servicios s on sc.servicio = s.codigo \
+      where s.activo and s.sae and sc.activo) as pa on p.id = pa.paquete order by nombre;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const base = await sequelize.query(sql, { type: QueryTypes.SELECT });
     res.status(200).send(base);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+
+exports.comunas = async (req, res) => {
+  try {
+    const sql = "SELECT  sc.comuna as codigo, c.nombre, sc.paquete as oficina \
+    FROM public.servicio_comuna sc join public.servicios s on sc.servicio = s.codigo join \
+    public.comunas c on sc.comuna = c.codigo	where s.sae and s.activo and sc.activo order by c.nombre;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const comuna = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    res.status(200).send(comuna);
   } catch (error) {
     res.status(500).send(error);
   }
