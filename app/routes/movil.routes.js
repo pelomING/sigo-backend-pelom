@@ -35,7 +35,8 @@ module.exports = function(app) {
 
     app.get("/api/movil/v1/eventostipo", [authJwt.verifyToken, authJwt.isSistema], movilController.eventostipo);
 
-    app.get("/api/movil/v1/ayudantes", [authJwt.verifyToken, authJwt.isSistema], movilController.ayudantes);
+    //por petición de Patricio en ayudantes se entregan todos los usuarios del sistema
+    app.get("/api/movil/v1/ayudantes", [authJwt.verifyToken, authJwt.isSistema], movilController.usuariosApp);
 
     app.get("/api/movil/v1/camionetas", [authJwt.verifyToken, authJwt.isSistema], movilController.camionetas);
 

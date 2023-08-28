@@ -1,4 +1,5 @@
 const mantendorController = require("../controllers/mantenedor.controller");
+const movilController = require("../controllers/movil.controller");
 
     
 module.exports = function(app) {
@@ -23,5 +24,7 @@ module.exports = function(app) {
     app.get("/api/mantenedor/v1/findalltipofuncionpersonal", mantendorController.findAllTipofuncionPersonal);
 
     app.get("/api/mantenedor/v1/findallpersonas", mantendorController.findAllPersonas);
+
+    app.get("/api/mantenedor/v1/oficinas", movilController.bases);
 
   };
