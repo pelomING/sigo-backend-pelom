@@ -89,6 +89,7 @@ require('./app/routes/reportes.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
+const NodeEnv = process.env.NODE_ENV || "local";
 app.listen(PORT, () => {
-  console.log(`Server [${process.env.NODE_ENV}] is running on port ${PORT}.`);
+  console.log(`Server [${NodeEnv}] is running on port ${PORT}.`);
 });
