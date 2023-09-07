@@ -60,11 +60,7 @@ exports.findAllJornadas = async (req, res) => {
 
       console.log(req.body.detalle);
       const detalles = req.body.detalle;
-      for (const detalle of detalles) {
-        console.log(detalle);
-      }
-      res.send(req.body);
-      /*
+      
       const estadoResultado = await EstadoResultado.create({
         id_usuario: req.body.id_usuario,
         zona: req.body.zona,
@@ -77,12 +73,32 @@ exports.findAllJornadas = async (req, res) => {
         fecha_creacion: req.body.fecha_creacion,
         fecha_modificacion: req.body.fecha_modificacion,
         estado: req.body.estado
-      }).then(data => {
-        res.send(data);
+      }).then(async data => {
+            let hayError = false;
+            let mensajeError = '';
+            for (const detalle of detalles) {
+              console.log(detalle);
+              await DetalleEstadoResultado.create({
+                id_estado_resultado: data.id,
+                id_evento: detalle.id
+              }).then(data => {
+                //res.send(data);
+              }).catch(err => {
+                hayError = true;
+                mensajeError = err.message;
+                //res.status(500).send({ message: err.message });
+                return;
+              });
+            }
+            if (!hayError) {
+              res.send(data);
+            }else {
+              res.status(500).send({ message: mensajeError });
+            }
       }).catch(err => {
         res.status(500).send({ message: err.message });
       });
-      */
+      
     } catch (error) {
       res.status(500).send(error);
     }
