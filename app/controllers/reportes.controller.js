@@ -59,6 +59,11 @@ exports.findAllJornadas = async (req, res) => {
       };
 
       console.log(req.body.detalle);
+      const detalles = JSON.parse(req.body.detalle);
+      for (const detalle of detalles) {
+        console.log(detalle);
+      }
+      res.send(req.body);
       /*
       const estadoResultado = await EstadoResultado.create({
         id_usuario: req.body.id_usuario,
