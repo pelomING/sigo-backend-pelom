@@ -82,6 +82,7 @@ exports.findAllJornadas = async (req, res) => {
                 id_estado_resultado: data.id,
                 id_evento: detalle
               }).then(data => {
+                console.log(data)
                 //res.send(data);
               }).catch(err => {
                 hayError = true;
