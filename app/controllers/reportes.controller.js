@@ -59,7 +59,7 @@ exports.findAllJornadas = async (req, res) => {
       };
 
       console.log(req.body.detalle);
-      const detalles = JSON.parse(req.body.detalle);
+      const detalles = req.body.detalle;
       for (const detalle of detalles) {
         console.log(detalle);
       }
