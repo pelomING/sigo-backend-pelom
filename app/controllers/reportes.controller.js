@@ -1,5 +1,6 @@
 const db = require("../models");
 const Jornada = db.jornada;
+const EstadoResultado = db.estadoResultado;
 
 exports.readAllJornada = async (req, res) => {
     await Jornada.findAll().then(data => {
@@ -39,4 +40,55 @@ exports.findAllJornadas = async (req, res) => {
       res.status(500).send(error);
     }
     
+  }
+
+
+  exports.creaEstadoResultado = async (req, res) => {
+    try {
+      const campos = [
+        'id_usuario', 'zona', 'paquete', 'mes', 'fecha_inicio', 'fecha_final', 'nombre_doc', 'url_doc', 'fecha_creacion', 'fecha_modificacion', 'estado'
+      ];
+      for (const element of campos) {
+        if (!req.body[element]) {
+          res.status(400).send({
+            message: "No puede estar nulo el campo " + element
+          });
+          return;
+        }
+      };
+
+      const estadoResultado = await EstadoResultado.create({
+        id_usuario: req.body.id_usuario,
+        zona: req.body.zona,
+        paquete: req.body.paquete,
+        mes: req.body.mes,
+        fecha_inicio: req.body.fecha_inicio,
+        fecha_final: req.body.fecha_final,
+        nombre_doc: req.body.nombre_doc,
+        url_doc: req.body.url_doc,
+        fecha_creacion: req.body.fecha_creacion,
+        fecha_modificacion: req.body.fecha_modificacion,
+        estado: req.body.estado
+      }).then(data => {
+        res.send(data);
+      }).catch(err => {
+        res.status(500).send({ message: err.message });
+      });
+      
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  }
+
+
+  exports.findAllEstadosResultado = async (req, res) => {
+    try {
+      const sql = "SELECT er.id, id_usuario, u.username as nombre_usuario, zona, z.nombre as nombre_zona, paquete, p.nombre as nombre_paquete, mes, m.nombre as nombre_mes, fecha_inicio, fecha_final, nombre_doc, url_doc, fecha_creacion, fecha_modificacion, estado	FROM reporte.estado_resultado er INNER JOIN public.users u on er.id_usuario = u.id	INNER JOIN public.zonal z on z.id = er.zona	INNER JOIN public.paquete p on p.id = er.paquete	INNER JOIN public.meses m on m.id = er.mes;";
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      const estadosResultado = await sequelize.query(sql, { type: QueryTypes.SELECT });
+      res.status(200).send(estadosResultado);
+    } catch (error) {
+      res.status(500).send(error);
+    }
   }

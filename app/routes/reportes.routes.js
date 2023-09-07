@@ -13,5 +13,9 @@ module.exports = function(app) {
 
     app.get("/api/reportes/v1/alleventos", reportesController.findAllEventos);
 
+    app.get("/api/reportes/v1/allestadosresultado", reportesController.findAllEstadosResultado);
+
+    app.post("/api/reportes/v1/creaestadoresultado", reportesController.creaEstadoResultado);
+
 
 }
