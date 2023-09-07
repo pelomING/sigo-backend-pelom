@@ -1,6 +1,7 @@
 const db = require("../models");
 const Jornada = db.jornada;
 const EstadoResultado = db.estadoResultado;
+const DetalleEstadoResultado = db.detalleEstadoResultado;
 
 exports.readAllJornada = async (req, res) => {
     await Jornada.findAll().then(data => {
@@ -46,7 +47,7 @@ exports.findAllJornadas = async (req, res) => {
   exports.creaEstadoResultado = async (req, res) => {
     try {
       const campos = [
-        'id_usuario', 'zona', 'paquete', 'mes', 'fecha_inicio', 'fecha_final', 'nombre_doc', 'url_doc', 'fecha_creacion', 'fecha_modificacion', 'estado'
+        'id_usuario', 'zona', 'paquete', 'mes', 'fecha_inicio', 'fecha_final', 'nombre_doc', 'url_doc', 'fecha_creacion', 'fecha_modificacion', 'estado', 'detalle'
       ];
       for (const element of campos) {
         if (!req.body[element]) {
@@ -57,6 +58,8 @@ exports.findAllJornadas = async (req, res) => {
         }
       };
 
+      console.log(req.body.detalle);
+      /*
       const estadoResultado = await EstadoResultado.create({
         id_usuario: req.body.id_usuario,
         zona: req.body.zona,
@@ -74,7 +77,7 @@ exports.findAllJornadas = async (req, res) => {
       }).catch(err => {
         res.status(500).send({ message: err.message });
       });
-      
+      */
     } catch (error) {
       res.status(500).send(error);
     }
@@ -88,6 +91,36 @@ exports.findAllJornadas = async (req, res) => {
       const sequelize = db.sequelize;
       const estadosResultado = await sequelize.query(sql, { type: QueryTypes.SELECT });
       res.status(200).send(estadosResultado);
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  }
+
+
+  exports.creaDetalleEstadoResultado = async (req, res) => {
+    
+    try {
+      const campos = [
+        'id_estado_resultado', 'id_evento'
+      ];
+      for (const element of campos) {
+        if (!req.body[element]) {
+          res.status(400).send({
+            message: "No puede estar nulo el campo " + element
+          });
+          return;
+        }
+      };
+
+      const detalleEstadoResultado = await DetalleEstadoResultado.create({
+        id_estado_resultado: req.body.id_estado_resultado,
+        id_evento: req.body.id_evento
+      }).then(data => {
+        res.send(data);
+      }).catch(err => {
+        res.status(500).send({ message: err.message });
+      });
+      
     } catch (error) {
       res.status(500).send(error);
     }
