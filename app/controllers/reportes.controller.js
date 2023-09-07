@@ -80,7 +80,7 @@ exports.findAllJornadas = async (req, res) => {
               console.log(detalle);
               await DetalleEstadoResultado.create({
                 id_estado_resultado: data.id,
-                id_evento: detalle.id
+                id_evento: detalle
               }).then(data => {
                 //res.send(data);
               }).catch(err => {
