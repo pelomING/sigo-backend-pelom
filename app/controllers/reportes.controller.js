@@ -108,7 +108,7 @@ exports.findAllJornadas = async (req, res) => {
 
   exports.findAllEstadosResultado = async (req, res) => {
     try {
-      const sql = "SELECT er.id, id_usuario, u.username as nombre_usuario, zona, z.nombre as nombre_zona, paquete, p.nombre as nombre_paquete, mes, m.nombre as nombre_mes, fecha_inicio, fecha_final, nombre_doc, url_doc, fecha_creacion, fecha_modificacion, estado	FROM reporte.estado_resultado er INNER JOIN public.users u on er.id_usuario = u.id	INNER JOIN public.zonal z on z.id = er.zona	INNER JOIN public.paquete p on p.id = er.paquete	INNER JOIN public.meses m on m.id = er.mes;";
+      const sql = "SELECT er.id, id_usuario, u.username as nombre_usuario, zona, z.nombre as nombre_zona, paquete, p.nombre as nombre_paquete, mes, m.nombre as nombre_mes, fecha_inicio, fecha_final, nombre_doc, url_doc, fecha_creacion, fecha_modificacion, estado, (SELECT array_agg(id_evento) as eventos FROM reporte.detalle_estado_resultado  where id_estado_resultado = er.id) as eventos	FROM reporte.estado_resultado er INNER JOIN public.users u on er.id_usuario = u.id	INNER JOIN public.zonal z on z.id = er.zona	INNER JOIN public.paquete p on p.id = er.paquete	INNER JOIN public.meses m on m.id = er.mes;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const estadosResultado = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -119,31 +119,3 @@ exports.findAllJornadas = async (req, res) => {
   }
 
 
-  exports.creaDetalleEstadoResultado = async (req, res) => {
-    
-    try {
-      const campos = [
-        'id_estado_resultado', 'id_evento'
-      ];
-      for (const element of campos) {
-        if (!req.body[element]) {
-          res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-          });
-          return;
-        }
-      };
-
-      const detalleEstadoResultado = await DetalleEstadoResultado.create({
-        id_estado_resultado: req.body.id_estado_resultado,
-        id_evento: req.body.id_evento
-      }).then(data => {
-        res.send(data);
-      }).catch(err => {
-        res.status(500).send({ message: err.message });
-      });
-      
-    } catch (error) {
-      res.status(500).send(error);
-    }
-  }
