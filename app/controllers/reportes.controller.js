@@ -47,7 +47,7 @@ exports.findAllJornadas = async (req, res) => {
   exports.creaEstadoResultado = async (req, res) => {
     try {
       const campos = [
-        'id_usuario', 'zona', 'paquete', 'mes', 'fecha_inicio', 'fecha_final', 'nombre_doc', 'url_doc', 'fecha_creacion', 'fecha_modificacion', 'estado', 'detalle'
+        'id_usuario', 'zona', 'paquete', 'mes', 'fecha_inicio', 'fecha_final', 'nombre_doc', 'url_doc', 'fecha_creacion', 'fecha_modificacion', 'estado', 'eventos_relacionados'
       ];
       for (const element of campos) {
         if (!req.body[element]) {
@@ -58,8 +58,8 @@ exports.findAllJornadas = async (req, res) => {
         }
       };
 
-      console.log(req.body.detalle);
-      const detalles = req.body.detalle;
+      console.log(req.body.eventos_relacionados);
+      const detalles = req.body.eventos_relacionados;
       
       const estadoResultado = await EstadoResultado.create({
         id_usuario: req.body.id_usuario,
@@ -108,7 +108,7 @@ exports.findAllJornadas = async (req, res) => {
 
   exports.findAllEstadosResultado = async (req, res) => {
     try {
-      const sql = "SELECT er.id, id_usuario, u.username as nombre_usuario, zona, z.nombre as nombre_zona, paquete, p.nombre as nombre_paquete, mes, m.nombre as nombre_mes, fecha_inicio, fecha_final, nombre_doc, url_doc, fecha_creacion, fecha_modificacion, estado, (SELECT array_agg(id_evento) as eventos FROM reporte.detalle_estado_resultado  where id_estado_resultado = er.id) as eventos	FROM reporte.estado_resultado er INNER JOIN public.users u on er.id_usuario = u.id	INNER JOIN public.zonal z on z.id = er.zona	INNER JOIN public.paquete p on p.id = er.paquete	INNER JOIN public.meses m on m.id = er.mes;";
+      const sql = "SELECT er.id, id_usuario, u.username as nombre_usuario, zona, z.nombre as nombre_zona, paquete, p.nombre as nombre_paquete, mes, m.nombre as nombre_mes, fecha_inicio, fecha_final, nombre_doc, url_doc, fecha_creacion, fecha_modificacion, estado, (SELECT array_agg(id_evento) as eventos FROM reporte.detalle_estado_resultado  where id_estado_resultado = er.id) as eventos_relacionados	FROM reporte.estado_resultado er INNER JOIN public.users u on er.id_usuario = u.id	INNER JOIN public.zonal z on z.id = er.zona	INNER JOIN public.paquete p on p.id = er.paquete	INNER JOIN public.meses m on m.id = er.mes;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const estadosResultado = await sequelize.query(sql, { type: QueryTypes.SELECT });
