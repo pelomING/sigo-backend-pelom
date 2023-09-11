@@ -29,10 +29,10 @@ exports.findAllJornadas = async (req, res) => {
   exports.findAllEventos = async (req, res) => {
     try {
       const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, \
-      (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, b.nombre as base, \
+      (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, p.nombre as paquete, \
       e.requerimiento, e.direccion, e.fecha_hora::text, e.estado FROM reporte.eventos e join \
       public.eventos_tipo et on e.tipo_evento = et.codigo join public.turnos t on e.codigo_turno = t.id join \
-      public.base b on e.id_base = b.id order by e.id asc";
+      public.paquete p on e.id_base = p.id order by e.id asc";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
