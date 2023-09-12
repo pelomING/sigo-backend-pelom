@@ -127,7 +127,7 @@ exports.findAllJornadas = async (req, res) => {
 exports.resumenEventos = async (req, res) => {
   try {
     const campos = [
-      'fecha_inicial', 'fecha_final'
+      'id_paquete', 'fecha_inicial', 'fecha_final'
     ];
     for (const element of campos) {
       if (!req.body[element]) {
@@ -137,14 +137,17 @@ exports.resumenEventos = async (req, res) => {
         return;
       }
     };
-    const sql = "SELECT pb.id_cliente, e.id_paquete, e.tipo_evento, e.codigo_turno, sum(pb.valor) as valor \
-    from reporte.eventos e inner join public.eventos_tipo et on et.codigo = e.tipo_evento inner join \
-    public.precios_base pb on et.id = pb.id_evento_tipo and e.codigo_turno = pb.id_turno and e.id_paquete = \
-    pb.id_paquete where estado = 1 and pb.id_cliente = 1 and (fecha_hora between :fec_ini and :fec_fin) \
-    group by pb.id_cliente, e.id_paquete, e.tipo_evento, e.codigo_turno;";
+    const sql = "SELECT e.id_paquete, e.tipo_evento, et.id as id_evento, et.descripcion as glosa_evento, \
+    pb.valor as precio, count(e.id) as cantidad, (pb.valor*count(e.id)) as monto from reporte.eventos e \
+    inner join public.eventos_tipo et on et.codigo = e.tipo_evento inner join (SELECT distinct on \
+      (id_cliente, id_paquete, id_evento_tipo) id_cliente, id_paquete, id_evento_tipo, valor FROM \
+      public.precios_base ORDER BY id_cliente, id_paquete, id_evento_tipo ASC ) as pb on et.id = \
+      pb.id_evento_tipo and e.id_paquete = pb.id_paquete and pb.id_cliente = 1 where estado = 1 and \
+      e.id_paquete = :id_paquete and (fecha_hora between :fec_ini and :fec_fin) group by \
+      e.id_paquete, e.tipo_evento, et.id, et.descripcion, pb.valor;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
-    const eventos = await sequelize.query(sql, { replacements: { fec_ini: req.body.fecha_inicial, fec_fin: req.body.fecha_final }, type: QueryTypes.SELECT });
+    const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.body.id_paquete, fec_ini: req.body.fecha_inicial, fec_fin: req.body.fecha_final }, type: QueryTypes.SELECT });
     res.status(200).send(eventos);
   } catch (error) {
     res.status(500).send(error);
