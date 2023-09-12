@@ -140,11 +140,11 @@ exports.resumenEventos = async (req, res) => {
     const sql = "SELECT pb.id_cliente, e.id_paquete, e.tipo_evento, e.codigo_turno, sum(pb.valor) as valor \
     from reporte.eventos e inner join public.eventos_tipo et on et.codigo = e.tipo_evento inner join \
     public.precios_base pb on et.id = pb.id_evento_tipo and e.codigo_turno = pb.id_turno and e.id_paquete = \
-    pb.id_paquete where estado = 1 and pb.id_cliente = 1 and (fecha_hora between '?' and '?') \
+    pb.id_paquete where estado = 1 and pb.id_cliente = 1 and (fecha_hora between :fec_ini and :fec_fin) \
     group by pb.id_cliente, e.id_paquete, e.tipo_evento, e.codigo_turno;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
-    const eventos = await sequelize.query(sql, { replacements: [req.body.fecha_inicial, req.body.fecha_final], type: QueryTypes.SELECT });
+    const eventos = await sequelize.query(sql, { replacements: { fec_ini: req.body.fecha_inicial, fec_fin: req.body.fecha_final }, type: QueryTypes.SELECT });
     res.status(200).send(eventos);
   } catch (error) {
     res.status(500).send(error);
