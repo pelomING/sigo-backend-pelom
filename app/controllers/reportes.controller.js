@@ -170,7 +170,7 @@ exports.resumenTurnos = async (req, res) => {
     };
     const sql = "select r.*, (r.cantidad_brigada*r.precio*r.uso_semanal)::integer as monto from \
     (SELECT id_paquete, id_turno, (substring(t.inicio::text,1,5) || ' - ' || substring(t.fin::text,1,5)) as permanencia_semanal, \
-    cantidad_brigada, valor as precio, ((date :fec_ini - (date :fec_fin - 1))::numeric/7)::numeric(6,4) \
+    cantidad_brigada, valor as precio, ((date :fec_fin - (date :fec_ini - 1))::numeric/7)::numeric(6,4) \
     as uso_semanal 	FROM public.cargo_fijo cf inner join public.turnos t on t.id = cf.id_turno where id_cliente = 1 and id_paquete = :id_paquete) r;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
