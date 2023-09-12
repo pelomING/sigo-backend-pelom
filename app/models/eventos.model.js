@@ -26,7 +26,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             allowNull: false
           },
-          id_base: {
+          id_paquete: {
             type: Sequelize.INTEGER
           },
           requerimiento: {

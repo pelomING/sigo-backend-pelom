@@ -17,5 +17,7 @@ module.exports = function(app) {
 
     app.post("/api/reportes/v1/creaestadoresultado", reportesController.creaEstadoResultado);
 
+    app.get("/api/reportes/v1/resumeneventos", reportesController.resumenEventos);
+
 
 }

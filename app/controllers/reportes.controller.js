@@ -14,7 +14,7 @@ exports.readAllJornada = async (req, res) => {
 
 exports.findAllJornadas = async (req, res) => {
     try {
-      const sql = "SELECT id, rut_maestro, rut_ayudante, codigo_turno, patente, base, km_inicial, km_final, fecha_hora_ini::text, \
+      const sql = "SELECT id, rut_maestro, rut_ayudante, codigo_turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, \
       fecha_hora_fin::text, estado	FROM reporte.jornada ORDER BY id ASC;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
@@ -32,7 +32,7 @@ exports.findAllJornadas = async (req, res) => {
       (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, p.nombre as paquete, \
       e.requerimiento, e.direccion, e.fecha_hora::text, e.estado FROM reporte.eventos e join \
       public.eventos_tipo et on e.tipo_evento = et.codigo join public.turnos t on e.codigo_turno = t.id join \
-      public.paquete p on e.id_base = p.id order by e.id asc";
+      public.paquete p on e.id_paquete = p.id order by e.id asc";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -108,7 +108,12 @@ exports.findAllJornadas = async (req, res) => {
 
   exports.findAllEstadosResultado = async (req, res) => {
     try {
-      const sql = "SELECT er.id, id_usuario, u.username as nombre_usuario, zona, z.nombre as nombre_zona, paquete, p.nombre as nombre_paquete, mes, m.nombre as nombre_mes, fecha_inicio, fecha_final, nombre_doc, url_doc, fecha_creacion, fecha_modificacion, estado, (SELECT array_agg(id_evento) as eventos FROM reporte.detalle_estado_resultado  where id_estado_resultado = er.id) as eventos_relacionados	FROM reporte.estado_resultado er INNER JOIN public.users u on er.id_usuario = u.id	INNER JOIN public.zonal z on z.id = er.zona	INNER JOIN public.paquete p on p.id = er.paquete	INNER JOIN public.meses m on m.id = er.mes;";
+      const sql = "SELECT er.id, id_usuario, u.username as nombre_usuario, zona, z.nombre as nombre_zona, paquete, \
+      p.nombre as nombre_paquete, mes, m.nombre as nombre_mes, fecha_inicio, fecha_final, nombre_doc, url_doc, \
+      fecha_creacion, fecha_modificacion, estado, (SELECT array_agg(id_evento) as eventos FROM reporte.detalle_estado_resultado  \
+      where id_estado_resultado = er.id) as eventos_relacionados	FROM reporte.estado_resultado er INNER JOIN public.users u \
+      on er.id_usuario = u.id	INNER JOIN public.zonal z on z.id = er.zona	INNER JOIN public.paquete p on p.id = er.paquete	\
+      INNER JOIN public.meses m on m.id = er.mes;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const estadosResultado = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -119,3 +124,29 @@ exports.findAllJornadas = async (req, res) => {
   }
 
 
+exports.resumenEventos = async (req, res) => {
+  try {
+    const campos = [
+      'fecha_inicial', 'fecha_final'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    const sql = "SELECT pb.id_cliente, e.id_paquete, e.tipo_evento, e.codigo_turno, sum(pb.valor) as valor \
+    from reporte.eventos e inner join public.eventos_tipo et on et.codigo = e.tipo_evento inner join \
+    public.precios_base pb on et.id = pb.id_evento_tipo and e.codigo_turno = pb.id_turno and e.id_paquete = \
+    pb.id_paquete where estado = 1 and pb.id_cliente = 1 and (fecha_hora between ? and ?) \
+    group by pb.id_cliente, e.id_paquete, e.tipo_evento, e.codigo_turno;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const eventos = await sequelize.query(sql, { replacements: [fecha_inicial, fecha_final], type: QueryTypes.SELECT });
+    res.status(200).send(eventos);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
