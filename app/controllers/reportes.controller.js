@@ -144,7 +144,7 @@ exports.resumenEventos = async (req, res) => {
     group by pb.id_cliente, e.id_paquete, e.tipo_evento, e.codigo_turno;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
-    const eventos = await sequelize.query(sql, { replacements: [fecha_inicial, fecha_final], type: QueryTypes.SELECT });
+    const eventos = await sequelize.query(sql, { replacements: [req.body.fecha_inicial, req.body.fecha_final], type: QueryTypes.SELECT });
     res.status(200).send(eventos);
   } catch (error) {
     res.status(500).send(error);
