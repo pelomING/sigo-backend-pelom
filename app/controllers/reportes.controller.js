@@ -153,3 +153,30 @@ exports.resumenEventos = async (req, res) => {
     res.status(500).send(error);
   }
 }
+
+
+exports.resumenTurnos = async (req, res) => {
+  try {
+    const campos = [
+      'id_paquete', 'fecha_inicial', 'fecha_final'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    const sql = "select r.*, (r.cantidad_brigada*r.precio*r.uso_semanal)::integer as monto from \
+    (SELECT id_paquete, id_turno, (substring(t.inicio::text,1,5) || ' - ' || substring(t.fin::text,1,5)) as permanencia_semanal, \
+    cantidad_brigada, valor as precio, ((date :fec_ini - (date :fec_fin - 1))::numeric/7)::numeric(6,4) \
+    as uso_semanal 	FROM public.cargo_fijo cf inner join public.turnos t on t.id = cf.id_turno where id_cliente = 1 and id_paquete = :id_paquete) r;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.body.id_paquete, fec_ini: req.body.fecha_inicial, fec_fin: req.body.fecha_final }, type: QueryTypes.SELECT });
+    res.status(200).send(eventos);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}

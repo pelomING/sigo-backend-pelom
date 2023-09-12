@@ -19,5 +19,7 @@ module.exports = function(app) {
 
     app.get("/api/reportes/v1/resumeneventos", reportesController.resumenEventos);
 
+    app.get("/api/reportes/v1/resumenturnos", reportesController.resumenTurnos);
+
 
 }
