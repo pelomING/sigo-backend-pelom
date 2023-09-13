@@ -4,6 +4,7 @@ const EstadoResultado = db.estadoResultado;
 const DetalleEstadoResultado = db.detalleEstadoResultado;
 
 exports.readAllJornada = async (req, res) => {
+  //metodo GET
     await Jornada.findAll().then(data => {
         console.log(data);
         res.send(data);
@@ -13,6 +14,7 @@ exports.readAllJornada = async (req, res) => {
 }
 
 exports.findAllJornadas = async (req, res) => {
+  //metodo GET
     try {
       const sql = "SELECT id, rut_maestro, rut_ayudante, codigo_turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, \
       fecha_hora_fin::text, estado	FROM reporte.jornada ORDER BY id ASC;";
@@ -27,6 +29,7 @@ exports.findAllJornadas = async (req, res) => {
   }
 
   exports.findAllEventos = async (req, res) => {
+    //metodo GET
     try {
       const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, \
       (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, p.nombre as paquete, \
@@ -45,6 +48,7 @@ exports.findAllJornadas = async (req, res) => {
 
 
   exports.creaEstadoResultado = async (req, res) => {
+    //metodo POST
     try {
       const campos = [
         'id_usuario', 'zona', 'paquete', 'mes', 'fecha_inicio', 'fecha_final', 'nombre_doc', 'url_doc', 'fecha_creacion', 'fecha_modificacion', 'estado', 'eventos_relacionados'
@@ -107,6 +111,7 @@ exports.findAllJornadas = async (req, res) => {
 
 
   exports.findAllEstadosResultado = async (req, res) => {
+    //metodo POST
     try {
       const sql = "SELECT er.id, id_usuario, u.username as nombre_usuario, zona, z.nombre as nombre_zona, paquete, \
       p.nombre as nombre_paquete, mes, m.nombre as nombre_mes, fecha_inicio, fecha_final, nombre_doc, url_doc, \
@@ -125,12 +130,13 @@ exports.findAllJornadas = async (req, res) => {
 
 
 exports.resumenEventos = async (req, res) => {
+  //metodo GET
   try {
     const campos = [
       'id_paquete', 'fecha_inicial', 'fecha_final'
     ];
     for (const element of campos) {
-      if (!req.body[element]) {
+      if (!req.query[element]) {
         res.status(400).send({
           message: "No puede estar nulo el campo " + element
         });
@@ -147,7 +153,7 @@ exports.resumenEventos = async (req, res) => {
       e.id_paquete, e.tipo_evento, et.id, et.descripcion, pb.valor;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
-    const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.body.id_paquete, fec_ini: req.body.fecha_inicial, fec_fin: req.body.fecha_final }, type: QueryTypes.SELECT });
+    const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.query.id_paquete, fec_ini: req.query.fecha_inicial, fec_fin: req.query.fecha_final }, type: QueryTypes.SELECT });
     res.status(200).send(eventos);
   } catch (error) {
     res.status(500).send(error);
@@ -156,8 +162,8 @@ exports.resumenEventos = async (req, res) => {
 
 
 exports.resumenTurnos = async (req, res) => {
+  // metodo GET
   try {
-    console.log('parametros', req.query);
     const campos = [
       'id_paquete', 'fecha_inicial', 'fecha_final'
     ];
