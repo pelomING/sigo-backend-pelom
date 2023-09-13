@@ -157,7 +157,7 @@ exports.resumenEventos = async (req, res) => {
 
 exports.resumenTurnos = async (req, res) => {
   try {
-    console.log('parametros', req.params);
+    console.log('parametros', req);
     const campos = [
       'id_paquete', 'fecha_inicial', 'fecha_final'
     ];
