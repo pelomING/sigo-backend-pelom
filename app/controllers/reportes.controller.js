@@ -157,12 +157,12 @@ exports.resumenEventos = async (req, res) => {
 
 exports.resumenTurnos = async (req, res) => {
   try {
-    console.log('parametros', req);
+    console.log('parametros', req.query);
     const campos = [
       'id_paquete', 'fecha_inicial', 'fecha_final'
     ];
     for (const element of campos) {
-      if (!req.params[element]) {
+      if (!req.query[element]) {
         res.status(400).send({
           message: "No puede estar nulo el campo " + element
         });
@@ -176,7 +176,7 @@ exports.resumenTurnos = async (req, res) => {
     as uso_semanal 	FROM public.cargo_fijo cf inner join public.turnos t on t.id = cf.id_turno where id_cliente = 1 and id_paquete = :id_paquete) r;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
-    const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.params.id_paquete, fec_ini: req.params.fecha_inicial, fec_fin: req.params.fecha_final }, type: QueryTypes.SELECT });
+    const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.query.id_paquete, fec_ini: req.query.fecha_inicial, fec_fin: req.query.fecha_final }, type: QueryTypes.SELECT });
     res.status(200).send(eventos);
   } catch (error) {
     res.status(500).send(error);
