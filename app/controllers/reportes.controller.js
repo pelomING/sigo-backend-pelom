@@ -143,7 +143,7 @@ exports.resumenEventos = async (req, res) => {
         return;
       }
     };
-    const sql = "SELECT e.id_paquete, e.tipo_evento, et.id as id_evento, et.descripcion as glosa_evento, \
+    const sql = "SELECT e.id_paquete, e.tipo_evento, et.id as id_tipo_evento, et.descripcion as glosa_evento, \
     pb.valor as precio, count(e.id) as cantidad, (pb.valor*count(e.id)) as monto from reporte.eventos e \
     inner join public.eventos_tipo et on et.codigo = e.tipo_evento inner join (SELECT distinct on \
       (id_cliente, id_paquete, id_evento_tipo) id_cliente, id_paquete, id_evento_tipo, valor FROM \
