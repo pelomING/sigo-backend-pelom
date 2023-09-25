@@ -21,7 +21,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
-        base: {
+        id_paquete: {
             type: Sequelize.INTEGER,
             allowNull: false
         },

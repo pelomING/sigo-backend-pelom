@@ -1,41 +1,44 @@
 module.exports = (sequelize, Sequelize) => {
-    const Eventos = sequelize.define("eventos", {
+    const EstadoResultado = sequelize.define("estado_resultado", {
         id: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
             primaryKey: true
           },
-          numero_ot: {
-            type: Sequelize.BIGINT,
+          id_usuario: {
+            type: Sequelize.INTEGER,
             allowNull: false,
-            unique: true
           },
-          tipo_evento: {
-            type: Sequelize.STRING,
-            allowNull: false
-          },
-          rut_maestro: {
-            type: Sequelize.STRING,
-            allowNull: false
-          },
-          rut_ayudante: {
-            type: Sequelize.STRING,
-            allowNull: false
-          },
-          codigo_turno: {
+          zona: {
             type: Sequelize.INTEGER,
             allowNull: false
           },
-          id_paquete: {
-            type: Sequelize.INTEGER
+          paquete: {
+            type: Sequelize.INTEGER,
+            allowNull: false
           },
-          requerimiento: {
+          mes: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+          },
+          fecha_inicio: {
+            type: Sequelize.STRING,
+            allowNull: false
+          },
+          fecha_final: {
+            type: Sequelize.STRING,
+            allowNull: false
+          },
+          nombre_doc: {
             type: Sequelize.STRING
           },
-          direccion: {
+          url_doc: {
             type: Sequelize.STRING
           },
-          fecha_hora: {
+          fecha_creacion: {
+            type: Sequelize.STRING
+          },
+          fecha_modificacion: {
             type: Sequelize.STRING
           },
           estado: {
@@ -46,5 +49,5 @@ module.exports = (sequelize, Sequelize) => {
         schema: "reporte",
     });
   
-    return Eventos;
+    return EstadoResultado;
   };

@@ -62,6 +62,8 @@ db.zonal = require("./zonal.model.js")(sequelize, Sequelize);
 db.estados = require("./estados.model.js")(sequelize, Sequelize);
 db.eventos = require("./eventos.model.js")(sequelize, Sequelize);
 db.jornada = require("./jornada.model.js")(sequelize, Sequelize);
+db.estadoResultado = require("./estadoResultado.model.js")(sequelize, Sequelize);
+db.detalleEstadoResultado = require("./detalleEstadoResultado.model.js")(sequelize, Sequelize);
 
 
 

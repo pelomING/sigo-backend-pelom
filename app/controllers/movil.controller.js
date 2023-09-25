@@ -87,7 +87,7 @@ exports.eventostipo = async (req, res) => {
 
 exports.camionetas = async (req, res) => {
   try {
-    const sql = "SELECT c.id, c.patente, c.marca, c.modelo, b.nombre as base, c.activa FROM camionetas c join base b on c.id_base = b.id ORDER BY id ASC ";
+    const sql = "SELECT c.id, c.patente, c.marca, c.modelo, b.nombre as base, c.activa FROM camionetas c join base b on c.id_base = b.id WHERE activa ORDER BY id ASC ";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const camionetas = await sequelize.query(sql, { type: QueryTypes.SELECT });
