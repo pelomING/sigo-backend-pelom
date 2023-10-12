@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Zonal = sequelize.define("zonal", {
+    const Paquete = sequelize.define("paquete", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true
@@ -7,8 +7,14 @@ module.exports = (sequelize, Sequelize) => {
           nombre: {
             type: Sequelize.STRING,
             allowNull: false
+          },
+          id_zonal: {
+            type: Sequelize.INTEGER
           }
+    },
+    {
+      schema: "_comun",
     });
   
-    return Zonal;
+    return Paquete;
   };

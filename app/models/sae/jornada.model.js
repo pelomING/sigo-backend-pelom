@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Jornada = sequelize.define("jornada", {
+    const Jornada = sequelize.define("reporte_jornada", {
         id: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
@@ -44,7 +44,7 @@ module.exports = (sequelize, Sequelize) => {
         }
     },
     {
-        schema: "reporte",
+        schema: "sae",
     });
   
     return Jornada;

@@ -1,19 +1,19 @@
 module.exports = (sequelize, Sequelize) => {
-    const EventosTipo = sequelize.define("eventos_tipo", {
+    const Estados = sequelize.define("reporte_estados", {
         id: {
             type: Sequelize.INTEGER,
+            autoIncrement: true,
             primaryKey: true
           },
-          codigo: {
+          nombre: {
             type: Sequelize.STRING,
             allowNull: false,
             unique: true
-          },
-          descripcion: {
-            type: Sequelize.STRING,
-            allowNull: false
           }
+    },
+    {
+        schema: "sae",
     });
   
-    return EventosTipo;
+    return Estados;
   };

@@ -1,5 +1,5 @@
-const db = require("../models");
-const config = require("../config/auth.config");
+const db = require("../../models");
+const config = require("../../config/auth.config");
 const User = db.user;
 const Role = db.role;
 
@@ -11,13 +11,11 @@ const bcrypt = require("bcryptjs");
 exports.signup = async (req, res) => {
   // Save User to Database
   try {
-    console.log('req.body: ', req.body);
     const user = await User.create({
       username: req.body.username,
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
     });
-    console.log('user: ', user);
     if (req.body.roles) {
       const roles = await Role.findAll({
         where: {
@@ -26,7 +24,6 @@ exports.signup = async (req, res) => {
           },
         },
       });
-      console.log('roles: ', roles);
       const result = user.setRoles(roles);
       if (result) res.send({ message: "User registered successfully!" });
     } else {

@@ -3,7 +3,7 @@ module.exports = {
     USER: "postgres",
     PORT: 7921,
     PASSWORD: "oHSOIS08dgl0m9L1WGSR",
-    DB: "sae",
+    DB: "pelom-db",
     dialect: "postgres",
     define: {
       id: false,  // disable default id

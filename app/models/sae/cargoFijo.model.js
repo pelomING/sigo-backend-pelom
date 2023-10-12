@@ -1,16 +1,13 @@
 module.exports = (sequelize, Sequelize) => {
-    const PreciosBase = sequelize.define("precios_base", {
+    const CargoFijo = sequelize.define("cargo_fijo", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true
-          },
+        },
         id_cliente: {
             type: Sequelize.INTEGER
         },
         id_base: {
-            type: Sequelize.INTEGER
-        },
-        id_evento_tipo: {
             type: Sequelize.INTEGER
         },
         id_turno: {
@@ -23,7 +20,9 @@ module.exports = (sequelize, Sequelize) => {
         observacion: {
             type: Sequelize.STRING
           }
-    });
-  
-    return PreciosBase;
+        },
+        {
+            schema: "sae",
+        });
+    return CargoFijo;
   };

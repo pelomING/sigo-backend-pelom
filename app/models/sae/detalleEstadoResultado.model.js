@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const DetalleEstadoResultado = sequelize.define("detalle_estado_resultado", {
+    const DetalleEstadoResultado = sequelize.define("reporte_detalle_estado_resultado", {
         id: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
           }
     },
     {
-        schema: "reporte",
+        schema: "sae",
     });
   
     return DetalleEstadoResultado;

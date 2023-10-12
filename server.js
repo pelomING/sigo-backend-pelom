@@ -39,11 +39,13 @@ const db = require("./app/models");
 const Role = db.role;
 
 //se usa db.sequelize.sync({force: true}) para que reconstruya la base
+/*
 db.sequelize.sync().then(() => {
   console.log('Drop and Resync Db');
   //y se llama a la funcion init() para que reconstruya la base
   //initial();
 });
+*/
 
 function initial() {
   Role.create({
@@ -64,7 +66,7 @@ function initial() {
 
 // Swagger
 const specs = swaggerJsdoc(options);
-console.log(options);
+//console.log(options);
 app.use(
   "/api-docs",
   swaggerUi.serve,
@@ -83,9 +85,9 @@ app.get("/", (req, res) => {
 // routes
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
-require('./app/routes/movil.routes')(app);
+require('./app/routes/sae_movil.routes')(app);
 require('./app/routes/mantenedor.routes')(app);
-require('./app/routes/reportes.routes')(app);
+require('./app/routes/sae_reportes.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

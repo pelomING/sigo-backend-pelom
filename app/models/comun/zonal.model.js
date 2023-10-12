@@ -1,19 +1,17 @@
 module.exports = (sequelize, Sequelize) => {
-    const Estados = sequelize.define("estados", {
+    const Zonal = sequelize.define("zonal", {
         id: {
             type: Sequelize.INTEGER,
-            autoIncrement: true,
             primaryKey: true
           },
           nombre: {
             type: Sequelize.STRING,
-            allowNull: false,
-            unique: true
+            allowNull: false
           }
     },
     {
-        schema: "reporte",
+      schema: "_comun",
     });
   
-    return Estados;
+    return Zonal;
   };

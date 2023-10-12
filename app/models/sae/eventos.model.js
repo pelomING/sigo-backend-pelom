@@ -1,12 +1,12 @@
 module.exports = (sequelize, Sequelize) => {
-    const Eventos = sequelize.define("eventos", {
+    const Eventos = sequelize.define("reporte_eventos", {
         id: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
             primaryKey: true
           },
           numero_ot: {
-            type: Sequelize.BIGINT,
+            type: Sequelize.STRING,
             allowNull: false,
             unique: true
           },
@@ -43,7 +43,7 @@ module.exports = (sequelize, Sequelize) => {
           }
     },
     {
-        schema: "reporte",
+        schema: "sae",
     });
   
     return Eventos;

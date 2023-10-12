@@ -12,6 +12,9 @@ module.exports = (sequelize, Sequelize) => {
           id_paquete: {
             type: Sequelize.INTEGER
           }
+    },
+    {
+      schema: "_comun",
     });
   
     return Base;

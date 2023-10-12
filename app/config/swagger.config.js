@@ -22,7 +22,7 @@ const options = {
         },
       ],
     },
-    apis: ["./routes/*.js"],
+    apis: ["../routes/sae_movil.routes.js"],
   };
 
   module.exports = options;

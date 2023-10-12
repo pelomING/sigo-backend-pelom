@@ -15,6 +15,9 @@ module.exports = (sequelize, Sequelize) => {
         field: 'userId',
         allowNull: false
       }
+    },
+    {
+      schema: "_auth",
     });
   
     return UserRoles;

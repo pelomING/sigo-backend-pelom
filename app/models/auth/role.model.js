@@ -12,6 +12,9 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.BOOLEAN,
         allowNull: false
       }
+    },
+    {
+      schema: "_auth",
     });
   
     return Role;

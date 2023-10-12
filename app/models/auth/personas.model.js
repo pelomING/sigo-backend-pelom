@@ -33,6 +33,9 @@ module.exports = (sequelize, Sequelize) => {
         activo: {
             type: Sequelize.BOOLEAN,
         }
+    },
+    {
+        schema: "_auth",
     });
   
     return Personas;

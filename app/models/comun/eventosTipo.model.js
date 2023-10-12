@@ -1,22 +1,22 @@
 module.exports = (sequelize, Sequelize) => {
-    const Turnos = sequelize.define("turnos", {
+    const EventosTipo = sequelize.define("eventos_tipo", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true
           },
-          inicio: {
+          codigo: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            unique: true
+          },
+          descripcion: {
             type: Sequelize.STRING,
             allowNull: false
-          },
-          fin: {
-            type: Sequelize.STRING,
-            allowNull: false
-          },
-          observacion: {
-            type: Sequelize.STRING
           }
+    },
+    {
+      schema: "_comun",
     });
   
-    return Turnos;
+    return EventosTipo;
   };
-  

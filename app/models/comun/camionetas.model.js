@@ -21,6 +21,9 @@ module.exports = (sequelize, Sequelize) => {
           observacio: {
             type: Sequelize.STRING
           }
+    },
+    {
+      schema: "_comun",
     });
   
     return Camonietas;
