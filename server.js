@@ -88,6 +88,7 @@ require('./app/routes/user.routes')(app);
 require('./app/routes/sae_movil.routes')(app);
 require('./app/routes/mantenedor.routes')(app);
 require('./app/routes/sae_reportes.routes')(app);
+require('./app/routes/obras_backoffice.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
