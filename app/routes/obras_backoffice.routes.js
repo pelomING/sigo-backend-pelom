@@ -57,4 +57,13 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/v1/obras", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.findObraByCodigo);
 
 
+    app.get("/api/obras/backoffice/v1/allbom", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.findAllBom);
+
+
+    app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.createBom);
+
+
+    app.delete("/api/obras/backoffice/v1/eliminabombyreserva/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.deleteBomByReserva);
+
+
 }

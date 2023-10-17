@@ -9,6 +9,7 @@ const Comuna = db.comuna;
 const EstadoObra = db.estadoObra;
 const Segmento = db.segmento;
 const Obra = db.obra;
+const Bom = db.bom;
 
 exports.findAllTipoObra = async (req, res) => {
     //metodo GET
@@ -113,6 +114,19 @@ exports.findAllSegmento = async (req, res) => {
 }
  /*********************************************************************************** */
 
+/***********************************************************************************/
+/*                                                                                 */
+/*                                                                                 */
+/*                                 TABLA OBRAS                                     */
+/*                                                                                 */
+/*                                                                                 */
+/***********************************************************************************/
+
+
+/*********************************************************************************** */
+/* Consulta todas las Obras
+;
+*/
 exports.findAllObra = async (req, res) => {
     //metodo GET
     try {
@@ -424,3 +438,155 @@ exports.findObraByCodigo = async (req, res) => {
   }
 }
   /*********************************************************************************** */
+
+/***********************************************************************************/
+/*                                                                                 */
+/*                                                                                 */
+/*                                 BILL OF MATERIALS BOM                           */
+/*                                                                                 */
+/*                                                                                 */
+/***********************************************************************************/
+/* Consulta todas las Obras
+;
+*/
+exports.findAllBom = async (req, res) => {
+
+  try {
+    const sql = "SELECT b.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, reserva, \
+    json_build_object('codigo_sap', mm.codigo_sap, 'descripcion', mm.descripcion) as codigo_sap_material, \
+    cantidad_requerida FROM obras.bom b left join obras.obras o on o.id = b.id_obra left join \
+    obras.maestro_materiales mm on mm.codigo_sap = b.codigo_sap_material";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const bom = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    if (bom) {
+      for (const element of bom) {
+
+            const detalle_salida = {
+
+              id: Number(element.id),
+              id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
+              reserva: Number(element.reserva),
+              codigo_sap_material: element.codigo_sap_material, //json {"codigo_sap": codigo_sap, "descripcion": descripcion}
+              cantidad_requerida: Number(element.cantidad_requerida)
+            }
+            salida.push(detalle_salida);
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+  
+}
+/***********************************************************************************/
+/* Crea un nuevo bom
+;
+*/
+exports.createBom = async (req, res) => {
+
+    const campos = [
+      'id_obra', 'reserva', 'materiales'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    try {
+      let materiales = req.body.materiales;
+      materiales = materiales.replace(",", ".");
+      let id_obra = req.body.id_obra;
+      let reserva = req.body.reserva;
+      let arreglo_materiales = materiales.split("-");
+      let sql = "";
+      let sql_chek = "";
+      let inicia = false;
+      for ( const element of arreglo_materiales)
+        {
+        console.log(element)
+        const valores = element.split("_")
+        const cod_sap = valores[0]
+        const cantidad = valores[1]
+
+        if (!inicia){
+          inicia = true;
+          if (cod_sap){
+            sql_chek = sql_chek + "select m.sap_material from (select unnest(array[" + cod_sap;
+          }
+        }else{
+          if (cod_sap){
+            sql_chek = sql_chek + ", " + cod_sap;
+          }
+        }
+        sql = sql + "insert into obras.bom (id_obra, reserva, codigo_sap_material, cantidad_requerida) values (" + id_obra + ", " + reserva + ", " + cod_sap + ", " + cantidad + ");"
+
+      }
+      if (sql_chek){
+        sql_chek = sql_chek + "]) as sap_material) as m left join obras.maestro_materiales mm on m.sap_material = mm.codigo_sap where mm.codigo_sap is null;";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const bom = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
+        if (bom) {
+          if (bom.length > 0){
+            //Hay materiales no definidos
+            const detalle_salida = {
+              error: Boolean(true),
+              mensaje: String("Hay códigos de material no definidos en la base de datos"),
+              detalle: bom
+            }
+            res.status(200).send(detalle_salida);
+          }else {
+            if (sql) {
+              // Si todos los materiales estan definidos
+              const { QueryTypes } = require('sequelize');
+              const sequelize = db.sequelize;
+              const bom = await sequelize.query(sql, { type: QueryTypes.INSERT });
+              if (bom) {
+                res.status(200).send(bom);
+              }else{
+                res.status(500).send("Error en la consulta (servidor backend)");
+              }
+            } else {
+              res.status(500).send("Consulta vacía (error servidor backend)");
+            }
+          }
+        }else{
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }
+      }else{
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }
+  }catch (error) {
+    res.status(500).send(error);
+  }
+    
+}
+/***********************************************************************************/
+/* Elimina bom por reserva
+;
+*/
+exports.deleteBomByReserva = async (req, res) => {
+
+  const reserva = req.params.reserva;
+  Bom.destroy({
+    where: { reserva: reserva }
+  }).then(data => {
+    if (data[0] === 1) {
+      res.send({ message: "Bom eliminado" });
+    } else {
+      res.send({ message: `No existe un bom con la reserva ${reserva}` });
+    }
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
+
+}
