@@ -10,6 +10,13 @@ module.exports = function(app) {
     next();
   });
 
+
+  app.get(
+    "/api/users/:id", // Define la ruta con un parámetro de ID
+    [authJwt.verifyToken],
+    controller.getUser
+  ); 
+
   app.get("/api/test/all", controller.allAccess);
 
   app.get(
