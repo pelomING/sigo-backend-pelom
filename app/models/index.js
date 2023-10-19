@@ -73,6 +73,7 @@ db.obra = require("./obras/obra.model.js")(sequelize, Sequelize);
 db.segmento = require("./obras/segmento.model.js")(sequelize, Sequelize);
 db.tipoObra = require("./obras/tipoObra.model.js")(sequelize, Sequelize);
 db.tipoTrabajo = require("./obras/tipoTrabajo.model.js")(sequelize, Sequelize);
+db.visitaTerreno = require("./obras/visitaTerreno.model.js")(sequelize, Sequelize);
 
 /*****  SAE */
 db.cargoFijo = require("./sae/cargoFijo.model.js")(sequelize, Sequelize);
@@ -82,21 +83,5 @@ db.estados = require("./sae/estados.model.js")(sequelize, Sequelize);
 db.eventos = require("./sae/eventos.model.js")(sequelize, Sequelize);
 db.jornada = require("./sae/jornada.model.js")(sequelize, Sequelize);
 db.preciosBase = require("./sae/preciosBase.model.js")(sequelize, Sequelize);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 module.exports = db;
