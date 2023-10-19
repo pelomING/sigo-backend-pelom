@@ -85,7 +85,13 @@ exports.signin = async (req, res) => {
       accessToken: token
     });
   } catch (error) {
-    return res.status(500).send({ message: error.message });
+    if (error.message === "connect ECONNREFUSED ::1:5432") {
+      return res.status(400).send({
+        message: "No hay conexión a la base de datos",
+      });
+    } else {
+      return res.status(500).send({ message: error.message });
+    }
   }
 };
 

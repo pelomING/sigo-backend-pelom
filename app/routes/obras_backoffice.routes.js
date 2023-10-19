@@ -60,10 +60,16 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/v1/allbom", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.findAllBom);
 
 
-    app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.createBom);
+    app.get("/api/obras/backoffice/v1/bomporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.findBomByParametros);
 
 
-    app.delete("/api/obras/backoffice/v1/eliminabombyreserva/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.deleteBomByReserva);
+    app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.createBomMasivo);
+
+
+    app.delete("/api/obras/backoffice/v1/eliminabombyreserva/:reserva", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.deleteBomByReserva);
+
+
+    app.delete("/api/obras/backoffice/v1/eliminamaterialbom/:reserva/:cod_sap", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeController.deleteBomByMaterial);
 
 
 }
