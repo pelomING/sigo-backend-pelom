@@ -67,13 +67,19 @@ db.zonal = require("./comun/zonal.model.js")(sequelize, Sequelize);
 db.bom = require("./obras/bom.model.js")(sequelize, Sequelize);
 db.coordinadorContratista = require("./obras/coordinadorContratista.model.js")(sequelize, Sequelize);
 db.delegacion = require("./obras/delegacion.model.js")(sequelize, Sequelize);
+db.detalleReporteDiarioActividad = require("./obras/detalleReporteDiarioActividad.model.js")(sequelize, Sequelize);
 db.empresaContratista = require("./obras/empresaContratista.model.js")(sequelize, Sequelize);
+db.encabezadoReporteDiario = require("./obras/encabezadoReporteDiario.model.js")(sequelize, Sequelize);
 db.estadoObra = require("./obras/estadoObra.model.js")(sequelize, Sequelize);
+db.maestroActividad = require("./obras/maestroActividad.model.js")(sequelize, Sequelize);
 db.obra = require("./obras/obra.model.js")(sequelize, Sequelize);
 db.segmento = require("./obras/segmento.model.js")(sequelize, Sequelize);
+db.tipoActividad = require("./obras/tipoActividad.model.js")(sequelize, Sequelize);
 db.tipoObra = require("./obras/tipoObra.model.js")(sequelize, Sequelize);
+db.tipoOperacion = require("./obras/tipoOperacion.model.js")(sequelize, Sequelize);
 db.tipoTrabajo = require("./obras/tipoTrabajo.model.js")(sequelize, Sequelize);
 db.visitaTerreno = require("./obras/visitaTerreno.model.js")(sequelize, Sequelize);
+
 
 /*****  SAE */
 db.cargoFijo = require("./sae/cargoFijo.model.js")(sequelize, Sequelize);

@@ -127,7 +127,7 @@ exports.createObra = async (req, res) => {
         tipo_trabajo: req.body.tipo_trabajo,
         persona_envia_info: req.body.persona_envia_info,
         cargo_persona_envia_info: req.body.cargo_persona_envia_info,
-        empresa_contratista: req.body.companya_contratista,
+        empresa_contratista: req.body.empresa_contratista,
         coordinador_contratista: req.body.coordinador_contratista,
         comuna: req.body.comuna,
         ubicacion: req.body.ubicacion,
