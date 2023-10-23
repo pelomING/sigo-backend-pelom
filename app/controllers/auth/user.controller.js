@@ -1,4 +1,5 @@
 const db = require("../../models");
+const User = db.user;
 
 exports.allAccess = (req, res) => {
     res.status(200).send("Public Content.");
@@ -26,7 +27,7 @@ exports.allAccess = (req, res) => {
   exports.getUser = async (req, res) => {
     try {
       const userId = req.params.id; // El ID del usuario se pasa a través de los parámetros de la ruta
-      const user = await user.findByPk(userId);
+      const user = await User.findByPk(userId);
   
       if (!user) {
         return res.status(404).send({ message: 'Usuario no encontrado' });
