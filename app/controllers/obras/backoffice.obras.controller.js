@@ -25,7 +25,7 @@ exports.findAllObra = async (req, res) => {
       obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left \
       join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo \
       left join obras.estado_obra eo on o.estado = eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento \
-      s on o.segmento = s.id";
+      s on o.segmento = s.id WHERE not o.eliminada";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const obras = await sequelize.query(sql, { type: QueryTypes.SELECT });
