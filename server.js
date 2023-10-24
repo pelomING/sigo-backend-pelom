@@ -1,9 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
-const swaggerJsdoc = require("swagger-jsdoc");
+//const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const options = require('./app/config/swagger.config');
+const swaggerFile = require('./swagger-output.json')
+const bodyParser = require('body-parser')
+//const options = require('./app/config/swagger.config');
 
 //const options = swaggerConfig;
 
@@ -65,6 +67,7 @@ function initial() {
 }
 
 // Swagger
+/*
 const specs = swaggerJsdoc(options);
 //console.log(options);
 app.use(
@@ -76,6 +79,10 @@ app.use(
       "https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-newspaper.css",
   })
 );
+*/
+
+app.use(bodyParser.json())
+app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 // simple route
 app.get("/", (req, res) => {
@@ -83,6 +90,7 @@ app.get("/", (req, res) => {
 });
 
 // routes
+
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/sae_movil.routes')(app);

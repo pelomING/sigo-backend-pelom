@@ -10,6 +10,8 @@ const bcrypt = require("bcryptjs");
 
 exports.signup = async (req, res) => {
   // Save User to Database
+  /*  #swagger.tags = ['Autenticación']
+      #swagger.description = 'Registro de un usuariuo nuevo' */
   try {
     const user = await User.create({
       username: req.body.username,
@@ -38,6 +40,8 @@ exports.signup = async (req, res) => {
 };
 
 exports.signin = async (req, res) => {
+  /*  #swagger.tags = ['Autenticación']
+      #swagger.description = 'Login de usuario' */
   try {
 
     const user = await User.findOne({
@@ -96,6 +100,8 @@ exports.signin = async (req, res) => {
 };
 
 exports.signout = async (req, res) => {
+  /*  #swagger.tags = ['Autenticación']
+      #swagger.description = 'Logout de usuario' */
   try {
     req.session = null;
     return res.status(200).send({

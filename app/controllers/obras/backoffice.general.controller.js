@@ -14,6 +14,8 @@ const MaestroActividad = db.maestroActividad;
 
 exports.findAllTipoObra = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todos los tipo de Obra' */
       await TipoObra.findAll().then(data => {
           res.send(data);
       }).catch(err => {
@@ -24,6 +26,8 @@ exports.findAllTipoObra = async (req, res) => {
 
 exports.findAllTipoOperacion = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todos los tipo de Operación' */
       await TipoOperacion.findAll().then(data => {
           res.send(data);
       }).catch(err => {
@@ -34,6 +38,8 @@ exports.findAllTipoOperacion = async (req, res) => {
 
 exports.findAllTipoActividad = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todos los tipo de Actividad' */
       await TipoActividad.findAll().then(data => {
           res.send(data);
       }).catch(err => {
@@ -44,6 +50,8 @@ exports.findAllTipoActividad = async (req, res) => {
 
 exports.findAllMaestroActividad = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todas las actividades dentro del Maestro Actividades' */
     try {
       const sql = "SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, \
       uc_retiro, uc_traslado, ma.descripcion FROM obras.maestro_actividades ma \
@@ -85,6 +93,8 @@ exports.findAllMaestroActividad = async (req, res) => {
 */
 exports.findOneMaestroActividad = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve una actividad dentro del Maestro Actividades buscando por ID' */
     try {
       
       const campos = [
@@ -138,6 +148,8 @@ exports.findOneMaestroActividad = async (req, res) => {
 */
 exports.findAllMaestroActividadActividad = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todas las actividades que coincidan (select like) con el campo actividad dentro del Maestro Actividades' */
     try {
       
       const campos = [
@@ -190,6 +202,8 @@ exports.findAllMaestroActividadActividad = async (req, res) => {
 
 exports.findAllZonal = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todas las zonales' */
     try {
       const data = await Zonal.findAll();
       res.send(data);
@@ -202,6 +216,8 @@ exports.findAllZonal = async (req, res) => {
 
 exports.findAllDelegacion = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todas las delegaciones' */
     try {
       const data = await Delegacion.findAll();
       res.send(data);
@@ -214,6 +230,8 @@ exports.findAllDelegacion = async (req, res) => {
 
  exports.findAllTipoTrabajo = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todos los tipo de Trabajo' */
     try {
       const data = await TipoTrabajo.findAll();
       res.send(data);
@@ -226,6 +244,8 @@ exports.findAllDelegacion = async (req, res) => {
 
 exports.findAllEmpresaContratista = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todas las empresas contratistas' */
     try {
       const data = await EmpresaContratista.findAll();
       res.send(data);
@@ -238,6 +258,8 @@ exports.findAllEmpresaContratista = async (req, res) => {
 
 exports.findAllCoordinadorContratista = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todos los coordinadores contratistas' */
     try {
       const data = await CoordinadorContratista.findAll();
       res.send(data);
@@ -250,6 +272,8 @@ exports.findAllCoordinadorContratista = async (req, res) => {
 
 exports.findAllComuna = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todas las comunas' */
     try {
       const data = await Comuna.findAll();
       res.send(data);
@@ -261,6 +285,8 @@ exports.findAllComuna = async (req, res) => {
 
 exports.findAllEstadoObra = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todos los estados de Obra' */
     try {
       const data = await EstadoObra.findAll();
       res.send(data);
@@ -272,6 +298,8 @@ exports.findAllEstadoObra = async (req, res) => {
 
 exports.findAllSegmento = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todos los segmentos' */
     try {
       const data = await Segmento.findAll();
       res.send(data);
