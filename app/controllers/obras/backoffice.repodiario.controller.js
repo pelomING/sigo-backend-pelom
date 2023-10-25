@@ -1,6 +1,9 @@
 const db = require("../../models");
 const EncabezadoReporteDiario = db.encabezadoReporteDiario;
 const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
+const tipoOperacion = db.tipoOperacion;
+const maestroActividad = db.maestroActividad;
+const encabezado_reporte_diario = db.encabezadoReporteDiario;
 
 /***********************************************************************************/
 /*                                                                                 */
@@ -22,9 +25,9 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
         const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
         fecha_reporte::text, jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, \
         observaciones, entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, \
-        sector, hora_salida_base::text, hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text \
-        FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join \
-        obras.obras o on rd.id_obra = o.id";
+        sector, hora_salida_base::text, hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, \
+        alimentador, row_to_json(c) as comuna, num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo \
+        tt on rd.id_area = tt.id join obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const obras = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -50,7 +53,11 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
                   hora_salida_base: String(element.hora_salida_base),
                   hora_llegada_terreno: String(element.hora_llegada_terreno),
                   hora_salida_terreno: String(element.hora_salida_terreno),
-                  hora_llegada_base: String(element.hora_llegada_base)
+                  hora_llegada_base: String(element.hora_llegada_base),
+                  alimentador: String(req.body.alimentador),
+                  comuna: String(req.body.comuna),
+                  num_documento: String(req.body.num_documento),
+                  flexiapp: String(req.body.flexiapp)
                   
                 }
                 salida.push(detalle_salida);
@@ -71,7 +78,35 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
 */
 exports.createEncabezadoReporteDiario = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
-      #swagger.description = 'Crea un encabezado de reporte diario' */
+      #swagger.description = 'Crea un encabezado de reporte diario'
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos encabezado reporte diario',
+            required: true,
+            schema: {
+                id_obra: 1,
+                fecha_reporte: "2023-10-25",
+                jefe_faena: "nombre jefe de faena",
+                sdi: "sdi",
+                gestor_cliente: "nombre gestor cliente",
+                id_area: 1,
+                brigada_pesada: false,
+                observaciones: "observaciones",
+                entregado_por_persona: "nombre persona",
+                fecha_entregado: "2023-10-25",
+                revisado_por_persona: "nombre persona que revisa",
+                fecha_revisado: "2023-10-25",
+                sector: "direccion sector",
+                hora_salida_base: "2023-10-25 07:30:00",
+                hora_llegada_terreno: "2023-10-25 08:00",
+                hora_salida_terreno: "2023-10-25 18:30",
+                hora_llegada_base: "2023-10-25 19:30",
+                alimentador: "alimentador",
+                comuna: "10345",
+                num_documento: "10001000600",
+                flexiapp: "CGE-123343-55"
+            }
+        } */
   try{
       let salir = false;
       const campos = [
@@ -106,23 +141,27 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
         }
 
         const encabezado_reporte_diario = {
-            id_obra: req.body.id_obra,
-            fecha_reporte: req.body.fecha_reporte,
-            jefe_faena: req.body.jefe_faena,
-            sdi: req.body.sdi,
-            gestor_cliente: req.body.gestor_cliente,
-            id_area: req.body.id_area,
-            brigada_pesada: req.body.brigada_pesada,
-            observaciones: req.body.observaciones,
-            entregado_por_persona: req.body.entregado_por_persona,
-            fecha_entregado: req.body.fecha_entregado,
-            revisado_por_persona: req.body.revisado_por_persona,
-            fecha_revisado: req.body.fecha_revisado,
-            sector: req.body.sector,
-            hora_salida_base: req.body.hora_salida_base,
-            hora_llegada_terreno: req.body.hora_llegada_terreno,
-            hora_salida_terreno: req.body.hora_salida_terreno,
-            hora_llegada_base: req.body.hora_llegada_base
+            id_obra: Number(req.body.id_obra),
+            fecha_reporte: String(req.body.fecha_reporte),
+            jefe_faena: String(req.body.jefe_faena),
+            sdi: String(req.body.sdi),
+            gestor_cliente: String(req.body.gestor_cliente),
+            id_area: Number(req.body.id_area),
+            brigada_pesada: Boolean(req.body.brigada_pesada),
+            observaciones: String(req.body.observaciones),
+            entregado_por_persona: String(req.body.entregado_por_persona),
+            fecha_entregado: String(req.body.fecha_entregado),
+            revisado_por_persona: String(req.body.revisado_por_persona),
+            fecha_revisado: String(req.body.fecha_revisado),
+            sector: String(req.body.sector),
+            hora_salida_base: String(req.body.hora_salida_base),
+            hora_llegada_terreno: String(req.body.hora_llegada_terreno),
+            hora_salida_terreno: String(req.body.hora_salida_terreno),
+            hora_llegada_base: String(req.body.hora_llegada_base),
+            alimentador: String(req.body.alimentador),
+            comuna: String(req.body.comuna),
+            num_documento: String(req.body.num_documento),
+            flexiapp: String(req.body.flexiapp)
         }
 
         await EncabezadoReporteDiario.create(encabezado_reporte_diario)
@@ -195,9 +234,9 @@ exports.findAllDetalleReporteDiarioActividad = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
       #swagger.description = 'Devuelve todos los registros de detalle de reportes diarios' */
     try {
-      const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ta) as tipo_actividad, cantidad, \
+      const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
       id_encabezado_rep FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top \
-      on dra.tipo_operacion = top.id join obras.tipo_actividad ta on dra.id_actividad = ta.id";
+      on dra.tipo_operacion = top.id join obras.maestro_actividades ma on dra.id_actividad = ma.id";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const detalleReporteDiarioActividad = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -247,9 +286,9 @@ exports.findOneDetalleReporteDiarioActividad = async (req, res) => {
       }
     };
     const id = req.query.id;
-    const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ta) as tipo_actividad, cantidad, \
+    const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
     id_encabezado_rep FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top \
-    on dra.tipo_operacion = top.id join obras.tipo_actividad ta on dra.id_actividad = ta.id WHERE dra.id = :id";
+    on dra.tipo_operacion = top.id join obras.maestro_actividades ma on dra.id_actividad = ma.id WHERE dra.id = :id";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const detalleReporteDiarioActividad = await sequelize.query(sql,  { replacements: { id: id }, type: QueryTypes.SELECT });
@@ -296,9 +335,9 @@ exports.findDetalleReporteDiarioActividadPorEncabezado = async (req, res) => {
       }
     };
     const encabezado_reporte = req.query.encabezado_reporte;
-    const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ta) as tipo_actividad, cantidad, \
+    const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
     id_encabezado_rep FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top \
-    on dra.tipo_operacion = top.id join obras.tipo_actividad ta on dra.id_actividad = ta.id WHERE id_encabezado_rep = :encabezado_reporte";
+    on dra.tipo_operacion = top.id join obras.maestro_actividades ma on dra.id_actividad = ma.id WHERE id_encabezado_rep = :encabezado_reporte";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const detalleReporteDiarioActividad = await sequelize.query(sql,  { replacements: { encabezado_reporte: encabezado_reporte }, type: QueryTypes.SELECT });
@@ -329,4 +368,92 @@ exports.findDetalleReporteDiarioActividadPorEncabezado = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 }
+/*********************************************************************************** */
+/* Crea un detalle de reporte diario
+;
+*/
+exports.createOneDetalleReporteDiarioActividad = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Crea un detalle de reporte diario' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para el detalle de reporte diario',
+            required: true,
+            schema: {
+                tipo_operacion: 1,
+                id_actividad: 537,
+                cantidad: 2.3,
+                id_encabezado_rep: 3
+            }
+        }*/
+  try {
+    const campos = [
+      'tipo_operacion',
+      'id_actividad',
+      'cantidad',
+      'id_encabezado_rep'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
 
+    // Consultar si existe la actividad en el maestro de actividades
+    const actividadExists = await maestroActividad.findOne({
+      where: {
+        id: req.body.id_actividad
+      }
+    });
+
+    // Consultar si existe el tipo de opracion en la tabla tipo_operacion
+    const tipoOperacionExists = await tipoOperacion.findOne({
+      where: {
+        id: req.body.tipo_operacion
+      }
+    });
+
+    // Consultar si existe el encabezado de reporte diario en la tabla encabezado_reporte_diario
+    const encabezado_reporte_diarioExists = await encabezado_reporte_diario.findOne({
+      where: {
+        id: req.body.id_encabezado_rep
+      }
+    });
+    if (!actividadExists) {
+      // La actividad no existe en la tabla maestro_actividad
+      res.status(400).send({message: "No existe la actividad con Id " + req.body.id_actividad});
+      return;
+    }
+
+    if (!tipoOperacionExists) {
+      // El tipo de operación no existe en la tabla tipo_operacion
+      res.status(400).send({message: "No el tipo de operación con Id " + req.body.tipo_operacion});
+      return;
+    }
+
+    if (!encabezado_reporte_diarioExists) {
+      // El encabezado de reporte diario no existe
+      res.status(400).send({message: "No existe un encabezado reporte diario con Id " + req.body.id_encabezado_rep});
+      return;
+    }
+
+    const detalleReporteDiarioActividad = {
+      tipo_operacion: Number(req.body.tipo_operacion),
+      id_actividad: Number(req.body.id_actividad),
+      cantidad: Number(req.body.cantidad),
+      id_encabezado_rep: Number(req.body.id_encabezado_rep)
+    }
+    await DetalleReporteDiarioActividad.create(detalleReporteDiarioActividad)
+          .then(data => {
+              res.send(data);
+          }).catch(err => {
+              res.status(500).send({ message: err.message });
+          })
+  }catch (error) {
+    res.status(500).send(error);
+  }
+
+}

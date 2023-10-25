@@ -13,8 +13,7 @@
   "host": "localhost:8080",
   "basePath": "/",
   "schemes": [
-    "http",
-    "https"
+    "http"
   ],
   "paths": {
     "/api/auth/signup": {
@@ -1161,6 +1160,38 @@
         }
       }
     },
+    "/api/obras/backoffice/v1/visitaterreno": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Visita Terreno"
+        ],
+        "description": "Devuelve las visitas a terreno por ID de obra (id_obra)",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/creavisitaterreno": {
       "post": {
         "tags": [
@@ -1319,59 +1350,94 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "id_obra": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "fecha_reporte": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "jefe_faena": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre jefe de faena"
                 },
                 "sdi": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "sdi"
                 },
                 "gestor_cliente": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre gestor cliente"
                 },
                 "id_area": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "brigada_pesada": {
-                  "example": "any"
+                  "type": "boolean",
+                  "example": false
                 },
                 "observaciones": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "observaciones"
                 },
                 "entregado_por_persona": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre persona"
                 },
                 "fecha_entregado": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "revisado_por_persona": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre persona que revisa"
                 },
                 "fecha_revisado": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "sector": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "direccion sector"
                 },
                 "hora_salida_base": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25 07:30:00"
                 },
                 "hora_llegada_terreno": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25 08:00"
                 },
                 "hora_salida_terreno": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25 18:30"
                 },
                 "hora_llegada_base": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25 19:30"
+                },
+                "alimentador": {
+                  "type": "string",
+                  "example": "alimentador"
+                },
+                "comuna": {
+                  "type": "string",
+                  "example": "10345"
+                },
+                "num_documento": {
+                  "type": "string",
+                  "example": "10001000600"
+                },
+                "flexiapp": {
+                  "type": "string",
+                  "example": "CGE-123343-55"
                 }
               }
             }
@@ -1521,6 +1587,60 @@
             "name": "encabezado_reporte",
             "in": "query",
             "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/creardetalleactividad": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Crea un detalle de reporte diario",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para el detalle de reporte diario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tipo_operacion": {
+                  "type": "number",
+                  "example": 1
+                },
+                "id_actividad": {
+                  "type": "number",
+                  "example": 537
+                },
+                "cantidad": {
+                  "type": "number",
+                  "example": 2.3
+                },
+                "id_encabezado_rep": {
+                  "type": "number",
+                  "example": 3
+                }
+              }
+            }
           }
         ],
         "responses": {

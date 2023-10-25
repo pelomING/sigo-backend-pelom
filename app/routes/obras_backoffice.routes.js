@@ -128,6 +128,8 @@ module.exports = function(app) {
 
   app.get("/api/obras/backoffice/v1/reportesdiariosactividadporencabezado", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findDetalleReporteDiarioActividadPorEncabezado);
 
+  app.post("/api/obras/backoffice/v1/creardetalleactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.createOneDetalleReporteDiarioActividad);
+
 }
 
 

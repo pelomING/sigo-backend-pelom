@@ -5,7 +5,7 @@
 -- Dumped from database version 13.11
 -- Dumped by pg_dump version 15.3
 
--- Started on 2023-10-23 12:46:02
+-- Started on 2023-10-25 18:02:46
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -140,7 +140,7 @@ CREATE SEQUENCE _auth.personas_id_seq
 ALTER TABLE _auth.personas_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3897 (class 0 OID 0)
+-- TOC entry 3901 (class 0 OID 0)
 -- Dependencies: 229
 -- Name: personas_id_seq; Type: SEQUENCE OWNED BY; Schema: _auth; Owner: postgres
 --
@@ -207,7 +207,7 @@ CREATE SEQUENCE _auth.users_id_seq
 ALTER TABLE _auth.users_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3898 (class 0 OID 0)
+-- TOC entry 3902 (class 0 OID 0)
 -- Dependencies: 233
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: _auth; Owner: postgres
 --
@@ -264,7 +264,7 @@ CREATE SEQUENCE _comun.camionetas_id_seq
 ALTER TABLE _comun.camionetas_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3899 (class 0 OID 0)
+-- TOC entry 3903 (class 0 OID 0)
 -- Dependencies: 231
 -- Name: camionetas_id_seq; Type: SEQUENCE OWNED BY; Schema: _comun; Owner: postgres
 --
@@ -302,7 +302,7 @@ CREATE SEQUENCE _comun.cliente_id_seq
 ALTER TABLE _comun.cliente_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3900 (class 0 OID 0)
+-- TOC entry 3904 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: cliente_id_seq; Type: SEQUENCE OWNED BY; Schema: _comun; Owner: postgres
 --
@@ -355,7 +355,7 @@ CREATE SEQUENCE _comun.eventos_tipo_id_seq
 ALTER TABLE _comun.eventos_tipo_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3901 (class 0 OID 0)
+-- TOC entry 3905 (class 0 OID 0)
 -- Dependencies: 216
 -- Name: eventos_tipo_id_seq; Type: SEQUENCE OWNED BY; Schema: _comun; Owner: postgres
 --
@@ -450,7 +450,7 @@ CREATE SEQUENCE _comun.servicio_comuna_id_seq
 ALTER TABLE _comun.servicio_comuna_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3902 (class 0 OID 0)
+-- TOC entry 3906 (class 0 OID 0)
 -- Dependencies: 225
 -- Name: servicio_comuna_id_seq; Type: SEQUENCE OWNED BY; Schema: _comun; Owner: postgres
 --
@@ -491,7 +491,7 @@ CREATE SEQUENCE _comun.servicios_id_seq
 ALTER TABLE _comun.servicios_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3903 (class 0 OID 0)
+-- TOC entry 3907 (class 0 OID 0)
 -- Dependencies: 210
 -- Name: servicios_id_seq; Type: SEQUENCE OWNED BY; Schema: _comun; Owner: postgres
 --
@@ -547,7 +547,7 @@ CREATE SEQUENCE _comun.turnos_id_seq
 ALTER TABLE _comun.turnos_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3904 (class 0 OID 0)
+-- TOC entry 3908 (class 0 OID 0)
 -- Dependencies: 207
 -- Name: turnos_id_seq; Type: SEQUENCE OWNED BY; Schema: _comun; Owner: postgres
 --
@@ -603,7 +603,7 @@ CREATE SEQUENCE obras.actividades_id_seq
 ALTER TABLE obras.actividades_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3905 (class 0 OID 0)
+-- TOC entry 3909 (class 0 OID 0)
 -- Dependencies: 252
 -- Name: actividades_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -643,7 +643,7 @@ CREATE SEQUENCE obras.actividades_obra_id_seq
 ALTER TABLE obras.actividades_obra_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3906 (class 0 OID 0)
+-- TOC entry 3910 (class 0 OID 0)
 -- Dependencies: 254
 -- Name: actividades_obra_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -683,7 +683,7 @@ CREATE SEQUENCE obras.adicionales_edp_id_seq
 ALTER TABLE obras.adicionales_edp_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3907 (class 0 OID 0)
+-- TOC entry 3911 (class 0 OID 0)
 -- Dependencies: 256
 -- Name: adicionales_edp_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -723,7 +723,7 @@ CREATE SEQUENCE obras.bom_id_seq
 ALTER TABLE obras.bom_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3908 (class 0 OID 0)
+-- TOC entry 3912 (class 0 OID 0)
 -- Dependencies: 258
 -- Name: bom_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -763,7 +763,7 @@ CREATE SEQUENCE obras.coordinadores_contratista_id_seq
 ALTER TABLE obras.coordinadores_contratista_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3909 (class 0 OID 0)
+-- TOC entry 3913 (class 0 OID 0)
 -- Dependencies: 260
 -- Name: coordinadores_contratista_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -801,7 +801,7 @@ CREATE SEQUENCE obras.delegaciones_id_seq
 ALTER TABLE obras.delegaciones_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3910 (class 0 OID 0)
+-- TOC entry 3914 (class 0 OID 0)
 -- Dependencies: 262
 -- Name: delegaciones_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -841,7 +841,7 @@ CREATE SEQUENCE obras.detalle_edp_id_seq
 ALTER TABLE obras.detalle_edp_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3911 (class 0 OID 0)
+-- TOC entry 3915 (class 0 OID 0)
 -- Dependencies: 264
 -- Name: detalle_edp_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -882,7 +882,7 @@ CREATE SEQUENCE obras.detalle_pedido_material_id_seq
 ALTER TABLE obras.detalle_pedido_material_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3912 (class 0 OID 0)
+-- TOC entry 3916 (class 0 OID 0)
 -- Dependencies: 266
 -- Name: detalle_pedido_material_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -922,7 +922,7 @@ CREATE SEQUENCE obras.detalle_reporte_diario_actividad_id_seq
 ALTER TABLE obras.detalle_reporte_diario_actividad_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3913 (class 0 OID 0)
+-- TOC entry 3917 (class 0 OID 0)
 -- Dependencies: 268
 -- Name: detalle_reporte_diario_actividad_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -962,7 +962,7 @@ CREATE SEQUENCE obras.detalle_reporte_diario_material_id_seq
 ALTER TABLE obras.detalle_reporte_diario_material_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3914 (class 0 OID 0)
+-- TOC entry 3918 (class 0 OID 0)
 -- Dependencies: 270
 -- Name: detalle_reporte_diario_material_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1003,7 +1003,7 @@ CREATE SEQUENCE obras.detalle_reporte_diario_otras_actividades_id_seq
 ALTER TABLE obras.detalle_reporte_diario_otras_actividades_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3915 (class 0 OID 0)
+-- TOC entry 3919 (class 0 OID 0)
 -- Dependencies: 272
 -- Name: detalle_reporte_diario_otras_actividades_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1042,7 +1042,7 @@ CREATE SEQUENCE obras.empresas_contratista_id_seq
 ALTER TABLE obras.empresas_contratista_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3916 (class 0 OID 0)
+-- TOC entry 3920 (class 0 OID 0)
 -- Dependencies: 274
 -- Name: empresas_contratista_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1094,7 +1094,7 @@ CREATE SEQUENCE obras.encabezado_edp_id_seq
 ALTER TABLE obras.encabezado_edp_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3917 (class 0 OID 0)
+-- TOC entry 3921 (class 0 OID 0)
 -- Dependencies: 276
 -- Name: encabezado_edp_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1134,7 +1134,7 @@ CREATE SEQUENCE obras.encabezado_pedido_material_id_seq
 ALTER TABLE obras.encabezado_pedido_material_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3918 (class 0 OID 0)
+-- TOC entry 3922 (class 0 OID 0)
 -- Dependencies: 278
 -- Name: encabezado_pedido_material_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1165,11 +1165,33 @@ CREATE TABLE obras.encabezado_reporte_diario (
     hora_salida_base timestamp without time zone,
     hora_llegada_terreno timestamp without time zone,
     hora_salida_terreno timestamp without time zone,
-    hora_llegada_base timestamp without time zone
+    hora_llegada_base timestamp without time zone,
+    alimentador character varying,
+    comuna character varying,
+    num_documento character varying,
+    flexiapp character varying
 );
 
 
 ALTER TABLE obras.encabezado_reporte_diario OWNER TO postgres;
+
+--
+-- TOC entry 3923 (class 0 OID 0)
+-- Dependencies: 279
+-- Name: COLUMN encabezado_reporte_diario.id_area; Type: COMMENT; Schema: obras; Owner: postgres
+--
+
+COMMENT ON COLUMN obras.encabezado_reporte_diario.id_area IS 'tipo de trabajo, viene de tabla obras.tipo_trabajo';
+
+
+--
+-- TOC entry 3924 (class 0 OID 0)
+-- Dependencies: 279
+-- Name: COLUMN encabezado_reporte_diario.sector; Type: COMMENT; Schema: obras; Owner: postgres
+--
+
+COMMENT ON COLUMN obras.encabezado_reporte_diario.sector IS 'Ubicación o dirección donde se realiza la faena';
+
 
 --
 -- TOC entry 280 (class 1259 OID 386145)
@@ -1187,7 +1209,7 @@ CREATE SEQUENCE obras.encabezado_reporte_diario_id_seq
 ALTER TABLE obras.encabezado_reporte_diario_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3919 (class 0 OID 0)
+-- TOC entry 3925 (class 0 OID 0)
 -- Dependencies: 280
 -- Name: encabezado_reporte_diario_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1225,7 +1247,7 @@ CREATE SEQUENCE obras.estado_obra_id_seq
 ALTER TABLE obras.estado_obra_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3920 (class 0 OID 0)
+-- TOC entry 3926 (class 0 OID 0)
 -- Dependencies: 316
 -- Name: estado_obra_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1263,7 +1285,7 @@ CREATE SEQUENCE obras.estado_visita_id_seq
 ALTER TABLE obras.estado_visita_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3921 (class 0 OID 0)
+-- TOC entry 3927 (class 0 OID 0)
 -- Dependencies: 320
 -- Name: estado_visita_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1330,7 +1352,7 @@ CREATE SEQUENCE obras.jefes_faena_id_seq
 ALTER TABLE obras.jefes_faena_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3922 (class 0 OID 0)
+-- TOC entry 3928 (class 0 OID 0)
 -- Dependencies: 284
 -- Name: jefes_faena_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1369,7 +1391,7 @@ CREATE SEQUENCE obras.maestro_estructura_id_seq
 ALTER TABLE obras.maestro_estructura_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3923 (class 0 OID 0)
+-- TOC entry 3929 (class 0 OID 0)
 -- Dependencies: 286
 -- Name: maestro_estructura_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1423,7 +1445,7 @@ CREATE SEQUENCE obras.maestro_unidades_id_seq
 ALTER TABLE obras.maestro_unidades_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3924 (class 0 OID 0)
+-- TOC entry 3930 (class 0 OID 0)
 -- Dependencies: 289
 -- Name: maestro_unidades_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1483,7 +1505,7 @@ CREATE SEQUENCE obras.obras_id_seq
 ALTER TABLE obras.obras_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3925 (class 0 OID 0)
+-- TOC entry 3931 (class 0 OID 0)
 -- Dependencies: 291
 -- Name: obras_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1523,7 +1545,7 @@ CREATE SEQUENCE obras.otros_cargos_edp_id_seq
 ALTER TABLE obras.otros_cargos_edp_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3926 (class 0 OID 0)
+-- TOC entry 3932 (class 0 OID 0)
 -- Dependencies: 293
 -- Name: otros_cargos_edp_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1580,7 +1602,7 @@ CREATE SEQUENCE obras.recibido_bodega_pelom_id_seq
 ALTER TABLE obras.recibido_bodega_pelom_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3927 (class 0 OID 0)
+-- TOC entry 3933 (class 0 OID 0)
 -- Dependencies: 296
 -- Name: recibido_bodega_pelom_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1632,7 +1654,7 @@ CREATE SEQUENCE obras.segmento_id_seq
 ALTER TABLE obras.segmento_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3928 (class 0 OID 0)
+-- TOC entry 3934 (class 0 OID 0)
 -- Dependencies: 298
 -- Name: segmento_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1671,7 +1693,7 @@ CREATE SEQUENCE obras.solicitantes_id_seq
 ALTER TABLE obras.solicitantes_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3929 (class 0 OID 0)
+-- TOC entry 3935 (class 0 OID 0)
 -- Dependencies: 300
 -- Name: solicitantes_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1708,7 +1730,7 @@ CREATE SEQUENCE obras.tipo_actividad_id_seq
 ALTER TABLE obras.tipo_actividad_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3930 (class 0 OID 0)
+-- TOC entry 3936 (class 0 OID 0)
 -- Dependencies: 302
 -- Name: tipo_actividad_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1745,7 +1767,7 @@ CREATE SEQUENCE obras.tipo_obra_id_seq
 ALTER TABLE obras.tipo_obra_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3931 (class 0 OID 0)
+-- TOC entry 3937 (class 0 OID 0)
 -- Dependencies: 304
 -- Name: tipo_obra_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1783,7 +1805,7 @@ CREATE SEQUENCE obras.tipo_operacion_id_seq
 ALTER TABLE obras.tipo_operacion_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3932 (class 0 OID 0)
+-- TOC entry 3938 (class 0 OID 0)
 -- Dependencies: 322
 -- Name: tipo_operacion_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1821,7 +1843,7 @@ CREATE SEQUENCE obras.tipo_trabajo_id_seq
 ALTER TABLE obras.tipo_trabajo_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3933 (class 0 OID 0)
+-- TOC entry 3939 (class 0 OID 0)
 -- Dependencies: 306
 -- Name: tipo_trabajo_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1860,7 +1882,7 @@ CREATE SEQUENCE obras.valor_uc_id_seq
 ALTER TABLE obras.valor_uc_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3934 (class 0 OID 0)
+-- TOC entry 3940 (class 0 OID 0)
 -- Dependencies: 308
 -- Name: valor_uc_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1906,7 +1928,7 @@ CREATE SEQUENCE obras.visitas_terreno_id_seq
 ALTER TABLE obras.visitas_terreno_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3935 (class 0 OID 0)
+-- TOC entry 3941 (class 0 OID 0)
 -- Dependencies: 310
 -- Name: visitas_terreno_id_seq; Type: SEQUENCE OWNED BY; Schema: obras; Owner: postgres
 --
@@ -1964,7 +1986,7 @@ CREATE SEQUENCE sae.cargo_fijo_id_seq
 ALTER TABLE sae.cargo_fijo_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3936 (class 0 OID 0)
+-- TOC entry 3942 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: cargo_fijo_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2005,7 +2027,7 @@ CREATE SEQUENCE sae.movil_eventos_id_seq
 ALTER TABLE sae.movil_eventos_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3937 (class 0 OID 0)
+-- TOC entry 3943 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: movil_eventos_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2046,7 +2068,7 @@ CREATE SEQUENCE sae.movil_jornadas_id_seq
 ALTER TABLE sae.movil_jornadas_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3938 (class 0 OID 0)
+-- TOC entry 3944 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: movil_jornadas_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2090,7 +2112,7 @@ CREATE SEQUENCE sae.precios_base_id_seq
 ALTER TABLE sae.precios_base_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3939 (class 0 OID 0)
+-- TOC entry 3945 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: precios_base_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2129,7 +2151,7 @@ CREATE SEQUENCE sae.reporte_detalle_estado_resultado_id_seq
 ALTER TABLE sae.reporte_detalle_estado_resultado_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3940 (class 0 OID 0)
+-- TOC entry 3946 (class 0 OID 0)
 -- Dependencies: 240
 -- Name: reporte_detalle_estado_resultado_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2169,7 +2191,7 @@ CREATE SEQUENCE sae.reporte_errores_id_seq
 ALTER TABLE sae.reporte_errores_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3941 (class 0 OID 0)
+-- TOC entry 3947 (class 0 OID 0)
 -- Dependencies: 242
 -- Name: reporte_errores_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2218,7 +2240,7 @@ CREATE SEQUENCE sae.reporte_estado_resultado_id_seq
 ALTER TABLE sae.reporte_estado_resultado_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3942 (class 0 OID 0)
+-- TOC entry 3948 (class 0 OID 0)
 -- Dependencies: 244
 -- Name: reporte_estado_resultado_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2256,7 +2278,7 @@ CREATE SEQUENCE sae.reporte_estados_id_seq
 ALTER TABLE sae.reporte_estados_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3943 (class 0 OID 0)
+-- TOC entry 3949 (class 0 OID 0)
 -- Dependencies: 246
 -- Name: reporte_estados_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2305,7 +2327,7 @@ CREATE SEQUENCE sae.reporte_eventos_id_seq
 ALTER TABLE sae.reporte_eventos_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3944 (class 0 OID 0)
+-- TOC entry 3950 (class 0 OID 0)
 -- Dependencies: 248
 -- Name: reporte_eventos_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2354,7 +2376,7 @@ CREATE SEQUENCE sae.reporte_jornada_id_seq
 ALTER TABLE sae.reporte_jornada_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3945 (class 0 OID 0)
+-- TOC entry 3951 (class 0 OID 0)
 -- Dependencies: 250
 -- Name: reporte_jornada_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2402,7 +2424,7 @@ CREATE SEQUENCE sae.resultado_estado_resultado_id_seq
 ALTER TABLE sae.resultado_estado_resultado_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3946 (class 0 OID 0)
+-- TOC entry 3952 (class 0 OID 0)
 -- Dependencies: 313
 -- Name: resultado_estado_resultado_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2440,7 +2462,7 @@ CREATE SEQUENCE sae.resultado_estados_id_seq
 ALTER TABLE sae.resultado_estados_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3947 (class 0 OID 0)
+-- TOC entry 3953 (class 0 OID 0)
 -- Dependencies: 311
 -- Name: resultado_estados_id_seq; Type: SEQUENCE OWNED BY; Schema: sae; Owner: postgres
 --
@@ -2871,7 +2893,7 @@ ALTER TABLE ONLY sae.resultado_estados ALTER COLUMN id SET DEFAULT nextval('sae.
 
 
 --
--- TOC entry 3795 (class 0 OID 385780)
+-- TOC entry 3799 (class 0 OID 385780)
 -- Dependencies: 228
 -- Data for Name: personas; Type: TABLE DATA; Schema: _auth; Owner: postgres
 --
@@ -2898,7 +2920,7 @@ INSERT INTO _auth.personas VALUES (20, 'test_admin', 'test', NULL, 'admin', 1, 1
 
 
 --
--- TOC entry 3778 (class 0 OID 385602)
+-- TOC entry 3782 (class 0 OID 385602)
 -- Dependencies: 211
 -- Data for Name: roles; Type: TABLE DATA; Schema: _auth; Owner: postgres
 --
@@ -2910,7 +2932,7 @@ INSERT INTO _auth.roles VALUES (4, 'sistema', true);
 
 
 --
--- TOC entry 3801 (class 0 OID 385846)
+-- TOC entry 3805 (class 0 OID 385846)
 -- Dependencies: 234
 -- Data for Name: user_roles; Type: TABLE DATA; Schema: _auth; Owner: postgres
 --
@@ -2936,7 +2958,7 @@ INSERT INTO _auth.user_roles VALUES (1, 23);
 
 
 --
--- TOC entry 3799 (class 0 OID 385825)
+-- TOC entry 3803 (class 0 OID 385825)
 -- Dependencies: 232
 -- Data for Name: users; Type: TABLE DATA; Schema: _auth; Owner: postgres
 --
@@ -2962,7 +2984,7 @@ INSERT INTO _auth.users VALUES (23, 'test_admin', 'test_admin@pelom.cl', '$2a$08
 
 
 --
--- TOC entry 3790 (class 0 OID 385710)
+-- TOC entry 3794 (class 0 OID 385710)
 -- Dependencies: 223
 -- Data for Name: base; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -2978,7 +3000,7 @@ INSERT INTO _comun.base VALUES (8, 'Pelluhue', 3);
 
 
 --
--- TOC entry 3797 (class 0 OID 385809)
+-- TOC entry 3801 (class 0 OID 385809)
 -- Dependencies: 230
 -- Data for Name: camionetas; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -2989,7 +3011,7 @@ INSERT INTO _comun.camionetas VALUES (1, 'AABB-00', 'KIA', 'XX', 1, false, '');
 
 
 --
--- TOC entry 3785 (class 0 OID 385662)
+-- TOC entry 3789 (class 0 OID 385662)
 -- Dependencies: 218
 -- Data for Name: cliente; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -2998,7 +3020,7 @@ INSERT INTO _comun.cliente VALUES (1, 'CGE');
 
 
 --
--- TOC entry 3784 (class 0 OID 385648)
+-- TOC entry 3788 (class 0 OID 385648)
 -- Dependencies: 217
 -- Data for Name: comunas; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3352,7 +3374,7 @@ INSERT INTO _comun.comunas VALUES ('10102', 'Calbuco', '101');
 
 
 --
--- TOC entry 3782 (class 0 OID 385638)
+-- TOC entry 3786 (class 0 OID 385638)
 -- Dependencies: 215
 -- Data for Name: eventos_tipo; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3365,7 +3387,7 @@ INSERT INTO _comun.eventos_tipo VALUES (5, 'VIFRU', 'VIAJE FRUSTRADO');
 
 
 --
--- TOC entry 3781 (class 0 OID 385630)
+-- TOC entry 3785 (class 0 OID 385630)
 -- Dependencies: 214
 -- Data for Name: meses; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3385,7 +3407,7 @@ INSERT INTO _comun.meses VALUES (12, 'Diciembre');
 
 
 --
--- TOC entry 3787 (class 0 OID 385670)
+-- TOC entry 3791 (class 0 OID 385670)
 -- Dependencies: 220
 -- Data for Name: paquete; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3397,7 +3419,7 @@ INSERT INTO _comun.paquete VALUES (4, 'Pelluhue', 2);
 
 
 --
--- TOC entry 3780 (class 0 OID 385616)
+-- TOC entry 3784 (class 0 OID 385616)
 -- Dependencies: 213
 -- Data for Name: provincias; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3461,7 +3483,7 @@ INSERT INTO _comun.provincias VALUES ('121', 'Magallanes', '12');
 
 
 --
--- TOC entry 3779 (class 0 OID 385608)
+-- TOC entry 3783 (class 0 OID 385608)
 -- Dependencies: 212
 -- Data for Name: regiones; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3485,7 +3507,7 @@ INSERT INTO _comun.regiones VALUES ('11', 'De Aisén del Gral. C. Ibáñez del C
 
 
 --
--- TOC entry 3791 (class 0 OID 385721)
+-- TOC entry 3795 (class 0 OID 385721)
 -- Dependencies: 224
 -- Data for Name: servicio_comuna; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3513,7 +3535,7 @@ INSERT INTO _comun.servicio_comuna VALUES (20, 'SAE', '07405', 3, true);
 
 
 --
--- TOC entry 3776 (class 0 OID 385590)
+-- TOC entry 3780 (class 0 OID 385590)
 -- Dependencies: 209
 -- Data for Name: servicios; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3522,7 +3544,7 @@ INSERT INTO _comun.servicios VALUES (1, 'SAE', 'Servicio de Atención de Emergen
 
 
 --
--- TOC entry 3775 (class 0 OID 385583)
+-- TOC entry 3779 (class 0 OID 385583)
 -- Dependencies: 208
 -- Data for Name: tipo_funcion_personal; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3533,7 +3555,7 @@ INSERT INTO _comun.tipo_funcion_personal VALUES (3, 'sistema', true, false, fals
 
 
 --
--- TOC entry 3773 (class 0 OID 385575)
+-- TOC entry 3777 (class 0 OID 385575)
 -- Dependencies: 206
 -- Data for Name: turnos; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3545,7 +3567,7 @@ INSERT INTO _comun.turnos VALUES (4, '08:00:00', '18:30:00', 'cuarto turno');
 
 
 --
--- TOC entry 3772 (class 0 OID 385570)
+-- TOC entry 3776 (class 0 OID 385570)
 -- Dependencies: 205
 -- Data for Name: zonal; Type: TABLE DATA; Schema: _comun; Owner: postgres
 --
@@ -3555,7 +3577,7 @@ INSERT INTO _comun.zonal VALUES (2, '10. Maule Sur');
 
 
 --
--- TOC entry 3820 (class 0 OID 386038)
+-- TOC entry 3824 (class 0 OID 386038)
 -- Dependencies: 253
 -- Data for Name: actividades_obra; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3563,7 +3585,7 @@ INSERT INTO _comun.zonal VALUES (2, '10. Maule Sur');
 
 
 --
--- TOC entry 3822 (class 0 OID 386046)
+-- TOC entry 3826 (class 0 OID 386046)
 -- Dependencies: 255
 -- Data for Name: adicionales_edp; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3571,7 +3593,7 @@ INSERT INTO _comun.zonal VALUES (2, '10. Maule Sur');
 
 
 --
--- TOC entry 3824 (class 0 OID 386054)
+-- TOC entry 3828 (class 0 OID 386054)
 -- Dependencies: 257
 -- Data for Name: bom; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3584,7 +3606,7 @@ INSERT INTO obras.bom VALUES (36, 1, 124, 13661, 10);
 
 
 --
--- TOC entry 3826 (class 0 OID 386059)
+-- TOC entry 3830 (class 0 OID 386059)
 -- Dependencies: 259
 -- Data for Name: coordinadores_contratista; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3593,7 +3615,7 @@ INSERT INTO obras.coordinadores_contratista VALUES (1, 'Juan Soto', 1, '12.234.5
 
 
 --
--- TOC entry 3828 (class 0 OID 386067)
+-- TOC entry 3832 (class 0 OID 386067)
 -- Dependencies: 261
 -- Data for Name: delegaciones; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3606,7 +3628,7 @@ INSERT INTO obras.delegaciones VALUES (5, 'CGE Distribución Constitución');
 
 
 --
--- TOC entry 3830 (class 0 OID 386075)
+-- TOC entry 3834 (class 0 OID 386075)
 -- Dependencies: 263
 -- Data for Name: detalle_edp; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3614,7 +3636,7 @@ INSERT INTO obras.delegaciones VALUES (5, 'CGE Distribución Constitución');
 
 
 --
--- TOC entry 3832 (class 0 OID 386083)
+-- TOC entry 3836 (class 0 OID 386083)
 -- Dependencies: 265
 -- Data for Name: detalle_pedido_material; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3622,15 +3644,16 @@ INSERT INTO obras.delegaciones VALUES (5, 'CGE Distribución Constitución');
 
 
 --
--- TOC entry 3834 (class 0 OID 386091)
+-- TOC entry 3838 (class 0 OID 386091)
 -- Dependencies: 267
 -- Data for Name: detalle_reporte_diario_actividad; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
 
+INSERT INTO obras.detalle_reporte_diario_actividad VALUES (2, 1, 537, 2.3, 3);
 
 
 --
--- TOC entry 3836 (class 0 OID 386099)
+-- TOC entry 3840 (class 0 OID 386099)
 -- Dependencies: 269
 -- Data for Name: detalle_reporte_diario_material; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3638,7 +3661,7 @@ INSERT INTO obras.delegaciones VALUES (5, 'CGE Distribución Constitución');
 
 
 --
--- TOC entry 3838 (class 0 OID 386107)
+-- TOC entry 3842 (class 0 OID 386107)
 -- Dependencies: 271
 -- Data for Name: detalle_reporte_diario_otras_actividades; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3646,7 +3669,7 @@ INSERT INTO obras.delegaciones VALUES (5, 'CGE Distribución Constitución');
 
 
 --
--- TOC entry 3840 (class 0 OID 386115)
+-- TOC entry 3844 (class 0 OID 386115)
 -- Dependencies: 273
 -- Data for Name: empresas_contratista; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3655,7 +3678,7 @@ INSERT INTO obras.empresas_contratista VALUES (1, 'Pelom Ingeniería', '76.000.0
 
 
 --
--- TOC entry 3842 (class 0 OID 386123)
+-- TOC entry 3846 (class 0 OID 386123)
 -- Dependencies: 275
 -- Data for Name: encabezado_edp; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3663,7 +3686,7 @@ INSERT INTO obras.empresas_contratista VALUES (1, 'Pelom Ingeniería', '76.000.0
 
 
 --
--- TOC entry 3844 (class 0 OID 386131)
+-- TOC entry 3848 (class 0 OID 386131)
 -- Dependencies: 277
 -- Data for Name: encabezado_pedido_material; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3671,15 +3694,16 @@ INSERT INTO obras.empresas_contratista VALUES (1, 'Pelom Ingeniería', '76.000.0
 
 
 --
--- TOC entry 3846 (class 0 OID 386139)
+-- TOC entry 3850 (class 0 OID 386139)
 -- Dependencies: 279
 -- Data for Name: encabezado_reporte_diario; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
 
+INSERT INTO obras.encabezado_reporte_diario VALUES (3, 1, '2023-10-25', 'nombre jefe de faena', 'sdi', 'nombre gestor cliente', 1, false, 'observaciones', 'nombre persona', '2023-10-25', 'nombre persona que revisa', '2023-10-25', 'direccion sector', '2023-10-25 07:30:00', '2023-10-25 08:00:00', '2023-10-25 18:30:00', '2023-10-25 19:30:00', 'alimentador', '10305', '10001000600', 'CGE-123343-55');
 
 
 --
--- TOC entry 3884 (class 0 OID 418070)
+-- TOC entry 3888 (class 0 OID 418070)
 -- Dependencies: 317
 -- Data for Name: estado_obra; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3691,11 +3715,11 @@ INSERT INTO obras.estado_obra VALUES (4, 'En Faena');
 INSERT INTO obras.estado_obra VALUES (5, 'Paralizada');
 INSERT INTO obras.estado_obra VALUES (6, 'Estado Pago Enviado');
 INSERT INTO obras.estado_obra VALUES (7, 'Factura Emitida');
-INSERT INTO obras.estado_obra VALUES (8, 'Factura Emitida');
+INSERT INTO obras.estado_obra VALUES (8, 'Factura Pagada');
 
 
 --
--- TOC entry 3888 (class 0 OID 450720)
+-- TOC entry 3892 (class 0 OID 450720)
 -- Dependencies: 321
 -- Data for Name: estado_visita; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3709,7 +3733,7 @@ INSERT INTO obras.estado_visita VALUES (1, 'AGENDADA');
 
 
 --
--- TOC entry 3848 (class 0 OID 386147)
+-- TOC entry 3852 (class 0 OID 386147)
 -- Dependencies: 281
 -- Data for Name: estructura_material; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3717,7 +3741,7 @@ INSERT INTO obras.estado_visita VALUES (1, 'AGENDADA');
 
 
 --
--- TOC entry 3849 (class 0 OID 386153)
+-- TOC entry 3853 (class 0 OID 386153)
 -- Dependencies: 282
 -- Data for Name: estructuras_obra; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3725,7 +3749,7 @@ INSERT INTO obras.estado_visita VALUES (1, 'AGENDADA');
 
 
 --
--- TOC entry 3850 (class 0 OID 386159)
+-- TOC entry 3854 (class 0 OID 386159)
 -- Dependencies: 283
 -- Data for Name: jefes_faena; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -3733,7 +3757,7 @@ INSERT INTO obras.estado_visita VALUES (1, 'AGENDADA');
 
 
 --
--- TOC entry 3818 (class 0 OID 386030)
+-- TOC entry 3822 (class 0 OID 386030)
 -- Dependencies: 251
 -- Data for Name: maestro_actividades; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -5505,7 +5529,7 @@ INSERT INTO obras.maestro_actividades VALUES (1765, ' MT 3ø Pesada p/red compac
 
 
 --
--- TOC entry 3852 (class 0 OID 386167)
+-- TOC entry 3856 (class 0 OID 386167)
 -- Dependencies: 285
 -- Data for Name: maestro_estructura; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -9098,7 +9122,7 @@ INSERT INTO obras.maestro_estructura VALUES (3585, 'MTCU 15N 3P JP3PC', 'MTCU 15
 
 
 --
--- TOC entry 3854 (class 0 OID 386175)
+-- TOC entry 3858 (class 0 OID 386175)
 -- Dependencies: 287
 -- Data for Name: maestro_materiales; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10117,7 +10141,7 @@ INSERT INTO obras.maestro_materiales VALUES (7948, 'TUBO ', 'TUBO FLEXIBLE DE AC
 
 
 --
--- TOC entry 3855 (class 0 OID 386181)
+-- TOC entry 3859 (class 0 OID 386181)
 -- Dependencies: 288
 -- Data for Name: maestro_unidades; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10138,7 +10162,7 @@ INSERT INTO obras.maestro_unidades VALUES (13, 'SACO', 'SA');
 
 
 --
--- TOC entry 3857 (class 0 OID 386189)
+-- TOC entry 3861 (class 0 OID 386189)
 -- Dependencies: 290
 -- Data for Name: obras; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10147,7 +10171,7 @@ INSERT INTO obras.obras VALUES (1, 'CGED-001', '555444', 'Obra de prueba', 1, 1,
 
 
 --
--- TOC entry 3859 (class 0 OID 386197)
+-- TOC entry 3863 (class 0 OID 386197)
 -- Dependencies: 292
 -- Data for Name: otros_cargos_edp; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10155,7 +10179,7 @@ INSERT INTO obras.obras VALUES (1, 'CGED-001', '555444', 'Obra de prueba', 1, 1,
 
 
 --
--- TOC entry 3861 (class 0 OID 386205)
+-- TOC entry 3865 (class 0 OID 386205)
 -- Dependencies: 294
 -- Data for Name: otros_cargos_obra; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10163,7 +10187,7 @@ INSERT INTO obras.obras VALUES (1, 'CGED-001', '555444', 'Obra de prueba', 1, 1,
 
 
 --
--- TOC entry 3862 (class 0 OID 386211)
+-- TOC entry 3866 (class 0 OID 386211)
 -- Dependencies: 295
 -- Data for Name: recibido_bodega_pelom; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10171,7 +10195,7 @@ INSERT INTO obras.obras VALUES (1, 'CGED-001', '555444', 'Obra de prueba', 1, 1,
 
 
 --
--- TOC entry 3886 (class 0 OID 442524)
+-- TOC entry 3890 (class 0 OID 442524)
 -- Dependencies: 319
 -- Data for Name: reservas_obras; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10181,7 +10205,7 @@ INSERT INTO obras.reservas_obras VALUES (124, 1);
 
 
 --
--- TOC entry 3864 (class 0 OID 386219)
+-- TOC entry 3868 (class 0 OID 386219)
 -- Dependencies: 297
 -- Data for Name: segmento; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10200,7 +10224,7 @@ INSERT INTO obras.segmento VALUES (11, 'CAPEX ALTA', '');
 
 
 --
--- TOC entry 3866 (class 0 OID 386227)
+-- TOC entry 3870 (class 0 OID 386227)
 -- Dependencies: 299
 -- Data for Name: solicitantes; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10230,7 +10254,7 @@ INSERT INTO obras.solicitantes VALUES (22, 'Viviana Briso', 1);
 
 
 --
--- TOC entry 3868 (class 0 OID 386235)
+-- TOC entry 3872 (class 0 OID 386235)
 -- Dependencies: 301
 -- Data for Name: tipo_actividad; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10264,7 +10288,7 @@ INSERT INTO obras.tipo_actividad VALUES (26, 'Transformadores');
 
 
 --
--- TOC entry 3870 (class 0 OID 386243)
+-- TOC entry 3874 (class 0 OID 386243)
 -- Dependencies: 303
 -- Data for Name: tipo_obra; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10279,7 +10303,7 @@ INSERT INTO obras.tipo_obra VALUES (7, 'EMERGENCIA');
 
 
 --
--- TOC entry 3890 (class 0 OID 467102)
+-- TOC entry 3894 (class 0 OID 467102)
 -- Dependencies: 323
 -- Data for Name: tipo_operacion; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10290,7 +10314,7 @@ INSERT INTO obras.tipo_operacion VALUES (3, 'TRASLADO');
 
 
 --
--- TOC entry 3872 (class 0 OID 386251)
+-- TOC entry 3876 (class 0 OID 386251)
 -- Dependencies: 305
 -- Data for Name: tipo_trabajo; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10303,7 +10327,7 @@ INSERT INTO obras.tipo_trabajo VALUES (5, 'PODA');
 
 
 --
--- TOC entry 3874 (class 0 OID 386259)
+-- TOC entry 3878 (class 0 OID 386259)
 -- Dependencies: 307
 -- Data for Name: valor_uc; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10311,7 +10335,7 @@ INSERT INTO obras.tipo_trabajo VALUES (5, 'PODA');
 
 
 --
--- TOC entry 3876 (class 0 OID 386267)
+-- TOC entry 3880 (class 0 OID 386267)
 -- Dependencies: 309
 -- Data for Name: visitas_terreno; Type: TABLE DATA; Schema: obras; Owner: postgres
 --
@@ -10320,7 +10344,7 @@ INSERT INTO obras.visitas_terreno VALUES (3, 1, '2023-10-20', 'parcela 29, camin
 
 
 --
--- TOC entry 3882 (class 0 OID 393393)
+-- TOC entry 3886 (class 0 OID 393393)
 -- Dependencies: 315
 -- Data for Name: _oficinas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -10328,7 +10352,7 @@ INSERT INTO obras.visitas_terreno VALUES (3, 1, '2023-10-20', 'parcela 29, camin
 
 
 --
--- TOC entry 3788 (class 0 OID 385683)
+-- TOC entry 3792 (class 0 OID 385683)
 -- Dependencies: 221
 -- Data for Name: cargo_fijo; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10352,7 +10376,7 @@ INSERT INTO sae.cargo_fijo VALUES (16, 1, 4, 4, 1551447, NULL, 1);
 
 
 --
--- TOC entry 3802 (class 0 OID 385861)
+-- TOC entry 3806 (class 0 OID 385861)
 -- Dependencies: 235
 -- Data for Name: movil_eventos; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10401,7 +10425,7 @@ INSERT INTO sae.movil_eventos VALUES (41, 3, '{"_id":"64e7cf12b93641538678bdf5",
 
 
 --
--- TOC entry 3804 (class 0 OID 385872)
+-- TOC entry 3808 (class 0 OID 385872)
 -- Dependencies: 237
 -- Data for Name: movil_jornadas; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10416,7 +10440,7 @@ INSERT INTO sae.movil_jornadas VALUES (7, 4, '{"_id":"64e7cfa0b93641538678bdf8",
 
 
 --
--- TOC entry 3793 (class 0 OID 385750)
+-- TOC entry 3797 (class 0 OID 385750)
 -- Dependencies: 226
 -- Data for Name: precios_base; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10504,7 +10528,7 @@ INSERT INTO sae.precios_base VALUES (80, 1, 4, 5, 4, 0, NULL);
 
 
 --
--- TOC entry 3806 (class 0 OID 385883)
+-- TOC entry 3810 (class 0 OID 385883)
 -- Dependencies: 239
 -- Data for Name: reporte_detalle_estado_resultado; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10542,7 +10566,7 @@ INSERT INTO sae.reporte_detalle_estado_resultado VALUES (30, 11, 5);
 
 
 --
--- TOC entry 3808 (class 0 OID 385891)
+-- TOC entry 3812 (class 0 OID 385891)
 -- Dependencies: 241
 -- Data for Name: reporte_errores; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10556,7 +10580,7 @@ INSERT INTO sae.reporte_errores VALUES (6, 'jor', 7, 'SequelizeUniqueConstraintE
 
 
 --
--- TOC entry 3810 (class 0 OID 385902)
+-- TOC entry 3814 (class 0 OID 385902)
 -- Dependencies: 243
 -- Data for Name: reporte_estado_resultado; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10573,7 +10597,7 @@ INSERT INTO sae.reporte_estado_resultado VALUES (11, 7, 1, 1, 9, '2023-09-01 00:
 
 
 --
--- TOC entry 3812 (class 0 OID 385931)
+-- TOC entry 3816 (class 0 OID 385931)
 -- Dependencies: 245
 -- Data for Name: reporte_estados; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10586,7 +10610,7 @@ INSERT INTO sae.reporte_estados VALUES (5, 'test0');
 
 
 --
--- TOC entry 3814 (class 0 OID 385939)
+-- TOC entry 3818 (class 0 OID 385939)
 -- Dependencies: 247
 -- Data for Name: reporte_eventos; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10607,7 +10631,7 @@ INSERT INTO sae.reporte_eventos VALUES (100, '10020', 'LINMT', '12345234-7', '12
 
 
 --
--- TOC entry 3816 (class 0 OID 385985)
+-- TOC entry 3820 (class 0 OID 385985)
 -- Dependencies: 249
 -- Data for Name: reporte_jornada; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10661,7 +10685,7 @@ INSERT INTO sae.reporte_jornada VALUES (46, '12345234-7', '12345678-9', 2, 'AABB
 
 
 --
--- TOC entry 3881 (class 0 OID 393384)
+-- TOC entry 3885 (class 0 OID 393384)
 -- Dependencies: 314
 -- Data for Name: resultado_estado_resultado; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10669,7 +10693,7 @@ INSERT INTO sae.reporte_jornada VALUES (46, '12345234-7', '12345678-9', 2, 'AABB
 
 
 --
--- TOC entry 3879 (class 0 OID 393374)
+-- TOC entry 3883 (class 0 OID 393374)
 -- Dependencies: 312
 -- Data for Name: resultado_estados; Type: TABLE DATA; Schema: sae; Owner: postgres
 --
@@ -10678,7 +10702,7 @@ INSERT INTO sae.resultado_estados VALUES (1, 'test');
 
 
 --
--- TOC entry 3885 (class 0 OID 426155)
+-- TOC entry 3889 (class 0 OID 426155)
 -- Dependencies: 318
 -- Data for Name: rendimiento; Type: TABLE DATA; Schema: temp; Owner: postgres
 --
@@ -11489,7 +11513,7 @@ INSERT INTO temp.rendimiento VALUES (63241, 'CARBONCILLO PUESTAS TIERRA SACO 25K
 
 
 --
--- TOC entry 3948 (class 0 OID 0)
+-- TOC entry 3954 (class 0 OID 0)
 -- Dependencies: 229
 -- Name: personas_id_seq; Type: SEQUENCE SET; Schema: _auth; Owner: postgres
 --
@@ -11498,7 +11522,7 @@ SELECT pg_catalog.setval('_auth.personas_id_seq', 20, true);
 
 
 --
--- TOC entry 3949 (class 0 OID 0)
+-- TOC entry 3955 (class 0 OID 0)
 -- Dependencies: 233
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: _auth; Owner: postgres
 --
@@ -11507,7 +11531,7 @@ SELECT pg_catalog.setval('_auth.users_id_seq', 23, true);
 
 
 --
--- TOC entry 3950 (class 0 OID 0)
+-- TOC entry 3956 (class 0 OID 0)
 -- Dependencies: 231
 -- Name: camionetas_id_seq; Type: SEQUENCE SET; Schema: _comun; Owner: postgres
 --
@@ -11516,7 +11540,7 @@ SELECT pg_catalog.setval('_comun.camionetas_id_seq', 3, true);
 
 
 --
--- TOC entry 3951 (class 0 OID 0)
+-- TOC entry 3957 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: cliente_id_seq; Type: SEQUENCE SET; Schema: _comun; Owner: postgres
 --
@@ -11525,7 +11549,7 @@ SELECT pg_catalog.setval('_comun.cliente_id_seq', 1, false);
 
 
 --
--- TOC entry 3952 (class 0 OID 0)
+-- TOC entry 3958 (class 0 OID 0)
 -- Dependencies: 216
 -- Name: eventos_tipo_id_seq; Type: SEQUENCE SET; Schema: _comun; Owner: postgres
 --
@@ -11534,7 +11558,7 @@ SELECT pg_catalog.setval('_comun.eventos_tipo_id_seq', 4, true);
 
 
 --
--- TOC entry 3953 (class 0 OID 0)
+-- TOC entry 3959 (class 0 OID 0)
 -- Dependencies: 225
 -- Name: servicio_comuna_id_seq; Type: SEQUENCE SET; Schema: _comun; Owner: postgres
 --
@@ -11543,7 +11567,7 @@ SELECT pg_catalog.setval('_comun.servicio_comuna_id_seq', 20, true);
 
 
 --
--- TOC entry 3954 (class 0 OID 0)
+-- TOC entry 3960 (class 0 OID 0)
 -- Dependencies: 210
 -- Name: servicios_id_seq; Type: SEQUENCE SET; Schema: _comun; Owner: postgres
 --
@@ -11552,7 +11576,7 @@ SELECT pg_catalog.setval('_comun.servicios_id_seq', 1, false);
 
 
 --
--- TOC entry 3955 (class 0 OID 0)
+-- TOC entry 3961 (class 0 OID 0)
 -- Dependencies: 207
 -- Name: turnos_id_seq; Type: SEQUENCE SET; Schema: _comun; Owner: postgres
 --
@@ -11561,7 +11585,7 @@ SELECT pg_catalog.setval('_comun.turnos_id_seq', 4, true);
 
 
 --
--- TOC entry 3956 (class 0 OID 0)
+-- TOC entry 3962 (class 0 OID 0)
 -- Dependencies: 252
 -- Name: actividades_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11570,7 +11594,7 @@ SELECT pg_catalog.setval('obras.actividades_id_seq', 1, false);
 
 
 --
--- TOC entry 3957 (class 0 OID 0)
+-- TOC entry 3963 (class 0 OID 0)
 -- Dependencies: 254
 -- Name: actividades_obra_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11579,7 +11603,7 @@ SELECT pg_catalog.setval('obras.actividades_obra_id_seq', 1, false);
 
 
 --
--- TOC entry 3958 (class 0 OID 0)
+-- TOC entry 3964 (class 0 OID 0)
 -- Dependencies: 256
 -- Name: adicionales_edp_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11588,7 +11612,7 @@ SELECT pg_catalog.setval('obras.adicionales_edp_id_seq', 1, false);
 
 
 --
--- TOC entry 3959 (class 0 OID 0)
+-- TOC entry 3965 (class 0 OID 0)
 -- Dependencies: 258
 -- Name: bom_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11597,7 +11621,7 @@ SELECT pg_catalog.setval('obras.bom_id_seq', 36, true);
 
 
 --
--- TOC entry 3960 (class 0 OID 0)
+-- TOC entry 3966 (class 0 OID 0)
 -- Dependencies: 260
 -- Name: coordinadores_contratista_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11606,7 +11630,7 @@ SELECT pg_catalog.setval('obras.coordinadores_contratista_id_seq', 1, true);
 
 
 --
--- TOC entry 3961 (class 0 OID 0)
+-- TOC entry 3967 (class 0 OID 0)
 -- Dependencies: 262
 -- Name: delegaciones_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11615,7 +11639,7 @@ SELECT pg_catalog.setval('obras.delegaciones_id_seq', 5, true);
 
 
 --
--- TOC entry 3962 (class 0 OID 0)
+-- TOC entry 3968 (class 0 OID 0)
 -- Dependencies: 264
 -- Name: detalle_edp_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11624,7 +11648,7 @@ SELECT pg_catalog.setval('obras.detalle_edp_id_seq', 1, false);
 
 
 --
--- TOC entry 3963 (class 0 OID 0)
+-- TOC entry 3969 (class 0 OID 0)
 -- Dependencies: 266
 -- Name: detalle_pedido_material_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11633,16 +11657,16 @@ SELECT pg_catalog.setval('obras.detalle_pedido_material_id_seq', 1, false);
 
 
 --
--- TOC entry 3964 (class 0 OID 0)
+-- TOC entry 3970 (class 0 OID 0)
 -- Dependencies: 268
 -- Name: detalle_reporte_diario_actividad_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
 
-SELECT pg_catalog.setval('obras.detalle_reporte_diario_actividad_id_seq', 1, false);
+SELECT pg_catalog.setval('obras.detalle_reporte_diario_actividad_id_seq', 2, true);
 
 
 --
--- TOC entry 3965 (class 0 OID 0)
+-- TOC entry 3971 (class 0 OID 0)
 -- Dependencies: 270
 -- Name: detalle_reporte_diario_material_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11651,7 +11675,7 @@ SELECT pg_catalog.setval('obras.detalle_reporte_diario_material_id_seq', 1, fals
 
 
 --
--- TOC entry 3966 (class 0 OID 0)
+-- TOC entry 3972 (class 0 OID 0)
 -- Dependencies: 272
 -- Name: detalle_reporte_diario_otras_actividades_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11660,7 +11684,7 @@ SELECT pg_catalog.setval('obras.detalle_reporte_diario_otras_actividades_id_seq'
 
 
 --
--- TOC entry 3967 (class 0 OID 0)
+-- TOC entry 3973 (class 0 OID 0)
 -- Dependencies: 274
 -- Name: empresas_contratista_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11669,7 +11693,7 @@ SELECT pg_catalog.setval('obras.empresas_contratista_id_seq', 1, true);
 
 
 --
--- TOC entry 3968 (class 0 OID 0)
+-- TOC entry 3974 (class 0 OID 0)
 -- Dependencies: 276
 -- Name: encabezado_edp_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11678,7 +11702,7 @@ SELECT pg_catalog.setval('obras.encabezado_edp_id_seq', 1, false);
 
 
 --
--- TOC entry 3969 (class 0 OID 0)
+-- TOC entry 3975 (class 0 OID 0)
 -- Dependencies: 278
 -- Name: encabezado_pedido_material_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11687,16 +11711,16 @@ SELECT pg_catalog.setval('obras.encabezado_pedido_material_id_seq', 1, false);
 
 
 --
--- TOC entry 3970 (class 0 OID 0)
+-- TOC entry 3976 (class 0 OID 0)
 -- Dependencies: 280
 -- Name: encabezado_reporte_diario_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
 
-SELECT pg_catalog.setval('obras.encabezado_reporte_diario_id_seq', 1, true);
+SELECT pg_catalog.setval('obras.encabezado_reporte_diario_id_seq', 3, true);
 
 
 --
--- TOC entry 3971 (class 0 OID 0)
+-- TOC entry 3977 (class 0 OID 0)
 -- Dependencies: 316
 -- Name: estado_obra_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11705,7 +11729,7 @@ SELECT pg_catalog.setval('obras.estado_obra_id_seq', 1, true);
 
 
 --
--- TOC entry 3972 (class 0 OID 0)
+-- TOC entry 3978 (class 0 OID 0)
 -- Dependencies: 320
 -- Name: estado_visita_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11714,7 +11738,7 @@ SELECT pg_catalog.setval('obras.estado_visita_id_seq', 1, false);
 
 
 --
--- TOC entry 3973 (class 0 OID 0)
+-- TOC entry 3979 (class 0 OID 0)
 -- Dependencies: 284
 -- Name: jefes_faena_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11723,7 +11747,7 @@ SELECT pg_catalog.setval('obras.jefes_faena_id_seq', 1, false);
 
 
 --
--- TOC entry 3974 (class 0 OID 0)
+-- TOC entry 3980 (class 0 OID 0)
 -- Dependencies: 286
 -- Name: maestro_estructura_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11732,7 +11756,7 @@ SELECT pg_catalog.setval('obras.maestro_estructura_id_seq', 3585, true);
 
 
 --
--- TOC entry 3975 (class 0 OID 0)
+-- TOC entry 3981 (class 0 OID 0)
 -- Dependencies: 289
 -- Name: maestro_unidades_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11741,7 +11765,7 @@ SELECT pg_catalog.setval('obras.maestro_unidades_id_seq', 13, true);
 
 
 --
--- TOC entry 3976 (class 0 OID 0)
+-- TOC entry 3982 (class 0 OID 0)
 -- Dependencies: 291
 -- Name: obras_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11750,7 +11774,7 @@ SELECT pg_catalog.setval('obras.obras_id_seq', 1, true);
 
 
 --
--- TOC entry 3977 (class 0 OID 0)
+-- TOC entry 3983 (class 0 OID 0)
 -- Dependencies: 293
 -- Name: otros_cargos_edp_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11759,7 +11783,7 @@ SELECT pg_catalog.setval('obras.otros_cargos_edp_id_seq', 1, false);
 
 
 --
--- TOC entry 3978 (class 0 OID 0)
+-- TOC entry 3984 (class 0 OID 0)
 -- Dependencies: 296
 -- Name: recibido_bodega_pelom_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11768,7 +11792,7 @@ SELECT pg_catalog.setval('obras.recibido_bodega_pelom_id_seq', 1, false);
 
 
 --
--- TOC entry 3979 (class 0 OID 0)
+-- TOC entry 3985 (class 0 OID 0)
 -- Dependencies: 298
 -- Name: segmento_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11777,7 +11801,7 @@ SELECT pg_catalog.setval('obras.segmento_id_seq', 11, true);
 
 
 --
--- TOC entry 3980 (class 0 OID 0)
+-- TOC entry 3986 (class 0 OID 0)
 -- Dependencies: 300
 -- Name: solicitantes_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11786,7 +11810,7 @@ SELECT pg_catalog.setval('obras.solicitantes_id_seq', 22, true);
 
 
 --
--- TOC entry 3981 (class 0 OID 0)
+-- TOC entry 3987 (class 0 OID 0)
 -- Dependencies: 302
 -- Name: tipo_actividad_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11795,7 +11819,7 @@ SELECT pg_catalog.setval('obras.tipo_actividad_id_seq', 26, true);
 
 
 --
--- TOC entry 3982 (class 0 OID 0)
+-- TOC entry 3988 (class 0 OID 0)
 -- Dependencies: 304
 -- Name: tipo_obra_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11804,7 +11828,7 @@ SELECT pg_catalog.setval('obras.tipo_obra_id_seq', 7, true);
 
 
 --
--- TOC entry 3983 (class 0 OID 0)
+-- TOC entry 3989 (class 0 OID 0)
 -- Dependencies: 322
 -- Name: tipo_operacion_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11813,7 +11837,7 @@ SELECT pg_catalog.setval('obras.tipo_operacion_id_seq', 1, false);
 
 
 --
--- TOC entry 3984 (class 0 OID 0)
+-- TOC entry 3990 (class 0 OID 0)
 -- Dependencies: 306
 -- Name: tipo_trabajo_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11822,7 +11846,7 @@ SELECT pg_catalog.setval('obras.tipo_trabajo_id_seq', 5, true);
 
 
 --
--- TOC entry 3985 (class 0 OID 0)
+-- TOC entry 3991 (class 0 OID 0)
 -- Dependencies: 308
 -- Name: valor_uc_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11831,7 +11855,7 @@ SELECT pg_catalog.setval('obras.valor_uc_id_seq', 1, false);
 
 
 --
--- TOC entry 3986 (class 0 OID 0)
+-- TOC entry 3992 (class 0 OID 0)
 -- Dependencies: 310
 -- Name: visitas_terreno_id_seq; Type: SEQUENCE SET; Schema: obras; Owner: postgres
 --
@@ -11840,7 +11864,7 @@ SELECT pg_catalog.setval('obras.visitas_terreno_id_seq', 3, true);
 
 
 --
--- TOC entry 3987 (class 0 OID 0)
+-- TOC entry 3993 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: cargo_fijo_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11849,7 +11873,7 @@ SELECT pg_catalog.setval('sae.cargo_fijo_id_seq', 16, true);
 
 
 --
--- TOC entry 3988 (class 0 OID 0)
+-- TOC entry 3994 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: movil_eventos_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11858,7 +11882,7 @@ SELECT pg_catalog.setval('sae.movil_eventos_id_seq', 41, true);
 
 
 --
--- TOC entry 3989 (class 0 OID 0)
+-- TOC entry 3995 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: movil_jornadas_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11867,7 +11891,7 @@ SELECT pg_catalog.setval('sae.movil_jornadas_id_seq', 7, true);
 
 
 --
--- TOC entry 3990 (class 0 OID 0)
+-- TOC entry 3996 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: precios_base_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11876,7 +11900,7 @@ SELECT pg_catalog.setval('sae.precios_base_id_seq', 80, true);
 
 
 --
--- TOC entry 3991 (class 0 OID 0)
+-- TOC entry 3997 (class 0 OID 0)
 -- Dependencies: 240
 -- Name: reporte_detalle_estado_resultado_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11885,7 +11909,7 @@ SELECT pg_catalog.setval('sae.reporte_detalle_estado_resultado_id_seq', 30, true
 
 
 --
--- TOC entry 3992 (class 0 OID 0)
+-- TOC entry 3998 (class 0 OID 0)
 -- Dependencies: 242
 -- Name: reporte_errores_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11894,7 +11918,7 @@ SELECT pg_catalog.setval('sae.reporte_errores_id_seq', 6, true);
 
 
 --
--- TOC entry 3993 (class 0 OID 0)
+-- TOC entry 3999 (class 0 OID 0)
 -- Dependencies: 244
 -- Name: reporte_estado_resultado_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11903,7 +11927,7 @@ SELECT pg_catalog.setval('sae.reporte_estado_resultado_id_seq', 11, true);
 
 
 --
--- TOC entry 3994 (class 0 OID 0)
+-- TOC entry 4000 (class 0 OID 0)
 -- Dependencies: 246
 -- Name: reporte_estados_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11912,7 +11936,7 @@ SELECT pg_catalog.setval('sae.reporte_estados_id_seq', 5, true);
 
 
 --
--- TOC entry 3995 (class 0 OID 0)
+-- TOC entry 4001 (class 0 OID 0)
 -- Dependencies: 248
 -- Name: reporte_eventos_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11921,7 +11945,7 @@ SELECT pg_catalog.setval('sae.reporte_eventos_id_seq', 101, true);
 
 
 --
--- TOC entry 3996 (class 0 OID 0)
+-- TOC entry 4002 (class 0 OID 0)
 -- Dependencies: 250
 -- Name: reporte_jornada_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11930,7 +11954,7 @@ SELECT pg_catalog.setval('sae.reporte_jornada_id_seq', 7, true);
 
 
 --
--- TOC entry 3997 (class 0 OID 0)
+-- TOC entry 4003 (class 0 OID 0)
 -- Dependencies: 313
 -- Name: resultado_estado_resultado_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -11939,7 +11963,7 @@ SELECT pg_catalog.setval('sae.resultado_estado_resultado_id_seq', 1, false);
 
 
 --
--- TOC entry 3998 (class 0 OID 0)
+-- TOC entry 4004 (class 0 OID 0)
 -- Dependencies: 311
 -- Name: resultado_estados_id_seq; Type: SEQUENCE SET; Schema: sae; Owner: postgres
 --
@@ -12263,7 +12287,7 @@ ALTER TABLE ONLY obras.detalle_reporte_diario_actividad
 
 
 --
--- TOC entry 3487 (class 2606 OID 386322)
+-- TOC entry 3488 (class 2606 OID 386322)
 -- Name: detalle_reporte_diario_material detalle_reporte_diario_material_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12272,7 +12296,7 @@ ALTER TABLE ONLY obras.detalle_reporte_diario_material
 
 
 --
--- TOC entry 3489 (class 2606 OID 386324)
+-- TOC entry 3490 (class 2606 OID 386324)
 -- Name: detalle_reporte_diario_otras_actividades detalle_reporte_diario_otras_actividades_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12281,7 +12305,7 @@ ALTER TABLE ONLY obras.detalle_reporte_diario_otras_actividades
 
 
 --
--- TOC entry 3491 (class 2606 OID 386326)
+-- TOC entry 3492 (class 2606 OID 386326)
 -- Name: empresas_contratista empresas_contratista_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12290,7 +12314,7 @@ ALTER TABLE ONLY obras.empresas_contratista
 
 
 --
--- TOC entry 3493 (class 2606 OID 386328)
+-- TOC entry 3494 (class 2606 OID 386328)
 -- Name: encabezado_edp encabezado_edp_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12299,7 +12323,7 @@ ALTER TABLE ONLY obras.encabezado_edp
 
 
 --
--- TOC entry 3495 (class 2606 OID 386330)
+-- TOC entry 3496 (class 2606 OID 386330)
 -- Name: encabezado_pedido_material encabezado_pedido_material_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12308,7 +12332,7 @@ ALTER TABLE ONLY obras.encabezado_pedido_material
 
 
 --
--- TOC entry 3497 (class 2606 OID 386332)
+-- TOC entry 3498 (class 2606 OID 386332)
 -- Name: encabezado_reporte_diario encabezado_reporte_diario_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12317,7 +12341,7 @@ ALTER TABLE ONLY obras.encabezado_reporte_diario
 
 
 --
--- TOC entry 3562 (class 2606 OID 418078)
+-- TOC entry 3564 (class 2606 OID 418078)
 -- Name: estado_obra estado_obra_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12326,7 +12350,7 @@ ALTER TABLE ONLY obras.estado_obra
 
 
 --
--- TOC entry 3568 (class 2606 OID 450728)
+-- TOC entry 3570 (class 2606 OID 450728)
 -- Name: estado_visita estado_visita_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12335,7 +12359,7 @@ ALTER TABLE ONLY obras.estado_visita
 
 
 --
--- TOC entry 3502 (class 2606 OID 386334)
+-- TOC entry 3504 (class 2606 OID 386334)
 -- Name: estructura_material estructura_material_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12344,7 +12368,7 @@ ALTER TABLE ONLY obras.estructura_material
 
 
 --
--- TOC entry 3505 (class 2606 OID 386336)
+-- TOC entry 3507 (class 2606 OID 386336)
 -- Name: estructuras_obra estructuras_obra_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12353,7 +12377,7 @@ ALTER TABLE ONLY obras.estructuras_obra
 
 
 --
--- TOC entry 3509 (class 2606 OID 386338)
+-- TOC entry 3511 (class 2606 OID 386338)
 -- Name: jefes_faena jefes_faena_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12362,7 +12386,7 @@ ALTER TABLE ONLY obras.jefes_faena
 
 
 --
--- TOC entry 3511 (class 2606 OID 386340)
+-- TOC entry 3513 (class 2606 OID 386340)
 -- Name: maestro_estructura maestro_estructura_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12371,7 +12395,7 @@ ALTER TABLE ONLY obras.maestro_estructura
 
 
 --
--- TOC entry 3514 (class 2606 OID 386342)
+-- TOC entry 3516 (class 2606 OID 386342)
 -- Name: maestro_materiales maestro_materiales_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12380,7 +12404,7 @@ ALTER TABLE ONLY obras.maestro_materiales
 
 
 --
--- TOC entry 3516 (class 2606 OID 386344)
+-- TOC entry 3518 (class 2606 OID 386344)
 -- Name: maestro_unidades maestro_unidades_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12389,7 +12413,7 @@ ALTER TABLE ONLY obras.maestro_unidades
 
 
 --
--- TOC entry 3527 (class 2606 OID 386346)
+-- TOC entry 3529 (class 2606 OID 386346)
 -- Name: obras obras_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12398,7 +12422,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3530 (class 2606 OID 386348)
+-- TOC entry 3532 (class 2606 OID 386348)
 -- Name: otros_cargos_edp otros_cargos_edp_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12407,7 +12431,7 @@ ALTER TABLE ONLY obras.otros_cargos_edp
 
 
 --
--- TOC entry 3532 (class 2606 OID 386350)
+-- TOC entry 3534 (class 2606 OID 386350)
 -- Name: otros_cargos_obra otros_cargos_obra_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12416,7 +12440,7 @@ ALTER TABLE ONLY obras.otros_cargos_obra
 
 
 --
--- TOC entry 3535 (class 2606 OID 386352)
+-- TOC entry 3537 (class 2606 OID 386352)
 -- Name: recibido_bodega_pelom recibido_bodega_pelom_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12425,7 +12449,7 @@ ALTER TABLE ONLY obras.recibido_bodega_pelom
 
 
 --
--- TOC entry 3564 (class 2606 OID 442528)
+-- TOC entry 3566 (class 2606 OID 442528)
 -- Name: reservas_obras reservas_obras_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12434,7 +12458,7 @@ ALTER TABLE ONLY obras.reservas_obras
 
 
 --
--- TOC entry 3537 (class 2606 OID 386354)
+-- TOC entry 3539 (class 2606 OID 386354)
 -- Name: segmento segmento_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12443,7 +12467,7 @@ ALTER TABLE ONLY obras.segmento
 
 
 --
--- TOC entry 3539 (class 2606 OID 386356)
+-- TOC entry 3541 (class 2606 OID 386356)
 -- Name: solicitantes solicitantes_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12452,7 +12476,7 @@ ALTER TABLE ONLY obras.solicitantes
 
 
 --
--- TOC entry 3541 (class 2606 OID 386358)
+-- TOC entry 3543 (class 2606 OID 386358)
 -- Name: tipo_actividad tipo_actividad_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12461,7 +12485,7 @@ ALTER TABLE ONLY obras.tipo_actividad
 
 
 --
--- TOC entry 3543 (class 2606 OID 386360)
+-- TOC entry 3545 (class 2606 OID 386360)
 -- Name: tipo_obra tipo_obra_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12470,7 +12494,7 @@ ALTER TABLE ONLY obras.tipo_obra
 
 
 --
--- TOC entry 3570 (class 2606 OID 467110)
+-- TOC entry 3572 (class 2606 OID 467110)
 -- Name: tipo_operacion tipo_operacion_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12479,7 +12503,7 @@ ALTER TABLE ONLY obras.tipo_operacion
 
 
 --
--- TOC entry 3545 (class 2606 OID 386362)
+-- TOC entry 3547 (class 2606 OID 386362)
 -- Name: tipo_trabajo tipo_trabajo_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12488,7 +12512,7 @@ ALTER TABLE ONLY obras.tipo_trabajo
 
 
 --
--- TOC entry 3550 (class 2606 OID 450736)
+-- TOC entry 3552 (class 2606 OID 450736)
 -- Name: visitas_terreno unico_id_obra_fecha; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12497,7 +12521,7 @@ ALTER TABLE ONLY obras.visitas_terreno
 
 
 --
--- TOC entry 3500 (class 2606 OID 458915)
+-- TOC entry 3502 (class 2606 OID 458915)
 -- Name: encabezado_reporte_diario unico_obra_fecha; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12506,7 +12530,7 @@ ALTER TABLE ONLY obras.encabezado_reporte_diario
 
 
 --
--- TOC entry 3566 (class 2606 OID 442530)
+-- TOC entry 3568 (class 2606 OID 442530)
 -- Name: reservas_obras unico_reserva_obra; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12524,7 +12548,7 @@ ALTER TABLE ONLY obras.bom
 
 
 --
--- TOC entry 3547 (class 2606 OID 386364)
+-- TOC entry 3549 (class 2606 OID 386364)
 -- Name: valor_uc valor_uc_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12533,7 +12557,7 @@ ALTER TABLE ONLY obras.valor_uc
 
 
 --
--- TOC entry 3552 (class 2606 OID 386366)
+-- TOC entry 3554 (class 2606 OID 386366)
 -- Name: visitas_terreno visitas_terreno_pkey; Type: CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -12542,7 +12566,7 @@ ALTER TABLE ONLY obras.visitas_terreno
 
 
 --
--- TOC entry 3560 (class 2606 OID 393397)
+-- TOC entry 3562 (class 2606 OID 393397)
 -- Name: _oficinas _oficinas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -12668,7 +12692,7 @@ ALTER TABLE ONLY sae.reporte_jornada
 
 
 --
--- TOC entry 3558 (class 2606 OID 393392)
+-- TOC entry 3560 (class 2606 OID 393392)
 -- Name: resultado_estado_resultado resultado_estado_resultado_pkey; Type: CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -12677,7 +12701,7 @@ ALTER TABLE ONLY sae.resultado_estado_resultado
 
 
 --
--- TOC entry 3554 (class 2606 OID 393381)
+-- TOC entry 3556 (class 2606 OID 393381)
 -- Name: resultado_estados resultado_estados_nombre_key; Type: CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -12686,7 +12710,7 @@ ALTER TABLE ONLY sae.resultado_estados
 
 
 --
--- TOC entry 3556 (class 2606 OID 393379)
+-- TOC entry 3558 (class 2606 OID 393379)
 -- Name: resultado_estados resultado_estados_pkey; Type: CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -12791,7 +12815,15 @@ CREATE INDEX fki_fk_bom_id_bom ON obras.detalle_pedido_material USING btree (id_
 
 
 --
--- TOC entry 3517 (class 1259 OID 418060)
+-- TOC entry 3499 (class 1259 OID 475322)
+-- Name: fki_fk_comuna; Type: INDEX; Schema: obras; Owner: postgres
+--
+
+CREATE INDEX fki_fk_comuna ON obras.encabezado_reporte_diario USING btree (comuna);
+
+
+--
+-- TOC entry 3519 (class 1259 OID 418060)
 -- Name: fki_fk_coordinador_contratista; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12807,7 +12839,7 @@ CREATE INDEX fki_fk_coordinador_empresa ON obras.coordinadores_contratista USING
 
 
 --
--- TOC entry 3518 (class 1259 OID 418054)
+-- TOC entry 3520 (class 1259 OID 418054)
 -- Name: fki_fk_empresa_contratista; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12815,7 +12847,7 @@ CREATE INDEX fki_fk_empresa_contratista ON obras.obras USING btree (empresa_cont
 
 
 --
--- TOC entry 3528 (class 1259 OID 386369)
+-- TOC entry 3530 (class 1259 OID 386369)
 -- Name: fki_fk_encabezado_edp_id_encabezado; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12839,7 +12871,7 @@ CREATE INDEX fki_fk_id_actividad_maestro_actividad ON obras.detalle_reporte_diar
 
 
 --
--- TOC entry 3498 (class 1259 OID 458913)
+-- TOC entry 3500 (class 1259 OID 458913)
 -- Name: fki_fk_id_area_tipo_trabajo; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12887,7 +12919,7 @@ CREATE INDEX fki_fk_maestro_actividades_actividad ON obras.actividades_obra USIN
 
 
 --
--- TOC entry 3506 (class 1259 OID 386375)
+-- TOC entry 3508 (class 1259 OID 386375)
 -- Name: fki_fk_maestro_estructura_id_estructura; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12895,7 +12927,7 @@ CREATE INDEX fki_fk_maestro_estructura_id_estructura ON obras.estructuras_obra U
 
 
 --
--- TOC entry 3512 (class 1259 OID 386376)
+-- TOC entry 3514 (class 1259 OID 386376)
 -- Name: fki_fk_maestro_mat_unidad; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12903,7 +12935,7 @@ CREATE INDEX fki_fk_maestro_mat_unidad ON obras.maestro_materiales USING btree (
 
 
 --
--- TOC entry 3533 (class 1259 OID 386377)
+-- TOC entry 3535 (class 1259 OID 386377)
 -- Name: fki_fk_maestro_material_cod_sap; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12911,7 +12943,7 @@ CREATE INDEX fki_fk_maestro_material_cod_sap ON obras.recibido_bodega_pelom USIN
 
 
 --
--- TOC entry 3503 (class 1259 OID 386378)
+-- TOC entry 3505 (class 1259 OID 386378)
 -- Name: fki_fk_maestro_materiales_cod_sap; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12919,7 +12951,7 @@ CREATE INDEX fki_fk_maestro_materiales_cod_sap ON obras.estructura_material USIN
 
 
 --
--- TOC entry 3519 (class 1259 OID 418084)
+-- TOC entry 3521 (class 1259 OID 418084)
 -- Name: fki_fk_obra_estado_estados_obra; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12927,7 +12959,7 @@ CREATE INDEX fki_fk_obra_estado_estados_obra ON obras.obras USING btree (estado)
 
 
 --
--- TOC entry 3520 (class 1259 OID 418066)
+-- TOC entry 3522 (class 1259 OID 418066)
 -- Name: fki_fk_obras_comuna; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12935,7 +12967,7 @@ CREATE INDEX fki_fk_obras_comuna ON obras.obras USING btree (comuna);
 
 
 --
--- TOC entry 3521 (class 1259 OID 418042)
+-- TOC entry 3523 (class 1259 OID 418042)
 -- Name: fki_fk_obras_delegacion_id_delegacion; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12951,7 +12983,7 @@ CREATE INDEX fki_fk_obras_id ON obras.actividades_obra USING btree (id_obra);
 
 
 --
--- TOC entry 3507 (class 1259 OID 386380)
+-- TOC entry 3509 (class 1259 OID 386380)
 -- Name: fki_fk_obras_id_obra; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12959,7 +12991,7 @@ CREATE INDEX fki_fk_obras_id_obra ON obras.estructuras_obra USING btree (id_obra
 
 
 --
--- TOC entry 3522 (class 1259 OID 418091)
+-- TOC entry 3524 (class 1259 OID 418091)
 -- Name: fki_fk_obras_segmento; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12967,7 +12999,7 @@ CREATE INDEX fki_fk_obras_segmento ON obras.obras USING btree (segmento);
 
 
 --
--- TOC entry 3523 (class 1259 OID 418030)
+-- TOC entry 3525 (class 1259 OID 418030)
 -- Name: fki_fk_obras_tipo_obra; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12975,7 +13007,7 @@ CREATE INDEX fki_fk_obras_tipo_obra ON obras.obras USING btree (tipo_obra);
 
 
 --
--- TOC entry 3524 (class 1259 OID 418048)
+-- TOC entry 3526 (class 1259 OID 418048)
 -- Name: fki_fk_obras_tipo_trabajo; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12983,7 +13015,7 @@ CREATE INDEX fki_fk_obras_tipo_trabajo ON obras.obras USING btree (tipo_trabajo)
 
 
 --
--- TOC entry 3525 (class 1259 OID 418036)
+-- TOC entry 3527 (class 1259 OID 418036)
 -- Name: fki_fk_obras_zona_zonales; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -12999,7 +13031,15 @@ CREATE INDEX fki_fk_reserva_id_obra ON obras.bom USING btree (reserva, id_obra);
 
 
 --
--- TOC entry 3548 (class 1259 OID 450734)
+-- TOC entry 3486 (class 1259 OID 475328)
+-- Name: fki_fk_tipo_operacion; Type: INDEX; Schema: obras; Owner: postgres
+--
+
+CREATE INDEX fki_fk_tipo_operacion ON obras.detalle_reporte_diario_actividad USING btree (tipo_operacion);
+
+
+--
+-- TOC entry 3550 (class 1259 OID 450734)
 -- Name: fki_k; Type: INDEX; Schema: obras; Owner: postgres
 --
 
@@ -13079,7 +13119,7 @@ CREATE INDEX idx_id_movil_j ON sae.reporte_jornada USING btree (id_movil);
 
 
 --
--- TOC entry 3641 (class 2620 OID 450717)
+-- TOC entry 3645 (class 2620 OID 450717)
 -- Name: bom trg_ajusta_reservas; Type: TRIGGER; Schema: obras; Owner: postgres
 --
 
@@ -13087,7 +13127,7 @@ CREATE TRIGGER trg_ajusta_reservas AFTER DELETE OR UPDATE OR TRUNCATE ON obras.b
 
 
 --
--- TOC entry 3585 (class 2606 OID 385794)
+-- TOC entry 3587 (class 2606 OID 385794)
 -- Name: personas base_fk; Type: FK CONSTRAINT; Schema: _auth; Owner: postgres
 --
 
@@ -13096,7 +13136,7 @@ ALTER TABLE ONLY _auth.personas
 
 
 --
--- TOC entry 3586 (class 2606 OID 385799)
+-- TOC entry 3588 (class 2606 OID 385799)
 -- Name: personas cliente_fk; Type: FK CONSTRAINT; Schema: _auth; Owner: postgres
 --
 
@@ -13105,7 +13145,7 @@ ALTER TABLE ONLY _auth.personas
 
 
 --
--- TOC entry 3587 (class 2606 OID 385804)
+-- TOC entry 3589 (class 2606 OID 385804)
 -- Name: personas id_funcion_fk; Type: FK CONSTRAINT; Schema: _auth; Owner: postgres
 --
 
@@ -13114,7 +13154,7 @@ ALTER TABLE ONLY _auth.personas
 
 
 --
--- TOC entry 3590 (class 2606 OID 385851)
+-- TOC entry 3592 (class 2606 OID 385851)
 -- Name: user_roles user_roles_roleId_fkey; Type: FK CONSTRAINT; Schema: _auth; Owner: postgres
 --
 
@@ -13123,7 +13163,7 @@ ALTER TABLE ONLY _auth.user_roles
 
 
 --
--- TOC entry 3591 (class 2606 OID 385856)
+-- TOC entry 3593 (class 2606 OID 385856)
 -- Name: user_roles user_roles_userId_fkey; Type: FK CONSTRAINT; Schema: _auth; Owner: postgres
 --
 
@@ -13132,7 +13172,7 @@ ALTER TABLE ONLY _auth.user_roles
 
 
 --
--- TOC entry 3589 (class 2606 OID 385841)
+-- TOC entry 3591 (class 2606 OID 385841)
 -- Name: users username_fk; Type: FK CONSTRAINT; Schema: _auth; Owner: postgres
 --
 
@@ -13141,7 +13181,7 @@ ALTER TABLE ONLY _auth.users
 
 
 --
--- TOC entry 3578 (class 2606 OID 385735)
+-- TOC entry 3580 (class 2606 OID 385735)
 -- Name: servicio_comuna comuna_fk; Type: FK CONSTRAINT; Schema: _comun; Owner: postgres
 --
 
@@ -13150,7 +13190,7 @@ ALTER TABLE ONLY _comun.servicio_comuna
 
 
 --
--- TOC entry 3588 (class 2606 OID 385820)
+-- TOC entry 3590 (class 2606 OID 385820)
 -- Name: camionetas id_base_camioneta_fk; Type: FK CONSTRAINT; Schema: _comun; Owner: postgres
 --
 
@@ -13159,7 +13199,7 @@ ALTER TABLE ONLY _comun.camionetas
 
 
 --
--- TOC entry 3577 (class 2606 OID 385716)
+-- TOC entry 3579 (class 2606 OID 385716)
 -- Name: base id_paquete_fk; Type: FK CONSTRAINT; Schema: _comun; Owner: postgres
 --
 
@@ -13168,7 +13208,7 @@ ALTER TABLE ONLY _comun.base
 
 
 --
--- TOC entry 3573 (class 2606 OID 385678)
+-- TOC entry 3575 (class 2606 OID 385678)
 -- Name: paquete id_zonal_fk; Type: FK CONSTRAINT; Schema: _comun; Owner: postgres
 --
 
@@ -13177,7 +13217,7 @@ ALTER TABLE ONLY _comun.paquete
 
 
 --
--- TOC entry 3579 (class 2606 OID 385740)
+-- TOC entry 3581 (class 2606 OID 385740)
 -- Name: servicio_comuna paquete_fk; Type: FK CONSTRAINT; Schema: _comun; Owner: postgres
 --
 
@@ -13186,7 +13226,7 @@ ALTER TABLE ONLY _comun.servicio_comuna
 
 
 --
--- TOC entry 3572 (class 2606 OID 385657)
+-- TOC entry 3574 (class 2606 OID 385657)
 -- Name: comunas provincia_fk; Type: FK CONSTRAINT; Schema: _comun; Owner: postgres
 --
 
@@ -13195,7 +13235,7 @@ ALTER TABLE ONLY _comun.comunas
 
 
 --
--- TOC entry 3571 (class 2606 OID 385625)
+-- TOC entry 3573 (class 2606 OID 385625)
 -- Name: provincias region_fk; Type: FK CONSTRAINT; Schema: _comun; Owner: postgres
 --
 
@@ -13204,7 +13244,7 @@ ALTER TABLE ONLY _comun.provincias
 
 
 --
--- TOC entry 3580 (class 2606 OID 385745)
+-- TOC entry 3582 (class 2606 OID 385745)
 -- Name: servicio_comuna serv_fk; Type: FK CONSTRAINT; Schema: _comun; Owner: postgres
 --
 
@@ -13213,7 +13253,7 @@ ALTER TABLE ONLY _comun.servicio_comuna
 
 
 --
--- TOC entry 3607 (class 2606 OID 386381)
+-- TOC entry 3609 (class 2606 OID 386381)
 -- Name: maestro_actividades fk_actividad_tipo; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13222,7 +13262,7 @@ ALTER TABLE ONLY obras.maestro_actividades
 
 
 --
--- TOC entry 3617 (class 2606 OID 386386)
+-- TOC entry 3619 (class 2606 OID 386386)
 -- Name: detalle_pedido_material fk_bom_id_bom; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13231,7 +13271,16 @@ ALTER TABLE ONLY obras.detalle_pedido_material
 
 
 --
--- TOC entry 3627 (class 2606 OID 418055)
+-- TOC entry 3624 (class 2606 OID 475317)
+-- Name: encabezado_reporte_diario fk_comuna; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
+--
+
+ALTER TABLE ONLY obras.encabezado_reporte_diario
+    ADD CONSTRAINT fk_comuna FOREIGN KEY (comuna) REFERENCES _comun.comunas(codigo);
+
+
+--
+-- TOC entry 3631 (class 2606 OID 418055)
 -- Name: obras fk_coordinador_contratista; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13240,7 +13289,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3614 (class 2606 OID 386391)
+-- TOC entry 3616 (class 2606 OID 386391)
 -- Name: coordinadores_contratista fk_coordinador_empresa; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13249,7 +13298,7 @@ ALTER TABLE ONLY obras.coordinadores_contratista
 
 
 --
--- TOC entry 3628 (class 2606 OID 418049)
+-- TOC entry 3632 (class 2606 OID 418049)
 -- Name: obras fk_empresa_contratista; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13258,7 +13307,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3636 (class 2606 OID 386396)
+-- TOC entry 3640 (class 2606 OID 386396)
 -- Name: otros_cargos_edp fk_encabezado_edp_id_encabezado; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13267,7 +13316,7 @@ ALTER TABLE ONLY obras.otros_cargos_edp
 
 
 --
--- TOC entry 3610 (class 2606 OID 386401)
+-- TOC entry 3612 (class 2606 OID 386401)
 -- Name: adicionales_edp fk_encabezado_edp_id_encabezado; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13276,7 +13325,7 @@ ALTER TABLE ONLY obras.adicionales_edp
 
 
 --
--- TOC entry 3615 (class 2606 OID 386406)
+-- TOC entry 3617 (class 2606 OID 386406)
 -- Name: detalle_edp fk_encabezado_edp_id_encabezado; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13285,7 +13334,7 @@ ALTER TABLE ONLY obras.detalle_edp
 
 
 --
--- TOC entry 3618 (class 2606 OID 386411)
+-- TOC entry 3620 (class 2606 OID 386411)
 -- Name: detalle_pedido_material fk_encabezado_pedido_id_encabezado; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13294,7 +13343,7 @@ ALTER TABLE ONLY obras.detalle_pedido_material
 
 
 --
--- TOC entry 3639 (class 2606 OID 450729)
+-- TOC entry 3643 (class 2606 OID 450729)
 -- Name: visitas_terreno fk_estado_visita; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13303,7 +13352,7 @@ ALTER TABLE ONLY obras.visitas_terreno
 
 
 --
--- TOC entry 3619 (class 2606 OID 467117)
+-- TOC entry 3621 (class 2606 OID 467117)
 -- Name: detalle_reporte_diario_actividad fk_id_actividad_maestro_actividad; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13312,7 +13361,7 @@ ALTER TABLE ONLY obras.detalle_reporte_diario_actividad
 
 
 --
--- TOC entry 3621 (class 2606 OID 458908)
+-- TOC entry 3625 (class 2606 OID 458908)
 -- Name: encabezado_reporte_diario fk_id_area_tipo_trabajo; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13321,7 +13370,7 @@ ALTER TABLE ONLY obras.encabezado_reporte_diario
 
 
 --
--- TOC entry 3620 (class 2606 OID 467111)
+-- TOC entry 3622 (class 2606 OID 467111)
 -- Name: detalle_reporte_diario_actividad fk_id_encabezado_rep; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13330,7 +13379,7 @@ ALTER TABLE ONLY obras.detalle_reporte_diario_actividad
 
 
 --
--- TOC entry 3612 (class 2606 OID 386416)
+-- TOC entry 3614 (class 2606 OID 386416)
 -- Name: bom fk_id_obra_obra; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13339,7 +13388,7 @@ ALTER TABLE ONLY obras.bom
 
 
 --
--- TOC entry 3611 (class 2606 OID 386421)
+-- TOC entry 3613 (class 2606 OID 386421)
 -- Name: adicionales_edp fk_maestro_actividad_actividad; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13348,7 +13397,7 @@ ALTER TABLE ONLY obras.adicionales_edp
 
 
 --
--- TOC entry 3608 (class 2606 OID 386426)
+-- TOC entry 3610 (class 2606 OID 386426)
 -- Name: actividades_obra fk_maestro_actividades_actividad; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13357,7 +13406,7 @@ ALTER TABLE ONLY obras.actividades_obra
 
 
 --
--- TOC entry 3616 (class 2606 OID 386431)
+-- TOC entry 3618 (class 2606 OID 386431)
 -- Name: detalle_edp fk_maestro_actividades_detedp; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13366,7 +13415,7 @@ ALTER TABLE ONLY obras.detalle_edp
 
 
 --
--- TOC entry 3624 (class 2606 OID 386436)
+-- TOC entry 3628 (class 2606 OID 386436)
 -- Name: estructuras_obra fk_maestro_estructura_id_estructura; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13375,7 +13424,7 @@ ALTER TABLE ONLY obras.estructuras_obra
 
 
 --
--- TOC entry 3622 (class 2606 OID 386441)
+-- TOC entry 3626 (class 2606 OID 386441)
 -- Name: estructura_material fk_maestro_estructura_id_estructura; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13384,7 +13433,7 @@ ALTER TABLE ONLY obras.estructura_material
 
 
 --
--- TOC entry 3626 (class 2606 OID 386446)
+-- TOC entry 3630 (class 2606 OID 386446)
 -- Name: maestro_materiales fk_maestro_mat_unidad; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13393,7 +13442,7 @@ ALTER TABLE ONLY obras.maestro_materiales
 
 
 --
--- TOC entry 3637 (class 2606 OID 386451)
+-- TOC entry 3641 (class 2606 OID 386451)
 -- Name: recibido_bodega_pelom fk_maestro_material_cod_sap; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13402,7 +13451,7 @@ ALTER TABLE ONLY obras.recibido_bodega_pelom
 
 
 --
--- TOC entry 3623 (class 2606 OID 386456)
+-- TOC entry 3627 (class 2606 OID 386456)
 -- Name: estructura_material fk_maestro_materiales_cod_sap; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13411,7 +13460,7 @@ ALTER TABLE ONLY obras.estructura_material
 
 
 --
--- TOC entry 3629 (class 2606 OID 418079)
+-- TOC entry 3633 (class 2606 OID 418079)
 -- Name: obras fk_obra_estado_estados_obra; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13420,7 +13469,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3630 (class 2606 OID 418061)
+-- TOC entry 3634 (class 2606 OID 418061)
 -- Name: obras fk_obras_comuna; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13429,7 +13478,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3631 (class 2606 OID 418037)
+-- TOC entry 3635 (class 2606 OID 418037)
 -- Name: obras fk_obras_delegacion_id_delegacion; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13438,7 +13487,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3609 (class 2606 OID 386461)
+-- TOC entry 3611 (class 2606 OID 386461)
 -- Name: actividades_obra fk_obras_id; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13447,7 +13496,7 @@ ALTER TABLE ONLY obras.actividades_obra
 
 
 --
--- TOC entry 3625 (class 2606 OID 386466)
+-- TOC entry 3629 (class 2606 OID 386466)
 -- Name: estructuras_obra fk_obras_id_obra; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13456,7 +13505,7 @@ ALTER TABLE ONLY obras.estructuras_obra
 
 
 --
--- TOC entry 3640 (class 2606 OID 386471)
+-- TOC entry 3644 (class 2606 OID 386471)
 -- Name: visitas_terreno fk_obras_id_obra; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13465,7 +13514,7 @@ ALTER TABLE ONLY obras.visitas_terreno
 
 
 --
--- TOC entry 3632 (class 2606 OID 418086)
+-- TOC entry 3636 (class 2606 OID 418086)
 -- Name: obras fk_obras_segmento; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13474,7 +13523,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3633 (class 2606 OID 418025)
+-- TOC entry 3637 (class 2606 OID 418025)
 -- Name: obras fk_obras_tipo_obra; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13483,7 +13532,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3634 (class 2606 OID 418043)
+-- TOC entry 3638 (class 2606 OID 418043)
 -- Name: obras fk_obras_tipo_trabajo; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13492,7 +13541,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3635 (class 2606 OID 418031)
+-- TOC entry 3639 (class 2606 OID 418031)
 -- Name: obras fk_obras_zona_zonales; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13501,7 +13550,7 @@ ALTER TABLE ONLY obras.obras
 
 
 --
--- TOC entry 3613 (class 2606 OID 442531)
+-- TOC entry 3615 (class 2606 OID 442531)
 -- Name: bom fk_reserva_id_obra; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13510,7 +13559,7 @@ ALTER TABLE ONLY obras.bom
 
 
 --
--- TOC entry 3638 (class 2606 OID 386476)
+-- TOC entry 3642 (class 2606 OID 386476)
 -- Name: solicitantes fk_segmento_delegacion; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
 --
 
@@ -13519,7 +13568,16 @@ ALTER TABLE ONLY obras.solicitantes
 
 
 --
--- TOC entry 3595 (class 2606 OID 385955)
+-- TOC entry 3623 (class 2606 OID 475323)
+-- Name: detalle_reporte_diario_actividad fk_tipo_operacion; Type: FK CONSTRAINT; Schema: obras; Owner: postgres
+--
+
+ALTER TABLE ONLY obras.detalle_reporte_diario_actividad
+    ADD CONSTRAINT fk_tipo_operacion FOREIGN KEY (tipo_operacion) REFERENCES obras.tipo_operacion(id);
+
+
+--
+-- TOC entry 3597 (class 2606 OID 385955)
 -- Name: reporte_eventos cod_turno_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13528,7 +13586,7 @@ ALTER TABLE ONLY sae.reporte_eventos
 
 
 --
--- TOC entry 3601 (class 2606 OID 385999)
+-- TOC entry 3603 (class 2606 OID 385999)
 -- Name: reporte_jornada cod_turno_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13537,7 +13595,7 @@ ALTER TABLE ONLY sae.reporte_jornada
 
 
 --
--- TOC entry 3596 (class 2606 OID 385960)
+-- TOC entry 3598 (class 2606 OID 385960)
 -- Name: reporte_eventos est_evento_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13546,7 +13604,7 @@ ALTER TABLE ONLY sae.reporte_eventos
 
 
 --
--- TOC entry 3602 (class 2606 OID 386004)
+-- TOC entry 3604 (class 2606 OID 386004)
 -- Name: reporte_jornada est_jor_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13555,7 +13613,7 @@ ALTER TABLE ONLY sae.reporte_jornada
 
 
 --
--- TOC entry 3574 (class 2606 OID 385695)
+-- TOC entry 3576 (class 2606 OID 385695)
 -- Name: cargo_fijo id_cliente_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13564,7 +13622,7 @@ ALTER TABLE ONLY sae.cargo_fijo
 
 
 --
--- TOC entry 3581 (class 2606 OID 385760)
+-- TOC entry 3583 (class 2606 OID 385760)
 -- Name: precios_base id_cliente_pb_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13573,7 +13631,7 @@ ALTER TABLE ONLY sae.precios_base
 
 
 --
--- TOC entry 3582 (class 2606 OID 385765)
+-- TOC entry 3584 (class 2606 OID 385765)
 -- Name: precios_base id_evento_tipo_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13582,7 +13640,7 @@ ALTER TABLE ONLY sae.precios_base
 
 
 --
--- TOC entry 3592 (class 2606 OID 385916)
+-- TOC entry 3594 (class 2606 OID 385916)
 -- Name: reporte_estado_resultado id_mes_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13591,7 +13649,7 @@ ALTER TABLE ONLY sae.reporte_estado_resultado
 
 
 --
--- TOC entry 3597 (class 2606 OID 385965)
+-- TOC entry 3599 (class 2606 OID 385965)
 -- Name: reporte_eventos id_paquete_evt_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13600,7 +13658,7 @@ ALTER TABLE ONLY sae.reporte_eventos
 
 
 --
--- TOC entry 3575 (class 2606 OID 385700)
+-- TOC entry 3577 (class 2606 OID 385700)
 -- Name: cargo_fijo id_paquete_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13609,7 +13667,7 @@ ALTER TABLE ONLY sae.cargo_fijo
 
 
 --
--- TOC entry 3603 (class 2606 OID 386009)
+-- TOC entry 3605 (class 2606 OID 386009)
 -- Name: reporte_jornada id_paquete_jornada_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13618,7 +13676,7 @@ ALTER TABLE ONLY sae.reporte_jornada
 
 
 --
--- TOC entry 3583 (class 2606 OID 385770)
+-- TOC entry 3585 (class 2606 OID 385770)
 -- Name: precios_base id_paquete_pb_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13627,7 +13685,7 @@ ALTER TABLE ONLY sae.precios_base
 
 
 --
--- TOC entry 3576 (class 2606 OID 385705)
+-- TOC entry 3578 (class 2606 OID 385705)
 -- Name: cargo_fijo id_turno_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13636,7 +13694,7 @@ ALTER TABLE ONLY sae.cargo_fijo
 
 
 --
--- TOC entry 3584 (class 2606 OID 385775)
+-- TOC entry 3586 (class 2606 OID 385775)
 -- Name: precios_base id_turno_pb_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13645,7 +13703,7 @@ ALTER TABLE ONLY sae.precios_base
 
 
 --
--- TOC entry 3593 (class 2606 OID 385921)
+-- TOC entry 3595 (class 2606 OID 385921)
 -- Name: reporte_estado_resultado id_usuario_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13654,7 +13712,7 @@ ALTER TABLE ONLY sae.reporte_estado_resultado
 
 
 --
--- TOC entry 3594 (class 2606 OID 385926)
+-- TOC entry 3596 (class 2606 OID 385926)
 -- Name: reporte_estado_resultado id_zona_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13663,7 +13721,7 @@ ALTER TABLE ONLY sae.reporte_estado_resultado
 
 
 --
--- TOC entry 3604 (class 2606 OID 386014)
+-- TOC entry 3606 (class 2606 OID 386014)
 -- Name: reporte_jornada patente_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13672,7 +13730,7 @@ ALTER TABLE ONLY sae.reporte_jornada
 
 
 --
--- TOC entry 3598 (class 2606 OID 385970)
+-- TOC entry 3600 (class 2606 OID 385970)
 -- Name: reporte_eventos rut_ay_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13681,7 +13739,7 @@ ALTER TABLE ONLY sae.reporte_eventos
 
 
 --
--- TOC entry 3599 (class 2606 OID 385975)
+-- TOC entry 3601 (class 2606 OID 385975)
 -- Name: reporte_eventos rut_ma_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13690,7 +13748,7 @@ ALTER TABLE ONLY sae.reporte_eventos
 
 
 --
--- TOC entry 3605 (class 2606 OID 386019)
+-- TOC entry 3607 (class 2606 OID 386019)
 -- Name: reporte_jornada ruta_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13699,7 +13757,7 @@ ALTER TABLE ONLY sae.reporte_jornada
 
 
 --
--- TOC entry 3606 (class 2606 OID 386024)
+-- TOC entry 3608 (class 2606 OID 386024)
 -- Name: reporte_jornada rutm_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13708,7 +13766,7 @@ ALTER TABLE ONLY sae.reporte_jornada
 
 
 --
--- TOC entry 3600 (class 2606 OID 385980)
+-- TOC entry 3602 (class 2606 OID 385980)
 -- Name: reporte_eventos tipo_evt_fk; Type: FK CONSTRAINT; Schema: sae; Owner: postgres
 --
 
@@ -13717,7 +13775,7 @@ ALTER TABLE ONLY sae.reporte_eventos
 
 
 --
--- TOC entry 3896 (class 0 OID 0)
+-- TOC entry 3900 (class 0 OID 0)
 -- Dependencies: 4
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -13726,7 +13784,7 @@ REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2023-10-23 12:46:03
+-- Completed on 2023-10-25 18:02:47
 
 --
 -- PostgreSQL database dump complete

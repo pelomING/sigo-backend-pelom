@@ -57,6 +57,18 @@ module.exports = (sequelize, Sequelize) => {
         },
         hora_llegada_base: {
             type: Sequelize.STRING
+        },
+        alimentador: {
+            type: Sequelize.STRING
+        },
+        comuna: {
+            type: Sequelize.STRING
+        },
+        num_documento: {
+            type: Sequelize.STRING
+        },
+        flexiapp: {
+            type: Sequelize.STRING
         }
     },
         {
