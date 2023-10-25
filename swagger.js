@@ -1,14 +1,19 @@
 const swaggerAutogen = require('swagger-autogen')();
 
 let ruta_host = "";
+let schema = [];
 if (process.env.NODE_ENV === "production") {
   ruta_host = "backend-sae-postgres-production.up.railway.app";
+  schema = ['https'];
 }else if(process.env.NODE_ENV === "development"){
   ruta_host = "backend-sae-postgres-desarrollo.up.railway.app";
+  schema = ['https'];
 }else if(process.env.NODE_ENV === "local"){
   ruta_host = "localhost:8080";
+  schema = ['http'];
 }else{
   ruta_host = "localhost:8080";
+  schema = ['http'];
 }
 
 const doc = {
@@ -22,7 +27,7 @@ const doc = {
     },
   },
   host: `${ruta_host}`,
-  schemes: ['http', 'https'],
+  schemes: schema,
 };
 
 const outputFile = './swagger-output.json';
