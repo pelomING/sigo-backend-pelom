@@ -46,6 +46,62 @@ exports.findAllVisitaTerreno = async (req, res) => {
       }
 }
 /*********************************************************************************** */
+/* Consulta visitas terreno por id de obra
+;
+*/
+exports.findVisitaTerrenoByIdObra = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
+      #swagger.description = 'Devuelve las visitas a terreno por ID de obra (id_obra)' */
+      try {
+        const campos = [
+            'id_obra'
+          ];
+          for (const element of campos) {
+            if (!req.query[element]) {
+              res.status(400).send({
+                message: "No puede estar nulo el campo " + element
+              });
+              return;
+            }
+          };
+        const id_obra = req.query.id_obra;
+        const sql = "SELECT vt.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
+        fecha_visita::text, direccion, persona_mandante, cargo_mandante, persona_contratista, cargo_contratista, \
+        observacion, row_to_json(ev) as estado, fecha_modificacion::text FROM obras.visitas_terreno vt join \
+        obras.obras o on o.id = vt.id_obra join obras.estado_visita ev on vt.estado = ev.id WHERE not o.eliminada and o.id = :id_obra";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const obras = await sequelize.query(sql, {  replacements: { id_obra: id_obra } , type: QueryTypes.SELECT });
+        let salida = [];
+        if (obras) {
+          for (const element of obras) {
+    
+                const detalle_salida = {
+                  id: Number(element.id),
+                  id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
+                  fecha_visita: String(element.fecha_visita),
+                  direccion: String(element.direccion),
+                  persona_mandante: String(element.persona_mandante),
+                  cargo_mandante: String(element.cargo_mandante),
+                  persona_contratista: String(element.persona_contratista),
+                  cargo_contratista: String(element.cargo_contratista),
+                  observacion: String(element.observacion),
+                  estado: element.estado, //json {"id": id, "nombre": nombre}
+                  fecha_modificacion: String(element.fecha_modificacion)
+                }
+                salida.push(detalle_salida);
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send(salida);
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
+}
+/*********************************************************************************** */
 /* Crea una visita terreno
 ;
 */
