@@ -16,6 +16,8 @@ const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
 ;
 */
 exports.findAllEncabezadoReporteDiario = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los ancabezados de reporte diario' */
     try {
         const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
         fecha_reporte::text, jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, \
@@ -68,64 +70,70 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
 ;
 */
 exports.createEncabezadoReporteDiario = async (req, res) => {
-    let salir = false;
-    const campos = [
-      'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'gestor_cliente', 'id_area', 
-      'observaciones', 'entregado_por_persona', 'fecha_entregado', 
-      'revisado_por_persona', 'fecha_revisado', 'sector', 'hora_salida_base', 
-      'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base'
-    ];
-    for (const element of campos) {
-      if (!req.body[element]) {
-        res.status(400).send({
-          message: "No puede estar nulo el campo " + element
-        });
-        return;
-      }
-    };
-
-    //Verifica que la fecha de reporte no este asignada a una obra
-    await EncabezadoReporteDiario.findAll({where: {id_obra: req.body.id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
-        //el rut ya existe
-        if (data.length > 0) {
-          salir = true;
-          res.status(403).send({ message: 'El Codigo de Obra ya se encuentra ingresado en la base' });
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Crea un encabezado de reporte diario' */
+  try{
+      let salir = false;
+      const campos = [
+        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'gestor_cliente', 'id_area', 
+        'observaciones', 'entregado_por_persona', 'fecha_entregado', 
+        'revisado_por_persona', 'fecha_revisado', 'sector', 'hora_salida_base', 
+        'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base'
+      ];
+      for (const element of campos) {
+        if (!req.body[element]) {
+          res.status(400).send({
+            message: "No puede estar nulo el campo " + element
+          });
+          return;
         }
-      }).catch(err => {
-          salir = true;
-          res.status(500).send({ message: err.message });
-      })
-    
-      if (salir) {
-        return;
-      }
+      };
 
-      const encabezado_reporte_diario = {
-          id_obra: req.body.id_obra,
-          fecha_reporte: req.body.fecha_reporte,
-          jefe_faena: req.body.jefe_faena,
-          sdi: req.body.sdi,
-          gestor_cliente: req.body.gestor_cliente,
-          id_area: req.body.id_area,
-          brigada_pesada: req.body.brigada_pesada,
-          observaciones: req.body.observaciones,
-          entregado_por_persona: req.body.entregado_por_persona,
-          fecha_entregado: req.body.fecha_entregado,
-          revisado_por_persona: req.body.revisado_por_persona,
-          fecha_revisado: req.body.fecha_revisado,
-          sector: req.body.sector,
-          hora_salida_base: req.body.hora_salida_base,
-          hora_llegada_terreno: req.body.hora_llegada_terreno,
-          hora_salida_terreno: req.body.hora_salida_terreno,
-          hora_llegada_base: req.body.hora_llegada_base
-      }
-
-      await EncabezadoReporteDiario.create(encabezado_reporte_diario)
-        .then(data => {
-            res.send(data);
+      //Verifica que la fecha de reporte no este asignada a una obra
+      await EncabezadoReporteDiario.findAll({where: {id_obra: req.body.id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
+          //el rut ya existe
+          if (data.length > 0) {
+            salir = true;
+            res.status(403).send({ message: 'El Codigo de Obra ya se encuentra ingresado en la base' });
+          }
         }).catch(err => {
+            salir = true;
             res.status(500).send({ message: err.message });
         })
+      
+        if (salir) {
+          return;
+        }
+
+        const encabezado_reporte_diario = {
+            id_obra: req.body.id_obra,
+            fecha_reporte: req.body.fecha_reporte,
+            jefe_faena: req.body.jefe_faena,
+            sdi: req.body.sdi,
+            gestor_cliente: req.body.gestor_cliente,
+            id_area: req.body.id_area,
+            brigada_pesada: req.body.brigada_pesada,
+            observaciones: req.body.observaciones,
+            entregado_por_persona: req.body.entregado_por_persona,
+            fecha_entregado: req.body.fecha_entregado,
+            revisado_por_persona: req.body.revisado_por_persona,
+            fecha_revisado: req.body.fecha_revisado,
+            sector: req.body.sector,
+            hora_salida_base: req.body.hora_salida_base,
+            hora_llegada_terreno: req.body.hora_llegada_terreno,
+            hora_salida_terreno: req.body.hora_salida_terreno,
+            hora_llegada_base: req.body.hora_llegada_base
+        }
+
+        await EncabezadoReporteDiario.create(encabezado_reporte_diario)
+          .then(data => {
+              res.send(data);
+          }).catch(err => {
+              res.status(500).send({ message: err.message });
+          })
+  }catch (error) {
+    res.status(500).send(error);
+  }
 
 }
 /*********************************************************************************** */
@@ -133,26 +141,33 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
 ;
 */
 exports.updateEncabezadoReporteDiario = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Actualiza un encabezado de reporte diario por ID' */
+  try{
     const id = req.params.id;
-
-
-  await EncabezadoReporteDiario.update(req.body, {
-    where: { id: id }
-  }).then(data => {
-    if (data[0] === 1) {
-      res.send({ message: "Obra actualizada" });
-    } else {
-      res.send({ message: `No existe una obra con el id ${id}` });
-    }
-  }).catch(err => {
-    res.status(500).send({ message: err.message });
-  })
+    await EncabezadoReporteDiario.update(req.body, {
+      where: { id: id }
+    }).then(data => {
+      if (data[0] === 1) {
+        res.send({ message: "Obra actualizada" });
+      } else {
+        res.send({ message: `No existe una obra con el id ${id}` });
+      }
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
 }
 /*********************************************************************************** */
 /* Borra un reporte diario
 ;
 */
 exports.deleteEncabezadoReporteDiario = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Borra un encabezado de reporte diario por ID' */
+  try{
     const id = req.params.id;
     EncabezadoReporteDiario.destroy({
         where: { id: id }
@@ -166,6 +181,9 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
       }).catch(err => {
         res.status(500).send({ message: err.message });
       })
+  }catch (error) {
+    res.status(500).send(error);
+  }
 
 }
 /*********************************************************************************** */
@@ -174,6 +192,8 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
 */
 exports.findAllDetalleReporteDiarioActividad = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los registros de detalle de reportes diarios' */
     try {
       const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ta) as tipo_actividad, cantidad, \
       id_encabezado_rep FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top \
@@ -211,6 +231,8 @@ exports.findAllDetalleReporteDiarioActividad = async (req, res) => {
 ;
 */
 exports.findOneDetalleReporteDiarioActividad = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve un registro de detalle de reportes diarios por ID' */
   try {
       
     const campos = [
@@ -258,6 +280,8 @@ exports.findOneDetalleReporteDiarioActividad = async (req, res) => {
 ;
 */
 exports.findDetalleReporteDiarioActividadPorEncabezado = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los registros de detalle de reportes diarios para un encabezado' */
   try {
       
     const campos = [

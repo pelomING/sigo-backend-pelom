@@ -1,5 +1,16 @@
 const swaggerAutogen = require('swagger-autogen')();
 
+let ruta_host = "";
+if (process.env.NODE_ENV === "production") {
+  ruta_host = "backend-sae-postgres-production.up.railway.app";
+}else if(process.env.NODE_ENV === "development"){
+  ruta_host = "backend-sae-postgres-desarrollo.up.railway.app";
+}else if(process.env.NODE_ENV === "local"){
+  ruta_host = "localhost:8080";
+}else{
+  ruta_host = "localhost:8080";
+}
+
 const doc = {
   info: {
     title: 'API Obras',
@@ -10,7 +21,7 @@ const doc = {
       email: 'ti.pelom@pelom.cl',
     },
   },
-  host: 'localhost:8080',
+  host: `${ruta_host}`,
   schemes: ['http', 'https'],
 };
 

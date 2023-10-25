@@ -116,7 +116,10 @@
     },
     "/api/mantenedor/v1/creaestado": {
       "post": {
-        "description": "",
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Crea un estado para sae",
         "parameters": [
           {
             "name": "body",
@@ -152,7 +155,10 @@
     },
     "/api/mantenedor/v1/creapersona": {
       "post": {
-        "description": "",
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "crea una persona",
         "parameters": [
           {
             "name": "body",
@@ -206,7 +212,10 @@
     },
     "/api/mantenedor/v1/estados": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todos los estados que puede tomar un reporte",
         "responses": {
           "200": {
             "description": "OK"
@@ -225,7 +234,10 @@
     },
     "/api/mantenedor/v1/findallbases": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todas las bases del sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -244,7 +256,10 @@
     },
     "/api/mantenedor/v1/findallclientes": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todos los clientes sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -263,7 +278,10 @@
     },
     "/api/mantenedor/v1/findalltipofuncionpersonal": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todos los tipo de funcion del personal sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -282,7 +300,10 @@
     },
     "/api/mantenedor/v1/findallpersonas": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todos las personas",
         "responses": {
           "200": {
             "description": "OK"
@@ -301,7 +322,10 @@
     },
     "/api/mantenedor/v1/oficinas": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todas las oficinas del sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -648,7 +672,10 @@
     },
     "/api/obras/backoffice/v1/allobras": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Devuelve todas las obras de la tabla de obras",
         "responses": {
           "200": {
             "description": "OK"
@@ -667,7 +694,10 @@
     },
     "/api/obras/backoffice/v1/creaobra": {
       "post": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Crea una nueva obra",
         "parameters": [
           {
             "name": "body",
@@ -769,7 +799,10 @@
     },
     "/api/obras/backoffice/v1/actualizaobra/{id}": {
       "put": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Actualiza una obra",
         "parameters": [
           {
             "name": "id",
@@ -796,7 +829,10 @@
     },
     "/api/obras/backoffice/v1/eliminaobra/{id}": {
       "delete": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Borra una obra, pasando el campo eliminado a true",
         "parameters": [
           {
             "name": "id",
@@ -823,7 +859,10 @@
     },
     "/api/obras/backoffice/v1/obras/{id}": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Devuelve una obra por ID",
         "parameters": [
           {
             "name": "id",
@@ -850,7 +889,10 @@
     },
     "/api/obras/backoffice/v1/obras": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Devuelve una obra por código de obra",
         "parameters": [
           {
             "name": "codigo_obra",
@@ -876,7 +918,10 @@
     },
     "/api/obras/backoffice/v1/allbom": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve todos los materiales en el bom",
         "responses": {
           "200": {
             "description": "OK"
@@ -895,7 +940,10 @@
     },
     "/api/obras/backoffice/v1/bomporparametros": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve todos los materiales en el bom de acuerdo a los parámetros",
         "parameters": [
           {
             "name": "id_obra",
@@ -931,7 +979,10 @@
     },
     "/api/obras/backoffice/v1/creabom": {
       "post": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Ingresa un grupo de materiales en el bom de una sola vez",
         "parameters": [
           {
             "name": "body",
@@ -973,7 +1024,10 @@
     },
     "/api/obras/backoffice/v1/creabomindividual": {
       "post": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Ingresa un sólo material en el bom",
         "parameters": [
           {
             "name": "body",
@@ -1018,7 +1072,10 @@
     },
     "/api/obras/backoffice/v1/eliminabomporreserva/{reserva}": {
       "delete": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Borra un grupo de materiales asociados a una reserva",
         "parameters": [
           {
             "name": "reserva",
@@ -1045,7 +1102,10 @@
     },
     "/api/obras/backoffice/v1/eliminamaterialbom/{reserva}/{cod_sap}": {
       "delete": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Borra un sólo material asociado a una reserva",
         "parameters": [
           {
             "name": "reserva",
@@ -1081,7 +1141,10 @@
     },
     "/api/obras/backoffice/v1/allvisitaterreno": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Visita Terreno"
+        ],
+        "description": "Devuelve todas las visitas a terreno",
         "responses": {
           "200": {
             "description": "OK"
@@ -1100,7 +1163,10 @@
     },
     "/api/obras/backoffice/v1/creavisitaterreno": {
       "post": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Visita Terreno"
+        ],
+        "description": "Crea una visita a terreno",
         "parameters": [
           {
             "name": "body",
@@ -1157,7 +1223,10 @@
     },
     "/api/obras/backoffice/v1/actualizavisitaterreno/{id}": {
       "put": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Visita Terreno"
+        ],
+        "description": "Actualiza una visita a terreno",
         "parameters": [
           {
             "name": "id",
@@ -1220,7 +1289,10 @@
     },
     "/api/obras/backoffice/v1/allreportesdiarios": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los ancabezados de reporte diario",
         "responses": {
           "200": {
             "description": "OK"
@@ -1239,7 +1311,10 @@
     },
     "/api/obras/backoffice/v1/creareportediario": {
       "post": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Crea un encabezado de reporte diario",
         "parameters": [
           {
             "name": "body",
@@ -1323,7 +1398,10 @@
     },
     "/api/obras/backoffice/v1/actualizareportediario/{id}": {
       "put": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Actualiza un encabezado de reporte diario por ID",
         "parameters": [
           {
             "name": "id",
@@ -1350,7 +1428,10 @@
     },
     "/api/obras/backoffice/v1/eliminareportediario/{id}": {
       "delete": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Borra un encabezado de reporte diario por ID",
         "parameters": [
           {
             "name": "id",
@@ -1377,7 +1458,10 @@
     },
     "/api/obras/backoffice/v1/allreportesdiariosactividad": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los registros de detalle de reportes diarios",
         "responses": {
           "200": {
             "description": "OK"
@@ -1396,7 +1480,10 @@
     },
     "/api/obras/backoffice/v1/reportesdiariosactividadporid": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve un registro de detalle de reportes diarios por ID",
         "parameters": [
           {
             "name": "id",
@@ -1425,7 +1512,10 @@
     },
     "/api/obras/backoffice/v1/reportesdiariosactividadporencabezado": {
       "get": {
-        "description": "",
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los registros de detalle de reportes diarios para un encabezado",
         "parameters": [
           {
             "name": "encabezado_reporte",
@@ -1454,7 +1544,10 @@
     },
     "/api/movil/v1/paquete": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos los paquetes en sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -1473,7 +1566,10 @@
     },
     "/api/movil/v1/zonaPaqueteBaseSql": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos la relación zona-paquete-base en sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -1492,7 +1588,10 @@
     },
     "/api/movil/v1/usuariosApp": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos usuarios de la app móvil sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -1511,7 +1610,10 @@
     },
     "/api/movil/v1/turnos": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos los turnos de la app móvil sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -1530,7 +1632,10 @@
     },
     "/api/movil/v1/eventostipo": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos los tipos de eventos",
         "responses": {
           "200": {
             "description": "OK"
@@ -1549,7 +1654,10 @@
     },
     "/api/movil/v1/ayudantes": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos usuarios de la app móvil sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -1568,7 +1676,10 @@
     },
     "/api/movil/v1/camionetas": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todas las camionetas",
         "responses": {
           "200": {
             "description": "OK"
@@ -1587,7 +1698,10 @@
     },
     "/api/movil/v1/oficinas": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todas las bases sae",
         "responses": {
           "200": {
             "description": "OK"
@@ -1606,7 +1720,10 @@
     },
     "/api/movil/v1/comunas": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todas las comunas",
         "responses": {
           "200": {
             "description": "OK"
@@ -1625,7 +1742,10 @@
     },
     "/api/movil/v1/creaevento": {
       "post": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Crea un nuevo evento",
         "parameters": [
           {
             "name": "body",
@@ -1685,7 +1805,10 @@
     },
     "/api/movil/v1/creajornada": {
       "post": {
-        "description": "",
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Crea una nueva jornada",
         "parameters": [
           {
             "name": "body",
@@ -1745,7 +1868,10 @@
     },
     "/api/reportes/v1/alljornada": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve todas las jornadas",
         "responses": {
           "200": {
             "description": "OK"
@@ -1764,7 +1890,10 @@
     },
     "/api/reportes/v1/alleventos": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve todos los eventos",
         "responses": {
           "200": {
             "description": "OK"
@@ -1783,7 +1912,10 @@
     },
     "/api/reportes/v1/allestadosresultado": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve todos los estados de resultado",
         "responses": {
           "200": {
             "description": "OK"
@@ -1802,7 +1934,10 @@
     },
     "/api/reportes/v1/creaestadoresultado": {
       "post": {
-        "description": "",
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Crea un estado resultado",
         "parameters": [
           {
             "name": "body",
@@ -1874,7 +2009,10 @@
     },
     "/api/reportes/v1/resumeneventos": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve el resumen de eventos por paquete y rango de fechas",
         "parameters": [
           {
             "name": "id_paquete",
@@ -1913,7 +2051,10 @@
     },
     "/api/reportes/v1/resumenturnos": {
       "get": {
-        "description": "",
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve el resumen de turnos por paquete y rango de fechas",
         "parameters": [
           {
             "name": "id_paquete",

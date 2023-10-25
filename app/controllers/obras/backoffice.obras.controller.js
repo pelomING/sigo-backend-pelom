@@ -16,6 +16,8 @@ const Obra = db.obra;
 */
 exports.findAllObra = async (req, res) => {
     //metodo GET
+    /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Devuelve todas las obras de la tabla de obras' */
     try {
       const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, gestor_cliente, \
       numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, fecha_termino::text, row_to_json(tt) as tipo_trabajo, \
@@ -25,7 +27,7 @@ exports.findAllObra = async (req, res) => {
       obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left \
       join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo \
       left join obras.estado_obra eo on o.estado = eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento \
-      s on o.segmento = s.id";
+      s on o.segmento = s.id WHERE not o.eliminada";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const obras = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -79,72 +81,76 @@ exports.findAllObra = async (req, res) => {
 ;
 */
 exports.createObra = async (req, res) => {
-
-    let salir = false;
-    const campos = [
-      'codigo_obra', 'nombre_obra'
-    ];
-    for (const element of campos) {
-      if (!req.body[element]) {
-        res.status(400).send({
-          message: "No puede estar nulo el campo " + element
-        });
+  /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Crea una nueva obra' */
+  try {
+      let salir = false;
+      const campos = [
+        'codigo_obra', 'nombre_obra'
+      ];
+      for (const element of campos) {
+        if (!req.body[element]) {
+          res.status(400).send({
+            message: "No puede estar nulo el campo " + element
+          });
+          return;
+        }
+      };
+    
+      //Verifica que el codigo obra no se encuentre
+      await Obra.findAll({where: {codigo_obra: req.body.codigo_obra}}).then(data => {
+        //el rut ya existe
+        if (data.length > 0) {
+          salir = true;
+          res.status(403).send({ message: 'El Codigo de Obra ya se encuentra ingresado en la base' });
+        }
+      }).catch(err => {
+          salir = true;
+          res.status(500).send({ message: err.message });
+      })
+    
+      if (salir) {
         return;
       }
-    };
-  
-    //Verifica que el codigo obra no se encuentre
-    await Obra.findAll({where: {codigo_obra: req.body.codigo_obra}}).then(data => {
-      //el rut ya existe
-      if (data.length > 0) {
-        salir = true;
-        res.status(403).send({ message: 'El Codigo de Obra ya se encuentra ingresado en la base' });
+
+      const obra = {
+
+          codigo_obra: req.body.codigo_obra,
+          nombre_obra: req.body.nombre_obra,
+          numero_ot: req.body.numero_ot,
+          zona: req.body.zona,
+          delegacion: req.body.delegacion,
+          gestor_cliente: req.body.gestor_cliente,
+          numero_aviso: req.body.numero_aviso,
+          numero_oc: req.body.numero_oc,
+          monto: req.body.monto,
+          cantidad_uc: req.body.cantidad_uc,
+          fecha_llegada: req.body.fecha_llegada,
+          fecha_inicio: req.body.fecha_inicio,
+          fecha_termino: req.body.fecha_termino,
+          tipo_trabajo: req.body.tipo_trabajo,
+          persona_envia_info: req.body.persona_envia_info,
+          cargo_persona_envia_info: req.body.cargo_persona_envia_info,
+          empresa_contratista: req.body.empresa_contratista,
+          coordinador_contratista: req.body.coordinador_contratista,
+          comuna: req.body.comuna,
+          ubicacion: req.body.ubicacion,
+          estado: req.body.estado?req.body.estado:1,
+          tipo_obra: req.body.tipo_obra,
+          segmento: req.body.segmento,
+          eliminada: false
+
       }
-    }).catch(err => {
-        salir = true;
-        res.status(500).send({ message: err.message });
-    })
-  
-    if (salir) {
-      return;
+
+      await Obra.create(obra)
+          .then(data => {
+              res.send(data);
+          }).catch(err => {
+              res.status(500).send({ message: err.message });
+          })
+    }catch (error) {
+      res.status(500).send(error);
     }
-
-    const obra = {
-
-        codigo_obra: req.body.codigo_obra,
-        nombre_obra: req.body.nombre_obra,
-        numero_ot: req.body.numero_ot,
-        zona: req.body.zona,
-        delegacion: req.body.delegacion,
-        gestor_cliente: req.body.gestor_cliente,
-        numero_aviso: req.body.numero_aviso,
-        numero_oc: req.body.numero_oc,
-        monto: req.body.monto,
-        cantidad_uc: req.body.cantidad_uc,
-        fecha_llegada: req.body.fecha_llegada,
-        fecha_inicio: req.body.fecha_inicio,
-        fecha_termino: req.body.fecha_termino,
-        tipo_trabajo: req.body.tipo_trabajo,
-        persona_envia_info: req.body.persona_envia_info,
-        cargo_persona_envia_info: req.body.cargo_persona_envia_info,
-        empresa_contratista: req.body.empresa_contratista,
-        coordinador_contratista: req.body.coordinador_contratista,
-        comuna: req.body.comuna,
-        ubicacion: req.body.ubicacion,
-        estado: req.body.estado?req.body.estado:1,
-        tipo_obra: req.body.tipo_obra,
-        segmento: req.body.segmento,
-        eliminada: false
-
-    }
-
-    await Obra.create(obra)
-        .then(data => {
-            res.send(data);
-        }).catch(err => {
-            res.status(500).send({ message: err.message });
-        })
-  
   }
   /*********************************************************************************** */
 
@@ -154,20 +160,25 @@ exports.createObra = async (req, res) => {
 ;
 */
 exports.updateObra = async (req, res) => {
-  const id = req.params.id;
+  /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Actualiza una obra' */
+  try{
+    const id = req.params.id;
 
-
-  await Obra.update(req.body, {
-    where: { id: id }
-  }).then(data => {
-    if (data[0] === 1) {
-      res.send({ message: "Obra actualizada" });
-    } else {
-      res.send({ message: `No existe una obra con el id ${id}` });
-    }
-  }).catch(err => {
-    res.status(500).send({ message: err.message });
-  })
+    await Obra.update(req.body, {
+      where: { id: id }
+    }).then(data => {
+      if (data[0] === 1) {
+        res.send({ message: "Obra actualizada" });
+      } else {
+        res.send({ message: `No existe una obra con el id ${id}` });
+      }
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
 }
   /*********************************************************************************** */
 
@@ -177,18 +188,24 @@ exports.updateObra = async (req, res) => {
 ;
 */
 exports.deleteObra = async (req, res) => {
-  const id = req.params.id;
-  const borrar = {"eliminada": true};
+  /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Borra una obra, pasando el campo eliminado a true' */
+  try{
+    const id = req.params.id;
+    const borrar = {"eliminada": true};
 
-  await Obra.update(borrar, {
-    where: { id: id }
-  }).then(data => {
-    if (data[0] === 1) {
-      res.send({ message: "Obra eliminada" });
-    }
-  }).catch(err => {
-    res.status(500).send({ message: err.message });
-  })
+    await Obra.update(borrar, {
+      where: { id: id }
+    }).then(data => {
+      if (data[0] === 1) {
+        res.send({ message: "Obra eliminada" });
+      }
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
 
 }
   /*********************************************************************************** */
@@ -199,6 +216,8 @@ exports.deleteObra = async (req, res) => {
 ;
 */
 exports.findObraById = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Devuelve una obra por ID' */
   const id = req.params.id;
 
   try {
@@ -266,6 +285,8 @@ exports.findObraById = async (req, res) => {
 ;
 */
 exports.findObraByCodigo = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Devuelve una obra por código de obra' */
   const codigo_obra = req.query.codigo_obra;
 
   try {

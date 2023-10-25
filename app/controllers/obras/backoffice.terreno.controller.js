@@ -6,6 +6,8 @@ const VisitaTerreno = db.visitaTerreno;
 ;
 */
 exports.findAllVisitaTerreno = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
+      #swagger.description = 'Devuelve todas las visitas a terreno' */
     try {
         const sql = "SELECT vt.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
         fecha_visita::text, direccion, persona_mandante, cargo_mandante, persona_contratista, cargo_contratista, \
@@ -48,6 +50,8 @@ exports.findAllVisitaTerreno = async (req, res) => {
 ;
 */
 exports.createVisitaTerreno = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
+      #swagger.description = 'Crea una visita a terreno' */
 
     try {
 
@@ -108,33 +112,51 @@ exports.createVisitaTerreno = async (req, res) => {
 ;
 */
 exports.updateVisitaTerreno = async (req, res) => {
-    const id = req.params.id;
+    /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
+      #swagger.description = 'Actualiza una visita a terreno' */
+    try{
+        const id = req.params.id;
 
-    let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-    fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
-    id_obra = req.body.id_obra;
-    fecha_visita = req.body.fecha_visita;
-    let visita = undefined;
+        let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
+        id_obra = req.body.id_obra;
+        fecha_visita = req.body.fecha_visita;
+        let visita = undefined;
 
-    
-    if (id_obra) {
-        //El id de obra no se puede cambiar para una visita una vez asignado
-        res.status(500).send({ message: 'El id de obra no se puede cambiar' });
+        
+        if (id_obra) {
+            //El id de obra no se puede cambiar para una visita una vez asignado
+            res.status(500).send({ message: 'El id de obra no se puede cambiar' });
 
-    }else {
-        //Si viene la fecha de visita verificar que sea mayor o igual al día de hoy
-        if (fecha_visita) {
+        }else {
+            //Si viene la fecha de visita verificar que sea mayor o igual al día de hoy
+            if (fecha_visita) {
 
-            let today = new Date(fecha_hoy).toISOString();
-            let fechaVisita = new Date(fecha_visita).toISOString();
+                let today = new Date(fecha_hoy).toISOString();
+                let fechaVisita = new Date(fecha_visita).toISOString();
 
-            if (fechaVisita < today) {
-                // La fecha de visita es menor a la fecha actual 
-                res.status(500).send({ message: 'La fecha de la visita no puede ser menor a la fecha actual' });
+                if (fechaVisita < today) {
+                    // La fecha de visita es menor a la fecha actual 
+                    res.status(500).send({ message: 'La fecha de la visita no puede ser menor a la fecha actual' });
+                }else {
+                    visita = {
+
+                        fecha_visita: fechaVisita,
+                        direccion: req.body.direccion,
+                        persona_mandante: req.body.persona_mandante,
+                        cargo_mandante: req.body.cargo_mandante,
+                        persona_contratista: req.body.persona_contratista,
+                        cargo_contratista: req.body.cargo_contratista,
+                        observacion: req.body.observacion,
+                        estado: req.body.estado,
+                        fecha_modificacion: fecha_hoy
+                
+                    }
+                }
             }else {
+                //No viene la fecha de visita
                 visita = {
 
-                    fecha_visita: fechaVisita,
                     direccion: req.body.direccion,
                     persona_mandante: req.body.persona_mandante,
                     cargo_mandante: req.body.cargo_mandante,
@@ -146,32 +168,20 @@ exports.updateVisitaTerreno = async (req, res) => {
             
                 }
             }
-        }else {
-            //No viene la fecha de visita
-            visita = {
-
-                direccion: req.body.direccion,
-                persona_mandante: req.body.persona_mandante,
-                cargo_mandante: req.body.cargo_mandante,
-                persona_contratista: req.body.persona_contratista,
-                cargo_contratista: req.body.cargo_contratista,
-                observacion: req.body.observacion,
-                estado: req.body.estado,
-                fecha_modificacion: fecha_hoy
-        
-            }
+            if (visita != undefined) {
+                await VisitaTerreno.update(visita, { where: { id: id } })
+                    .then(data => {
+                        if (data == 1) {
+                            res.send({ message: "Visita actualizada" });
+                        }else {
+                            res.status(500).send({ message: "No se pudo actualizar la Visita" });
+                        }
+                    }).catch(err => {
+                        res.status(500).send({ message: err.message });
+                    })
+                }
         }
-        if (visita != undefined) {
-            await VisitaTerreno.update(visita, { where: { id: id } })
-                .then(data => {
-                    if (data == 1) {
-                        res.send({ message: "Visita actualizada" });
-                    }else {
-                        res.status(500).send({ message: "No se pudo actualizar la Visita" });
-                    }
-                }).catch(err => {
-                    res.status(500).send({ message: err.message });
-                })
-            }
+    }catch (error) {
+        res.status(500).send(error);
     }
 }

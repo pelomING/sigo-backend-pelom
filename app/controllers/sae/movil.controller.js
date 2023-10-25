@@ -10,6 +10,8 @@ const Jornada = db.jornada;
   app.get("/api/movil/v1/paquete", movilController.paquete)
 */
 exports.paquete = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todos los paquetes en sae' */
   try {
     const paquete = await Paquete.findAll();
     res.status(200).send(paquete);
@@ -25,6 +27,8 @@ exports.paquete = async (req, res) => {
   app.get("/api/movil/v1/zonaPaqueteBaseSql", [authJwt.verifyToken, authJwt.isTecnico], movilController.zonaPaqueteBaseSql);
 */
 exports.zonaPaqueteBaseSql = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todos la relación zona-paquete-base en sae' */
   try {
     const sql = "select b.id, z.nombre as zona, p.nombre as paquete, b.nombre as base from _comun.zonal z join \
     _comun.paquete p on z.id = p.id_zonal join _comun.base b on p.id = b.id_paquete order by z.id, p.id, b.id";
@@ -73,6 +77,8 @@ exports.zonaPaqueteBaseSql = async (req, res) => {
   app.get("/api/movil/v1/usuariosApp", [authJwt.verifyToken, authJwt.isSistema], movilController.usuariosApp)
 */
 exports.usuariosApp = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todos usuarios de la app móvil sae' */
   try {
 
     const sql = "select u.id, p.rut, (p.nombres || ' ' || p.apellido_1 || case when p.apellido_2 is null then \
@@ -129,6 +135,8 @@ exports.usuariosApp = async (req, res) => {
   app.get("/api/movil/v1/ayudantes", [authJwt.verifyToken, authJwt.isSistema], movilController.usuariosApp);
 */
 exports.ayudantes = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todos los ayudantes de la app móvil sae' */
   try {
 
     const sql = "select u.id, p.rut, (p.nombres || ' ' || p.apellido_1 || case when p.apellido_2 is null then \
@@ -185,6 +193,8 @@ exports.ayudantes = async (req, res) => {
   app.get("/api/movil/v1/turnos", [authJwt.verifyToken, authJwt.isSistema], movilController.turnos);
 */
 exports.turnos = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todos los turnos de la app móvil sae' */
   try {
     const sql = "SELECT id, substring(inicio::text,1,5) || ' - ' || substring(fin::text,1,5) as turno, observacion FROM _comun.turnos order by id";
     const { QueryTypes } = require('sequelize');
@@ -228,6 +238,8 @@ exports.turnos = async (req, res) => {
   app.get("/api/movil/v1/eventostipo", [authJwt.verifyToken, authJwt.isSistema], movilController.eventostipo)
 */
 exports.eventostipo = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todos los tipos de eventos' */
   try {
     const sql = "SELECT id, codigo, descripcion FROM _comun.eventos_tipo ORDER BY id ASC;";
     const { QueryTypes } = require('sequelize');
@@ -271,6 +283,8 @@ exports.eventostipo = async (req, res) => {
   app.get("/api/movil/v1/camionetas", [authJwt.verifyToken, authJwt.isSistema], movilController.camionetas)
 */
 exports.camionetas = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todas las camionetas' */
   try {
     const sql = "SELECT c.id, c.patente, c.marca, c.modelo, b.nombre as base, c.activa FROM _comun.camionetas c join _comun.base b on c.id_base = b.id WHERE activa ORDER BY id ASC ";
     const { QueryTypes } = require('sequelize');
@@ -323,6 +337,8 @@ exports.camionetas = async (req, res) => {
   app.post("/api/movil/v1/creaevento", [authJwt.verifyToken, authJwt.isSistema], movilController.createEvento);
 */
 exports.createEvento = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Crea un nuevo evento' */
 
   const campos = [
     'numero_ot', 'tipo_evento', 'rut_maestro', 'rut_ayudante', 'codigo_turno', 'id_base', 'requerimiento', 'direccion', 'fecha_hora'
@@ -365,6 +381,8 @@ exports.createEvento = async (req, res) => {
   app.post("/api/movil/v1/creajornada", [authJwt.verifyToken, authJwt.isSistema], movilController.creaJornada)
 */
 exports.creaJornada = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Crea una nueva jornada' */
   try {
 
     const campos = [
@@ -405,6 +423,8 @@ exports.creaJornada = async (req, res) => {
   app.get("/api/movil/v1/oficinas", [authJwt.verifyToken, authJwt.isSistema], movilController.bases)
 */
 exports.bases = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todas las bases sae' */
   try {
     const sql = "select p.id, p.nombre, p.id_zonal from _comun.paquete p join (SELECT distinct sc.paquete \
       FROM _comun.servicio_comuna sc inner join _comun.servicios s on sc.servicio = s.codigo \
@@ -450,6 +470,8 @@ exports.bases = async (req, res) => {
   app.get("/api/movil/v1/comunas", [authJwt.verifyToken, authJwt.isSistema], movilController.comunas)
 */
 exports.comunas = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todas las comunas' */
   try {
     const sql = "SELECT  sc.comuna as codigo, c.nombre, sc.paquete as oficina \
     FROM _comun.servicio_comuna sc join _comun.servicios s on sc.servicio = s.codigo join \

@@ -13,6 +13,8 @@ const Oficinas = db.consulta_oficinas;
   app.post("/api/mantenedor/v1/creaestado", mantendorController.createEstado)
 */
 exports.createEstado = (req, res) => {
+  /*  #swagger.tags = ['SAE - Mantenedores']
+      #swagger.description = 'Crea un estado para sae' */
 
     if (!req.body["nombre"]) {
         res.status(400).send({
@@ -41,6 +43,8 @@ exports.createEstado = (req, res) => {
   app.get("/api/mantenedor/v1/estados", mantendorController.estados)
 */
 exports.estados = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Mantenedores']
+      #swagger.description = 'Devuelve todos los estados que puede tomar un reporte' */
     try {
       const sql = "SELECT * FROM sae.reporte_estados order by id";
       const { QueryTypes } = require('sequelize');
@@ -84,6 +88,8 @@ exports.estados = async (req, res) => {
   app.get("/api/mantenedor/v1/findallbases", mantendorController.findAllBases)
 */
   exports.findAllBases = async (req, res) => {
+    /*  #swagger.tags = ['SAE - Mantenedores']
+      #swagger.description = 'Devuelve todas las bases del sae' */
     await Base.findAll().then(data => {
         res.send(data);
     }).catch(err => {
@@ -98,6 +104,8 @@ exports.estados = async (req, res) => {
   app.get("/api/mantenedor/v1/findallclientes", mantendorController.findAllClientes)
 */
 exports.findAllClientes = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Mantenedores']
+      #swagger.description = 'Devuelve todos los clientes sae' */
   await Cliente.findAll().then(data => {
       res.send(data);
   }).catch(err => {
@@ -112,6 +120,8 @@ exports.findAllClientes = async (req, res) => {
   app.get("/api/mantenedor/v1/findalltipofuncionpersonal", mantendorController.findAllTipofuncionPersonal)
 */
 exports.findAllTipofuncionPersonal = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Mantenedores']
+      #swagger.description = 'Devuelve todos los tipo de funcion del personal sae' */
   await TipoFuncionPersonal.findAll({where: {sistema: false}}).then(data => {
       res.send(data);
   }).catch(err => {
@@ -126,6 +136,8 @@ exports.findAllTipofuncionPersonal = async (req, res) => {
   app.get("/api/mantenedor/v1/findallpersonas", mantendorController.findAllPersonas)
 */
 exports.findAllPersonas = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Mantenedores']
+      #swagger.description = 'Devuelve todos las personas' */
   try {
     const sql = "SELECT p.id, p.rut, p.apellido_1, p.apellido_2, p.nombres, p.base, p.cliente, \
     p.id_funcion, p.activo, c.nombre as nom_cliente, pq.nombre as oficina, tfp.nombre as nom_funcion \
@@ -190,6 +202,8 @@ exports.findAllPersonas = async (req, res) => {
   app.get("/api/mantenedor/v1/oficinas", mantendorController.oficinas)
 */
 exports.oficinas = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Mantenedores']
+      #swagger.description = 'Devuelve todas las oficinas del sae' */
   try {
     const sql = "select p.id, p.nombre, p.id_zonal from _comun.paquete p join (SELECT distinct sc.paquete \
       FROM _comun.servicio_comuna sc inner join _comun.servicios s on sc.servicio = s.codigo \
@@ -234,6 +248,8 @@ exports.oficinas = async (req, res) => {
   app.post("/api/mantenedor/v1/creapersona", mantendorController.createPersona);
 */
 exports.createPersona = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Mantenedores']
+      #swagger.description = 'crea una persona' */
 
   let salir = false;
   const campos = [

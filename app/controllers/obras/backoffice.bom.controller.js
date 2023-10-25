@@ -11,6 +11,8 @@ const Bom = db.bom;
 ;
 */
 exports.findAllBom = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve todos los materiales en el bom' */
 
     try {
       const sql = "SELECT b.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, reserva, \
@@ -50,6 +52,8 @@ exports.findAllBom = async (req, res) => {
   ;
   */
   exports.findBomByParametros = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve todos los materiales en el bom de acuerdo a los parámetros' */
   
     const parametros = {
       id_obra: req.query.id_obra,
@@ -114,6 +118,8 @@ exports.findAllBom = async (req, res) => {
   ;
   */
   exports.createBomMasivo = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Ingresa un grupo de materiales en el bom de una sola vez' */
   
     const campos = [
       'id_obra', 'reserva', 'materiales'
@@ -234,6 +240,8 @@ exports.findAllBom = async (req, res) => {
   ;
   */
   exports.createBomIndividual = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Ingresa un sólo material en el bom' */
     const campos = [
       'id_obra', 'reserva', 'codigo_sap_material', 'cantidad_requerida'
     ];
@@ -339,6 +347,8 @@ exports.findAllBom = async (req, res) => {
   ;
   */
   exports.deleteBomByReserva = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Borra un grupo de materiales asociados a una reserva' */
   
     const reserva = req.params.reserva;
     Bom.destroy({
@@ -360,6 +370,8 @@ exports.findAllBom = async (req, res) => {
   ;
   */
   exports.deleteBomByMaterial = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Borra un sólo material asociado a una reserva' */
     const reserva = req.params.reserva;
     const cod_sap = req.params.cod_sap;
     if (!cod_sap || !reserva){
