@@ -53,6 +53,9 @@ module.exports = function(app) {
 
 
     app.get("/api/obras/backoffice/v1/allestados", [authJwt.verifyToken], backofficeGeneralController.findAllEstadoObra);
+    
+
+    app.get("/api/obras/backoffice/v1/allestadovisitas", [authJwt.verifyToken], backofficeGeneralController.findAllEstadoVisita);
 
 
     app.get("/api/obras/backoffice/v1/allsegmentos", [authJwt.verifyToken], backofficeGeneralController.findAllSegmento);

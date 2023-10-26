@@ -7,6 +7,7 @@ const EmpresaContratista = db.empresaContratista;
 const CoordinadorContratista = db.coordinadorContratista;
 const Comuna = db.comuna;
 const EstadoObra = db.estadoObra;
+const EstadoVisita = db.estadoVisita;
 const Segmento = db.segmento;
 const TipoOperacion = db.tipoOperacion;
 const TipoActividad = db.tipoActividad;
@@ -163,14 +164,14 @@ exports.findAllMaestroActividadActividad = async (req, res) => {
           return;
         }
       };
-      let actividad = req.query.actividad;
-      actividad = '%' + actividad + '%';
+      let actividad = req.query.actividad.trim().split(" ");  //hace el trim y despues genera un array con los elementos
+      let condicion = actividad.map((item) => 'ma.actividad ILIKE \'%'+item+'%\'').reduce((acc, valor) => acc + ' AND ' +valor);
       const sql = "SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, \
       uc_retiro, uc_traslado, ma.descripcion FROM obras.maestro_actividades ma \
-      join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id WHERE ma.actividad LIKE :actividad";
+      join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id WHERE "+condicion;
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
-      const maestroActividad = await sequelize.query(sql,  { replacements: { actividad: actividad }, type: QueryTypes.SELECT });
+      const maestroActividad = await sequelize.query(sql,  { type: QueryTypes.SELECT });
       let salida;
       if (maestroActividad) {
         salida = [];
@@ -293,6 +294,19 @@ exports.findAllEstadoObra = async (req, res) => {
     } catch (err) {
       res.status(500).send({ message: err.message });
     }
+}
+/*********************************************************************************** */
+
+exports.findAllEstadoVisita = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Obras - General']
+    #swagger.description = 'Devuelve todos los estados de Visita Terreno' */
+  try {
+    const data = await EstadoVisita.findAll();
+    res.send(data);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 }
  /*********************************************************************************** */
 
