@@ -174,10 +174,33 @@ exports.updateVisitaTerreno = async (req, res) => {
         const id = req.params.id;
 
         let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-        fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
+       
+       fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
+
         id_obra = req.body.id_obra;
+        
         fecha_visita = req.body.fecha_visita;
+
+        fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
+
+
         let visita = undefined;
+
+
+        console.log("=================================");
+        console.log('id' + id);
+        console.log('fecha_hoy' + fecha_hoy);
+        console.log('fecha visita' + fecha_visita);
+        console.log("=================================");
+
+        
+        try {
+          let today = new Date(fecha_hoy).toISOString();
+        } catch (error) {
+          console.log('196 : '+error);
+        }
+
+
 
         
         if (id_obra) {
@@ -205,7 +228,7 @@ exports.updateVisitaTerreno = async (req, res) => {
                         cargo_contratista: req.body.cargo_contratista,
                         observacion: req.body.observacion,
                         estado: req.body.estado,
-                        fecha_modificacion: fecha_hoy
+                        fecha_modificacion: today
                 
                     }
                 }
@@ -220,24 +243,26 @@ exports.updateVisitaTerreno = async (req, res) => {
                     cargo_contratista: req.body.cargo_contratista,
                     observacion: req.body.observacion,
                     estado: req.body.estado,
-                    fecha_modificacion: fecha_hoy
+                    fecha_modificacion: today
             
                 }
             }
+
             if (visita != undefined) {
                 await VisitaTerreno.update(visita, { where: { id: id } })
                     .then(data => {
                         if (data == 1) {
                             res.send({ message: "Visita actualizada" });
                         }else {
-                            res.status(500).send({ message: "No se pudo actualizar la Visita" });
+                            res.status(500).send({ message: "No se pudo actualizar la Visita 246" });
                         }
                     }).catch(err => {
-                        res.status(500).send({ message: err.message });
+                        res.status(500).send({ message: err.message + " Visita no actualizada" });
                     })
                 }
         }
+
     }catch (error) {
-        res.status(500).send(error);
+        res.status(500).send('ERROR:'+error);
     }
 }
