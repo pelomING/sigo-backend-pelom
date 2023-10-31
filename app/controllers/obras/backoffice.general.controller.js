@@ -165,7 +165,7 @@ exports.findAllMaestroActividadActividad = async (req, res) => {
         }
       };
       let actividad = req.query.actividad.trim().split(" ");  //hace el trim y despues genera un array con los elementos
-      let condicion = actividad.map((item) => 'ma.actividad ILIKE \'%'+item+'%\'').reduce((acc, valor) => acc + ' AND ' +valor);
+      let condicion = actividad.filter((item) => item).map((item) => 'ma.actividad ILIKE \'%'+item+'%\'').reduce((acc, valor) => acc + ' AND ' +valor);
       const sql = "SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, \
       uc_retiro, uc_traslado, ma.descripcion FROM obras.maestro_actividades ma \
       join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id WHERE "+condicion;

@@ -53,7 +53,7 @@ module.exports = function(app) {
 
 
     app.get("/api/obras/backoffice/v1/allestados", [authJwt.verifyToken], backofficeGeneralController.findAllEstadoObra);
-    
+
 
     app.get("/api/obras/backoffice/v1/allestadovisitas", [authJwt.verifyToken], backofficeGeneralController.findAllEstadoVisita);
 
@@ -117,6 +117,8 @@ module.exports = function(app) {
 
   app.get("/api/obras/backoffice/v1/allreportesdiarios", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllEncabezadoReporteDiario);
 
+  app.get("/api/obras/backoffice/v1/reportesdiariosporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllEncabezadoReporteDiarioByParametros);
+
   app.post("/api/obras/backoffice/v1/creareportediario", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.createEncabezadoReporteDiario);
 
   app.put("/api/obras/backoffice/v1/actualizareportediario/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.updateEncabezadoReporteDiario);
@@ -129,7 +131,7 @@ module.exports = function(app) {
 
   app.get("/api/obras/backoffice/v1/reportesdiariosactividadporid", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findOneDetalleReporteDiarioActividad);
 
-  app.get("/api/obras/backoffice/v1/reportesdiariosactividadporencabezado", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findDetalleReporteDiarioActividadPorEncabezado);
+  app.get("/api/obras/backoffice/v1/reportesdiariosactividadporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findDetalleReporteDiarioActividadPorParametros);
 
   app.post("/api/obras/backoffice/v1/creardetalleactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.createOneDetalleReporteDiarioActividad);
 

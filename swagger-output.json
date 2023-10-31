@@ -1362,6 +1362,45 @@
         }
       }
     },
+    "/api/obras/backoffice/v1/reportesdiariosporparametros": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los ancabezados de reporte diario por parametro: id de reporte, id_obra, fecha_reporte\r  , debe indicarse al menos uno",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_reporte",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/creareportediario": {
       "post": {
         "tags": [
@@ -1598,15 +1637,20 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/reportesdiariosactividadporencabezado": {
+    "/api/obras/backoffice/v1/reportesdiariosactividadporparametros": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
         ],
-        "description": "Devuelve todos los registros de detalle de reportes diarios para un encabezado",
+        "description": "Devuelve un registro de detalle de reportes diarios por parámetros: id_obra, id_encabezado_rep,\r  debe tener al menos un parámetro",
         "parameters": [
           {
-            "name": "encabezado_reporte",
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_encabezado_rep",
             "in": "query",
             "type": "string"
           }
@@ -1614,9 +1658,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"

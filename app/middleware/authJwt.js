@@ -131,7 +131,7 @@ let isSupervisorOrAdmin = async (req, res, next) => {
         return next();
       }
 
-      if (element.name === "admin") {
+      if (element.name === "admin" || element.name === "adminsae") {
         return next();
       }
     }
