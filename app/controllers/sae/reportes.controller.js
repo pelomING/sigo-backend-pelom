@@ -25,8 +25,8 @@ exports.findAllJornadas = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todas las jornadas' */
     try {
-      const sql = "SELECT id, rut_maestro, rut_ayudante, codigo_turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, \
-      fecha_hora_fin::text, estado	FROM sae.reporte_jornada ORDER BY id DESC;";
+      const sql = "SELECT id, rut_maestro, rut_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, \
+      fecha_hora_fin::text, estado	FROM sae.reporte_jornada rj JOIN _comun.turnos t on rj.codigo_turno = t.id ORDER BY id DESC;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const jornadas = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -37,7 +37,7 @@ exports.findAllJornadas = async (req, res) => {
             typeof element.id === 'number' && 
             typeof element.rut_maestro === 'string' &&
             typeof element.rut_ayudante === 'string' &&
-            typeof element.codigo_turno === 'number' &&
+            typeof element.turno === 'string' &&
             typeof element.patente === 'string' &&
             typeof element.paquete === 'number' &&
             (typeof element.km_inicial === 'number' || typeof element.km_inicial === 'string') &&
@@ -51,7 +51,7 @@ exports.findAllJornadas = async (req, res) => {
                 id: Number(element.id),
                 rut_maestro: String(element.rut_maestro),
                 rut_ayudante: String(element.rut_ayudante),
-                codigo_turno: Number(element.codigo_turno),
+                turno: String(element.turno),
                 patente: String(element.patente),
                 paquete: Number(element.paquete),
                 km_inicial: String(element.km_inicial),
