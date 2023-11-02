@@ -16,7 +16,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:4200", "http://localhost:59214", "http://181.42.20.52:4200"],
+    origin: ["http://localhost:4200", "http://localhost:59214", "http://181.42.20.52:4200", "https://siscop.up.railway.app"],
   })
 );
 
