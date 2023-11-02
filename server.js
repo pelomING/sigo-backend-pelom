@@ -1,9 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
-const swaggerJsdoc = require("swagger-jsdoc");
+//const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const options = require('./app/config/swagger.config');
+const swaggerFile = require('./swagger-output.json')
+const bodyParser = require('body-parser')
+//const options = require('./app/config/swagger.config');
 
 //const options = swaggerConfig;
 
@@ -14,7 +16,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:4200", "http://localhost:59214"],
+    origin: ["http://localhost:4200", "http://localhost:59214", "http://181.42.20.52:4200", "https://siscop.up.railway.app"],
   })
 );
 
@@ -39,11 +41,13 @@ const db = require("./app/models");
 const Role = db.role;
 
 //se usa db.sequelize.sync({force: true}) para que reconstruya la base
+/*
 db.sequelize.sync().then(() => {
   console.log('Drop and Resync Db');
   //y se llama a la funcion init() para que reconstruya la base
   //initial();
 });
+*/
 
 function initial() {
   Role.create({
@@ -63,8 +67,9 @@ function initial() {
 }
 
 // Swagger
+/*
 const specs = swaggerJsdoc(options);
-console.log(options);
+//console.log(options);
 app.use(
   "/api-docs",
   swaggerUi.serve,
@@ -74,6 +79,10 @@ app.use(
       "https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-newspaper.css",
   })
 );
+*/
+
+app.use(bodyParser.json())
+app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 // simple route
 app.get("/", (req, res) => {
@@ -81,11 +90,13 @@ app.get("/", (req, res) => {
 });
 
 // routes
+
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
-require('./app/routes/movil.routes')(app);
+require('./app/routes/sae_movil.routes')(app);
 require('./app/routes/mantenedor.routes')(app);
-require('./app/routes/reportes.routes')(app);
+require('./app/routes/sae_reportes.routes')(app);
+require('./app/routes/obras_backoffice.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

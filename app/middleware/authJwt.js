@@ -97,58 +97,93 @@ let isTecnico = async (req, res, next) => {
   }
 };
 
-let isModerator = async (req, res, next) => {
+let isSupervisor = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.userId);
     const roles = await user.getRoles();
 
     for (const element of roles) {
-      if (element.name === "moderator") {
+      if (element.name === "supervisor") {
         return next();
       }
     }
 
     return res.status(403).send({
-      message: "Require Moderator Role!",
+      error: true,
+      message: "Debe ser Supervisor",
     });
   } catch (error) {
     return res.status(500).send({
-      message: "Unable to validate Moderator role!",
+      error: true,
+      message: "No es posible determinar el rol",
     });
   }
 };
 
-let isModeratorOrAdmin = async (req, res, next) => {
+
+let isSupervisorOrAdmin = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.userId);
     const roles = await user.getRoles();
 
     for (const element of roles) {
-      if (element.name === "moderator") {
+      if (element.name === "supervisor") {
+        return next();
+      }
+
+      if (element.name === "admin" || element.name === "adminsae") {
+        return next();
+      }
+    }
+
+    return res.status(403).send({
+      message: "Debe ser Supervisor o Administrador!",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "No es posible determinar el rol",
+    });
+  }
+};
+
+
+let isSupervisorOrAdminOrSistema = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.userId);
+    const roles = await user.getRoles();
+
+    for (const element of roles) {
+      if (element.name === "supervisor") {
         return next();
       }
 
       if (element.name === "admin") {
         return next();
       }
+
+      if (element.name === "sistema") {
+        return next();
+      }
     }
 
     return res.status(403).send({
-      message: "Require Moderator or Admin Role!",
+      message: "Debe ser Supervisor o Administrador o Sistema!",
     });
   } catch (error) {
     return res.status(500).send({
-      message: "Unable to validate Moderator or Admin role!",
+      message: "No es posible determinar el rol",
     });
   }
 };
+
 
 const authJwt = {
   verifyToken,
   isAdmin,
   isTecnico,
-  isModerator,
-  isModeratorOrAdmin,
-  isSistema
+  isSistema,
+  isSupervisor,
+  isSupervisorOrAdmin,
+  isSupervisorOrAdminOrSistema
 };
 module.exports = authJwt;

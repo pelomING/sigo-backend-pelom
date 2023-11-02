@@ -11,18 +11,19 @@ const options = {
           url: "https://spdx.org/licenses/MIT.html",
         },
         contact: {
-          name: "LogRocket",
-          url: "https://logrocket.com",
-          email: "info@email.com",
+          name: "Tecnología y Negocios Pelom",
+          url: "https://www.pelom.cl",
+          email: "ti.pelom@pelom.cl",
         },
       },
       servers: [
         {
-          url: "http://localhost:8080/api/movil/v1/",
+          url: "http://localhost:8080/",
         },
       ],
     },
-    apis: ["./routes/*.js"],
+    basePath: "/",
+    apis: ["../../server.js"],
   };
 
   module.exports = options;

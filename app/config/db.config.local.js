@@ -2,7 +2,7 @@ module.exports = {
     HOST: "localhost",
     USER: "postgres",
     PASSWORD: "hm1308!@..",
-    DB: "sae",
+    DB: "pelom-db",
     dialect: "postgres",
     define: {
       id: false,  // disable default id

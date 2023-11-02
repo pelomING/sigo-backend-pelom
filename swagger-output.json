@@ -1,0 +1,2278 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "API Obras",
+    "description": "API de Obras",
+    "contact": {
+      "name": "Tecnología y Negocios Pelom",
+      "url": "https://www.pelom.cl",
+      "email": "ti.pelom@pelom.cl"
+    },
+    "version": "1.0.0"
+  },
+  "host": "localhost:8080",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/api/auth/signup": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Registro de un usuariuo nuevo",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "example": "any"
+                },
+                "email": {
+                  "example": "any"
+                },
+                "roles": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/auth/signin": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Login de usuario",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/auth/signout": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Logout de usuario",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/mantenedor/v1/creaestado": {
+      "post": {
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Crea un estado para sae",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nombre": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/mantenedor/v1/creapersona": {
+      "post": {
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "crea una persona",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rut": {
+                  "example": "any"
+                },
+                "apellido_1": {
+                  "example": "any"
+                },
+                "apellido_2": {
+                  "example": "any"
+                },
+                "nombres": {
+                  "example": "any"
+                },
+                "base": {
+                  "example": "any"
+                },
+                "cliente": {
+                  "example": "any"
+                },
+                "id_funcion": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/mantenedor/v1/estados": {
+      "get": {
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todos los estados que puede tomar un reporte",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/mantenedor/v1/findallbases": {
+      "get": {
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todas las bases del sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/mantenedor/v1/findallclientes": {
+      "get": {
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todos los clientes sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/mantenedor/v1/findalltipofuncionpersonal": {
+      "get": {
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todos los tipo de funcion del personal sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/mantenedor/v1/findallpersonas": {
+      "get": {
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todos las personas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/mantenedor/v1/oficinas": {
+      "get": {
+        "tags": [
+          "SAE - Mantenedores"
+        ],
+        "description": "Devuelve todas las oficinas del sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/alltipoobras": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los tipo de Obra",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/alltipoperacion": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los tipo de Operación",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/alltipoactividad": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los tipo de Actividad",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allmaestroactividad": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todas las actividades dentro del Maestro Actividades",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/maestroactividadporid": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve una actividad dentro del Maestro Actividades buscando por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/maestroactividadporactividad": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todas las actividades que coincidan (select like) con el campo actividad dentro del Maestro Actividades",
+        "parameters": [
+          {
+            "name": "actividad",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allzonales": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todas las zonales",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/alldelegaciones": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todas las delegaciones",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/alltipotrabajos": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los tipo de Trabajo",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allempresacontratistas": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todas las empresas contratistas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allcoordinadorcontratistas": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los coordinadores contratistas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allcomunas": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todas las comunas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allestados": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los estados de Obra",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allestadovisitas": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los estados de Visita Terreno",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allsegmentos": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los segmentos",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allobras": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Devuelve todas las obras de la tabla de obras",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/creaobra": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Crea una nueva obra",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "codigo_obra": {
+                  "example": "any"
+                },
+                "nombre_obra": {
+                  "example": "any"
+                },
+                "numero_ot": {
+                  "example": "any"
+                },
+                "zona": {
+                  "example": "any"
+                },
+                "delegacion": {
+                  "example": "any"
+                },
+                "gestor_cliente": {
+                  "example": "any"
+                },
+                "numero_aviso": {
+                  "example": "any"
+                },
+                "numero_oc": {
+                  "example": "any"
+                },
+                "monto": {
+                  "example": "any"
+                },
+                "cantidad_uc": {
+                  "example": "any"
+                },
+                "fecha_llegada": {
+                  "example": "any"
+                },
+                "fecha_inicio": {
+                  "example": "any"
+                },
+                "fecha_termino": {
+                  "example": "any"
+                },
+                "tipo_trabajo": {
+                  "example": "any"
+                },
+                "persona_envia_info": {
+                  "example": "any"
+                },
+                "cargo_persona_envia_info": {
+                  "example": "any"
+                },
+                "empresa_contratista": {
+                  "example": "any"
+                },
+                "coordinador_contratista": {
+                  "example": "any"
+                },
+                "comuna": {
+                  "example": "any"
+                },
+                "ubicacion": {
+                  "example": "any"
+                },
+                "estado": {
+                  "example": "any"
+                },
+                "tipo_obra": {
+                  "example": "any"
+                },
+                "segmento": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/actualizaobra/{id}": {
+      "put": {
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Actualiza una obra",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/eliminaobra/{id}": {
+      "delete": {
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Borra una obra, pasando el campo eliminado a true",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/obras/{id}": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Devuelve una obra por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/obras": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Devuelve una obra por código de obra",
+        "parameters": [
+          {
+            "name": "codigo_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allbom": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve todos los materiales en el bom",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/bomporparametros": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve todos los materiales en el bom de acuerdo a los parámetros",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "reserva",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "codigo_sap_material",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/creabom": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Ingresa un grupo de materiales en el bom de una sola vez",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "materiales": {
+                  "example": "any"
+                },
+                "id_obra": {
+                  "example": "any"
+                },
+                "reserva": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/creabomindividual": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Ingresa un sólo material en el bom",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "codigo_sap_material": {
+                  "example": "any"
+                },
+                "cantidad_requerida": {
+                  "example": "any"
+                },
+                "id_obra": {
+                  "example": "any"
+                },
+                "reserva": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/eliminabomporreserva/{reserva}": {
+      "delete": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Borra un grupo de materiales asociados a una reserva",
+        "parameters": [
+          {
+            "name": "reserva",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/eliminamaterialbom/{reserva}/{cod_sap}": {
+      "delete": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Borra un sólo material asociado a una reserva",
+        "parameters": [
+          {
+            "name": "reserva",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cod_sap",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allvisitaterreno": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Visita Terreno"
+        ],
+        "description": "Devuelve todas las visitas a terreno",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/visitaterreno": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Visita Terreno"
+        ],
+        "description": "Devuelve las visitas a terreno por ID de obra (id_obra)",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/creavisitaterreno": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Visita Terreno"
+        ],
+        "description": "Crea una visita a terreno",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_visita": {
+                  "example": "any"
+                },
+                "id_obra": {
+                  "example": "any"
+                },
+                "direccion": {
+                  "example": "any"
+                },
+                "persona_mandante": {
+                  "example": "any"
+                },
+                "cargo_mandante": {
+                  "example": "any"
+                },
+                "persona_contratista": {
+                  "example": "any"
+                },
+                "cargo_contratista": {
+                  "example": "any"
+                },
+                "observacion": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/actualizavisitaterreno/{id}": {
+      "put": {
+        "tags": [
+          "Obras - Backoffice - Visita Terreno"
+        ],
+        "description": "Actualiza una visita a terreno",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_obra": {
+                  "example": "any"
+                },
+                "fecha_visita": {
+                  "example": "any"
+                },
+                "direccion": {
+                  "example": "any"
+                },
+                "persona_mandante": {
+                  "example": "any"
+                },
+                "cargo_mandante": {
+                  "example": "any"
+                },
+                "persona_contratista": {
+                  "example": "any"
+                },
+                "cargo_contratista": {
+                  "example": "any"
+                },
+                "observacion": {
+                  "example": "any"
+                },
+                "estado": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allreportesdiarios": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los ancabezados de reporte diario",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/reportesdiariosporparametros": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los ancabezados de reporte diario por parametro: id de reporte, id_obra, fecha_reporte\r  , debe indicarse al menos uno",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_reporte",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/creareportediario": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Crea un encabezado de reporte diario",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_obra": {
+                  "type": "number",
+                  "example": 1
+                },
+                "fecha_reporte": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "jefe_faena": {
+                  "type": "string",
+                  "example": "nombre jefe de faena"
+                },
+                "sdi": {
+                  "type": "string",
+                  "example": "sdi"
+                },
+                "gestor_cliente": {
+                  "type": "string",
+                  "example": "nombre gestor cliente"
+                },
+                "id_area": {
+                  "type": "number",
+                  "example": 1
+                },
+                "brigada_pesada": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "observaciones": {
+                  "type": "string",
+                  "example": "observaciones"
+                },
+                "entregado_por_persona": {
+                  "type": "string",
+                  "example": "nombre persona"
+                },
+                "fecha_entregado": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "revisado_por_persona": {
+                  "type": "string",
+                  "example": "nombre persona que revisa"
+                },
+                "fecha_revisado": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "sector": {
+                  "type": "string",
+                  "example": "direccion sector"
+                },
+                "hora_salida_base": {
+                  "type": "string",
+                  "example": "2023-10-25 07:30:00"
+                },
+                "hora_llegada_terreno": {
+                  "type": "string",
+                  "example": "2023-10-25 08:00"
+                },
+                "hora_salida_terreno": {
+                  "type": "string",
+                  "example": "2023-10-25 18:30"
+                },
+                "hora_llegada_base": {
+                  "type": "string",
+                  "example": "2023-10-25 19:30"
+                },
+                "alimentador": {
+                  "type": "string",
+                  "example": "alimentador"
+                },
+                "comuna": {
+                  "type": "string",
+                  "example": "10345"
+                },
+                "num_documento": {
+                  "type": "string",
+                  "example": "10001000600"
+                },
+                "flexiapp": {
+                  "type": "string",
+                  "example": "CGE-123343-55"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/actualizareportediario/{id}": {
+      "put": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Actualiza un encabezado de reporte diario por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/eliminareportediario/{id}": {
+      "delete": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Borra un encabezado de reporte diario por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/allreportesdiariosactividad": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los registros de detalle de reportes diarios",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/reportesdiariosactividadporid": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve un registro de detalle de reportes diarios por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/reportesdiariosactividadporparametros": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve un registro de detalle de reportes diarios por parámetros: id_obra, id_encabezado_rep,\r  debe tener al menos un parámetro",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_encabezado_rep",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/creardetalleactividad": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Crea un detalle de reporte diario",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para el detalle de reporte diario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tipo_operacion": {
+                  "type": "number",
+                  "example": 1
+                },
+                "id_actividad": {
+                  "type": "number",
+                  "example": 537
+                },
+                "cantidad": {
+                  "type": "number",
+                  "example": 2.3
+                },
+                "id_encabezado_rep": {
+                  "type": "number",
+                  "example": 3
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/paquete": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos los paquetes en sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/zonaPaqueteBaseSql": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos la relación zona-paquete-base en sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/usuariosApp": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos usuarios de la app móvil sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/turnos": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos los turnos de la app móvil sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/eventostipo": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos los tipos de eventos",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/ayudantes": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos usuarios de la app móvil sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/camionetas": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todas las camionetas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/oficinas": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todas las bases sae",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/comunas": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todas las comunas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/creaevento": {
+      "post": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Crea un nuevo evento",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "numero_ot": {
+                  "example": "any"
+                },
+                "tipo_evento": {
+                  "example": "any"
+                },
+                "rut_maestro": {
+                  "example": "any"
+                },
+                "rut_ayudante": {
+                  "example": "any"
+                },
+                "codigo_turno": {
+                  "example": "any"
+                },
+                "id_base": {
+                  "example": "any"
+                },
+                "requerimiento": {
+                  "example": "any"
+                },
+                "direccion": {
+                  "example": "any"
+                },
+                "fecha_hora": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/creajornada": {
+      "post": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Crea una nueva jornada",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rut_maestro": {
+                  "example": "any"
+                },
+                "rut_ayudante": {
+                  "example": "any"
+                },
+                "codigo_turno": {
+                  "example": "any"
+                },
+                "patente": {
+                  "example": "any"
+                },
+                "base": {
+                  "example": "any"
+                },
+                "km_inicial": {
+                  "example": "any"
+                },
+                "km_final": {
+                  "example": "any"
+                },
+                "fecha_hora_ini": {
+                  "example": "any"
+                },
+                "fecha_hora_fin": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/alljornada": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve todas las jornadas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/alleventos": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve todos los eventos",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/allestadosresultado": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve todos los estados de resultado",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/creaestadoresultado": {
+      "post": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Crea un estado resultado",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "eventos_relacionados": {
+                  "example": "any"
+                },
+                "id_usuario": {
+                  "example": "any"
+                },
+                "zona": {
+                  "example": "any"
+                },
+                "paquete": {
+                  "example": "any"
+                },
+                "mes": {
+                  "example": "any"
+                },
+                "fecha_inicio": {
+                  "example": "any"
+                },
+                "fecha_final": {
+                  "example": "any"
+                },
+                "nombre_doc": {
+                  "example": "any"
+                },
+                "url_doc": {
+                  "example": "any"
+                },
+                "fecha_creacion": {
+                  "example": "any"
+                },
+                "fecha_modificacion": {
+                  "example": "any"
+                },
+                "estado": {
+                  "example": "any"
+                },
+                "id_cliente": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/resumeneventos": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve el resumen de eventos por paquete y rango de fechas",
+        "parameters": [
+          {
+            "name": "id_paquete",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_inicial",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_final",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/resumenturnos": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve el resumen de turnos por paquete y rango de fechas",
+        "parameters": [
+          {
+            "name": "id_paquete",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_inicial",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_final",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  }
+}
