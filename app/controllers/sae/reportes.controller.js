@@ -26,7 +26,7 @@ exports.findAllJornadas = async (req, res) => {
       #swagger.description = 'Devuelve todas las jornadas' */
     try {
       const sql = "SELECT id, rut_maestro, rut_ayudante, codigo_turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, \
-      fecha_hora_fin::text, estado	FROM sae.reporte_jornada ORDER BY id ASC;";
+      fecha_hora_fin::text, estado	FROM sae.reporte_jornada ORDER BY id DESC;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const jornadas = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -95,7 +95,7 @@ exports.findAllJornadas = async (req, res) => {
       (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, p.nombre as paquete, \
       e.requerimiento, e.direccion, e.fecha_hora::text, e.estado FROM sae.reporte_eventos e join \
       _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
-      _comun.paquete p on e.id_paquete = p.id order by e.id asc";
+      _comun.paquete p on e.id_paquete = p.id order by e.id desc";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
