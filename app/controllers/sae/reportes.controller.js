@@ -25,7 +25,7 @@ exports.findAllJornadas = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todas las jornadas' */
     try {
-      const sql = "SELECT id, rut_maestro, rut_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, \
+      const sql = "SELECT rj.id, rut_maestro, rut_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, \
       fecha_hora_fin::text, estado	FROM sae.reporte_jornada rj JOIN _comun.turnos t on rj.codigo_turno = t.id ORDER BY id DESC;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
