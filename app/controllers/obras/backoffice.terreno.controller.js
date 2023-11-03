@@ -1,5 +1,7 @@
 const db = require("../../models");
 const VisitaTerreno = db.visitaTerreno;
+const VerificaAuth = db.verificaAuth;
+
 
 /*********************************************************************************** */
 /* Consulta todas las visitas terreno
@@ -9,6 +11,26 @@ exports.findAllVisitaTerreno = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
       #swagger.description = 'Devuelve todas las visitas a terreno' */
     try {
+
+      console.log('findAllVisitaTerreno');
+        let id_user = req.userId;
+        let codigo_api = 'obras.backoffice.terreno';
+        let crud = 'leer';
+        const verificaAuth = await VerificaAuth.findOne({
+          where: {
+            user_id: id_user,
+            codigo: codigo_api,
+            [crud]: true
+          }
+        });
+        if (!verificaAuth) {
+          return res.status(403).send({
+            error: true,
+            message: "No tiene permiso para realizar esta operación"
+          })
+        }
+
+
         const sql = "SELECT vt.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
         fecha_visita::text, direccion, persona_mandante, cargo_mandante, persona_contratista, cargo_contratista, \
         observacion, row_to_json(ev) as estado, fecha_modificacion::text FROM obras.visitas_terreno vt join \
@@ -53,6 +75,26 @@ exports.findVisitaTerrenoByIdObra = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
       #swagger.description = 'Devuelve las visitas a terreno por ID de obra (id_obra)' */
       try {
+        /// Revisa los permisos //////
+        let id_user = req.userId;
+        let codigo_api = 'obras.backoffice.terreno';
+        let crud = 'leer';
+        const verificaAuth = await VerificaAuth.findOne({
+          where: {
+            user_id: id_user,
+            codigo: codigo_api,
+            [crud]: true
+          }
+        });
+        if (!verificaAuth) {
+          return res.status(403).send({
+            error: true,
+            message: "No tiene permiso para realizar esta operación"
+          })
+        }
+        /////////////////////////////////////////////
+
+
         const campos = [
             'id_obra'
           ];
@@ -110,6 +152,25 @@ exports.createVisitaTerreno = async (req, res) => {
       #swagger.description = 'Crea una visita a terreno' */
 
     try {
+
+        /// Revisa los permisos //////
+        let id_user = req.userId;
+        let codigo_api = 'obras.backoffice.terreno';
+        let crud = 'crear';
+        const verificaAuth = await VerificaAuth.findOne({
+          where: {
+            user_id: id_user,
+            codigo: codigo_api,
+            [crud]: true
+          }
+        });
+        if (!verificaAuth) {
+          return res.status(403).send({
+            error: true,
+            message: "No tiene permiso para realizar esta operación"
+          })
+        }
+        /////////////////////////////////////////////
 
         const campos = [
         'id_obra', 'fecha_visita', 'direccion', 'persona_mandante', 'cargo_mandante', 'persona_contratista', 'cargo_contratista'
@@ -171,11 +232,30 @@ exports.updateVisitaTerreno = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
       #swagger.description = 'Actualiza una visita a terreno' */
     try{
+        /// Revisa los permisos //////
+        let id_user = req.userId;
+        let codigo_api = 'obras.backoffice.terreno';
+        let crud = 'actualizar';
+        const verificaAuth = await VerificaAuth.findOne({
+          where: {
+            user_id: id_user,
+            codigo: codigo_api,
+            [crud]: true
+          }
+        });
+        if (!verificaAuth) {
+          return res.status(403).send({
+            error: true,
+            message: "No tiene permiso para realizar esta operación"
+          })
+        }
+        /////////////////////////////////////////////
+
         const id = req.params.id;
 
         let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
        
-       fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
+        fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
 
         id_obra = req.body.id_obra;
         

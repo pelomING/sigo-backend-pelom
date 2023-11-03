@@ -36,8 +36,13 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
+/****** MODELOS */
+/*****  AUTH */
+db.personas = require("./auth/personas.model.js")(sequelize, Sequelize);
 db.user = require("./auth/user.model.js")(sequelize, Sequelize);
 db.role = require("./auth/role.model.js")(sequelize, Sequelize);
+db.loginHistorial = require("./auth/loginHistorial.model.js")(sequelize, Sequelize);
+db.verificaAuth = require("./auth/verificaAuth.model.js")(sequelize, Sequelize);
 
 db.role.belongsToMany(db.user, {
   through: "user_roles"
@@ -49,9 +54,6 @@ db.user.belongsToMany(db.role, {
 db.ROLES = ["user", "admin", "moderator", "tecnico", "supervisor", "sistema"];
 
 
-/****** MODELOS */
-/*****  AUTH */
-db.personas = require("./auth/personas.model.js")(sequelize, Sequelize);
 
 /*****  COMUN */
 db.base = require("./comun/base.model.js")(sequelize, Sequelize);
