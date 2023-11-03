@@ -2,6 +2,7 @@ const db = require("../../models");
 const config = require("../../config/auth.config");
 const User = db.user;
 const Role = db.role;
+const LoginHistorial = db.loginHistorial;
 
 const Op = db.Sequelize.Op;
 
@@ -43,6 +44,9 @@ exports.signin = async (req, res) => {
   /*  #swagger.tags = ['Autenticación']
       #swagger.description = 'Login de usuario' */
   try {
+    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const fechoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12)
+  
 
     const user = await User.findOne({
       where: {
@@ -81,6 +85,18 @@ exports.signin = async (req, res) => {
 
     req.session.token = token;
 
+    //* almacenar el log *//
+    const loginHistorial = await LoginHistorial.create({
+      username: user.username,
+      email: user.email,
+      accion: 'Login',
+      fecha_hora: fechoy
+    }).then(data => {
+      console.log('ok');
+    }).catch(err => {
+      console.log('err', err);
+    })
+
     return res.status(200).send({
       id: user.id,
       username: user.username,
@@ -103,6 +119,7 @@ exports.signout = async (req, res) => {
   /*  #swagger.tags = ['Autenticación']
       #swagger.description = 'Logout de usuario' */
   try {
+    //console.log("req.session", req);
     req.session = null;
     return res.status(200).send({
       message: "You've been signed out!"

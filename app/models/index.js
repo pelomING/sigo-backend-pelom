@@ -41,6 +41,7 @@ db.sequelize = sequelize;
 db.personas = require("./auth/personas.model.js")(sequelize, Sequelize);
 db.user = require("./auth/user.model.js")(sequelize, Sequelize);
 db.role = require("./auth/role.model.js")(sequelize, Sequelize);
+db.loginHistorial = require("./auth/loginHistorial.model.js")(sequelize, Sequelize);
 db.verificaAuth = require("./auth/verificaAuth.model.js")(sequelize, Sequelize);
 
 db.role.belongsToMany(db.user, {

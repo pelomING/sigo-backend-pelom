@@ -12,6 +12,7 @@ exports.findAllVisitaTerreno = async (req, res) => {
       #swagger.description = 'Devuelve todas las visitas a terreno' */
     try {
 
+      console.log('findAllVisitaTerreno');
         let id_user = req.userId;
         let codigo_api = 'obras.backoffice.terreno';
         let crud = 'leer';
