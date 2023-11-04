@@ -16,7 +16,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:4200", "http://localhost:59214", "http://181.42.20.52:4200", "https://siscop.up.railway.app"],
+    origin: ["http://localhost:4200", "http://localhost:59214", "https://siscop.up.railway.app"],
   })
 );
 
@@ -102,5 +102,6 @@ require('./app/routes/obras_backoffice.routes')(app);
 const PORT = process.env.PORT || 8080;
 const NodeEnv = process.env.NODE_ENV || "local";
 app.listen(PORT, () => {
+  console.log(`Base de datos [${process.env.DATABASE_URL}] `);
   console.log(`Server [${NodeEnv}] is running on port ${PORT}.`);
 });
