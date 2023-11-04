@@ -13,11 +13,10 @@ if (process.env.NODE_ENV === "production") {
 
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize(
-  null,
-  null,
-  null,
+  dbconfig.DB,
+  dbconfig.USER,
+  dbconfig.PASSWORD,
   {
-    url: dbconfig.url,
     host: dbconfig.HOST,
     dialect: dbconfig.dialect,
     define : dbconfig.define,
