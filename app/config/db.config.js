@@ -1,9 +1,4 @@
 module.exports = {
-    HOST: "containers-us-west-195.railway.app",
-    USER: "postgres",
-    PORT: 7921,
-    PASSWORD: "oHSOIS08dgl0m9L1WGSR",
-    DB: "pelom-db",
     dialect: "postgres",
     define: {
       id: false,  // disable default id

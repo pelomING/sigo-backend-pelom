@@ -1,6 +1,8 @@
 // const config = require("../config/db.config.local.js");
+const {ConnectionString} = require('connection-string');
 
 let dbconfig = {};
+/*
 if (process.env.NODE_ENV === "production") {
   dbconfig = require("../config/db.config.prod.js");
 }else if(process.env.NODE_ENV === "development"){
@@ -10,6 +12,26 @@ if (process.env.NODE_ENV === "production") {
 }else{
   dbconfig = require("../config/db.config.local.js");
 }
+*/
+dbconfig = require("../config/db.config.js");
+
+console.log('process.env.DATABASE_URL', process.env.DATABASE_URL);
+console.log('process.env.DATABASE_NAME', process.env.DATABASE_NAME)
+
+const database_url = process.env.DATABASE_URL;
+const write_uri = new ConnectionString(database_url);
+
+if (database_url){
+  dbconfig.DB = process.env.DATABASE_NAME;
+  dbconfig.USER = write_uri.user;
+  dbconfig.PASSWORD = write_uri.password;
+  dbconfig.HOST = write_uri.hostname;
+  dbconfig.PORT = write_uri.port;
+}
+
+//const connDB = write_uri.path[0];
+//dbconfig.DB = connDB;
+//console.log('connDB', connDB);
 
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize(
@@ -30,7 +52,6 @@ const sequelize = new Sequelize(
     }
   }
 );
-
 
 const db = {};
 

@@ -4,7 +4,6 @@ module.exports = {
     PORT: 5655,
     PASSWORD: "sPamwlPOKx6gKhvfEgTR",
     DB: "pelom-db",
-    url: "postgres://postgres:sPamwlPOKx6gKhvfEgTR@containers-us-west-123.railway.app:5655/pelom-db",
     dialect: "postgres",
     define: {
       id: false,  // disable default id
