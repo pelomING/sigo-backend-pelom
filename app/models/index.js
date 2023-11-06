@@ -17,6 +17,7 @@ const sequelize = new Sequelize(
   dbconfig.USER,
   dbconfig.PASSWORD,
   {
+    url: dbconfig.url,
     host: dbconfig.HOST,
     dialect: dbconfig.dialect,
     define : dbconfig.define,

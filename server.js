@@ -102,5 +102,6 @@ require('./app/routes/obras_backoffice.routes')(app);
 const PORT = process.env.PORT || 8080;
 const NodeEnv = process.env.NODE_ENV || "local";
 app.listen(PORT, () => {
+  console.log(`Base de datos [${process.env.DATABASE_URL}] `);
   console.log(`Server [${NodeEnv}] is running on port ${PORT}.`);
 });
