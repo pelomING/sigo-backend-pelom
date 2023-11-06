@@ -52,5 +52,8 @@ module.exports = function(app) {
     // deshabilitada por ahora para la api
     app.post("/api/movil/v1/creajornada", [authJwt.verifyToken, authJwt.isSistema], movilController.creaJornada);
 
+    //actualiza un evento por ID de evento
+    app.put("/api/movil/v1/actualizaEvento/:id", [authJwt.verifyToken, authJwt.isSistema], movilController.updateEvento);
+
 
   };

@@ -22,12 +22,6 @@ const database_url = process.env.DATABASE_URL;
 const write_uri = new ConnectionString(database_url);
 
 if (database_url){
-  console.log('user:', write_uri.user)
-  console.log('password:', write_uri.password)
-  console.log('host:', write_uri.hostname)
-  console.log('port:', write_uri.port)
-  console.log('db:', write_uri.path[0])
-
   dbconfig.DB = process.env.DATABASE_NAME;
   dbconfig.USER = write_uri.user;
   dbconfig.PASSWORD = write_uri.password;
@@ -58,9 +52,6 @@ const sequelize = new Sequelize(
     }
   }
 );
-
-
-console.log('write_uri', write_uri);
 
 const db = {};
 

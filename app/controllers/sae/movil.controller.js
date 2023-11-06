@@ -417,6 +417,43 @@ exports.creaJornada = async (req, res) => {
 }
 /*********************************************************************************** */
 
+/*********************************************************************************** */
+/*Actualiza un evento
+  app.post("/api/movil/v1/updateevento", [authJwt.verifyToken, authJwt.isSistema], movilController.updateEvento);
+*/
+exports.updateEvento = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Actualiza un evento' */
+  try {
+    const id = req.params.id;
+
+    const evento = {
+      numero_ot: req.body.numero_ot,
+      tipo_evento: req.body.tipo_evento,
+      rut_maestro: req.body.rut_maestro,
+      rut_ayudante: req.body.rut_ayudante,
+      codigo_turno: req.body.codigo_turno,
+      id_base: req.body.id_base,
+      requerimiento: req.body.requerimiento,
+      direccion: req.body.direccion,
+      fecha_hora: req.body.fecha_hora
+    };
+
+    await Eventos.update(evento, { where: { id: id } })
+          .then(data => {
+              if (data == 1) {
+                  res.send({ message: "Evento actualizado" });
+              }else {
+                  res.status(500).send({ message: "No se pudo actualizar el evento" });
+              }
+          }).catch(err => {
+              res.status(500).send({ message: err.message + " Evento no actualizado" });
+          })
+
+  }catch (error) {
+      res.status(500).send(error);
+    }
+}
 
 /*********************************************************************************** */
 /*Devuelve las oficinas
