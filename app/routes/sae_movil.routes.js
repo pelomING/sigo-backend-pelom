@@ -55,5 +55,8 @@ module.exports = function(app) {
     //actualiza un evento por ID de evento
     app.put("/api/movil/v1/actualizaEvento/:id", [authJwt.verifyToken, authJwt.isSistema], movilController.updateEvento);
 
+    //actualiza una jornada por ID
+    app.put("/api/movil/v1/actualizaJornada/:id", [authJwt.verifyToken, authJwt.isSistema], movilController.updateJornada);
+
 
   };

@@ -454,6 +454,43 @@ exports.updateEvento = async (req, res) => {
       res.status(500).send(error);
     }
 }
+/*********************************************************************************** */
+/*Actualiza una jornada
+  app.post("/api/movil/v1/updatejornada", [authJwt.verifyToken, authJwt.isSistema], movilController.updateJornada)
+*/
+exports.updateJornada = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Actualiza una jornada' */
+  try {
+    const id = req.params.id;
+
+    const jornada = {
+      rut_maestro: req.body.rut_maestro,
+      rut_ayudante: req.body.rut_ayudante,
+      codigo_turno: req.body.codigo_turno,
+      patente: req.body.patente,
+      base: req.body.base,
+      km_inicial: req.body.km_inicial,
+      km_final: req.body.km_final,
+      fecha_hora_ini: req.body.fecha_hora_ini,
+      fecha_hora_fin: req.body.fecha_hora_fin
+    }
+
+    await Jornada.update(jornada, { where: { id: id } })
+      .then(data => {
+        if (data == 1) {
+            res.send({ message: "Jornada actualizada" });
+        }else {
+            res.status(500).send({ message: "No se pudo actualizar la jornada" });
+        }
+        }).catch(err => {
+            res.status(500).send({ message: err.message + " Jornada no actualizada" });
+        })
+
+}catch (error) {
+    res.status(500).send(error);
+  }
+}
 
 /*********************************************************************************** */
 /*Devuelve las oficinas
