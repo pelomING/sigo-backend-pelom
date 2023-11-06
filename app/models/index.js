@@ -2,6 +2,7 @@
 const {ConnectionString} = require('connection-string');
 
 let dbconfig = {};
+/*
 if (process.env.NODE_ENV === "production") {
   dbconfig = require("../config/db.config.prod.js");
 }else if(process.env.NODE_ENV === "development"){
@@ -11,6 +12,8 @@ if (process.env.NODE_ENV === "production") {
 }else{
   dbconfig = require("../config/db.config.local.js");
 }
+*/
+dbconfig = require("../config/db.config.js");
 
 console.log('process.env.DATABASE_URL', process.env.DATABASE_URL);
 console.log('process.env.DATABASE_NAME', process.env.DATABASE_NAME)
@@ -21,9 +24,15 @@ const write_uri = new ConnectionString(database_url);
 if (database_url){
   console.log('user:', write_uri.user)
   console.log('password:', write_uri.password)
-  console.log('host:', write_uri.host)
+  console.log('host:', write_uri.hostname)
   console.log('port:', write_uri.port)
   console.log('db:', write_uri.path[0])
+
+  dbconfig.DB = process.env.DATABASE_NAME;
+  dbconfig.USER = write_uri.user;
+  dbconfig.PASSWORD = write_uri.password;
+  dbconfig.HOST = write_uri.hostname;
+  dbconfig.PORT = write_uri.port;
 }
 
 //const connDB = write_uri.path[0];
