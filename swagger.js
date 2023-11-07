@@ -2,6 +2,7 @@ const swaggerAutogen = require('swagger-autogen')();
 
 let ruta_host = "";
 let schema = [];
+console.log('process.env.PUBLIC_DOMAIN', process.env.PUBLIC_DOMAIN);
 if (process.env.NODE_ENV === "production") {
   ruta_host = "backend-pelom-production.up.railway.app";
   schema = ['https'];
