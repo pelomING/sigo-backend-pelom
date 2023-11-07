@@ -2049,6 +2049,138 @@
         }
       }
     },
+    "/api/movil/v1/actualizaEvento/{id}": {
+      "put": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Actualiza un evento",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "numero_ot": {
+                  "example": "any"
+                },
+                "tipo_evento": {
+                  "example": "any"
+                },
+                "rut_maestro": {
+                  "example": "any"
+                },
+                "rut_ayudante": {
+                  "example": "any"
+                },
+                "codigo_turno": {
+                  "example": "any"
+                },
+                "id_base": {
+                  "example": "any"
+                },
+                "requerimiento": {
+                  "example": "any"
+                },
+                "direccion": {
+                  "example": "any"
+                },
+                "fecha_hora": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/actualizaJornada/{id}": {
+      "put": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Actualiza una jornada",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rut_maestro": {
+                  "example": "any"
+                },
+                "rut_ayudante": {
+                  "example": "any"
+                },
+                "codigo_turno": {
+                  "example": "any"
+                },
+                "patente": {
+                  "example": "any"
+                },
+                "base": {
+                  "example": "any"
+                },
+                "km_inicial": {
+                  "example": "any"
+                },
+                "km_final": {
+                  "example": "any"
+                },
+                "fecha_hora_ini": {
+                  "example": "any"
+                },
+                "fecha_hora_fin": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/reportes/v1/alljornada": {
       "get": {
         "tags": [
