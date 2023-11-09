@@ -170,21 +170,107 @@
         }
       }
     },
-    "/api/usuarios/v1/findallpersonas": {
-      "get": {
+    "/api/usuarios/v1/creausuario": {
+      "post": {
         "tags": [
           "Autenticación"
         ],
-        "description": "Devuelve todos las personas",
+        "description": "Crea un nuevo usuario",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Crear un usuario nuevo, el rut debe exister en la tabla persona",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "example": "rut del usuario, sin puntos"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "usuario@email.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password usuario"
+                },
+                "roles": {
+                  "type": "array",
+                  "example": [
+                    "admin",
+                    "user"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
           },
           "403": {
             "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/ajustes/v1/cambiapassword": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Cambio de contraseña",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
+                },
+                "newpassword": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -2376,6 +2462,80 @@
             "in": "query",
             "type": "string"
           },
+          {
+            "name": "fecha_inicial",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_final",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/resumenalleventos": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve el resumen de eventos por paquete y rango de fechas",
+        "parameters": [
+          {
+            "name": "fecha_inicial",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_final",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/resumenallturnos": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve el resumen de turnos por paquete y rango de fechas",
+        "parameters": [
           {
             "name": "fecha_inicial",
             "in": "query",

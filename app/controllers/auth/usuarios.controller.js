@@ -1,9 +1,11 @@
 const db = require("../../models");
 const Persona = db.personas;
+const User = db.user;
+const Role = db.role;
 
 /*********************************************************************************** */
 /* Crea una persona
-  app.post("/api/usuarios/v1/creapersona", mantendorController.createPersona);
+  app.post("/api/usuarios/v1/creapersona", usuariosController.createPersona);
 */
 exports.createPersona = async (req, res) => {
     /*  #swagger.tags = ['Autenticación']
@@ -61,7 +63,7 @@ exports.createPersona = async (req, res) => {
 
 /*********************************************************************************** */
 /* Consulta las personas
-  app.get("/api/usuarios/v1/findallpersonas", mantendorController.findAllPersonas)
+  app.get("/api/usuarios/v1/findallpersonas", usuariosController.findAllPersonas)
 */
 exports.findAllPersonas = async (req, res) => {
     /*  #swagger.tags = ['Autenticación']
@@ -124,3 +126,73 @@ exports.findAllPersonas = async (req, res) => {
   }
   /*********************************************************************************** */
   
+/*********************************************************************************** */
+/* Crea un nuevo usuario
+  app.post("/api/usuarios/v1/creausuario", usuariosController.createUser);
+*/
+exports.createUser = async (req, res) => {
+    /*  #swagger.tags = ['Autenticación']
+        #swagger.description = 'Crea un nuevo usuario' 
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Crear un usuario nuevo, el rut debe exister en la tabla persona',
+            required: true,
+            schema: {
+                username: "rut del usuario, sin puntos",
+                email: "usuario@email.com",
+                password: "password usuario",
+                roles: ["admin", "user"]
+            }
+        }
+        */
+        try {
+          let salir = false;
+          const campos = [
+            'username', 'email', 'password'
+          ];
+          for (const element of campos) {
+            if (!req.body[element]) {
+              res.status(400).send({
+                message: "No puede estar nulo el campo " + element
+              });
+              return;
+            }
+          };
+
+          await Persona.findAll({where: {rut: req.body.username}}).then(async data => {
+            if (data.length > 0) {
+              //el rut se encuentra en la tabla de personas
+              const user = await User.create({
+                username: req.body.username,
+                email: req.body.email,
+                password: bcrypt.hashSync(req.body.password, 8),
+              });
+              if (req.body.roles) {
+                const roles = await Role.findAll({
+                  where: {
+                    name: {
+                      [Op.or]: req.body.roles,
+                    },
+                  },
+                });
+                const result = user.setRoles(roles);
+                if (result) res.send({ message: "User registered successfully!" });
+              } else {
+                // user has role = 1
+                const result = user.setRoles([1]);
+                if (result) res.send({ message: "User registered successfully!" });
+              }
+            }else {
+              //el rut no existe
+              salir = true;
+              res.status(403).send({ message: 'El Rut no se encuentra en la tabla de personas' });
+            }
+          }).catch(err => {
+              salir = true;
+              res.status(500).send({ message: err.message });
+          })
+        } catch (error) {
+          res.status(500).send({ message: error.message });
+          
+        }
+}
