@@ -456,3 +456,146 @@ exports.resumenTurnos = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+
+/*********************************************************************************** */
+/* Devuelve resumen de todos los eventos, no considera paquete
+  app.get("/api/reportes/v1/resumenalleventos", reportesController.resumenAllEventos)
+*/
+exports.resumenAllEventos = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve el resumen de eventos por paquete y rango de fechas' */
+  try {
+    const campos = [
+      'fecha_inicial', 'fecha_final'
+    ];
+    for (const element of campos) {
+      if (!req.query[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    const sql = "SELECT e.id_paquete, e.tipo_evento, et.id as id_tipo_evento, et.descripcion as glosa_evento, \
+    pb.valor as precio, count(e.id) as cantidad, (pb.valor*count(e.id)) as monto from sae.reporte_eventos e \
+    inner join _comun.eventos_tipo et on et.codigo = e.tipo_evento inner join (SELECT distinct on \
+      (id_cliente, id_paquete, id_evento_tipo) id_cliente, id_paquete, id_evento_tipo, valor FROM \
+      sae.precios_base ORDER BY id_cliente, id_paquete, id_evento_tipo ASC ) as pb on et.id = \
+      pb.id_evento_tipo and e.id_paquete = pb.id_paquete and pb.id_cliente = 1 where estado = 1 and \
+      (fecha_hora between date :fec_ini and date :fec_fin) group by \
+      e.id_paquete, e.tipo_evento, et.id, et.descripcion, pb.valor;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const eventos = await sequelize.query(sql, { replacements: { fec_ini: req.query.fecha_inicial, fec_fin: req.query.fecha_final }, type: QueryTypes.SELECT });
+    let salida = [];
+    if (eventos) {
+      for (const element of eventos) {
+        if (
+          typeof element.id_paquete === 'number' && 
+          typeof element.tipo_evento === 'string' &&
+          typeof element.id_tipo_evento === 'number' &&
+          typeof element.glosa_evento === 'string' &&
+          (typeof element.precio === 'number' || typeof element.precio === 'string') &&
+          (typeof element.cantidad === 'number' || typeof element.cantidad === 'string') &&
+          (typeof element.monto === 'number' || typeof element.monto === 'string')) {
+
+            const detalle_salida = {
+
+              id_paquete: Number(element.id_paquete),
+              tipo_evento: String(element.tipo_evento),
+              id_tipo_evento: Number(element.id_tipo_evento),
+              glosa_evento: String(element.glosa_evento),
+              precio: Number(element.precio),
+              cantidad: Number(element.cantidad),
+              monto: Number(element.monto)
+
+            }
+            salida.push(detalle_salida);
+
+        }else {
+            salida===undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+/*********************************************************************************** */
+
+/*********************************************************************************** */
+/* Devuelve resumen de todos los turnos
+  app.get("/api/reportes/v1/resumenallturnos", reportesController.resumenTurnos)
+*/
+exports.resumenAllTurnos = async (req, res) => {
+  // metodo GET
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve el resumen de turnos por paquete y rango de fechas' */
+  try {
+    const campos = [
+      'fecha_inicial', 'fecha_final'
+    ];
+    for (const element of campos) {
+      if (!req.query[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    
+    const sql = "select r.*, (r.cantidad_brigada*r.precio*r.uso_semanal)::integer as monto from \
+    (SELECT id_paquete, id_turno, (substring(t.inicio::text,1,5) || ' - ' || substring(t.fin::text,1,5)) as permanencia_semanal, \
+    cantidad_brigada, valor as precio, ((date :fec_fin - (date :fec_ini - 1))::numeric/7)::numeric(6,4) \
+    as uso_semanal 	FROM sae.cargo_fijo cf inner join _comun.turnos t on t.id = cf.id_turno where id_cliente = 1) r;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const eventos = await sequelize.query(sql, { replacements: { fec_ini: req.query.fecha_inicial, fec_fin: req.query.fecha_final }, type: QueryTypes.SELECT });
+    let salida = [];
+    if (eventos) {
+      for (const element of eventos) {
+        if (
+          typeof element.id_paquete === 'number' && 
+          typeof element.id_turno === 'number' &&
+          typeof element.permanencia_semanal === 'string' &&
+          typeof element.cantidad_brigada === 'number' &&
+          (typeof element.precio === 'number' || typeof element.precio === 'string') &&
+          (typeof element.uso_semanal === 'number' || typeof element.uso_semanal === 'string') &&
+          typeof element.monto === 'number') {
+
+            const detalle_salida = {
+
+              id_paquete: Number(element.id_paquete),
+              id_turno: Number(element.id_turno),
+              permanencia_semanal: String(element.permanencia_semanal),
+              cantidad_brigada: Number(element.cantidad_brigada),
+              precio: Number(element.precio),
+              uso_semanal: Number(element.uso_semanal),
+              monto: Number(element.monto)
+
+            }
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+/*********************************************************************************** */

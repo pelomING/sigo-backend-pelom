@@ -39,5 +39,12 @@ module.exports = function(app) {
     ejemplpo: /api/reportes/v1/resumenturnos?id_paquete=1&fecha_inicial=2023-08-01&fecha_final=2023-09-30*/
     app.get("/api/reportes/v1/resumenturnos", [authJwt.verifyToken], reportesController.resumenTurnos);
 
+    /* Devuelve resumen de todos los eventos, de todos los paquetes 
+    ejemplo: /api/reportes/v1/resumeneventos?fecha_inicial=2023-08-01&fecha_final=2023-09-30*/
+    app.get("/api/reportes/v1/resumenalleventos", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], reportesController.resumenAllEventos)
+
+    /* Devuelve resumen de todos los turnos 
+    ejemplpo: /api/reportes/v1/resumenturnos?fecha_inicial=2023-08-01&fecha_final=2023-09-30*/
+    app.get("/api/reportes/v1/resumenallturnos", [authJwt.verifyToken], reportesController.resumenAllTurnos);
 
 }
