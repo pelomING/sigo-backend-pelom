@@ -10,7 +10,8 @@ const bodyParser = require('body-parser')
 //const options = swaggerConfig;
 
 const app = express();
-
+const db = require("./app/models");
+const Origen_cors = db.backendCors;
 
 
 app.use(
@@ -37,7 +38,7 @@ app.use(
   })
 );
 
-const db = require("./app/models");
+
 const Role = db.role;
 
 //se usa db.sequelize.sync({force: true}) para que reconstruya la base
