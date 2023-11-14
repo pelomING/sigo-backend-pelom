@@ -46,6 +46,12 @@ module.exports = function(app) {
     /* Devuelve las comunas */
     app.get("/api/movil/v1/comunas", [authJwt.verifyToken, authJwt.isSistema], movilController.comunas);
 
+    /* Devuelve los tipo de turno */
+    app.get("/api/movil/v1/tipoturno", [authJwt.verifyToken, authJwt.isSistema], movilController.tipoTurno);
+
+    /* Devuelve las brigadas */
+    app.get("/api/movil/v1/saebrigadas", [authJwt.verifyToken, authJwt.isSistema], movilController.saeBrigadas);
+
     // deshabilitada por ahora para la api
     app.post("/api/movil/v1/creaevento", [authJwt.verifyToken, authJwt.isSistema], movilController.createEvento);
 
@@ -57,6 +63,8 @@ module.exports = function(app) {
 
     //actualiza una jornada por ID
     app.put("/api/movil/v1/actualizaJornada/:id", [authJwt.verifyToken, authJwt.isSistema], movilController.updateJornada);
+
+
 
 
   };

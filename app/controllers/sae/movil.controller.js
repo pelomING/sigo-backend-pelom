@@ -2,6 +2,7 @@ const db = require("../../models");
 const Paquete = db.paquete;
 const Eventos = db.eventos;
 const Jornada = db.jornada;
+const TipoTurno = db.tipoTurno;
 //const Base = db.base;
 
 
@@ -584,3 +585,103 @@ exports.comunas = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+
+/*********************************************************************************** */
+/* Devuelve los tipo de turnos
+  app.get("/api/movil/v1/tipoturno", [authJwt.verifyToken, authJwt.isSistema], movilController.tipoTurno)
+*/
+exports.tipoTurno = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todos los tipo de turnos' */
+  try {
+    const tipoturno = await TipoTurno.findAll();
+    let salida = [];
+    if (tipoturno) {
+      for (const element of tipoturno) {
+        if (
+          typeof element.id === 'number' && 
+          typeof element.nombre === 'string') {
+            const detalle_salida = {
+              id: String(element.id),
+              nombre: String(element.nombre)
+            }
+            salida.push(detalle_salida);
+          }else {
+            salida=undefined;
+            break;
+          }
+        };
+      };
+      if (salida===undefined){
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }else{
+        res.status(200).send(salida);
+      }
+    }catch (error) {
+      res.status(500).send(error);
+    }
+    
+}
+
+
+/*********************************************************************************** */
+/* Devuelve las brigadas , turno + base
+  app.get("/api/movil/v1/saebrigadas", [authJwt.verifyToken, authJwt.isSistema], movilController.saeBrigadas)
+*/
+exports.saeBrigadas = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Móvil']
+      #swagger.description = 'Devuelve todas las brigadas' */
+      try {
+        const sql = "SELECT br.id, json_build_object('id', s.id, 'codigo', s.codigo) as servicio, \
+        json_build_object('id', b.id, 'nombre', b.nombre) as base, json_build_object('id', t.id, 'turno', \
+        (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5))) as turno, (substr(t.inicio::text,1,5) \
+        || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas br \
+        JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id JOIN \
+        _comun.turnos t on br.id_turno = t.id WHERE s.sae and s.activo;";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const comuna = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida = [];
+        if (comuna) {
+          for (const element of comuna) {
+            if (
+              typeof element.id === 'number' && 
+              typeof element.servicio === 'object' && 
+              typeof element.base === 'object' && 
+              typeof element.turno === 'object' && 
+              typeof element.brigada === 'string') {
+              
+    
+                const detalle_salida = {
+                  id: String(element.id),
+                  servicio: {
+                    id: Number(element.servicio.id),
+                    codigo: String(element.servicio.codigo)
+                  },
+                  base: {
+                    id: Number(element.base.id),
+                    nombre: String(element.base.nombre)
+                  },
+                  turno: {
+                    id: Number(element.turno.id),
+                    turno: String(element.turno.turno)
+                  },
+                  brigada: String(element.brigada)
+                }
+                salida.push(detalle_salida);
+    
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send(salida);
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
+}

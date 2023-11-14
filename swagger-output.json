@@ -2009,6 +2009,50 @@
         }
       }
     },
+    "/api/movil/v1/tipoturno": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todos los tipo de turnos",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/movil/v1/saebrigadas": {
+      "get": {
+        "tags": [
+          "SAE - Móvil"
+        ],
+        "description": "Devuelve todas las brigadas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/movil/v1/creaevento": {
       "post": {
         "tags": [
