@@ -54,7 +54,6 @@ exports.findAllJornadas = async (req, res) => {
             typeof element.rut_ayudante === 'string' &&
             typeof element.turno === 'string' &&
             typeof element.patente === 'string' &&
-            typeof element.paquete === 'number' &&
             (typeof element.km_inicial === 'number' || typeof element.km_inicial === 'string') &&
             (typeof element.km_final === 'number' || typeof element.km_final === 'string') &&
             (typeof element.fecha_hora_ini === 'string' || typeof element.fecha_hora_ini === 'object') &&
