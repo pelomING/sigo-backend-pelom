@@ -45,7 +45,9 @@ exports.findAllJornadas = async (req, res) => {
       const jornadas = await sequelize.query(sql, { type: QueryTypes.SELECT });
       let salida = [];
       if (jornadas) {
+        console.log('jornadas ok');
         for (const element of jornadas) {
+          console.log('elemento ok', element.id);
           if (
             typeof element.id === 'number' && 
             typeof element.rut_maestro === 'string' &&
@@ -62,6 +64,7 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.tipo_turno === 'string' || typeof element.tipo_turno === 'object') &&
             (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
             (typeof element.longitude === 'string' || typeof element.longitude === 'object'))  {
+              console.log('if ok', element.id);
 
               const detalle_salida = {
 
@@ -87,6 +90,7 @@ exports.findAllJornadas = async (req, res) => {
               salida.push(detalle_salida);
 
           }else {
+              console.log('else ok', element.id);
               salida=undefined;
               break;
           }
