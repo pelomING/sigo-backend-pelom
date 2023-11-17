@@ -39,6 +39,7 @@ exports.findAllJornadas = async (req, res) => {
         || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join \
         _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br on rj.brigada = br.id \
         WHERE rj.brigada is not null ORDER BY id DESC;";
+        console.log(sql);
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const jornadas = await sequelize.query(sql, { type: QueryTypes.SELECT });
