@@ -599,3 +599,28 @@ exports.resumenAllTurnos = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+
+/*********************************************************************************** */
+/* Ingresa las observaciones para un estado de pago
+  app.post("/api/reportes/v1/creaobservaciones", reportesController.creaObservaciones)
+*/
+exports.creaObservaciones = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Ingresa las observaciones para un estado de pago' */
+  try {
+    const campos = [
+      'id_usuario', 'id_estado_pago', 'observaciones'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+}catch (error) {
+  res.status(500).send(error);
+}
+}
