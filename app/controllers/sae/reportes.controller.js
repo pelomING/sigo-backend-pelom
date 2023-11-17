@@ -25,8 +25,20 @@ exports.findAllJornadas = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todas las jornadas' */
     try {
-      const sql = "SELECT rj.id, rut_maestro, rut_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, \
-      fecha_hora_fin::text, estado	FROM sae.reporte_jornada rj JOIN _comun.turnos t on rj.codigo_turno = t.id ORDER BY id DESC;";
+      const sql = "SELECT rj.id, rut_maestro, rut_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
+      patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  null as brigada, \
+      null as tipo_turno, case when rj.coordenadas is not null then rj.coordenadas->>'latitude' else null end as latitude, case when \
+      rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_jornada rj \
+      JOIN _comun.turnos t on rj.codigo_turno = t.id WHERE brigada is null UNION SELECT rj.id, rut_maestro, rut_ayudante, \
+      br.turno as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, \
+      estado,  br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where \
+        id = rj.tipo_turno) else null end as tipo_turno, case when rj.coordenadas is not null then rj.coordenadas->>'latitude' \
+        else null end as latitude, case when rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as \
+        longitude FROM sae.reporte_jornada rj join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) \
+        || ' - ' || substr(t.fin::text,1,5)) as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) \
+        || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join \
+        _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br on rj.brigada = br.id \
+        WHERE rj.brigada is not null ORDER BY id DESC;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const jornadas = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -44,7 +56,11 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.km_final === 'number' || typeof element.km_final === 'string') &&
             (typeof element.fecha_hora_ini === 'string' || typeof element.fecha_hora_ini === 'object') &&
             (typeof element.fecha_hora_fin === 'string' || typeof element.fecha_hora_fin === 'object') &&
-            typeof element.estado === 'number')  {
+            typeof element.estado === 'number' &&
+            (typeof element.brigada === 'string' || typeof element.brigada === 'object') &&
+            (typeof element.tipo_turno === 'string' || typeof element.tipo_turno === 'object') &&
+            (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
+            (typeof element.longitude === 'string' || typeof element.longitude === 'object'))  {
 
               const detalle_salida = {
 
@@ -58,7 +74,13 @@ exports.findAllJornadas = async (req, res) => {
                 km_final: String(element.km_final),
                 fecha_hora_ini: String(element.fecha_hora_ini),
                 fecha_hora_fin: String(element.fecha_hora_fin),
-                estado: Number(element.estado)
+                estado: Number(element.estado),
+                brigada: String(element.brigada),
+                tipo_turno: String(element.tipo_turno),
+                coordenadas: {
+                  latitude: String(element.latitude),
+                  longitude: String(element.longitude)
+                }
 
               }
               salida.push(detalle_salida);
@@ -91,11 +113,23 @@ exports.findAllJornadas = async (req, res) => {
     /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todos los eventos' */
     try {
-      const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, \
-      (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, p.nombre as paquete, \
-      e.requerimiento, e.direccion, e.fecha_hora::text, e.estado FROM sae.reporte_eventos e join \
-      _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
-      _comun.paquete p on e.id_paquete = p.id order by e.id desc";
+      const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, (substr(t.inicio::text,1,5) \
+      || ' - ' || substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, \
+      e.estado, null as hora_inicio, null as hora_termino, null as brigada, null as tipo_turno, null as comuna, case when \
+      e.coordenadas is not null  then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null \
+      then e.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_eventos e join _comun.eventos_tipo et on \
+      e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join _comun.paquete p on e.id_paquete = p.id \
+      WHERE brigada is null UNION SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, \
+      br.turno as turno, br.paquete as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, hora_inicio, \
+      hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where \
+        id = e.tipo_turno) else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas \
+          where codigo = e.comuna ) else null end as comuna, case when e.coordenadas is not null then e.coordenadas->>'latitude' \
+          else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else null end as \
+          longitude FROM sae.reporte_eventos e join _comun.eventos_tipo et on e.tipo_evento = et.codigo join \
+          (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) \
+          as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada \
+          FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id \
+          join _comun.turnos t on br.id_turno = t.id) as br on e.brigada = br.id WHERE e.brigada is not null order by id desc;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -113,7 +147,14 @@ exports.findAllJornadas = async (req, res) => {
             typeof element.requerimiento === 'string' &&
             typeof element.direccion === 'string' &&
             (typeof element.fecha_hora === 'object' || typeof element.fecha_hora === 'string') &&
-            typeof element.estado === 'number') {
+            typeof element.estado === 'number' &&
+            (typeof element.hora_inicio === 'string' || typeof element.hora_inicio === 'object') &&
+            (typeof element.hora_termino === 'string' || typeof element.hora_termino === 'object') &&
+            (typeof element.brigada === 'string' || typeof element.brigada === 'object') &&
+            (typeof element.tipo_turno === 'string' || typeof element.tipo_turno === 'object') &&
+            (typeof element.comuna === 'string' || typeof element.comuna === 'object') &&
+            (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
+            (typeof element.longitude === 'string' || typeof element.longitude === 'object')) {
 
               const detalle_salida = {
 
@@ -127,7 +168,16 @@ exports.findAllJornadas = async (req, res) => {
                 requerimiento: String(element.requerimiento),
                 direccion: String(element.direccion),
                 fecha_hora: String(element.fecha_hora),
-                estado: Number(element.estado)
+                estado: Number(element.estado),
+                hora_inicio: String(element.hora_inicio),
+                hora_termino: String(element.hora_termino),
+                brigada: String(element.brigada),
+                tipo_turno: String(element.tipo_turno),
+                comuna: String(element.comuna),
+                coordenadas: {
+                  latitude: String(element.latitude),
+                  longitude: String(element.longitude)
+                }
 
               }
               salida.push(detalle_salida);
