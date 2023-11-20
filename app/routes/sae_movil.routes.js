@@ -20,49 +20,49 @@ module.exports = function(app) {
 */
 
     /* Consulta los paquetes*/
-    app.get("/api/movil/v1/paquete", [authJwt.verifyToken, authJwt.isSistema], movilController.paquete);
+    app.get("/api/movil/v1/paquete", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.paquete);
 
     /* Devuelve zona-paquete-base*/
-    app.get("/api/movil/v1/zonaPaqueteBaseSql", [authJwt.verifyToken, authJwt.isSistema], movilController.zonaPaqueteBaseSql);
+    app.get("/api/movil/v1/zonaPaqueteBaseSql", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.zonaPaqueteBaseSql);
 
     /* Devuelve los usuarios de la app móvil*/
-    app.get("/api/movil/v1/usuariosApp", [authJwt.verifyToken, authJwt.isSistema], movilController.usuariosApp);
+    app.get("/api/movil/v1/usuariosApp", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.usuariosApp);
 
     /* Devuelve los turnos de la app móvil*/
-    app.get("/api/movil/v1/turnos", [authJwt.verifyToken, authJwt.isSistema], movilController.turnos);
+    app.get("/api/movil/v1/turnos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.turnos);
 
     /* Devuelve los tipos de eventos de la app móvil*/
-    app.get("/api/movil/v1/eventostipo", [authJwt.verifyToken, authJwt.isSistema], movilController.eventostipo);
+    app.get("/api/movil/v1/eventostipo", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.eventostipo);
 
     //por petición de Patricio en ayudantes se entregan todos los usuarios del sistema
-    app.get("/api/movil/v1/ayudantes", [authJwt.verifyToken, authJwt.isSistema], movilController.usuariosApp);
+    app.get("/api/movil/v1/ayudantes", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.usuariosApp);
 
     /* Devuelve los camionetas de la app móvil*/
-    app.get("/api/movil/v1/camionetas", [authJwt.verifyToken, authJwt.isSistema], movilController.camionetas);
+    app.get("/api/movil/v1/camionetas", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.camionetas);
 
     /*Devuelve las oficinas */
-    app.get("/api/movil/v1/oficinas", [authJwt.verifyToken, authJwt.isSistema], movilController.bases);
+    app.get("/api/movil/v1/oficinas", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.bases);
 
     /* Devuelve las comunas */
-    app.get("/api/movil/v1/comunas", [authJwt.verifyToken, authJwt.isSistema], movilController.comunas);
+    app.get("/api/movil/v1/comunas", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.comunas);
 
     /* Devuelve los tipo de turno */
-    app.get("/api/movil/v1/tipoturno", [authJwt.verifyToken, authJwt.isSistema], movilController.tipoTurno);
+    app.get("/api/movil/v1/tipoturno", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.tipoTurno);
 
     /* Devuelve las brigadas */
-    app.get("/api/movil/v1/saebrigadas", [authJwt.verifyToken, authJwt.isSistema], movilController.saeBrigadas);
+    app.get("/api/movil/v1/saebrigadas", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.saeBrigadas);
 
     // deshabilitada por ahora para la api
-    app.post("/api/movil/v1/creaevento", [authJwt.verifyToken, authJwt.isSistema], movilController.createEvento);
+    app.post("/api/movil/v1/creaevento", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.createEvento);
 
     // deshabilitada por ahora para la api
-    app.post("/api/movil/v1/creajornada", [authJwt.verifyToken, authJwt.isSistema], movilController.creaJornada);
+    app.post("/api/movil/v1/creajornada", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.creaJornada);
 
     //actualiza un evento por ID de evento
-    app.put("/api/movil/v1/actualizaEvento/:id", [authJwt.verifyToken, authJwt.isSistema], movilController.updateEvento);
+    app.put("/api/movil/v1/actualizaEvento/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.updateEvento);
 
     //actualiza una jornada por ID
-    app.put("/api/movil/v1/actualizaJornada/:id", [authJwt.verifyToken, authJwt.isSistema], movilController.updateJornada);
+    app.put("/api/movil/v1/actualizaJornada/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], movilController.updateJornada);
 
 
 

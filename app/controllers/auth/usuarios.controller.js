@@ -2,6 +2,9 @@ const db = require("../../models");
 const Persona = db.personas;
 const User = db.user;
 const Role = db.role;
+const Op = db.Sequelize.Op;
+const bcrypt = require("bcryptjs");
+
 
 /*********************************************************************************** */
 /* Crea una persona
