@@ -2,7 +2,8 @@ module.exports = (sequelize, Sequelize) => {
     const Observaciones = sequelize.define("reporte_observaciones", {
         id: {
             type: Sequelize.INTEGER,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
         },
         detalle: {
             type: Sequelize.STRING

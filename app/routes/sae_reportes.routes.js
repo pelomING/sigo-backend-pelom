@@ -47,4 +47,70 @@ module.exports = function(app) {
     ejemplpo: /api/reportes/v1/resumenturnos?fecha_inicial=2023-08-01&fecha_final=2023-09-30*/
     app.get("/api/reportes/v1/resumenallturnos", [authJwt.verifyToken], reportesController.resumenAllTurnos);
 
+    /*********************************************************************************** */
+    /* Ingresa las observaciones para un estado de pago
+      app.post("/api/reportes/v1/creaobservaciones", reportesController.creaObservaciones)
+    */
+    app.post("/api/reportes/v1/creaobservaciones", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaObservaciones);
+
+    /*********************************************************************************** */
+    /* Actualiza las observaciones para un estado de pago
+      app.post("/api/reportes/v1/updateobservaciones", reportesController.updateObservaciones)
+    */
+    app.put("/api/reportes/v1/updateobservaciones/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateObservaciones);
+
+    /*********************************************************************************** */
+    /* Elimina una observacion para un estado de pago
+      app.post("/api/reportes/v1/deleteobservaciones", reportesController.deleteObservaciones)
+    */
+    app.delete("/api/reportes/v1/deleteobservaciones/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteObservaciones);
+
+    /*********************************************************************************** */
+    /* Devuelve todas las observaciones 
+      app.post("/api/reportes/v1/findallobservaciones", reportesController.findallObservaciones)
+    */
+    app.get("/api/reportes/v1/findallobservaciones", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findallObservaciones);
+
+    /*********************************************************************************** */
+    /* Devuelve las observacion por parametros
+      app.post("/api/reportes/v1/findobservaciones", reportesController.findObservacionesByParams)
+    */
+    app.get("/api/reportes/v1/findobservaciones", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findObservacionesByParams);
+
+    /*********************************************************************************** */
+    /* Devuelve las observaciones no procesadas, id_estado_resultado=null
+      app.post("/api/reportes/v1/observacionesnoprocesadas", reportesController.findObservacionesNoProcesadas)
+    */
+    app.get("/api/reportes/v1/observacionesnoprocesadas", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findObservacionesNoProcesadas);
+
+    /*********************************************************************************** */
+    /* Devuelve los cargos fijo por semana
+      app.post("/api/reportes/v1/semanal_por_brigada", reportesController.semanalByBrigada)
+    */
+    app.get("/api/reportes/v1/semanal_por_brigada", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.semanalByBrigada);
+
+    /*********************************************************************************** */
+    /* Devuelve la permanencia semanal por brigada
+      app.post("/api/reportes/v1/permanencia_por_brigada", reportesController.permanenciaByBrigada)
+    */
+    app.get("/api/reportes/v1/permanencia_por_brigada", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.permanenciaByBrigada);
+
+    /*********************************************************************************** */
+    /* Devuelve las horas extra realizadas
+      app.post("/api/reportes/v1/horasextras", reportesController.findHorasExtras)
+    */
+    app.get("/api/reportes/v1/horasextras", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findHorasExtras);
+
+    /*********************************************************************************** */
+    /* Devuelve los turnos adicionales
+      app.post("/api/reportes/v1/turnosadicionales", reportesController.findTurnosAdicionales)
+    */
+    app.get("/api/reportes/v1/turnosadicionales", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findTurnosAdicionales);
+
+    /*********************************************************************************** */
+    /* Devuelve los turnos de contingencia
+      app.post("/api/reportes/v1/turnoscontingencia", reportesController.findTurnosContingencia)
+    */
+    app.get("/api/reportes/v1/turnoscontingencia", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findTurnosContingencia);
+
 }

@@ -2,6 +2,7 @@ const db = require("../../models");
 const Jornada = db.jornada;
 const EstadoResultado = db.estadoResultado;
 const DetalleEstadoResultado = db.detalleEstadoResultado;
+const Observaciones = db.observaciones;
 
 exports.readAllJornada = async (req, res) => {
   //metodo GET
@@ -664,7 +665,7 @@ exports.creaObservaciones = async (req, res) => {
       #swagger.description = 'Ingresa las observaciones para un estado de pago' */
   try {
     const campos = [
-      'id_usuario', 'id_estado_pago', 'observaciones'
+      'detalle', 'fecha_hora'
     ];
     for (const element of campos) {
       if (!req.body[element]) {
@@ -674,7 +675,253 @@ exports.creaObservaciones = async (req, res) => {
         return;
       }
     };
-}catch (error) {
-  res.status(500).send(error);
+    let fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+    fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+
+
+    const observaciones = {
+      detalle: req.body.detalle,
+      fecha_hora: fecha,
+      estado: 1
+    };
+
+    const observacionesCreate = await Observaciones.create(observaciones)
+        .then(data => {
+            res.send(data);
+        }).catch(err => {
+            res.status(500).send({ message: err.message });
+        });
+    
+  }catch (error) {
+    res.status(500).send(error);
+  }
 }
+/*********************************************************************************** */
+/* Actualiza las observaciones para un estado de pago
+  app.post("/api/reportes/v1/updateobservaciones", reportesController.updateObservaciones)
+*/
+exports.updateObservaciones = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Actualiza las observaciones para un estado de pago' */
+      try{
+        const id = req.params.id;
+        let fecha;
+        if (req.body.fecha_hora){
+          fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+          fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        }else{
+          fecha = null
+        }
+        const observaciones = {
+          detalle: req.body.detalle?req.body.detalle:null,
+          fecha_hora: fecha,
+          estado: req.body.estado?req.body.estado:null
+        };
+        await Observaciones.update(observaciones, {
+          where: { id: id }
+        }).then(data => {
+          if (data[0] === 1) {
+            res.send({ message: "Oservaciones actualizadas" });
+          } else {
+            res.send({ message: `No existe una observacione con el id ${id}` });
+          }
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+      }catch (error) {
+        res.status(500).send(error);
+      };
+
+}
+/*********************************************************************************** */
+/* Elimina una observacion para un estado de pago
+  app.post("/api/reportes/v1/deleteobservaciones", reportesController.deleteObservaciones)
+*/
+exports.deleteObservaciones = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Elimina una observacion para un estado de pago' */
+  try{
+    const id = req.params.id;
+    await Observaciones.destroy({
+      where: { id: id }
+    }).then(data => {
+      if (data === 1) {
+        res.send({ message: "Observacion eliminada" });
+      } else {
+        res.send({ message: `No existe una observacion con el id ${id}` });
+      }
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
+
+}
+/*********************************************************************************** */
+/* Devuelve todas las observaciones 
+  app.post("/api/reportes/v1/findallobservaciones", reportesController.findallObservaciones)
+*/
+exports.findallObservaciones = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve todas las observaciones ' */
+  await Observaciones.findAll().then(data => {
+    res.send(data);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
+}
+/*********************************************************************************** */
+/* Devuelve las observacion por parametros
+  app.post("/api/reportes/v1/findobservaciones", reportesController.findObservacionesByParams)
+*/
+exports.findObservacionesByParams = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve las observacion por campos' */
+      const parametros = {
+        id: req.query.id,
+        id_estado_resultado: req.query.id_estado_resultado
+      }
+      const keys = Object.keys(parametros)
+      let sql_array = [];
+      let param = {};
+      for (element of keys) {
+        if (parametros[element]){
+          sql_array.push("b." + element + " = :" + element);
+          param[element] = parametros[element];
+        }
+      }
+      const where = sql_array.join(" AND ");
+      await Observaciones.findAll({
+        where: where,
+        params: param
+      }).then(data => {
+        res.send(data);
+      }).catch(err => {
+        res.status(500).send({ message: err.message });
+      })
+
+  await Observaciones.findAll({
+    where: req.body
+  }).then(data => {
+    res.send(data);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
+}
+/*********************************************************************************** */
+/* Devuelve las observaciones no procesadas, id_estado_resultado=null
+  app.post("/api/reportes/v1/observacionesnoprocesadas", reportesController.findObservacionesNoProcesadas)
+*/
+exports.findObservacionesNoProcesadas = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve las observaciones no procesadas' */
+  await Observaciones.findAll({
+    where: {
+      id_estado_resultado: null
+    }
+  }).then(data => {
+    res.send(data);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
+}
+
+/*********************************************************************************** */
+/* Devuelve los cargos fijo por semana
+  app.post("/api/reportes/v1/semanal_por_brigada", reportesController.semanalByBrigada)
+*/
+exports.semanalByBrigada = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve los cargos fijo por semana' */
+
+  const cargosFijos = [
+    {localidad:'Curicó', valor_cargo: 1390344},
+    {localidad:'Parral', valor_cargo: 1509516},
+    {localidad:'Pelluhue', valor_cargo: 1551447}
+  ]
+
+  res.send(cargosFijos);
+
+}
+/*********************************************************************************** */
+/* Devuelve la permanencia semanal por brigada
+  app.post("/api/reportes/v1/permanencia_por_brigada", reportesController.permanenciaByBrigada)
+*/
+exports.permanenciaByBrigada = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve la permanencia semanal por brigada' */
+
+  const permanencia = {
+    detalle: [
+      {brigada: '00:00 - 08:00 (Molina)', turnos: 28, valor_dia: 198621, valor_mes: 5561376},
+      {brigada: '08:00 - 18:30 (Molina)', turnos: 28, valor_dia: 198621, valor_mes: 5561376},
+      {brigada: '08:00 - 16:00 (Licantén)', turnos: 0, valor_dia: 198621, valor_mes: null},
+      {brigada: '16:00 - 24:00 (Licantén)', turnos: 0, valor_dia: 198621, valor_mes: null},
+      {brigada: '16:00 - 24:00 (Linares)', turnos: 0, valor_dia: 198621, valor_mes: null},
+      {brigada: '08:00 - 18:30 (Parral)', turnos: 29, valor_dia: 198621, valor_mes: 6253709},
+      {brigada: '08:00 - 18:30 (Pelluhue)', turnos: 0, valor_dia: 198621, valor_mes: null},
+    ],
+    subtotal: 17376461
+  }
+
+  res.send(permanencia);
+
+}
+
+/*********************************************************************************** */
+/* Devuelve las horas extra realizadas
+  app.post("/api/reportes/v1/horasextras", reportesController.findHorasExtras)
+*/
+exports.findHorasExtras = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve las horas extra realizadas' */
+
+  const horasExtras = {
+    detalle: [
+      {brigada: '00:00 - 08:00 (Molina)', horas: 7, valor_base: 37192, valor_total: 260344},
+      {brigada: '08:00 - 18:30 (Molina)', horas: 5, valor_base: 37192, valor_total: 185960},
+      {brigada: '08:00 - 18:30 (Parral)', horas: 0, valor_base: 40380, valor_total: null},
+    ],
+    subtotal: 1191726
+  }
+
+  res.send(horasExtras);
+
+}
+/*********************************************************************************** */
+/* Devuelve los turnos adicionales
+  app.post("/api/reportes/v1/turnosadicionales", reportesController.findTurnosAdicionales)
+*/
+exports.findTurnosAdicionales = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve los turnos adicionales' */
+
+  const turnosAdicionales = {
+    detalle: [
+      {brigada: '00:00 - 08:00 (Molina)', turnos: 5, valor_dia: 198621, valor_total: 993105},
+      {brigada: '08:00 - 18:30 (Molina)', turnos: 1, valor_dia: 198621, valor_total: 198621}
+    ],
+    subtotal: 1191726
+  }
+  res.send(turnosAdicionales);
+
+}
+
+/*********************************************************************************** */
+/* Devuelve los turnos de contingencia
+  app.post("/api/reportes/v1/turnoscontingencia", reportesController.findTurnosContingencia)
+*/
+exports.findTurnosContingencia = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve los turnos de contingencia' */
+
+  const turnosContingencia = {
+    detalle: [],
+    subtotal: null
+  }
+  res.send(turnosContingencia);
+
 }
