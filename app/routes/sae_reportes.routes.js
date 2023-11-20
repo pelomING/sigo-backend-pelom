@@ -27,7 +27,7 @@ module.exports = function(app) {
     ejemplo: { "id_usuario": 7, "zona": 1, "paquete": 1, "mes": 9, "fecha_inicio": "2023-09-01", "fecha_final": "2023-09-30", 
     "nombre_doc": "nombre de documento", "url_doc": "url de documento", "fecha_creacion": "2023-09-30", "fecha_modificacion": "2023-09-30", 
     "estado": 1, "eventos_relacionados": [1,2,3,4,5], "id_cliente":1 }*/
-    app.post("/api/reportes/v1/creaestadoresultado", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], reportesController.creaEstadoResultado);
+    app.post("/api/reportes/v1/creaestadoresultado", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaEstadoResultado);
 
 
     /* Devuelve resumen de eventos 
@@ -41,7 +41,7 @@ module.exports = function(app) {
 
     /* Devuelve resumen de todos los eventos, de todos los paquetes 
     ejemplo: /api/reportes/v1/resumeneventos?fecha_inicial=2023-08-01&fecha_final=2023-09-30*/
-    app.get("/api/reportes/v1/resumenalleventos", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], reportesController.resumenAllEventos)
+    app.get("/api/reportes/v1/resumenalleventos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.resumenAllEventos)
 
     /* Devuelve resumen de todos los turnos 
     ejemplpo: /api/reportes/v1/resumenturnos?fecha_inicial=2023-08-01&fecha_final=2023-09-30*/

@@ -131,7 +131,7 @@ let isSupervisorOrAdmin = async (req, res, next) => {
         return next();
       }
 
-      if (element.name === "admin" || element.name === "adminsae") {
+      if (element.name === "admin" ) {
         return next();
       }
     }
@@ -146,7 +146,30 @@ let isSupervisorOrAdmin = async (req, res, next) => {
   }
 };
 
+let isSistemaOrAdminSae = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.userId);
+    const roles = await user.getRoles();
 
+    for (const element of roles) {
+      if (element.name === "sistema") {
+        return next();
+      }
+
+      if (element.name === "adminsae") {
+        return next();
+      }
+    }
+
+    return res.status(403).send({
+      message: "Debe ser Sistema o Administrador Sae!",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "No es posible determinar el rol",
+    });
+  }
+}
 let isSupervisorOrAdminOrSistema = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.userId);
@@ -157,7 +180,7 @@ let isSupervisorOrAdminOrSistema = async (req, res, next) => {
         return next();
       }
 
-      if (element.name === "admin") {
+      if (element.name === "admin" ) {
         return next();
       }
 
@@ -184,6 +207,7 @@ const authJwt = {
   isSistema,
   isSupervisor,
   isSupervisorOrAdmin,
-  isSupervisorOrAdminOrSistema
+  isSupervisorOrAdminOrSistema,
+  isSistemaOrAdminSae
 };
 module.exports = authJwt;
