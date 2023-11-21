@@ -136,7 +136,7 @@ exports.findAllJornadas = async (req, res) => {
           (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) \
           as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada \
           FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id \
-          join _comun.turnos t on br.id_turno = t.id) as br on e.brigada = br.id WHERE e.brigada is not null order by fecha_hora, id desc;";
+          join _comun.turnos t on br.id_turno = t.id) as br on e.brigada = br.id WHERE e.brigada is not null order by fecha_hora desc, id desc;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -182,6 +182,7 @@ exports.findAllJornadas = async (req, res) => {
                 brigada: String(element.brigada),
                 tipo_turno: String(element.tipo_turno),
                 comuna: String(element.comuna),
+                despachador: String(element.despachador),
                 coordenadas: {
                   latitude: String(element.latitude),
                   longitude: String(element.longitude)
