@@ -665,7 +665,7 @@ exports.resumenAllTurnos = async (req, res) => {
 */
 exports.creaObservaciones = async (req, res) => {
   // metodo POST
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Observaciones']
       #swagger.description = 'Ingresa las observaciones para un estado de pago' */
   try {
     const campos = [
@@ -706,7 +706,7 @@ exports.creaObservaciones = async (req, res) => {
 */
 exports.updateObservaciones = async (req, res) => {
   // metodo POST
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Observaciones']
       #swagger.description = 'Actualiza las observaciones para un estado de pago' */
       try{
         const id = req.params.id;
@@ -744,7 +744,7 @@ exports.updateObservaciones = async (req, res) => {
 */
 exports.deleteObservaciones = async (req, res) => {
   // metodo POST
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Observaciones']
       #swagger.description = 'Elimina una observacion para un estado de pago' */
   try{
     const id = req.params.id;
@@ -769,7 +769,7 @@ exports.deleteObservaciones = async (req, res) => {
   app.post("/api/reportes/v1/findallobservaciones", reportesController.findallObservaciones)
 */
 exports.findallObservaciones = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Observaciones']
       #swagger.description = 'Devuelve todas las observaciones ' */
   await Observaciones.findAll().then(data => {
     res.send(data);
@@ -782,7 +782,7 @@ exports.findallObservaciones = async (req, res) => {
   app.post("/api/reportes/v1/findobservaciones", reportesController.findObservacionesByParams)
 */
 exports.findObservacionesByParams = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Observaciones']
       #swagger.description = 'Devuelve las observacion por campos' */
       try{
         const parametros = {
@@ -823,7 +823,7 @@ exports.findObservacionesByParams = async (req, res) => {
   app.post("/api/reportes/v1/observacionesnoprocesadas", reportesController.findObservacionesNoProcesadas)
 */
 exports.findObservacionesNoProcesadas = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Observaciones']
       #swagger.description = 'Devuelve las observaciones no procesadas' */
   await Observaciones.findAll({
     where: {
@@ -841,7 +841,7 @@ exports.findObservacionesNoProcesadas = async (req, res) => {
   app.post("/api/reportes/v1/semanal_por_brigada", reportesController.semanalByBrigada)
 */
 exports.semanalByBrigada = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve los cargos fijo por semana' */
 
   const cargosFijos = [
@@ -858,7 +858,7 @@ exports.semanalByBrigada = async (req, res) => {
   app.post("/api/reportes/v1/permanencia_por_brigada", reportesController.permanenciaByBrigada)
 */
 exports.permanenciaByBrigada = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la permanencia semanal por brigada' */
 
   const permanencia = {
@@ -883,7 +883,7 @@ exports.permanenciaByBrigada = async (req, res) => {
   app.post("/api/reportes/v1/horasextras", reportesController.findHorasExtras)
 */
 exports.findHorasExtras = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve las horas extra realizadas' */
 
   const horasExtras = {
@@ -903,7 +903,7 @@ exports.findHorasExtras = async (req, res) => {
   app.post("/api/reportes/v1/turnosadicionales", reportesController.findTurnosAdicionales)
 */
 exports.findTurnosAdicionales = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve los turnos adicionales' */
 
   const turnosAdicionales = {
@@ -922,7 +922,7 @@ exports.findTurnosAdicionales = async (req, res) => {
   app.post("/api/reportes/v1/turnoscontingencia", reportesController.findTurnosContingencia)
 */
 exports.findTurnosContingencia = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve los turnos de contingencia' */
 
   const turnosContingencia = {
@@ -937,7 +937,7 @@ exports.findTurnosContingencia = async (req, res) => {
   app.post("/api/reportes/v1/produccionpxq", reportesController.findProduccionPxQ)
 */
 exports.findProduccionPxQ = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la produccion PxQ' */
 
   const produccionPxQ = {
@@ -957,7 +957,7 @@ exports.findProduccionPxQ = async (req, res) => {
   app.post("/api/reportes/v1/reportecobroadicional", reportesController.findRepCobroAdicional)
 */
 exports.findRepCobroAdicional = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la tabla de cobros adicionales para el EDP' */
 
   const repCobroAdicional = {
@@ -974,7 +974,7 @@ exports.findRepCobroAdicional = async (req, res) => {
   app.post("/api/reportes/v1/reportedescuentos", reportesController.findRepDescuentos)
 */
 exports.findRepDescuentos = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la tabla de descuentos para el EDP' */
 
   const repDescuentos = {
@@ -991,7 +991,7 @@ exports.findRepDescuentos = async (req, res) => {
   app.post("/api/reportes/v1/reporteresumen", reportesController.findRepResumen)
 */
 exports.findRepResumen = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la tabla de resumen para el EDP' */
 
   const repResumen = {
@@ -1016,14 +1016,13 @@ exports.findRepResumen = async (req, res) => {
 
 }
 
-
 /*********************************************************************************** */
 /* Ingresa los cobros adicionales para un estado de pago
   app.post("/api/reportes/v1/creacobroadicional", reportesController.creaCobroAdicional)
 */
 exports.creaCobroAdicional = async (req, res) => {
   // metodo POST
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Cobros Adicionales']
       #swagger.description = 'Ingresa los cobros adicionales para un estado de pago' */
   try {
     const campos = [
@@ -1066,7 +1065,7 @@ exports.creaCobroAdicional = async (req, res) => {
 */
 exports.updateCobroAdicional = async (req, res) => {
   // metodo POST
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Cobros Adicionales']
       #swagger.description = 'Actualiza los cobro adicionales para un estado de pago' */
       try{
         const id = req.params.id;
@@ -1107,7 +1106,7 @@ exports.updateCobroAdicional = async (req, res) => {
 */
 exports.deleteCobroAdicional = async (req, res) => {
   // metodo POST
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Cobros Adicionales']
 #swagger.description = 'Elimina un cobro adicional para un estado de pago' */
   try{
     const id = req.params.id;
@@ -1133,7 +1132,7 @@ exports.deleteCobroAdicional = async (req, res) => {
   app.post("/api/reportes/v1/findallcobroadicional", reportesController.findallCobroAdicional)
 */
 exports.findallCobroAdicional = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Cobros Adicionales']
       #swagger.description = 'Devuelve todos los cobros adicionales ' */
   await CobroAdicional.findAll().then(data => {
     res.send(data);
@@ -1147,7 +1146,7 @@ exports.findallCobroAdicional = async (req, res) => {
   app.post("/api/reportes/v1/findcobroadicional", reportesController.findCobroAdicionalByParams)
 */
 exports.findCobroAdicionalByParams = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Cobros Adicionales']
       #swagger.description = 'Devuelve los cobros adicionales por campos' */
 	try{
       const parametros = {
@@ -1188,7 +1187,7 @@ exports.findCobroAdicionalByParams = async (req, res) => {
   app.post("/api/reportes/v1/cobroadicionalnoprocesado", reportesController.findCobroAdicionalNoProcesado)
 */
 exports.findCobroAdicionalNoProcesado = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Cobros Adicionales']
       #swagger.description = 'Devuelve los cobros adicionales no procesados' */
   await CobroAdicional.findAll({
     where: {
@@ -1206,7 +1205,7 @@ exports.findCobroAdicionalNoProcesado = async (req, res) => {
 */
 exports.creaDescuentos = async (req, res) => {
   // metodo POST
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Descuentos']
       #swagger.description = 'Ingresa los descuentos para un estado de pago' */
   try {
     const campos = [
@@ -1249,7 +1248,7 @@ exports.creaDescuentos = async (req, res) => {
 */
 exports.updateDescuentos = async (req, res) => {
   // metodo POST
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Descuentos']
       #swagger.description = 'Actualiza los descuentos para un estado de pago' */
       try{
         const id = req.params.id;
@@ -1290,7 +1289,7 @@ exports.updateDescuentos = async (req, res) => {
 */
 exports.deleteDescuentos = async (req, res) => {
   // metodo POST
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Descuentos']
 #swagger.description = 'Elimina un descuento para un estado de pago' */
   try{
     const id = req.params.id;
@@ -1316,7 +1315,7 @@ exports.deleteDescuentos = async (req, res) => {
   app.post("/api/reportes/v1/findalldescuentos", reportesController.findallDescuentos)
 */
 exports.findallDescuentos = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Descuentos']
       #swagger.description = 'Devuelve todos los descuentos ' */
   await Descuentos.findAll().then(data => {
     res.send(data);
@@ -1330,7 +1329,7 @@ exports.findallDescuentos = async (req, res) => {
   app.post("/api/reportes/v1/finddescuentos", reportesController.findDescuentosByParams)
 */
 exports.findDescuentosByParams = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Descuentos']
       #swagger.description = 'Devuelve los descuentos por campos' */
 	try{
       const parametros = {
@@ -1371,7 +1370,7 @@ exports.findDescuentosByParams = async (req, res) => {
   app.post("/api/reportes/v1/descuentosnoprocesados", reportesController.findDescuentosNoProcesados)
 */
 exports.findDescuentosNoProcesados = async (req, res) => {
-  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Descuentos']
       #swagger.description = 'Devuelve los descuentos no procesados' */
   await Descuentos.findAll({
     where: {

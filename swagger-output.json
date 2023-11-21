@@ -2613,7 +2613,7 @@
     "/api/reportes/v1/creaobservaciones": {
       "post": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Observaciones"
         ],
         "description": "Ingresa las observaciones para un estado de pago",
         "parameters": [
@@ -2655,7 +2655,7 @@
     "/api/reportes/v1/updateobservaciones/{id}": {
       "put": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Observaciones"
         ],
         "description": "Actualiza las observaciones para un estado de pago",
         "parameters": [
@@ -2703,7 +2703,7 @@
     "/api/reportes/v1/deleteobservaciones/{id}": {
       "delete": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Observaciones"
         ],
         "description": "Elimina una observacion para un estado de pago",
         "parameters": [
@@ -2733,7 +2733,7 @@
     "/api/reportes/v1/findallobservaciones": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Observaciones"
         ],
         "description": "Devuelve todas las observaciones ",
         "responses": {
@@ -2755,7 +2755,7 @@
     "/api/reportes/v1/findobservaciones": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Observaciones"
         ],
         "description": "Devuelve las observacion por campos",
         "parameters": [
@@ -2789,7 +2789,7 @@
     "/api/reportes/v1/observacionesnoprocesadas": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Observaciones"
         ],
         "description": "Devuelve las observaciones no procesadas",
         "responses": {
@@ -2811,7 +2811,7 @@
     "/api/reportes/v1/semanal_por_brigada": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve los cargos fijo por semana",
         "responses": {
@@ -2833,7 +2833,7 @@
     "/api/reportes/v1/permanencia_por_brigada": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la permanencia semanal por brigada",
         "responses": {
@@ -2855,7 +2855,7 @@
     "/api/reportes/v1/horasextras": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve las horas extra realizadas",
         "responses": {
@@ -2877,7 +2877,7 @@
     "/api/reportes/v1/turnosadicionales": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve los turnos adicionales",
         "responses": {
@@ -2899,7 +2899,7 @@
     "/api/reportes/v1/turnoscontingencia": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve los turnos de contingencia",
         "responses": {
@@ -2921,7 +2921,7 @@
     "/api/reportes/v1/produccionpxq": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la produccion PxQ",
         "responses": {
@@ -2943,7 +2943,7 @@
     "/api/reportes/v1/reportecobroadicional": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la tabla de cobros adicionales para el EDP",
         "responses": {
@@ -2965,7 +2965,7 @@
     "/api/reportes/v1/reportedescuentos": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la tabla de descuentos para el EDP",
         "responses": {
@@ -2987,7 +2987,7 @@
     "/api/reportes/v1/reporteresumen": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la tabla de resumen para el EDP",
         "responses": {
@@ -3009,7 +3009,7 @@
     "/api/reportes/v1/creacobroadicional": {
       "post": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Cobros Adicionales"
         ],
         "description": "Ingresa los cobros adicionales para un estado de pago",
         "parameters": [
@@ -3057,7 +3057,7 @@
     "/api/reportes/v1/updatecobroadicional/{id}": {
       "put": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Cobros Adicionales"
         ],
         "description": "Actualiza los cobro adicionales para un estado de pago",
         "parameters": [
@@ -3111,7 +3111,7 @@
     "/api/reportes/v1/deletecobroadicional/{id}": {
       "delete": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Cobros Adicionales"
         ],
         "description": "Elimina un cobro adicional para un estado de pago",
         "parameters": [
@@ -3141,7 +3141,7 @@
     "/api/reportes/v1/findallcobroadicional": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Cobros Adicionales"
         ],
         "description": "Devuelve todos los cobros adicionales ",
         "responses": {
@@ -3163,7 +3163,7 @@
     "/api/reportes/v1/findcobroadicional": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Cobros Adicionales"
         ],
         "description": "Devuelve los cobros adicionales por campos",
         "parameters": [
@@ -3197,7 +3197,7 @@
     "/api/reportes/v1/cobroadicionalnoprocesado": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Cobros Adicionales"
         ],
         "description": "Devuelve los cobros adicionales no procesados",
         "responses": {
@@ -3219,7 +3219,7 @@
     "/api/reportes/v1/creadescuentos": {
       "post": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Descuentos"
         ],
         "description": "Ingresa los descuentos para un estado de pago",
         "parameters": [
@@ -3267,7 +3267,7 @@
     "/api/reportes/v1/updatedescuentos/{id}": {
       "put": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Descuentos"
         ],
         "description": "Actualiza los descuentos para un estado de pago",
         "parameters": [
@@ -3321,7 +3321,7 @@
     "/api/reportes/v1/deletedescuento/{id}": {
       "delete": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Descuentos"
         ],
         "description": "Elimina un descuento para un estado de pago",
         "parameters": [
@@ -3351,7 +3351,7 @@
     "/api/reportes/v1/findalldescuentos": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Descuentos"
         ],
         "description": "Devuelve todos los descuentos ",
         "responses": {
@@ -3373,7 +3373,7 @@
     "/api/reportes/v1/finddescuentos": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Descuentos"
         ],
         "description": "Devuelve los descuentos por campos",
         "parameters": [
@@ -3407,7 +3407,7 @@
     "/api/reportes/v1/descuentosnoprocesados": {
       "get": {
         "tags": [
-          "SAE - Backoffice - Reportes"
+          "SAE - Backoffice - Reportes - CRUD Descuentos"
         ],
         "description": "Devuelve los descuentos no procesados",
         "responses": {
