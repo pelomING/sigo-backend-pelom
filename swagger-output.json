@@ -2917,6 +2917,216 @@
           }
         }
       }
+    },
+    "/api/reportes/v1/creacobroadicional": {
+      "post": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Ingresa los cobros adicionales para un estado de pago",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_hora": {
+                  "example": "any"
+                },
+                "detalle": {
+                  "example": "any"
+                },
+                "cantidad": {
+                  "example": "any"
+                },
+                "valor": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/updatecobroadicional/{id}": {
+      "put": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Actualiza los cobro adicionales para un estado de pago",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_hora": {
+                  "example": "any"
+                },
+                "detalle": {
+                  "example": "any"
+                },
+                "cantidad": {
+                  "example": "any"
+                },
+                "valor": {
+                  "example": "any"
+                },
+                "estado": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/deletecobroadicional/{id}": {
+      "delete": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Elimina un cobro adicional para un estado de pago",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/findallcobroadicional": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve todos los cobros adicionales ",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/findcobroadicional": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve los cobros adicionales por campos",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_estado_resultado",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/cobroadicionalnoprocesado": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve los cobros adicionales no procesados",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
     }
   }
 }

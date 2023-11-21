@@ -2,7 +2,8 @@ module.exports = (sequelize, Sequelize) => {
     const CobroAdicional = sequelize.define("reporte_cobro_adicional", {
         id: {
             type: Sequelize.INTEGER,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
         },
         detalle: {
             type: Sequelize.STRING
@@ -24,8 +25,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         }
         },
-        {
-            schema: "sae",
-        });
+    {
+        schema: "sae",
+    });
     return CobroAdicional;
   };

@@ -3,6 +3,8 @@ const Jornada = db.jornada;
 const EstadoResultado = db.estadoResultado;
 const DetalleEstadoResultado = db.detalleEstadoResultado;
 const Observaciones = db.observaciones;
+const CobroAdicional = db.cobroAdicional;
+const Descuentos = db.descuentos;
 
 exports.readAllJornada = async (req, res) => {
   //metodo GET
@@ -120,7 +122,7 @@ exports.findAllJornadas = async (req, res) => {
     try {
       const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, (substr(t.inicio::text,1,5) \
       || ' - ' || substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, \
-      e.estado, null as hora_inicio, null as hora_termino, null as brigada, null as tipo_turno, null as comuna, case when \
+      e.estado, null as hora_inicio, null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when \
       e.coordenadas is not null  then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null \
       then e.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_eventos e join _comun.eventos_tipo et on \
       e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join _comun.paquete p on e.id_paquete = p.id \
@@ -128,13 +130,13 @@ exports.findAllJornadas = async (req, res) => {
       br.turno as turno, br.paquete as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, hora_inicio, \
       hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where \
         id = e.tipo_turno) else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas \
-          where codigo = e.comuna ) else null end as comuna, case when e.coordenadas is not null then e.coordenadas->>'latitude' \
+          where codigo = e.comuna ) else null end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' \
           else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else null end as \
           longitude FROM sae.reporte_eventos e join _comun.eventos_tipo et on e.tipo_evento = et.codigo join \
           (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) \
           as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada \
           FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id \
-          join _comun.turnos t on br.id_turno = t.id) as br on e.brigada = br.id WHERE e.brigada is not null order by id desc;";
+          join _comun.turnos t on br.id_turno = t.id) as br on e.brigada = br.id WHERE e.brigada is not null order by fecha_hora, id desc;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -158,6 +160,7 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.brigada === 'string' || typeof element.brigada === 'object') &&
             (typeof element.tipo_turno === 'string' || typeof element.tipo_turno === 'object') &&
             (typeof element.comuna === 'string' || typeof element.comuna === 'object') &&
+            (typeof element.despachador === 'string' || typeof element.despachador === 'object') &&
             (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
             (typeof element.longitude === 'string' || typeof element.longitude === 'object')) {
 
@@ -803,13 +806,6 @@ exports.findObservacionesByParams = async (req, res) => {
         res.status(500).send({ message: err.message });
       })
 
-  await Observaciones.findAll({
-    where: req.body
-  }).then(data => {
-    res.send(data);
-  }).catch(err => {
-    res.status(500).send({ message: err.message });
-  })
 }
 /*********************************************************************************** */
 /* Devuelve las observaciones no procesadas, id_estado_resultado=null
@@ -924,4 +920,188 @@ exports.findTurnosContingencia = async (req, res) => {
   }
   res.send(turnosContingencia);
 
+}
+
+/*********************************************************************************** */
+/* Ingresa los cobros adicionales para un estado de pago
+  app.post("/api/reportes/v1/creacobroadicional", reportesController.creaCobroAdicional)
+*/
+exports.creaCobroAdicional = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Ingresa los cobros adicionales para un estado de pago' */
+  try {
+    const campos = [
+      'detalle', 'fecha_hora', 'cantidad', 'valor'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    let fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+    fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+
+
+    const cobroadicional = {
+      detalle: req.body.detalle,
+      fecha_hora: fecha,
+	    cantidad: req.body.cantidad,
+	    valor: req.body.valor,
+      estado: 1
+    };
+
+    const cobroadicionalCreate = await CobroAdicional.create(cobroadicional)
+        .then(data => {
+            res.send(data);
+        }).catch(err => {
+            res.status(500).send({ message: err.message });
+        });
+    
+  }catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+/* Actualiza los cobros adicionales para un estado de pago
+  app.post("/api/reportes/v1/updatecobroadicional", reportesController.updateCobroAdicional)
+*/
+exports.updateCobroAdicional = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Actualiza los cobro adicionales para un estado de pago' */
+      try{
+        const id = req.params.id;
+        let fecha;
+        if (req.body.fecha_hora){
+          fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+          fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        }else{
+          fecha = undefined;
+        }
+        const cobroadicional = {
+          detalle: req.body.detalle,
+          fecha_hora: fecha,
+		      cantidad: req.body.cantidad,
+		      valor: req.body.valor,
+          estado: req.body.estado
+        };
+        await CobroAdicional.update(cobroadicional, {
+          where: { id: id }
+        }).then(data => {
+          if (data[0] === 1) {
+            res.send({ message: "cobro adicional actualizado" });
+          } else {
+            res.send({ message: `No existe un cobro adicional con el id ${id}` });
+          }
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+      }catch (error) {
+        res.status(500).send(error);
+      };
+
+}
+
+/*********************************************************************************** */
+/* Elimina un cobro adicional para un estado de pago
+  app.post("/api/reportes/v1/deletecobroadicional", reportesController.deleteCobroAdicional)
+*/
+exports.deleteCobroAdicional = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+#swagger.description = 'Elimina un cobro adicional para un estado de pago' */
+  try{
+    const id = req.params.id;
+    await CobroAdicional.destroy({
+      where: { id: id }
+    }).then(data => {
+      if (data === 1) {
+        res.send({ message: "Cobro adicional eliminado" });
+      } else {
+        res.send({ message: `No existe un cobro con el id ${id}` });
+      }
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
+
+}
+
+/*********************************************************************************** */
+/* Devuelve todos los cobros adicionales 
+  app.post("/api/reportes/v1/findallcobroadicional", reportesController.findallCobroAdicional)
+*/
+exports.findallCobroAdicional = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve todos los cobros adicionales ' */
+  await CobroAdicional.findAll().then(data => {
+    res.send(data);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
+}
+
+/*********************************************************************************** */
+/* Devuelve los cobros adicionales por parametros
+  app.post("/api/reportes/v1/findcobroadicional", reportesController.findCobroAdicionalByParams)
+*/
+exports.findCobroAdicionalByParams = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve los cobros adicionales por campos' */
+	try{
+      const parametros = {
+        id: req.query.id,
+        id_estado_resultado: req.query.id_estado_resultado
+      }
+      const keys = Object.keys(parametros)
+      let sql_array = [];
+      let param = {};
+      for (element of keys) {
+        if (parametros[element]){
+          sql_array.push( element + " = :" + element);
+          param[element] = parametros[element];
+        }
+      }
+      const where = sql_array.join(" AND ");
+      console.log('where => ', where, param);
+      if (sql_array.length === 0) {
+        res.status(500).send("Debe incluir algun parametro para consultar");
+      }else {
+        await CobroAdicional.findAll({
+          where: param
+        }).then(data => {
+          res.send(data);
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+      }
+      
+
+	}catch (error) {
+		res.status(500).send(error);
+  }
+}
+
+/*********************************************************************************** */
+/* Devuelve los cobros adicionales no procesados, id_estado_resultado=null
+  app.post("/api/reportes/v1/cobroadicionalnoprocesado", reportesController.findCobroAdicionalNoProcesado)
+*/
+exports.findCobroAdicionalNoProcesado = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve los cobros adicionales no procesados' */
+  await CobroAdicional.findAll({
+    where: {
+      id_estado_resultado: null
+    }
+  }).then(data => {
+    res.send(data);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
 }

@@ -113,4 +113,40 @@ module.exports = function(app) {
     */
     app.get("/api/reportes/v1/turnoscontingencia", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findTurnosContingencia);
 
+    /*********************************************************************************** */
+    /* Ingresa las observaciones para un estado de pago
+      app.post("/api/reportes/v1/creacobroadicional", reportesController.creaCobroAdicional)
+    */
+    app.post("/api/reportes/v1/creacobroadicional", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaCobroAdicional);
+
+    /* Actualiza los cobros adicionales para un estado de pago
+    app.post("/api/reportes/v1/updatecobroadicional", reportesController.updateCobroAdicional)
+    */
+    app.put("/api/reportes/v1/updatecobroadicional/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateCobroAdicional);
+
+    /*********************************************************************************** */
+    /* Elimina un cobro adicional para un estado de pago
+      app.post("/api/reportes/v1/deletecobroadicional", reportesController.deleteCobroAdicional)
+    */
+    app.delete("/api/reportes/v1/deletecobroadicional/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteCobroAdicional);
+
+    /*********************************************************************************** */
+    /* Devuelve todos los cobros adicionales 
+      app.post("/api/reportes/v1/findallcobroadicional", reportesController.findallCobroAdicional)
+    */
+    app.get("/api/reportes/v1/findallcobroadicional", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findallCobroAdicional);
+
+    /*********************************************************************************** */
+    /* Devuelve los cobros adicionales por parametros
+      app.post("/api/reportes/v1/findcobroadicional", reportesController.findCobroAdicionalByParams)
+    */
+    app.get("/api/reportes/v1/findcobroadicional", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findCobroAdicionalByParams);
+
+    /*********************************************************************************** */
+    /* Devuelve los cobros adicionales no procesados, id_estado_resultado=null
+      app.post("/api/reportes/v1/cobroadicionalnoprocesado", reportesController.findCobroAdicionalNoProcesado)
+    */
+    app.get("/api/reportes/v1/cobroadicionalnoprocesado", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findCobroAdicionalNoProcesado);
+
+
 }

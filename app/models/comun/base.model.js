@@ -2,7 +2,8 @@ module.exports = (sequelize, Sequelize) => {
     const Base = sequelize.define("base", {
         id: {
             type: Sequelize.INTEGER,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
           },
           nombre: {
             type: Sequelize.STRING,
