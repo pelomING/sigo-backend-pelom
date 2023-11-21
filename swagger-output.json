@@ -2918,6 +2918,94 @@
         }
       }
     },
+    "/api/reportes/v1/produccionpxq": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve la produccion PxQ",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/reportecobroadicional": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve la tabla de cobros adicionales para el EDP",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/reportedescuentos": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve la tabla de descuentos para el EDP",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/reporteresumen": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve la tabla de resumen para el EDP",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/reportes/v1/creacobroadicional": {
       "post": {
         "tags": [
@@ -3112,6 +3200,216 @@
           "SAE - Backoffice - Reportes"
         ],
         "description": "Devuelve los cobros adicionales no procesados",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/creadescuentos": {
+      "post": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Ingresa los descuentos para un estado de pago",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_hora": {
+                  "example": "any"
+                },
+                "detalle": {
+                  "example": "any"
+                },
+                "cantidad": {
+                  "example": "any"
+                },
+                "valor": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/updatedescuentos/{id}": {
+      "put": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Actualiza los descuentos para un estado de pago",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_hora": {
+                  "example": "any"
+                },
+                "detalle": {
+                  "example": "any"
+                },
+                "cantidad": {
+                  "example": "any"
+                },
+                "valor": {
+                  "example": "any"
+                },
+                "estado": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/deletedescuento/{id}": {
+      "delete": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Elimina un descuento para un estado de pago",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/findalldescuentos": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve todos los descuentos ",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/finddescuentos": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve los descuentos por campos",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_estado_resultado",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/descuentosnoprocesados": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve los descuentos no procesados",
         "responses": {
           "200": {
             "description": "OK"

@@ -114,6 +114,29 @@ module.exports = function(app) {
     app.get("/api/reportes/v1/turnoscontingencia", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findTurnosContingencia);
 
     /*********************************************************************************** */
+    /* Devuelve la produccion PxQ
+      app.post("/api/reportes/v1/produccionpxq", reportesController.findProduccionPxQ)
+    */
+    app.get("/api/reportes/v1/produccionpxq", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findProduccionPxQ);
+
+    /*********************************************************************************** */
+    /* Devuelve la tabla de cobros adicionales para el EDP
+      app.post("/api/reportes/v1/reportecobroadicional", reportesController.findRepCobroAdicional)
+    */
+    app.get("/api/reportes/v1/reportecobroadicional", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findRepCobroAdicional);
+
+    /*********************************************************************************** */
+    /* Devuelve la tabla de descuentos para el EDP
+      app.post("/api/reportes/v1/reportedescuentos", reportesController.findRepDescuentos)
+    */
+    app.get("/api/reportes/v1/reportedescuentos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findRepDescuentos);
+    /*********************************************************************************** */
+    /* Devuelve la tabla de resumen para el EDP
+      app.post("/api/reportes/v1/reporteresumen", reportesController.findRepResumen)
+    */
+    app.get("/api/reportes/v1/reporteresumen", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findRepResumen);
+
+    /*********************************************************************************** */
     /* Ingresa las observaciones para un estado de pago
       app.post("/api/reportes/v1/creacobroadicional", reportesController.creaCobroAdicional)
     */
@@ -147,6 +170,42 @@ module.exports = function(app) {
       app.post("/api/reportes/v1/cobroadicionalnoprocesado", reportesController.findCobroAdicionalNoProcesado)
     */
     app.get("/api/reportes/v1/cobroadicionalnoprocesado", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findCobroAdicionalNoProcesado);
+
+    /*********************************************************************************** */
+    /* Ingresa los descuentos para un estado de pago
+      app.post("/api/reportes/v1/creadescuentos", reportesController.creaDescuentos)
+    */
+    app.post("/api/reportes/v1/creadescuentos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaDescuentos);
+
+    /*********************************************************************************** */
+    /* Actualiza los descuentos para un estado de pago
+      app.post("/api/reportes/v1/updatedescuentos", reportesController.updateDescuentos)
+    */
+    app.put("/api/reportes/v1/updatedescuentos/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateDescuentos);
+
+    /*********************************************************************************** */
+    /* Elimina un descuento para un estado de pago
+      app.post("/api/reportes/v1/deletedescuento", reportesController.deleteDescuentos)
+    */
+    app.delete("/api/reportes/v1/deletedescuento/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteDescuentos);
+
+    /*********************************************************************************** */
+    /* Devuelve todos los descuentos 
+      app.post("/api/reportes/v1/findalldescuentos", reportesController.findallDescuentos)
+    */
+    app.get("/api/reportes/v1/findalldescuentos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findallDescuentos);
+
+    /*********************************************************************************** */
+    /* Devuelve los descuentos por parametros
+      app.post("/api/reportes/v1/finddescuentos", reportesController.findDescuentosByParams)
+    */
+    app.get("/api/reportes/v1/finddescuentos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findDescuentosByParams);
+
+    /*********************************************************************************** */
+    /* Devuelve los descuentos no procesados, id_estado_resultado=null
+      app.post("/api/reportes/v1/descuentosnoprocesados", reportesController.findDescuentosNoProcesados)
+    */
+    app.get("/api/reportes/v1/descuentosnoprocesados", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findDescuentosNoProcesados);
 
 
 }

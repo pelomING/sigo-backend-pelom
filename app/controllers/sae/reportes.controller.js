@@ -784,28 +784,38 @@ exports.findallObservaciones = async (req, res) => {
 exports.findObservacionesByParams = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve las observacion por campos' */
-      const parametros = {
-        id: req.query.id,
-        id_estado_resultado: req.query.id_estado_resultado
-      }
-      const keys = Object.keys(parametros)
-      let sql_array = [];
-      let param = {};
-      for (element of keys) {
-        if (parametros[element]){
-          sql_array.push("b." + element + " = :" + element);
-          param[element] = parametros[element];
+      try{
+        const parametros = {
+          id: req.query.id,
+          id_estado_resultado: req.query.id_estado_resultado
         }
-      }
-      const where = sql_array.join(" AND ");
-      await Observaciones.findAll({
-        where: where,
-        params: param
-      }).then(data => {
-        res.send(data);
-      }).catch(err => {
-        res.status(500).send({ message: err.message });
-      })
+        const keys = Object.keys(parametros)
+        let sql_array = [];
+        let param = {};
+        for (element of keys) {
+          if (parametros[element]){
+            sql_array.push( element + " = :" + element);
+            param[element] = parametros[element];
+          }
+        }
+        const where = sql_array.join(" AND ");
+        console.log('where => ', where, param);
+        if (sql_array.length === 0) {
+          res.status(500).send("Debe incluir algun parametro para consultar");
+        }else {
+          await Observaciones.findAll({
+            where: param
+          }).then(data => {
+            res.send(data);
+          }).catch(err => {
+            res.status(500).send({ message: err.message });
+          })
+        }
+        
+  
+    }catch (error) {
+      res.status(500).send(error);
+    }
 
 }
 /*********************************************************************************** */
@@ -922,6 +932,90 @@ exports.findTurnosContingencia = async (req, res) => {
   res.send(turnosContingencia);
 
 }
+/*********************************************************************************** */
+/* Devuelve la produccion PxQ
+  app.post("/api/reportes/v1/produccionpxq", reportesController.findProduccionPxQ)
+*/
+exports.findProduccionPxQ = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve la produccion PxQ' */
+
+  const produccionPxQ = {
+    detalle: [
+      {tipo_evento: 'Evento domiciliario', valor_total: 500000},
+      {tipo_evento: 'Evento en SSEE y/o BT', valor_total: 500000},
+      {tipo_evento: 'Evento en línea MT', valor_total: 500000},
+      {tipo_evento: 'Trabajos menores de reparacación en líneas por falla', valor_total: 500000}
+    ],
+    subtotal: 2000000
+  }
+  res.send(produccionPxQ);
+
+}
+/*********************************************************************************** */
+/* Devuelve la tabla de cobros adicionales para el EDP
+  app.post("/api/reportes/v1/reportecobroadicional", reportesController.findRepCobroAdicional)
+*/
+exports.findRepCobroAdicional = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve la tabla de cobros adicionales para el EDP' */
+
+  const repCobroAdicional = {
+    detalle: [
+      {detalle: 'permisos municipales', q: 1,total: 1000000}
+    ],
+    subtotal: 1000000
+  }
+  res.send(repCobroAdicional);
+
+}
+/*********************************************************************************** */
+/* Devuelve la tabla de descuentos para el EDP
+  app.post("/api/reportes/v1/reportedescuentos", reportesController.findRepDescuentos)
+*/
+exports.findRepDescuentos = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve la tabla de descuentos para el EDP' */
+
+  const repDescuentos = {
+    detalle: [
+      {detalle: '5% trabajo adicional', q: 1,total: 234876}
+    ],
+    subtotal: 234876
+  }
+  res.send(repDescuentos);
+
+}
+/*********************************************************************************** */
+/* Devuelve la tabla de resumen para el EDP
+  app.post("/api/reportes/v1/reporteresumen", reportesController.findRepResumen)
+*/
+exports.findRepResumen = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve la tabla de resumen para el EDP' */
+
+  const repResumen = {
+    detalle: [
+      {item: 'BASE PERMANENCIA', valor: 234876},
+      {item: 'HORAS EXTRAS', valor: 234876},
+      {item: 'TURNOS ADICIONALES', valor: 234876},
+      {item: 'TURNOS CONTINGENCIA', valor: 234876},
+      {item: 'PRODUCCION', valor: 234876},
+      {item: 'COBROS ADICIONALES', valor: 234876},
+      {item: 'DESCUENTOS', valor: 234876},
+      {item: 'COSTO DIRECTO', valor: 234876},
+      {item: 'RECARGO POR DISTANCIA', valor: 234876},
+      {item: 'ESTADO DE EMERGENCIA', valor: 234876},
+      {item: 'VALOR NETO', valor: 234876},
+      {item: 'IVA', valor: 234876},
+      {item: 'TOTAL ESTADO DE PAGO', valor: 234876}
+    ],
+    total_edp: 234876
+  }
+  res.send(repResumen);
+
+}
+
 
 /*********************************************************************************** */
 /* Ingresa los cobros adicionales para un estado de pago
@@ -1097,6 +1191,189 @@ exports.findCobroAdicionalNoProcesado = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve los cobros adicionales no procesados' */
   await CobroAdicional.findAll({
+    where: {
+      id_estado_resultado: null
+    }
+  }).then(data => {
+    res.send(data);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
+}
+/*********************************************************************************** */
+/* Ingresa los descuentos para un estado de pago
+  app.post("/api/reportes/v1/creadescuentos", reportesController.creaDescuentos)
+*/
+exports.creaDescuentos = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Ingresa los descuentos para un estado de pago' */
+  try {
+    const campos = [
+      'detalle', 'fecha_hora', 'cantidad', 'valor'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    let fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+    fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+
+
+    const descuentos = {
+      detalle: req.body.detalle,
+      fecha_hora: fecha,
+	    cantidad: req.body.cantidad,
+	    valor: req.body.valor,
+      estado: 1
+    };
+
+    const descuentosCreate = await Descuentos.create(descuentos)
+        .then(data => {
+            res.send(data);
+        }).catch(err => {
+            res.status(500).send({ message: err.message });
+        });
+    
+  }catch (error) {
+    res.status(500).send(error);
+  }
+}
+/*********************************************************************************** */
+/* Actualiza los descuentos para un estado de pago
+  app.post("/api/reportes/v1/updatedescuentos", reportesController.updateDescuentos)
+*/
+exports.updateDescuentos = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Actualiza los descuentos para un estado de pago' */
+      try{
+        const id = req.params.id;
+        let fecha;
+        if (req.body.fecha_hora){
+          fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+          fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        }else{
+          fecha = undefined;
+        }
+        const descuentos = {
+          detalle: req.body.detalle,
+          fecha_hora: fecha,
+		      cantidad: req.body.cantidad,
+		      valor: req.body.valor,
+          estado: req.body.estado
+        };
+        await Descuentos.update(descuentos, {
+          where: { id: id }
+        }).then(data => {
+          if (data[0] === 1) {
+            res.send({ message: "descuento actualizado" });
+          } else {
+            res.send({ message: `No existe un descuento con el id ${id}` });
+          }
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+      }catch (error) {
+        res.status(500).send(error);
+      };
+
+}
+
+/*********************************************************************************** */
+/* Elimina un descuento para un estado de pago
+  app.post("/api/reportes/v1/deletedescuento", reportesController.deleteDescuentos)
+*/
+exports.deleteDescuentos = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+#swagger.description = 'Elimina un descuento para un estado de pago' */
+  try{
+    const id = req.params.id;
+    await Descuentos.destroy({
+      where: { id: id }
+    }).then(data => {
+      if (data === 1) {
+        res.send({ message: "Descuento eliminado" });
+      } else {
+        res.send({ message: `No existe un descuento con el id ${id}` });
+      }
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
+
+}
+
+/*********************************************************************************** */
+/* Devuelve todos los descuentos 
+  app.post("/api/reportes/v1/findalldescuentos", reportesController.findallDescuentos)
+*/
+exports.findallDescuentos = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve todos los descuentos ' */
+  await Descuentos.findAll().then(data => {
+    res.send(data);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
+}
+
+/*********************************************************************************** */
+/* Devuelve los descuentos por parametros
+  app.post("/api/reportes/v1/finddescuentos", reportesController.findDescuentosByParams)
+*/
+exports.findDescuentosByParams = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve los descuentos por campos' */
+	try{
+      const parametros = {
+        id: req.query.id,
+        id_estado_resultado: req.query.id_estado_resultado
+      }
+      const keys = Object.keys(parametros)
+      let sql_array = [];
+      let param = {};
+      for (element of keys) {
+        if (parametros[element]){
+          sql_array.push( element + " = :" + element);
+          param[element] = parametros[element];
+        }
+      }
+      //const where = sql_array.join(" AND ");
+      //console.log('where => ', where, param);
+      if (sql_array.length === 0) {
+        res.status(500).send("Debe incluir algun parametro para consultar");
+      }else {
+        await Descuentos.findAll({
+          where: param
+        }).then(data => {
+          res.send(data);
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+      }
+      
+
+	}catch (error) {
+		res.status(500).send(error);
+  }
+}
+
+/*********************************************************************************** */
+/* Devuelve los descuentos no procesados, id_estado_resultado=null
+  app.post("/api/reportes/v1/descuentosnoprocesados", reportesController.findDescuentosNoProcesados)
+*/
+exports.findDescuentosNoProcesados = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve los descuentos no procesados' */
+  await Descuentos.findAll({
     where: {
       id_estado_resultado: null
     }
