@@ -207,5 +207,52 @@ module.exports = function(app) {
     */
     app.get("/api/reportes/v1/descuentosnoprocesados", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findDescuentosNoProcesados);
 
+    /*********************************************************************************** */
+    /* Devuelve la lsita de brigadas para seleccionar dentro del módulo de horas extra
+      app.get("/api/movil/v1/listabrigadassae", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.listaBrigadasSae)
+    */
+    app.get("/api/movil/v1/listabrigadassae", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.listaBrigadasSae);
+
+    /*********************************************************************************** */
+    /* Ingresa las horas extra para un estado de pago
+      app.post("/api/reportes/v1/creahoraextra", reportesController.creaHoraExtra)
+    */
+    app.post("/api/reportes/v1/creahoraextra", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaHoraExtra);
+
+    /* Actualiza las horas extra para un estado de pago
+    app.put("/api/reportes/v1/updatehoraextra", reportesController.updateHoraExtra)
+    */
+    app.put("/api/reportes/v1/updatehoraextra/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateHoraExtra);
+
+    /*********************************************************************************** */
+    /* Elimina un registro de hora extra para un estado de pago
+      app.post("/api/reportes/v1/deletehoraextra", reportesController.deleteHoraExtra)
+    */
+    app.delete("/api/reportes/v1/deletehoraextra/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteHoraExtra);
+
+    /*********************************************************************************** */
+    /* Devuelve todos los registros de hora extra
+      app.get("/api/reportes/v1/findallhoraextra", reportesController.findallHoraExtra)
+    */
+    app.get("/api/reportes/v1/findallhoraextra", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findallHoraExtra);
+
+    /*********************************************************************************** */
+    /* Devuelve los registros de hora extra por parametros
+      app.get("/api/reportes/v1/findhoraextra", reportesController.findHoraExtraByParams)
+    */
+    app.get("/api/reportes/v1/findhoraextra", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findHoraExtraByParams);
+
+    /*********************************************************************************** */
+    /* Devuelve los registros de hora extra no procesados, id_estado_resultado=null
+      app.get("/api/reportes/v1/horaextranoprocesados", reportesController.findHoraExtraNoProcesados)
+    */
+    app.get("/api/reportes/v1/horaextranoprocesados", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findHoraExtraNoProcesados);
+
+    /*********************************************************************************** */
+    /* Devuelve el detalle de PxQ para planilla Excel, ingresando parámetro del paquete
+      app.get("/api/reportes/v1/detallepxq", reportesController.detallePxQ)
+    */
+    app.get("/api/reportes/v1/detallepxq", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.detallePxQ);
+
 
 }

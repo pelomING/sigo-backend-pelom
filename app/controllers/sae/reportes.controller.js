@@ -1382,3 +1382,313 @@ exports.findDescuentosNoProcesados = async (req, res) => {
     res.status(500).send({ message: err.message });
   })
 }
+
+/*********************************************************************************** */
+/* Devuelve la lsita de brigadas para seleccionar dentro del módulo de horas extra
+  app.get("/api/movil/v1/listabrigadassae", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.listaBrigadasSae)
+*/
+exports.listaBrigadasSae = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Horas Extras']
+      #swagger.description = 'Devuelve la lsita de brigadas para seleccionar dentro del módulo de horas extra' */
+      try {
+        const sql = "SELECT br.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || \
+        ' (' || b.nombre || ')' as brigada FROM _comun.brigadas br JOIN _comun.servicios s ON br.id_servicio = \
+        s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE s.sae and s.activo;";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const comuna = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida = [];
+        if (comuna) {
+          for (const element of comuna) {
+            if (
+              typeof element.id === 'number' && 
+              typeof element.brigada === 'string') {
+              
+    
+                const detalle_salida = {
+                  id: String(element.id),
+                  brigada: String(element.brigada)
+                }
+                salida.push(detalle_salida);
+    
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send(salida);
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
+}
+
+/*********************************************************************************** */
+/* Ingresa las horas extra para un estado de pago
+  app.post("/api/reportes/v1/creahoraextra", reportesController.creaHoraExtra)
+*/
+exports.creaHoraExtra = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Horas Extras']
+      #swagger.description = 'Ingresa las horas extra para un estado de pago' */
+  try {
+    const campos = [
+      'brigada', 'cantidad', 'fecha_hora'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    let fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+    fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+
+
+    const horaExtra = {
+	  brigada: req.body.brigada,
+      cantidad: req.body.cantidad,
+      fecha_hora: fecha,
+      estado: 1
+    };
+
+    const horaExtraCreate = await HoraExtra.create(horaExtra)
+        .then(data => {
+            res.send(data);
+        }).catch(err => {
+            res.status(500).send({ message: err.message });
+        });
+    
+  }catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+/* Actualiza las horas extra para un estado de pago
+  app.post("/api/reportes/v1/updatehoraextra", reportesController.updateHoraExtra)
+*/
+exports.updateHoraExtra = async (req, res) => {
+  // metodo PUT
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Horas Extras']
+      #swagger.description = 'Actualiza las horas extra para un estado de pago' */
+      try{
+        const id = req.params.id;
+        let fecha;
+        if (req.body.fecha_hora){
+          fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+          fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        }else{
+          fecha = undefined;
+        }
+        const horaExtra = {
+		  brigada: req.body.brigada,
+		  cantidad: req.body.cantidad,
+		  fecha_hora: fecha
+		};
+        await HoraExtra.update(horaExtra, {
+          where: { id: id }
+        }).then(data => {
+          if (data[0] === 1) {
+            res.send({ message: "Registro actualizado" });
+          } else {
+            res.send({ message: `No existe un registro de hora extra con el id ${id}` });
+          }
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+      }catch (error) {
+        res.status(500).send(error);
+      };
+
+}
+
+/*********************************************************************************** */
+/* Elimina un registro de hora extra para un estado de pago
+  app.post("/api/reportes/v1/deletehoraextra", reportesController.deleteHoraExtra)
+*/
+exports.deleteHoraExtra = async (req, res) => {
+  // metodo POST
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Horas Extras']
+#swagger.description = 'Elimina un registro de hora extra para un estado de pago' */
+  try{
+    const id = req.params.id;
+    await HoraExtra.destroy({
+      where: { id: id }
+    }).then(data => {
+      if (data === 1) {
+        res.send({ message: "Registro eliminado" });
+      } else {
+        res.send({ message: `No existe un registro de hora extra con el id ${id}` });
+      }
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
+
+}
+
+/*********************************************************************************** */
+/* Devuelve todos los registros de hora extra
+  app.get("/api/reportes/v1/findallhoraextra", reportesController.findallHoraExtra)
+*/
+exports.findallHoraExtra = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Horas Extras']
+      #swagger.description = 'Devuelve todos los registros de hora extra ' */
+  await HoraExtra.findAll().then(data => {
+    res.send(data);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
+}
+
+/*********************************************************************************** */
+/* Devuelve los registros de hora extra por parametros
+  app.get("/api/reportes/v1/findhoraextra", reportesController.findHoraExtraByParams)
+*/
+exports.findHoraExtraByParams = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Horas Extras']
+      #swagger.description = 'Devuelve los registros de hora extra por campos' */
+	try{
+      const parametros = {
+        id: req.query.id,
+        id_estado_resultado: req.query.id_estado_resultado
+      }
+      const keys = Object.keys(parametros)
+      let sql_array = [];
+      let param = {};
+      for (element of keys) {
+        if (parametros[element]){
+          sql_array.push( element + " = :" + element);
+          param[element] = parametros[element];
+        }
+      }
+      const where = sql_array.join(" AND ");
+      //console.log('where => ', where, param);
+      if (sql_array.length === 0) {
+        res.status(500).send("Debe incluir algun parametro para consultar");
+      }else {
+        await HoraExtra.findAll({
+          where: param
+        }).then(data => {
+          res.send(data);
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+      }
+      
+
+	}catch (error) {
+		res.status(500).send(error);
+  }
+}
+
+/*********************************************************************************** */
+/* Devuelve los registros de hora extra no procesados, id_estado_resultado=null
+  app.get("/api/reportes/v1/horaextranoprocesados", reportesController.findHoraExtraNoProcesados)
+*/
+exports.findHoraExtraNoProcesados = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Horas Extras']
+      #swagger.description = 'Devuelve los registros de hora extra no procesados' */
+  await HoraExtra.findAll({
+    where: {
+      id_estado_resultado: null
+    }
+  }).then(data => {
+    res.send(data);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  })
+}
+
+/*********************************************************************************** */
+/* Devuelve el detalle de PxQ para planilla Excel, ingresando parámetro del paquete
+  app.get("/api/reportes/v1/detallepxq", reportesController.detallePxQ)
+*/
+exports.detallePxQ = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - Detalle PxQ']
+      #swagger.description = 'Devuelve el detalle de PxQ para planilla Excel, se debe ingresar el id_paquete en la url ?id_paquete=[id_paquete]' */
+      try {
+        const campos = [
+          'id_paquete'
+        ];
+        for (const element of campos) {
+          if (!req.query[element]) {
+            res.status(400).send({
+              message: "No puede estar nulo el campo " + element
+            });
+            return;
+          }
+        };
+        
+        const sql = "SELECT re.id, to_char(re.fecha_hora::timestamp with time zone, 'DD-MM-YYYY'::text) AS fecha, hora_termino::text, \
+        numero_ot as centrality, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro from _auth.personas \
+        where rut = re.rut_maestro) as maestro, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro \
+        from _auth.personas where rut = re.rut_ayudante) as ayudante, despachador, c.nombre as comuna, direccion, \
+        requerimiento as aviso, et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base where \
+          id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) as \
+          valor_cobrar, ti.nombre as tipo_turno FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id \
+          join _comun.base b on br.id_base = b.id left join _comun.comunas c on re.comuna = c.codigo left join \
+          _comun.eventos_tipo et on re.tipo_evento = et.codigo join _comun.tipo_turno ti on re.tipo_turno = ti.id \
+          where b.id_paquete = :id_paquete and id_estado_resultado is null order by fecha_hora;";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.query.id_paquete }, type: QueryTypes.SELECT });
+        let salida = [];
+        if (eventos) {
+          for (const element of eventos) {
+            if (
+              typeof element.id === 'number' &&
+              (typeof element.fecha === 'object' || typeof element.fecha === 'string') &&
+              (typeof element.hora_termino === 'object' || typeof element.hora_termino === 'string') &&
+              (typeof element.centrality === 'object' || typeof element.centrality === 'string') &&
+              (typeof element.maestro === 'object' || typeof element.maestro === 'string') &&
+              (typeof element.ayudante === 'object' || typeof element.ayudante === 'string') &&
+              (typeof element.despachador === 'object' || typeof element.despachador === 'string') &&
+              (typeof element.comuna === 'object' || typeof element.comuna === 'string') &&
+              (typeof element.direccion === 'object' || typeof element.direccion === 'string') &&
+              (typeof element.aviso === 'object' || typeof element.aviso === 'string') &&
+              (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
+              (typeof element.valor_cobrar === 'number' || typeof element.valor_cobrar === 'string') &&
+              (typeof element.tipo_turno === 'object' || typeof element.tipo_turno === 'string')) {
+    
+                const detalle_salida = {
+                  id: Number(element.id),
+                  fecha: String(element.fecha),
+                  hora_termino: String(element.hora_termino),
+                  centrality: String(element.centrality),
+                  maestro: String(element.maestro),
+                  ayudante: String(element.ayudante),
+                  despachador: String(element.despachador),
+                  comuna: String(element.comuna),
+                  direccion: String(element.direccion),
+                  aviso: String(element.aviso),
+                  descripcion: String(element.descripcion),
+                  valor_cobrar: Number(element.valor_cobrar),
+                  tipo_turno: String(element.tipo_turno)
+    
+                }
+                salida.push(detalle_salida);
+    
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send(salida);
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
+}
