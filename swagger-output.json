@@ -3654,7 +3654,7 @@
         "tags": [
           "SAE - Backoffice - Reportes - Detalle PxQ"
         ],
-        "description": "Devuelve el detalle de PxQ para planilla Excel",
+        "description": "Devuelve el detalle de PxQ para planilla Excel, se debe ingresar el id_paquete en la url ?id_paquete=[id_paquete]",
         "parameters": [
           {
             "name": "id_paquete",

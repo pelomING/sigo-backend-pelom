@@ -860,7 +860,7 @@ exports.semanalByBrigada = async (req, res) => {
 exports.permanenciaByBrigada = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la permanencia semanal por brigada' */
-
+/*
   const permanencia = {
     detalle: [
       {brigada: '00:00 - 08:00 (Molina)', turnos: 28, valor_dia: 198621, valor_mes: 5561376},
@@ -875,6 +875,57 @@ exports.permanenciaByBrigada = async (req, res) => {
   }
 
   res.send(permanencia);
+*/
+  try {
+    
+    const sql = "select brigada.nombre_brigada as brigada, case when tabla.turnos is null then 0 else tabla.turnos end as turnos, \
+    brigada.valor_dia, case when tabla.turnos is null then 0 else tabla.turnos*brigada.valor_dia end as valor_mes from \
+    (select br.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as \
+    nombre_brigada, 0 as turnos, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base \
+    WHERE id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno) as valor_dia, 0 as valor_mes from \
+    _comun.brigadas br JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id \
+    JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join (select id_brigada as id, count(id_brigada) \
+    as turnos from (SELECT rj.id, br.id as id_brigada FROM sae.reporte_jornada rj join _comun.brigadas br on \
+    rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id WHERE brigada is not null and s.sae and \
+    id_estado_resultado is null and rj.tipo_turno = 1) as rj group by id_brigada) as tabla using (id) order by id";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.turnos === 'object' || typeof element.turnos === 'string') &&
+          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
+          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'string') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              turnos: Number(element.turnos),
+              valor_dia: Number(element.valor_dia),
+              valor_mes: Number(element.valor_mes)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_mes;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+  
 
 }
 
@@ -906,14 +957,53 @@ exports.findTurnosAdicionales = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve los turnos adicionales' */
 
-  const turnosAdicionales = {
-    detalle: [
-      {brigada: '00:00 - 08:00 (Molina)', turnos: 5, valor_dia: 198621, valor_total: 993105},
-      {brigada: '08:00 - 18:30 (Molina)', turnos: 1, valor_dia: 198621, valor_total: 198621}
-    ],
-    subtotal: 1191726
+  try {
+    
+    const sql = "select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, sum(valor_dia::integer) \
+    as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' \
+    as nombre_brigada, br.id as id_brigada, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base WHERE \
+    id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on (fecha, tipo_turno) factor FROM \
+    sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM \
+    sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = \
+    s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is not null \
+    and s.sae and id_estado_resultado is null and rj.tipo_turno = 2) as rj group by id_brigada, nombre_brigada, valor_dia";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.turnos === 'object' || typeof element.turnos === 'string') &&
+          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
+          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'string') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              turnos: Number(element.turnos),
+              valor_dia: Number(element.valor_dia),
+              valor_mes: Number(element.valor_mes)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_mes;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
   }
-  res.send(turnosAdicionales);
 
 }
 
@@ -924,12 +1014,59 @@ exports.findTurnosAdicionales = async (req, res) => {
 exports.findTurnosContingencia = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve los turnos de contingencia' */
-
+/*
   const turnosContingencia = {
     detalle: [],
     subtotal: null
   }
-  res.send(turnosContingencia);
+  res.send(turnosContingencia);*/
+  try {
+    
+    const sql = "select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, sum(valor_dia::integer) \
+    as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' \
+    as nombre_brigada, br.id as id_brigada, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base WHERE \
+    id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on (fecha, tipo_turno) factor FROM \
+    sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM \
+    sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = \
+    s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is not null \
+    and s.sae and id_estado_resultado is null and rj.tipo_turno = 3) as rj group by id_brigada, nombre_brigada, valor_dia";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.turnos === 'object' || typeof element.turnos === 'string') &&
+          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
+          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'string') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              turnos: Number(element.turnos),
+              valor_dia: Number(element.valor_dia),
+              valor_mes: Number(element.valor_mes)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_mes;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
 
 }
 /*********************************************************************************** */
@@ -939,7 +1076,7 @@ exports.findTurnosContingencia = async (req, res) => {
 exports.findProduccionPxQ = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la produccion PxQ' */
-
+/*
   const produccionPxQ = {
     detalle: [
       {tipo_evento: 'Evento domiciliario', valor_total: 500000},
@@ -949,7 +1086,54 @@ exports.findProduccionPxQ = async (req, res) => {
     ],
     subtotal: 2000000
   }
-  res.send(produccionPxQ);
+  res.send(produccionPxQ);*/
+
+  try {
+    
+    const sql = "select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, \
+      (select valor from sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and \
+        id_evento_tipo = et.id and id_turno = br.id_turno) as valor_cobrar, et.id as tipo_evento FROM \
+        sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join _comun.base b on \
+        br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo where id_estado_resultado \
+        is null order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.turnos === 'object' || typeof element.turnos === 'string') &&
+          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
+          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'string') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              turnos: Number(element.turnos),
+              valor_dia: Number(element.valor_dia),
+              valor_mes: Number(element.valor_mes)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_mes;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+
 
 }
 /*********************************************************************************** */
@@ -1666,6 +1850,7 @@ exports.detallePxQ = async (req, res) => {
                   centrality: String(element.centrality),
                   maestro: String(element.maestro),
                   ayudante: String(element.ayudante),
+                  patente: String('SWCX-56'),
                   despachador: String(element.despachador),
                   comuna: String(element.comuna),
                   direccion: String(element.direccion),
