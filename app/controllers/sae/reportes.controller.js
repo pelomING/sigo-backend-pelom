@@ -5,6 +5,7 @@ const DetalleEstadoResultado = db.detalleEstadoResultado;
 const Observaciones = db.observaciones;
 const CobroAdicional = db.cobroAdicional;
 const Descuentos = db.descuentos;
+const HoraExtra = db.horaExtra;
 
 exports.readAllJornada = async (req, res) => {
   //metodo GET
@@ -877,7 +878,24 @@ exports.permanenciaByBrigada = async (req, res) => {
   res.send(permanencia);
 */
   try {
-    
+
+    let param_fecha_ini = req.query.fecha_ini;
+    let param_fecha_fin = req.query.fecha_fin;
+    let condicion_fecha= "";
+    if (param_fecha_fin) {
+      if (param_fecha_fin.length == 10){
+        //ok
+        param_fecha_fin = param_fecha_fin + " 23:59:59";
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+      }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+      }
+    }
+
+
     const sql = "select brigada.nombre_brigada as brigada, case when tabla.turnos is null then 0 else tabla.turnos end as turnos, \
     brigada.valor_dia, case when tabla.turnos is null then 0 else tabla.turnos*brigada.valor_dia end as valor_mes from \
     (select br.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as \
@@ -887,7 +905,7 @@ exports.permanenciaByBrigada = async (req, res) => {
     JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join (select id_brigada as id, count(id_brigada) \
     as turnos from (SELECT rj.id, br.id as id_brigada FROM sae.reporte_jornada rj join _comun.brigadas br on \
     rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id WHERE brigada is not null and s.sae and \
-    id_estado_resultado is null and rj.tipo_turno = 1) as rj group by id_brigada) as tabla using (id) order by id";
+    id_estado_resultado is null and rj.tipo_turno = 1 " + condicion_fecha + ") as rj group by id_brigada) as tabla using (id) order by id";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -937,6 +955,22 @@ exports.findHorasExtras = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve las horas extra realizadas' */
 
+    let param_fecha_ini = req.query.fecha_ini;
+    let param_fecha_fin = req.query.fecha_fin;
+    let condicion_fecha= "";
+    if (param_fecha_fin) {
+      if (param_fecha_fin.length == 10){
+        //ok
+        param_fecha_fin = param_fecha_fin + " 23:59:59";
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+      }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+      }
+    }
+
   const horasExtras = {
     detalle: [
       {brigada: '00:00 - 08:00 (Molina)', horas: 7, valor_base: 37192, valor_total: 260344},
@@ -958,6 +992,22 @@ exports.findTurnosAdicionales = async (req, res) => {
       #swagger.description = 'Devuelve los turnos adicionales' */
 
   try {
+
+    let param_fecha_ini = req.query.fecha_ini;
+    let param_fecha_fin = req.query.fecha_fin;
+    let condicion_fecha= "";
+    if (param_fecha_fin) {
+      if (param_fecha_fin.length == 10){
+        //ok
+        param_fecha_fin = param_fecha_fin + " 23:59:59";
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+      }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+      }
+    }
     
     const sql = "select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, sum(valor_dia::integer) \
     as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' \
@@ -966,7 +1016,7 @@ exports.findTurnosAdicionales = async (req, res) => {
     sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM \
     sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = \
     s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is not null \
-    and s.sae and id_estado_resultado is null and rj.tipo_turno = 2) as rj group by id_brigada, nombre_brigada, valor_dia";
+    and s.sae and id_estado_resultado is null and rj.tipo_turno = 2 " + condicion_fecha + ") as rj group by id_brigada, nombre_brigada, valor_dia";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1021,6 +1071,21 @@ exports.findTurnosContingencia = async (req, res) => {
   }
   res.send(turnosContingencia);*/
   try {
+    let param_fecha_ini = req.query.fecha_ini;
+    let param_fecha_fin = req.query.fecha_fin;
+    let condicion_fecha= "";
+    if (param_fecha_fin) {
+      if (param_fecha_fin.length == 10){
+        //ok
+        param_fecha_fin = param_fecha_fin + " 23:59:59";
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+      }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+      }
+    }
     
     const sql = "select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, sum(valor_dia::integer) \
     as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' \
@@ -1029,7 +1094,7 @@ exports.findTurnosContingencia = async (req, res) => {
     sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM \
     sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = \
     s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is not null \
-    and s.sae and id_estado_resultado is null and rj.tipo_turno = 3) as rj group by id_brigada, nombre_brigada, valor_dia";
+    and s.sae and id_estado_resultado is null and rj.tipo_turno = 3 " + condicion_fecha + ") as rj group by id_brigada, nombre_brigada, valor_dia";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1089,13 +1154,28 @@ exports.findProduccionPxQ = async (req, res) => {
   res.send(produccionPxQ);*/
 
   try {
+    let param_fecha_ini = req.query.fecha_ini;
+    let param_fecha_fin = req.query.fecha_fin;
+    let condicion_fecha= "";
+    if (param_fecha_fin) {
+      if (param_fecha_fin.length == 10){
+        //ok
+        param_fecha_fin = param_fecha_fin + " 23:59:59";
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+      }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+      }
+    }
     
     const sql = "select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, \
       (select valor from sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and \
         id_evento_tipo = et.id and id_turno = br.id_turno) as valor_cobrar, et.id as tipo_evento FROM \
         sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join _comun.base b on \
         br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo where id_estado_resultado \
-        is null order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento;";
+        is null " + condicion_fecha + " order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1143,14 +1223,65 @@ exports.findProduccionPxQ = async (req, res) => {
 exports.findRepCobroAdicional = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la tabla de cobros adicionales para el EDP' */
+      /** SELECT detalle, cantidad, valor
+	FROM sae.reporte_cobro_adicional
+	WHERE id_estado_resultado is null
+	order by fecha_hora */
 
-  const repCobroAdicional = {
-    detalle: [
-      {detalle: 'permisos municipales', q: 1,total: 1000000}
-    ],
-    subtotal: 1000000
+  try {
+    let param_fecha_ini = req.query.fecha_ini;
+    let param_fecha_fin = req.query.fecha_fin;
+    let condicion_fecha= "";
+    if (param_fecha_fin) {
+      if (param_fecha_fin.length == 10){
+        //ok
+        param_fecha_fin = param_fecha_fin + " 23:59:59";
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+      }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+      }
+    }
+    
+    const sql = "SELECT detalle, cantidad, valor FROM sae.reporte_cobro_adicional WHERE id_estado_resultado is null " + condicion_fecha + " order by fecha_hora";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.detalle === 'object' || typeof element.detalle === 'string') &&
+          (typeof element.cantidad === 'object' || typeof element.cantidad === 'string') &&
+          (typeof element.valor === 'object' || typeof element.valor === 'string')  ) {
+
+            const detalle_salida = {
+              detalle: String(element.detalle),
+              cantidad: Number(element.cantidad),
+              valor: Number(element.valor)
+
+            }
+            subtotal = subtotal + detalle_salida.valor;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
   }
-  res.send(repCobroAdicional);
+
 
 }
 /*********************************************************************************** */
@@ -1161,13 +1292,59 @@ exports.findRepDescuentos = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la tabla de descuentos para el EDP' */
 
-  const repDescuentos = {
-    detalle: [
-      {detalle: '5% trabajo adicional', q: 1,total: 234876}
-    ],
-    subtotal: 234876
-  }
-  res.send(repDescuentos);
+      try {
+        let param_fecha_ini = req.query.fecha_ini;
+        let param_fecha_fin = req.query.fecha_fin;
+        let condicion_fecha= "";
+        if (param_fecha_fin) {
+          if (param_fecha_fin.length == 10){
+            //ok
+            param_fecha_fin = param_fecha_fin + " 23:59:59";
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+            condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+          }else {
+            res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+            return;
+          }
+        }
+        
+        const sql = "SELECT detalle, cantidad, valor FROM sae.reporte_descuentos WHERE id_estado_resultado is null " + condicion_fecha + " order by fecha_hora";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida = [];
+        let subtotal = 0;
+        if (permanencia) {
+          for (const element of permanencia) {
+            if (
+              (typeof element.detalle === 'object' || typeof element.detalle === 'string') &&
+              (typeof element.cantidad === 'object' || typeof element.cantidad === 'string') &&
+              (typeof element.valor === 'object' || typeof element.valor === 'string')  ) {
+    
+                const detalle_salida = {
+                  detalle: String(element.detalle),
+                  cantidad: Number(element.cantidad),
+                  valor: Number(element.valor)
+    
+                }
+                subtotal = subtotal + detalle_salida.valor;
+                salida.push(detalle_salida);
+    
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send({detalle: salida, subtotal: subtotal});
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
 
 }
 /*********************************************************************************** */
@@ -1633,10 +1810,13 @@ exports.creaHoraExtra = async (req, res) => {
     };
     let fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
     fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+    console.log('fecha => ', fecha);
+    console.log('brigada => ', req.body.brigada);
+    console.log('cantidad => ', req.body.cantidad);
 
 
     const horaExtra = {
-	  brigada: req.body.brigada,
+	    brigada: req.body.brigada,
       cantidad: req.body.cantidad,
       fecha_hora: fecha,
       estado: 1

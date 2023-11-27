@@ -2836,6 +2836,18 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la permanencia semanal por brigada",
+        "parameters": [
+          {
+            "name": "fecha_ini",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_fin",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2858,6 +2870,18 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve las horas extra realizadas",
+        "parameters": [
+          {
+            "name": "fecha_ini",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_fin",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2880,6 +2904,18 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve los turnos adicionales",
+        "parameters": [
+          {
+            "name": "fecha_ini",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_fin",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2902,6 +2938,18 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve los turnos de contingencia",
+        "parameters": [
+          {
+            "name": "fecha_ini",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_fin",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2924,6 +2972,18 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la produccion PxQ",
+        "parameters": [
+          {
+            "name": "fecha_ini",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_fin",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2946,6 +3006,18 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la tabla de cobros adicionales para el EDP",
+        "parameters": [
+          {
+            "name": "fecha_ini",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_fin",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2968,6 +3040,18 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la tabla de descuentos para el EDP",
+        "parameters": [
+          {
+            "name": "fecha_ini",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_fin",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
