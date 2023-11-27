@@ -680,8 +680,19 @@ exports.creaObservaciones = async (req, res) => {
         return;
       }
     };
-    let fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-    fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+    let param_fecha_ini = req.body.fecha_hora;
+    let fecha = "";
+    if (param_fecha_ini.length == 10){
+        if (param_fecha_ini.slice(2,3) == "-"){
+            param_fecha_ini = param_fecha_ini.slice(6,10) + '-' + param_fecha_ini.slice(3,5)+ '-' + param_fecha_ini.slice(0,2);
+        }
+        param_fecha_ini = param_fecha_ini + " 23:59:59";
+        fecha = new Date(param_fecha_ini).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+    }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+    }
 
 
     const observaciones = {
@@ -1397,9 +1408,19 @@ exports.creaCobroAdicional = async (req, res) => {
         return;
       }
     };
-    let fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-    fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
-
+    let param_fecha_ini = req.body.fecha_hora;
+    let fecha = "";
+    if (param_fecha_ini.length == 10){
+        if (param_fecha_ini.slice(2,3) == "-"){
+            param_fecha_ini = param_fecha_ini.slice(6,10) + '-' + param_fecha_ini.slice(3,5)+ '-' + param_fecha_ini.slice(0,2);
+        }
+        param_fecha_ini = param_fecha_ini + " 23:59:59";
+        fecha = new Date(param_fecha_ini).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+    }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+    }
 
     const cobroadicional = {
       detalle: req.body.detalle,
@@ -1580,9 +1601,19 @@ exports.creaDescuentos = async (req, res) => {
         return;
       }
     };
-    let fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-    fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
-
+    let param_fecha_ini = req.body.fecha_hora;
+    let fecha = "";
+    if (param_fecha_ini.length == 10){
+        if (param_fecha_ini.slice(2,3) == "-"){
+            param_fecha_ini = param_fecha_ini.slice(6,10) + '-' + param_fecha_ini.slice(3,5)+ '-' + param_fecha_ini.slice(0,2);
+        }
+        param_fecha_ini = param_fecha_ini + " 23:59:59";
+        fecha = new Date(param_fecha_ini).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+    }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+    }
 
     const descuentos = {
       detalle: req.body.detalle,
@@ -1808,11 +1839,20 @@ exports.creaHoraExtra = async (req, res) => {
         return;
       }
     };
-    let fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-    fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
-    console.log('fecha => ', fecha);
-    console.log('brigada => ', req.body.brigada);
-    console.log('cantidad => ', req.body.cantidad);
+
+    let param_fecha_ini = req.body.fecha_hora;
+    let fecha = "";
+    if (param_fecha_ini.length == 10){
+        if (param_fecha_ini.slice(2,3) == "-"){
+            param_fecha_ini = param_fecha_ini.slice(6,10) + '-' + param_fecha_ini.slice(3,5)+ '-' + param_fecha_ini.slice(0,2);
+        }
+        param_fecha_ini = param_fecha_ini + " 23:59:59";
+        fecha = new Date(param_fecha_ini).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+    }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+    }
 
 
     const horaExtra = {
