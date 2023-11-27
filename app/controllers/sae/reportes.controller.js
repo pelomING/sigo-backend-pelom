@@ -966,22 +966,71 @@ exports.findHorasExtras = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve las horas extra realizadas' */
 
-    let param_fecha_ini = req.query.fecha_ini;
-    let param_fecha_fin = req.query.fecha_fin;
-    let condicion_fecha= "";
-    if (param_fecha_fin) {
-      if (param_fecha_fin.length == 10){
-        //ok
-        param_fecha_fin = param_fecha_fin + " 23:59:59";
-        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
-        condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
-      }else {
-        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
-        return;
+    try {
+      let param_fecha_ini = req.query.fecha_ini;
+      let param_fecha_fin = req.query.fecha_fin;
+      let condicion_fecha= "";
+      if (param_fecha_fin) {
+        if (param_fecha_fin.length == 10){
+          //ok
+          param_fecha_fin = param_fecha_fin + " 23:59:59";
+          let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+          fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+          condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+        }else {
+          res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+          return;
+        }
       }
-    }
 
+
+    
+    const sql = "select xc.nombre_brigada as brigada, xc.cantidad as horas, xc.valor_hora as valor_base, xc.cantidad*valor_hora as valor_total \
+    from (select rhe.*, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as nombre_brigada, \
+    ((SELECT (valor::numeric/7)::integer/8 as valor_dia FROM sae.cargo_fijo_x_base WHERE id_cliente=1 and id_base= br.id_base and \
+    id_turno=br.id_turno)*(select valor FROM sae.cargo_hora_extra order by fecha desc limit 1))::integer as valor_hora from \
+    (select brigada, sum(cantidad) as cantidad from sae.reporte_hora_extra where id_estado_resultado is null " + condicion_fecha + " \
+    group by brigada) rhe JOIN _comun.brigadas br on rhe.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id \
+    JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id) as xc order by xc.brigada";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.horas === 'object' || typeof element.horas === 'string') &&
+          (typeof element.valor_base === 'object' || typeof element.valor_base === 'number') &&
+          (typeof element.valor_total === 'object' || typeof element.valor_total === 'string') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              horas: Number(element.horas),
+              valor_base: Number(element.valor_base),
+              valor_total: Number(element.valor_total)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_total;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+  
+/*
   const horasExtras = {
     detalle: [
       {brigada: '00:00 - 08:00 (Molina)', horas: 7, valor_base: 37192, valor_total: 260344},
@@ -991,7 +1040,7 @@ exports.findHorasExtras = async (req, res) => {
     subtotal: 1191726
   }
 
-  res.send(horasExtras);
+  res.send(horasExtras);*/
 
 }
 /*********************************************************************************** */
@@ -1859,6 +1908,7 @@ exports.creaHoraExtra = async (req, res) => {
 	    brigada: req.body.brigada,
       cantidad: req.body.cantidad,
       fecha_hora: fecha,
+      comentario: req.body.comentario,
       estado: 1
     };
 
