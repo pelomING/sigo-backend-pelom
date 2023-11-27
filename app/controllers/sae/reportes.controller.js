@@ -681,6 +681,7 @@ exports.creaObservaciones = async (req, res) => {
       }
     };
     let param_fecha_ini = req.body.fecha_hora;
+    /*
     let fecha = "";
     if (param_fecha_ini.length == 10){
         if (param_fecha_ini.slice(2,3) == "-"){
@@ -692,12 +693,12 @@ exports.creaObservaciones = async (req, res) => {
     }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
         return;
-    }
+    }*/
 
 
     const observaciones = {
       detalle: req.body.detalle,
-      fecha_hora: fecha,
+      fecha_hora: param_fecha_ini,
       estado: 1
     };
 
@@ -1458,6 +1459,7 @@ exports.creaCobroAdicional = async (req, res) => {
       }
     };
     let param_fecha_ini = req.body.fecha_hora;
+    /*
     let fecha = "";
     if (param_fecha_ini.length == 10){
         if (param_fecha_ini.slice(2,3) == "-"){
@@ -1469,11 +1471,11 @@ exports.creaCobroAdicional = async (req, res) => {
     }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
         return;
-    }
+    }*/
 
     const cobroadicional = {
       detalle: req.body.detalle,
-      fecha_hora: fecha,
+      fecha_hora: param_fecha_ini,
 	    cantidad: req.body.cantidad,
 	    valor: req.body.valor,
       estado: 1
@@ -1651,6 +1653,7 @@ exports.creaDescuentos = async (req, res) => {
       }
     };
     let param_fecha_ini = req.body.fecha_hora;
+    /*
     let fecha = "";
     if (param_fecha_ini.length == 10){
         if (param_fecha_ini.slice(2,3) == "-"){
@@ -1662,11 +1665,11 @@ exports.creaDescuentos = async (req, res) => {
     }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
         return;
-    }
+    }*/
 
     const descuentos = {
       detalle: req.body.detalle,
-      fecha_hora: fecha,
+      fecha_hora: param_fecha_ini,
 	    cantidad: req.body.cantidad,
 	    valor: req.body.valor,
       estado: 1
@@ -1890,6 +1893,7 @@ exports.creaHoraExtra = async (req, res) => {
     };
 
     let param_fecha_ini = req.body.fecha_hora;
+/*
     let fecha = "";
     if (param_fecha_ini.length == 10){
         if (param_fecha_ini.slice(2,3) == "-"){
@@ -1901,13 +1905,13 @@ exports.creaHoraExtra = async (req, res) => {
     }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
         return;
-    }
+    }*/
 
 
     const horaExtra = {
 	    brigada: req.body.brigada,
       cantidad: req.body.cantidad,
-      fecha_hora: fecha,
+      fecha_hora: param_fecha_ini,
       comentario: req.body.comentario,
       estado: 1
     };
