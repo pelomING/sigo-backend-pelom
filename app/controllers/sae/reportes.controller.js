@@ -978,7 +978,7 @@ exports.findHorasExtras = async (req, res) => {
           param_fecha_fin = param_fecha_fin + " 23:59:59";
           let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
           fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
-          condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+          condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
         }else {
           res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
           return;
@@ -1225,7 +1225,7 @@ exports.findProduccionPxQ = async (req, res) => {
         param_fecha_fin = param_fecha_fin + " 23:59:59";
         let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
         fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
-        condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+        condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
       }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
         return;
@@ -1300,7 +1300,7 @@ exports.findRepCobroAdicional = async (req, res) => {
         param_fecha_fin = param_fecha_fin + " 23:59:59";
         let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
         fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
-        condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+        condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
       }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
         return;
@@ -1364,7 +1364,7 @@ exports.findRepDescuentos = async (req, res) => {
             param_fecha_fin = param_fecha_fin + " 23:59:59";
             let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
             fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
-            condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+            condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
           }else {
             res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
             return;
@@ -1417,25 +1417,120 @@ exports.findRepResumen = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la tabla de resumen para el EDP' */
 
-  const repResumen = {
-    detalle: [
-      {item: 'BASE PERMANENCIA', valor: 234876},
-      {item: 'HORAS EXTRAS', valor: 234876},
-      {item: 'TURNOS ADICIONALES', valor: 234876},
-      {item: 'TURNOS CONTINGENCIA', valor: 234876},
-      {item: 'PRODUCCION', valor: 234876},
-      {item: 'COBROS ADICIONALES', valor: 234876},
-      {item: 'DESCUENTOS', valor: 234876},
-      {item: 'COSTO DIRECTO', valor: 234876},
-      {item: 'RECARGO POR DISTANCIA', valor: 234876},
-      {item: 'ESTADO DE EMERGENCIA', valor: 234876},
-      {item: 'VALOR NETO', valor: 234876},
-      {item: 'IVA', valor: 234876},
-      {item: 'TOTAL ESTADO DE PAGO', valor: 234876}
-    ],
-    total_edp: 234876
-  }
-  res.send(repResumen);
+      try {
+        let param_fecha_ini = req.query.fecha_ini;
+        let param_fecha_fin = req.query.fecha_fin;
+        let condicion_fecha= "";
+        let condicion_fecha_permanencia= "";
+        if (param_fecha_fin) {
+          if (param_fecha_fin.length == 10){
+            //ok
+            param_fecha_fin = param_fecha_fin + " 23:59:59";
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+            condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
+            condicion_fecha_permanencia = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+          }else {
+            res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+            return;
+          }
+        }
+        
+        const sql = "select 1::integer as orden, 'BASE PERMANENCIA'::text as item, case when sum(valor_mes) is null then 0 else sum(valor_mes) \
+        end as valor from (select brigada.nombre_brigada as brigada, case when tabla.turnos is null then 0 else tabla.turnos end as turnos, \
+          brigada.valor_dia, case when tabla.turnos is null then 0 else tabla.turnos*brigada.valor_dia end as valor_mes from \
+          (select br.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as nombre_brigada, \
+          0 as turnos, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base WHERE id_cliente=1 and id_base= br.id_base \
+          and id_turno=br.id_turno) as valor_dia, 0 as valor_mes from _comun.brigadas br JOIN _comun.servicios s ON br.id_servicio = \
+          s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join \
+          (select id_brigada as id, count(id_brigada) as turnos from (SELECT rj.id, br.id as id_brigada FROM sae.reporte_jornada \
+            rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id WHERE brigada is not \
+            null and s.sae and id_estado_resultado is null and rj.tipo_turno = 1 " + condicion_fecha_permanencia + ") as rj group by id_brigada) as tabla using (id) order by id) as xc \
+            UNION \
+            select  2::integer as orden, 'HORAS EXTRAS'::text as item, case when sum(valor_total) is null then 0 else sum(valor_total) end as valor \
+            from (select xc.nombre_brigada as brigada, xc.cantidad as horas, xc.valor_hora as valor_base, xc.cantidad*valor_hora as valor_total \
+              from (select rhe.*, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as nombre_brigada, \
+              ((SELECT (valor::numeric/7)::integer/8 as valor_dia FROM sae.cargo_fijo_x_base WHERE id_cliente=1 and id_base= br.id_base and \
+              id_turno=br.id_turno)*(select valor FROM sae.cargo_hora_extra order by fecha desc limit 1))::integer as valor_hora from \
+              (select brigada, sum(cantidad) as cantidad from sae.reporte_hora_extra where id_estado_resultado is null " + condicion_fecha + " group by brigada) rhe \
+              JOIN _comun.brigadas br on rhe.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON \
+              br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id) as xc order by xc.brigada) as xc \
+              UNION \
+              select  3::integer as orden, 'TURNOS ADICIONALES'::text as item, case when sum(valor_mes) is null then 0 else sum(valor_mes) end \
+              as valor from (select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, sum(valor_dia::integer) \
+              as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' \
+              as nombre_brigada, br.id as id_brigada, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base WHERE \
+              id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on (fecha, tipo_turno) factor FROM sae.cargo_turno_adicional \
+              where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM sae.reporte_jornada rj join _comun.brigadas \
+              br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos \
+              t on br.id_turno = t.id WHERE brigada is not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 2 " + condicion_fecha + ") as rj group by \
+              id_brigada, nombre_brigada, valor_dia) xc \
+              UNION \
+              select  4::integer as orden, 'TURNOS CONTINGENCIA'::text as item, case when sum(valor_mes) is null then 0 else \
+              sum(valor_mes) end as valor from (select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, \
+              sum(valor_dia::integer) as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) \
+              || ' (' || b.nombre || ')' as nombre_brigada, br.id as id_brigada, (SELECT (valor::numeric/7)::integer as valor_dia \
+              FROM sae.cargo_fijo_x_base WHERE id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on \
+                (fecha, tipo_turno) factor FROM sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) \
+                as valor_dia FROM sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON \
+                br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is \
+                not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 3 " + condicion_fecha + ") as rj group by id_brigada, nombre_brigada, valor_dia) xc \
+                UNION \
+                select  5::integer as orden, 'PRODUCCION'::text as item, case when sum(valor_total) is null then 0 else sum(valor_total) end as \
+                valor from (select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, (select valor from \
+                  sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) \
+                  as valor_cobrar, et.id as tipo_evento FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join \
+                  _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo where id_estado_resultado \
+                  is null " + condicion_fecha + " order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento) xc \
+                  UNION \
+                  SELECT  6::integer as orden, 'COBROS ADICIONALES'::text as item, case when sum(valor) is null then 0 else sum(valor) end as valor \
+                  FROM sae.reporte_cobro_adicional WHERE id_estado_resultado is null UNION SELECT  7::integer as orden, 'DESCUENTOS'::text as item, \
+                  case when sum(valor) is null then 0 else sum(valor) end as valor FROM sae.reporte_descuentos WHERE id_estado_resultado is null " + condicion_fecha + " order by orden";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const resumen = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida = [];
+        let costo_directo = 0;
+        let valor_neto= 0;
+        let iva = 0;
+        let total = 0;
+        let subtotal = 0;
+        if (resumen) {
+          for (const element of resumen) {
+            if (
+              (typeof element.orden === 'object' || typeof element.orden === 'number') &&
+              (typeof element.item === 'object' || typeof element.item === 'string') &&
+              (typeof element.valor === 'object' || typeof element.valor === 'string')  ) {
+    
+                const detalle_salida = {
+                  orden: Number(element.orden),
+                  item: String(element.item),
+                  valor: Number(element.valor)
+                }
+                costo_directo = costo_directo + Number(element.valor);
+                salida.push(detalle_salida);
+    
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+          /*
+          if (costo_directo){
+            valor_neto = Number(costo_directo);
+            iva = Number((costo_directo*0.16).toFixed(2));
+            total = Number((costo_directo*1.16).toFixed(2));
+            subtotal = Number((costo_directo*1.16).toFixed(2));
+          }*/
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send({detalle: salida, subtotal: subtotal});
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
 
 }
 
@@ -1851,7 +1946,7 @@ exports.listaBrigadasSae = async (req, res) => {
               
     
                 const detalle_salida = {
-                  id: String(element.id),
+                  id: Number(element.id),
                   brigada: String(element.brigada)
                 }
                 salida.push(detalle_salida);

@@ -3074,6 +3074,18 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve la tabla de resumen para el EDP",
+        "parameters": [
+          {
+            "name": "fecha_ini",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_fin",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
