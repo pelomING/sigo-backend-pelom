@@ -695,6 +695,7 @@ exports.creaObservaciones = async (req, res) => {
         return;
     }*/
 
+    console.log('param_fecha_ini', param_fecha_ini);
 
     const observaciones = {
       detalle: req.body.detalle,
@@ -2055,15 +2056,62 @@ exports.findHoraExtraByParams = async (req, res) => {
 exports.findHoraExtraNoProcesados = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Horas Extras']
       #swagger.description = 'Devuelve los registros de hora extra no procesados' */
-  await HoraExtra.findAll({
-    where: {
-      id_estado_resultado: null
-    }
-  }).then(data => {
-    res.send(data);
-  }).catch(err => {
-    res.status(500).send({ message: err.message });
-  })
+
+
+      try {
+        
+        const sql = "SELECT rhe.id, json_build_object('id', br.id, 'brigada', (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || \
+        ' (' || b.nombre || ')') as brigada, cantidad, rhe.comentario, id_estado_resultado, estado, fecha_hora::text FROM sae.reporte_hora_extra \
+        rhe JOIN _comun.brigadas br on rhe.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON \
+        br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE s.sae and s.activo and id_estado_resultado is null;";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida = [];
+        if (permanencia) {
+          for (const element of permanencia) {
+              console.log('element.id', typeof element.id)
+              console.log('element.brigada', typeof element.brigada)
+              console.log('element.cantidad', typeof element.cantidad)
+              console.log('element.comentario', typeof element.comentario)
+              console.log('element.id_estado_resultado', typeof element.id_estado_resultado)
+              console.log('element.estado', typeof element.estado)
+              console.log('element.fecha_hora', typeof element.fecha_hora)
+            if (
+              (typeof element.id === 'object' || typeof element.id === 'string') &&
+              (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+              (typeof element.cantidad === 'object' || typeof element.cantidad === 'string') &&
+              (typeof element.comentario === 'object' || typeof element.comentario === 'string') &&
+              (typeof element.id_estado_resultado === 'object' || typeof element.id_estado_resultado === 'number') &&
+              (typeof element.estado === 'object' || typeof element.estado === 'number') &&
+              (typeof element.fecha_hora === 'object' || typeof element.fecha_hora === 'string') ) {
+    
+                const detalle_salida = {
+                  id: Number(element.id),
+                  brigada: element.brigada,
+                  cantidad: Number(element.cantidad),
+                  comentario: String(element.comentario),
+                  id_estado_resultado: Number(element.id_estado_resultado),
+                  estado: Number(element.estado),
+                  fecha_hora: String(element.fecha_hora)
+    
+                }
+                salida.push(detalle_salida);
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send({detalle: salida});
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
+
 }
 
 /*********************************************************************************** */
