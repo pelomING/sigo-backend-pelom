@@ -2671,10 +2671,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "fecha_hora": {
+                "detalle": {
                   "example": "any"
                 },
-                "detalle": {
+                "fecha_hora": {
                   "example": "any"
                 },
                 "estado": {
@@ -3169,10 +3169,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "fecha_hora": {
+                "detalle": {
                   "example": "any"
                 },
-                "detalle": {
+                "fecha_hora": {
                   "example": "any"
                 },
                 "cantidad": {
@@ -3379,10 +3379,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "fecha_hora": {
+                "detalle": {
                   "example": "any"
                 },
-                "detalle": {
+                "fecha_hora": {
                   "example": "any"
                 },
                 "cantidad": {
@@ -3611,13 +3611,19 @@
             "schema": {
               "type": "object",
               "properties": {
-                "fecha_hora": {
-                  "example": "any"
-                },
                 "brigada": {
                   "example": "any"
                 },
                 "cantidad": {
+                  "example": "any"
+                },
+                "fecha_hora": {
+                  "example": "any"
+                },
+                "comments": {
+                  "example": "any"
+                },
+                "estado": {
                   "example": "any"
                 }
               }

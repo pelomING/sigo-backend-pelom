@@ -680,7 +680,7 @@ exports.creaObservaciones = async (req, res) => {
         return;
       }
     };
-    let param_fecha_ini = req.body.fecha_hora;
+    let param_fecha_ini = req.body.fecha_hora?req.body.fecha_hora:undefined;
     /*
     let fecha = "";
     if (param_fecha_ini.length == 10){
@@ -725,16 +725,20 @@ exports.updateObservaciones = async (req, res) => {
       try{
         const id = req.params.id;
         let fecha;
+        /*
         if (req.body.fecha_hora){
+          
           fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
           fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+          
+          fecha = req.body.fecha_hora
         }else{
-          fecha = null
-        }
+          fecha = undefined;
+        }*/
         const observaciones = {
-          detalle: req.body.detalle?req.body.detalle:null,
-          fecha_hora: fecha,
-          estado: req.body.estado?req.body.estado:null
+          detalle: req.body.detalle?req.body.detalle:undefined,
+          fecha_hora: req.body.fecha_hora?req.body.fecha_hora:undefined,
+          estado: req.body.estado?req.body.estado:undefined
         };
         await Observaciones.update(observaciones, {
           where: { id: id }
@@ -1598,19 +1602,20 @@ exports.updateCobroAdicional = async (req, res) => {
       #swagger.description = 'Actualiza los cobro adicionales para un estado de pago' */
       try{
         const id = req.params.id;
+        /*
         let fecha;
         if (req.body.fecha_hora){
           fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
           fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
         }else{
           fecha = undefined;
-        }
+        }*/
         const cobroadicional = {
-          detalle: req.body.detalle,
-          fecha_hora: fecha,
-		      cantidad: req.body.cantidad,
-		      valor: req.body.valor,
-          estado: req.body.estado
+          detalle: req.body.detalle?req.body.detalle:undefined,
+          fecha_hora: req.body.fecha_hora?req.body.fecha_hora:undefined,
+		      cantidad: req.body.cantidad?req.body.cantidad:undefined,
+		      valor: req.body.valor?req.body.valor:undefined,
+          estado: req.body.estado?req.body.estado:undefined
         };
         await CobroAdicional.update(cobroadicional, {
           where: { id: id }
@@ -1792,19 +1797,20 @@ exports.updateDescuentos = async (req, res) => {
       #swagger.description = 'Actualiza los descuentos para un estado de pago' */
       try{
         const id = req.params.id;
+        /*
         let fecha;
         if (req.body.fecha_hora){
           fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
           fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
         }else{
           fecha = undefined;
-        }
+        }*/
         const descuentos = {
-          detalle: req.body.detalle,
-          fecha_hora: fecha,
-		      cantidad: req.body.cantidad,
-		      valor: req.body.valor,
-          estado: req.body.estado
+          detalle: req.body.detalle?req.body.detalle:undefined,
+          fecha_hora: req.body.fecha_hora?req.body.fecha_hora:undefined,
+		      cantidad: req.body.cantidad?req.body.cantidad:undefined,
+		      valor: req.body.valor?req.body.valor:undefined,
+          estado: req.body.estado?req.body.estado:undefined
         };
         await Descuentos.update(descuentos, {
           where: { id: id }
@@ -2033,17 +2039,21 @@ exports.updateHoraExtra = async (req, res) => {
       #swagger.description = 'Actualiza las horas extra para un estado de pago' */
       try{
         const id = req.params.id;
+        //let param_fecha_ini = req.body.fecha_hora;
+        /*
         let fecha;
         if (req.body.fecha_hora){
           fecha = new Date(req.body.fecha_hora).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
           fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
         }else{
           fecha = undefined;
-        }
+        }*/
         const horaExtra = {
-		  brigada: req.body.brigada,
-		  cantidad: req.body.cantidad,
-		  fecha_hora: fecha
+          brigada: req.body.brigada?req.body.brigada:undefined,
+          cantidad: req.body.cantidad?req.body.cantidad:undefined,
+          fecha_hora: req.body.fecha_hora?req.body.fecha_hora:undefined,
+          comentario: req.body.comments?req.body.comments:undefined,
+          estado: req.body.estado?req.body.estado:undefined
 		};
         await HoraExtra.update(horaExtra, {
           where: { id: id }
@@ -2096,11 +2106,52 @@ exports.deleteHoraExtra = async (req, res) => {
 exports.findallHoraExtra = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - CRUD Horas Extras']
       #swagger.description = 'Devuelve todos los registros de hora extra ' */
-  await HoraExtra.findAll().then(data => {
-    res.send(data);
-  }).catch(err => {
-    res.status(500).send({ message: err.message });
-  })
+      try {
+        
+        const sql = "SELECT rhe.id, json_build_object('id', br.id, 'brigada', (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || \
+        ' (' || b.nombre || ')') as brigada, cantidad, rhe.comentario, id_estado_resultado, estado, fecha_hora::text FROM sae.reporte_hora_extra \
+        rhe JOIN _comun.brigadas br on rhe.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON \
+        br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE s.sae and s.activo;";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida = [];
+        if (permanencia) {
+          for (const element of permanencia) {
+            if (
+              (typeof element.id === 'object' || typeof element.id === 'string') &&
+              (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+              (typeof element.cantidad === 'object' || typeof element.cantidad === 'string') &&
+              (typeof element.comentario === 'object' || typeof element.comentario === 'string') &&
+              (typeof element.id_estado_resultado === 'object' || typeof element.id_estado_resultado === 'number') &&
+              (typeof element.estado === 'object' || typeof element.estado === 'number') &&
+              (typeof element.fecha_hora === 'object' || typeof element.fecha_hora === 'string') ) {
+    
+                const detalle_salida = {
+                  id: Number(element.id),
+                  brigada: element.brigada,
+                  cantidad: Number(element.cantidad),
+                  comentario: String(element.comentario),
+                  id_estado_resultado: Number(element.id_estado_resultado),
+                  estado: Number(element.estado),
+                  fecha_hora: String(element.fecha_hora)
+    
+                }
+                salida.push(detalle_salida);
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send({detalle: salida});
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
 }
 
 /*********************************************************************************** */
@@ -2165,13 +2216,6 @@ exports.findHoraExtraNoProcesados = async (req, res) => {
         let salida = [];
         if (permanencia) {
           for (const element of permanencia) {
-              console.log('element.id', typeof element.id)
-              console.log('element.brigada', typeof element.brigada)
-              console.log('element.cantidad', typeof element.cantidad)
-              console.log('element.comentario', typeof element.comentario)
-              console.log('element.id_estado_resultado', typeof element.id_estado_resultado)
-              console.log('element.estado', typeof element.estado)
-              console.log('element.fecha_hora', typeof element.fecha_hora)
             if (
               (typeof element.id === 'object' || typeof element.id === 'string') &&
               (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
