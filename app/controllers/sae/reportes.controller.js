@@ -2052,7 +2052,7 @@ exports.updateHoraExtra = async (req, res) => {
           brigada: req.body.brigada?req.body.brigada:undefined,
           cantidad: req.body.cantidad?req.body.cantidad:undefined,
           fecha_hora: req.body.fecha_hora?req.body.fecha_hora:undefined,
-          comentario: req.body.comments?req.body.comments:undefined,
+          comentario: req.body.comentario?req.body.comentario:undefined,
           estado: req.body.estado?req.body.estado:undefined
 		};
         await HoraExtra.update(horaExtra, {
@@ -2180,16 +2180,49 @@ exports.findHoraExtraByParams = async (req, res) => {
       if (sql_array.length === 0) {
         res.status(500).send("Debe incluir algun parametro para consultar");
       }else {
-        await HoraExtra.findAll({
-          where: param
-        }).then(data => {
-          res.send(data);
-        }).catch(err => {
-          res.status(500).send({ message: err.message });
-        })
+        const sql = "SELECT rhe.id, json_build_object('id', br.id, 'brigada', (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || \
+        ' (' || b.nombre || ')') as brigada, cantidad, rhe.comentario, id_estado_resultado, estado, fecha_hora::text FROM sae.reporte_hora_extra \
+        rhe JOIN _comun.brigadas br on rhe.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON \
+        br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE s.sae and s.activo AND " + where + ";";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida = [];
+        if (permanencia) {
+          for (const element of permanencia) {
+            if (
+              (typeof element.id === 'object' || typeof element.id === 'string') &&
+              (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+              (typeof element.cantidad === 'object' || typeof element.cantidad === 'string') &&
+              (typeof element.comentario === 'object' || typeof element.comentario === 'string') &&
+              (typeof element.id_estado_resultado === 'object' || typeof element.id_estado_resultado === 'number') &&
+              (typeof element.estado === 'object' || typeof element.estado === 'number') &&
+              (typeof element.fecha_hora === 'object' || typeof element.fecha_hora === 'string') ) {
+    
+                const detalle_salida = {
+                  id: Number(element.id),
+                  brigada: element.brigada,
+                  cantidad: Number(element.cantidad),
+                  comentario: String(element.comentario),
+                  id_estado_resultado: Number(element.id_estado_resultado),
+                  estado: Number(element.estado),
+                  fecha_hora: String(element.fecha_hora)
+    
+                }
+                salida.push(detalle_salida);
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send({detalle: salida});
+        }
       }
       
-
 	}catch (error) {
 		res.status(500).send(error);
   }
