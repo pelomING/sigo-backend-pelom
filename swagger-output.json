@@ -3620,7 +3620,7 @@
                 "fecha_hora": {
                   "example": "any"
                 },
-                "comments": {
+                "comentario": {
                   "example": "any"
                 },
                 "estado": {
@@ -3762,9 +3762,89 @@
         "description": "Devuelve el detalle de PxQ para planilla Excel, se debe ingresar el id_paquete en la url ?id_paquete=[id_paquete]",
         "parameters": [
           {
+            "name": "fecha_ini",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_fin",
+            "in": "query",
+            "type": "string"
+          },
+          {
             "name": "id_paquete",
             "in": "query",
             "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/cierraedp": {
+      "post": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP"
+        ],
+        "description": "Realiza el cierre de un estado de pago",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para el cierre de estado de pago",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "periodo": {
+                  "type": "string",
+                  "example": "agosto-2023"
+                },
+                "zonal": {
+                  "type": "string",
+                  "example": "Maule sur - Maule norte"
+                },
+                "fecha_inicial": {
+                  "type": "string",
+                  "example": "2023-08-01"
+                },
+                "fecha_final": {
+                  "type": "string",
+                  "example": "2023-08-31"
+                },
+                "coordinador_pelom": {
+                  "type": "string",
+                  "example": "Camilo Soto"
+                },
+                "supervisor_cge": {
+                  "type": "string",
+                  "example": "José León"
+                },
+                "turnos_comprometidos": {
+                  "type": "number",
+                  "example": 31
+                },
+                "fecha_generacion": {
+                  "type": "string",
+                  "example": "2023-09-05"
+                }
+              }
+            }
           }
         ],
         "responses": {

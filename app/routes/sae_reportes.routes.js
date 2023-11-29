@@ -254,5 +254,11 @@ module.exports = function(app) {
     */
     app.get("/api/reportes/v1/detallepxq", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.detallePxQ);
 
+    /*********************************************************************************** */
+    /* Realiza el cierre de un estado de pago
+      app.post("/api/reportes/v1/cierraedp", reportesController.cierraEstadoPago)
+    */
+    app.post("/api/reportes/v1/cierraedp", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.cierraEstadoPago);
+
 
 }

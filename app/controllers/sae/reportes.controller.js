@@ -1286,7 +1286,7 @@ exports.findProduccionPxQ = async (req, res) => {
 /* Devuelve la tabla de cobros adicionales para el EDP
   app.post("/api/reportes/v1/reportecobroadicional", reportesController.findRepCobroAdicional)
 */
-exports.findRepCobroAdicional = async (req, res) => {
+exports. findRepCobroAdicional = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la tabla de cobros adicionales para el EDP' */
       /** SELECT detalle, cantidad, valor
@@ -1488,17 +1488,15 @@ exports.findRepResumen = async (req, res) => {
                   is null " + condicion_fecha + " order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento) xc \
                   UNION \
                   SELECT  6::integer as orden, 'COBROS ADICIONALES'::text as item, case when sum(valor) is null then 0 else sum(valor) end as valor \
-                  FROM sae.reporte_cobro_adicional WHERE id_estado_resultado is null UNION SELECT  7::integer as orden, 'DESCUENTOS'::text as item, \
+                  FROM sae.reporte_cobro_adicional WHERE id_estado_resultado is null " + condicion_fecha + " \
+                  UNION \
+                  SELECT  7::integer as orden, 'DESCUENTOS'::text as item, \
                   case when sum(valor) is null then 0 else sum(valor) end as valor FROM sae.reporte_descuentos WHERE id_estado_resultado is null " + condicion_fecha + " order by orden";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const resumen = await sequelize.query(sql, { type: QueryTypes.SELECT });
         let salida = [];
         let costo_directo = 0;
-        let valor_neto= 0;
-        let iva = 0;
-        let total = 0;
-        let subtotal = 0;
         if (resumen) {
           for (const element of resumen) {
             if (
@@ -1511,7 +1509,12 @@ exports.findRepResumen = async (req, res) => {
                   item: String(element.item),
                   valor: Number(element.valor)
                 }
-                costo_directo = costo_directo + Number(element.valor);
+                if (element.orden === 7){
+                  // Se resta el descuento
+                  costo_directo = costo_directo - Number(element.valor);
+                }else{
+                  costo_directo = costo_directo + Number(element.valor);
+                }    
                 salida.push(detalle_salida);
     
             }else {
@@ -1519,18 +1522,72 @@ exports.findRepResumen = async (req, res) => {
                 break;
             }
           };
-          /*
+          
           if (costo_directo){
-            valor_neto = Number(costo_directo);
-            iva = Number((costo_directo*0.16).toFixed(2));
-            total = Number((costo_directo*1.16).toFixed(2));
-            subtotal = Number((costo_directo*1.16).toFixed(2));
-          }*/
+            //Agregar el costo por ditancia y por emergencia
+            let detalle_salida = {
+              orden: Number(8),
+              item: String('COSTO DIRECTO'),
+              valor: Number(costo_directo)
+            }
+            salida.push(detalle_salida);
+            detalle_salida = {
+              orden: Number(9),
+              item: String('RECARGO POR DISTANCIA'),
+              valor: Number(0)
+            }
+            salida.push(detalle_salida);
+            detalle_salida = {
+              orden: Number(10),
+              item: String('ESTADO DE EMERGENCIA'),
+              valor: Number(0)
+            }
+            salida.push(detalle_salida);
+            let total = salida.reduce(((total, num) => total + num.valor), 0);
+            let valor_neto = (total/1.19).toFixed(0);
+            let iva = Number(total - valor_neto).toFixed(0);  
+
+            detalle_salida = {
+              orden: Number(11),
+              item: String('VALOR NETO'),
+              valor: Number(valor_neto)
+            }
+            salida.push(detalle_salida);
+
+            detalle_salida = {
+              orden: Number(12),
+              item: String('IVA'),
+              valor: Number(iva)
+            }
+            salida.push(detalle_salida);
+
+            detalle_salida = {
+              orden: Number(13),
+              item: String('TOTAL ESTADO DE PAGO'),
+              valor: Number(total)
+            }
+            salida.push(detalle_salida);
+
+          } else {
+            let detalle_salida = {orden: Number(8), item: String('COSTO DIRECTO'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(9), item: String('RECARGO POR DISTANCIA'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(10), item: String('ESTADO DE EMERGENCIA'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(11), item: String('VALOR NETO'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(12), item: String('IVA'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(13), item: String('TOTAL ESTADO DE PAGO'), valor: Number(0)};
+            salida.push(detalle_salida);
+
+          }
         }
         if (salida===undefined){
           res.status(500).send("Error en la consulta (servidor backend)");
         }else{
-          res.status(200).send({detalle: salida, subtotal: subtotal});
+          res.status(200).send({detalle: salida});
         }
       } catch (error) {
         res.status(500).send(error);
@@ -2305,6 +2362,21 @@ exports.detallePxQ = async (req, res) => {
             return;
           }
         };
+        let param_fecha_ini = req.query.fecha_ini;
+        let param_fecha_fin = req.query.fecha_fin;
+        let condicion_fecha= "";
+        if (param_fecha_fin) {
+          if (param_fecha_fin.length == 10){
+            //ok
+            param_fecha_fin = param_fecha_fin + " 23:59:59";
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+            condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
+          }else {
+            res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+            return;
+          }
+        }
         
         const sql = "SELECT re.id, to_char(re.fecha_hora::timestamp with time zone, 'DD-MM-YYYY'::text) AS fecha, hora_termino::text, \
         numero_ot as centrality, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro from _auth.personas \
@@ -2315,7 +2387,7 @@ exports.detallePxQ = async (req, res) => {
           valor_cobrar, ti.nombre as tipo_turno FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id \
           join _comun.base b on br.id_base = b.id left join _comun.comunas c on re.comuna = c.codigo left join \
           _comun.eventos_tipo et on re.tipo_evento = et.codigo join _comun.tipo_turno ti on re.tipo_turno = ti.id \
-          where b.id_paquete = :id_paquete and id_estado_resultado is null order by fecha_hora;";
+          where b.id_paquete = :id_paquete and id_estado_resultado is null " + condicion_fecha + " order by fecha_hora;";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.query.id_paquete }, type: QueryTypes.SELECT });
@@ -2370,4 +2442,58 @@ exports.detallePxQ = async (req, res) => {
       } catch (error) {
         res.status(500).send(error);
       }
+}
+
+/*********************************************************************************** */
+/* Realiza el cierre de un estado de pago
+  app.post("/api/reportes/v1/cierraedp", reportesController.cierraEstadoPago)
+*/
+exports.cierraEstadoPago = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
+      #swagger.description = 'Realiza el cierre de un estado de pago'
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para el cierre de estado de pago',
+            required: true,
+            schema: {
+                periodo: "agosto-2023",
+                zonal: "Maule sur - Maule norte",
+                fecha_inicial: "2023-08-01",
+                fecha_final: "2023-08-31",
+                coordinador_pelom: "Camilo Soto",
+                supervisor_cge: "José León",
+                turnos_comprometidos: 31,
+                fecha_generacion: "2023-09-05"
+            }
+        } */
+      try {
+        const campos = [
+          'periodo', 'zonal', 'fecha_inicial', 'fecha_final', 'coordinador_pelom', 'supervisor_cge', 'turnos_comprometidos', 'fecha_generacion'
+        ];
+        for (const element of campos) {
+          if (!req.body[element]) {
+            res.status(400).send({
+              message: "No puede estar nulo el campo " + element
+            });
+            return;
+          }
+        };
+        const edp = {
+          "periodo": req.body.periodo,
+          "zonal": req.body.zonal,
+          "fecha_inicial": req.body.fecha_inicial,
+          "fecha_final": req.body.fecha_final,
+          "coordinador_pelom": req.body.coordinador_pelom,
+          "supervisor_cge": req.body.supervisor_cge,
+          "turnos_comprometidos": req.body.turnos_comprometidos,
+          "fecha_generacion": req.body.fecha_generacion
+        }
+          
+
+        res.status(200).send(edp);
+
+      } catch (error) {
+        res.status(500).send(error);
+      }
+
 }
