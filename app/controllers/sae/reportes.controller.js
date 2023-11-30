@@ -6,6 +6,7 @@ const Observaciones = db.observaciones;
 const CobroAdicional = db.cobroAdicional;
 const Descuentos = db.descuentos;
 const HoraExtra = db.horaExtra;
+const EstadoPago = db.estadoPago;
 
 exports.readAllJornada = async (req, res) => {
   //metodo GET
@@ -1249,20 +1250,18 @@ exports.findProduccionPxQ = async (req, res) => {
     let subtotal = 0;
     if (permanencia) {
       for (const element of permanencia) {
+        console.log('element.descripcion', typeof element.descripcion);
+        console.log('element.valor_total', typeof element.valor_total);
         if (
-          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
-          (typeof element.turnos === 'object' || typeof element.turnos === 'string') &&
-          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
-          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'string') ) {
+          (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
+          (typeof element.valor_total === 'object' || typeof element.valor_total === 'string')  ) {
 
             const detalle_salida = {
-              brigada: String(element.brigada),
-              turnos: Number(element.turnos),
-              valor_dia: Number(element.valor_dia),
-              valor_mes: Number(element.valor_mes)
+              tipo_evento: String(element.descripcion),
+              valor_total: Number(element.valor_total)
 
             }
-            subtotal = subtotal + detalle_salida.valor_mes;
+            subtotal = subtotal + detalle_salida.valor_total;
             salida.push(detalle_salida);
 
         }else {
@@ -1417,7 +1416,7 @@ exports.findRepDescuentos = async (req, res) => {
 /* Devuelve la tabla de resumen para el EDP
   app.post("/api/reportes/v1/reporteresumen", reportesController.findRepResumen)
 */
-exports.findRepResumen = async (req, res) => {
+exports. findRepResumen = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la tabla de resumen para el EDP' */
 
@@ -1484,7 +1483,7 @@ exports.findRepResumen = async (req, res) => {
                 valor from (select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, (select valor from \
                   sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) \
                   as valor_cobrar, et.id as tipo_evento FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join \
-                  _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo where id_estado_resultado \
+                  _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo WHERE id_estado_resultado \
                   is null " + condicion_fecha + " order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento) xc \
                   UNION \
                   SELECT  6::integer as orden, 'COBROS ADICIONALES'::text as item, case when sum(valor) is null then 0 else sum(valor) end as valor \
@@ -2075,12 +2074,7 @@ exports.creaHoraExtra = async (req, res) => {
       estado: 1
     };
 
-    const horaExtraCreate = await HoraExtra.create(horaExtra)
-        .then(data => {
-            res.send(data);
-        }).catch(err => {
-            res.status(500).send({ message: err.message });
-        });
+    c
     
   }catch (error) {
     res.status(500).send(error);
@@ -2478,6 +2472,29 @@ exports.cierraEstadoPago = async (req, res) => {
             return;
           }
         };
+        let param_fecha_fin = req.body.fecha_final;
+        let condicion_fecha= "";
+        let condicion_fecha_permanencia= "";
+        if (param_fecha_fin) {
+          if (param_fecha_fin.length == 10){
+            //ok
+            param_fecha_fin = param_fecha_fin + " 23:59:59";
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+            condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
+            condicion_fecha_permanencia = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+          }else {
+            res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+            return;
+          }
+        }
+
+        const codigo_estado = 'Z1-Z3-SAE-' + Math.floor(Math.random() * 999).toString() + '-' + req.body.periodo;
+        let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2) + " " + fecha_hoy.slice(12,20);
+
+
+
         const edp = {
           "periodo": req.body.periodo,
           "zonal": req.body.zonal,
@@ -2488,12 +2505,88 @@ exports.cierraEstadoPago = async (req, res) => {
           "turnos_comprometidos": req.body.turnos_comprometidos,
           "fecha_generacion": req.body.fecha_generacion
         }
-          
+        const estadoP = {
+          "codigo_estado": codigo_estado,
+          "encabezado": edp,
+          "fecha_hora": fecha_hoy
+        }
 
-        res.status(200).send(edp);
+        const estadoPago = await EstadoPago.create(estadoP)
+        .then(async data => {
+            //actualizar las otras tablas
+            const sql2 = "update sae.reporte_cobro_adicional set id_estado_resultado = " + data.id + " WHERE id_estado_resultado is null " + condicion_fecha + "; \
+            update sae.reporte_descuentos set id_estado_resultado = " + data.id + " WHERE id_estado_resultado is null " + condicion_fecha + "; \
+            update sae.reporte_hora_extra set id_estado_resultado = " + data.id + " where id_estado_resultado is null " + condicion_fecha + "; \
+            update sae.reporte_jornada set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null " + condicion_fecha_permanencia + "; \
+            update sae.reporte_eventos set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null " + condicion_fecha + "; \
+            update sae.reporte_observaciones set id_estado_resultado = " + data.id + " where id_estado_resultado is null " + condicion_fecha + ";";
+            console.log(sql2);
+
+            const { QueryTypes } = require('sequelize');
+            const sequelize = db.sequelize;
+            const resultado = await sequelize.query(sql2, { type: QueryTypes.UPDATE })
+            .then(data => {
+              res.send(data);
+            }).catch(err => {
+              res.status(500).send({ message: err.message });
+            })
+        }).catch(err => {
+            res.status(500).send({ message: err.message });
+        });
 
       } catch (error) {
         res.status(500).send(error);
       }
 
+}
+
+/*********************************************************************************** */
+/* Devuelve el listado historico de estados de pago
+  app.get("/api/reportes/v1/historicoedp", reportesController.historicoEdp)
+*/
+exports.historicoEdp = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
+      #swagger.description = 'Obtiene el historico de estados de pago'
+        } */
+
+  try {
+      const sql = "select id,codigo_estado, (encabezado->>'fecha_generacion' )::text as fecha_generacion, encabezado \
+      from sae.reporte_estado_pago order by (encabezado->>'fecha_generacion')::date desc";
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      const edp = await sequelize.query(sql, { type: QueryTypes.SELECT });
+      let salida = [];
+      if (edp) {
+        for (const element of edp) {
+          if (
+            typeof element.id === 'number' &&
+            (typeof element.codigo_estado === 'object' || typeof element.codigo_estado === 'string') &&
+            (typeof element.fecha_generacion === 'object' || typeof element.fecha_generacion === 'string') &&
+            (typeof element.encabezado === 'object' || typeof element.encabezado === 'string') ) {
+  
+              const detalle_salida = {
+
+                id: Number(element.id),
+                codigo_estado: String(element.codigo_estado),
+                fecha_generacion: String(element.fecha_generacion),
+                encabezado: element.encabezado
+  
+              }
+              salida.push(detalle_salida);
+  
+          }else {
+              salida=undefined;
+              break;
+          }
+        };
+      }
+      if (salida===undefined){
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }else{
+        res.status(200).send(salida);
+      }
+
+  } catch (error) {
+    res.status(500).send(error);
+  }
 }

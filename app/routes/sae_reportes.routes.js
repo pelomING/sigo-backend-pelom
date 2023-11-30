@@ -260,5 +260,11 @@ module.exports = function(app) {
     */
     app.post("/api/reportes/v1/cierraedp", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.cierraEstadoPago);
 
+    /*********************************************************************************** */
+    /* Devuelve el listado historico de estados de pago
+      app.get("/api/reportes/v1/historicoedp", reportesController.historicoEdp)
+    */
+    app.get("/api/reportes/v1/historicoedp", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.historicoEdp);
+
 
 }
