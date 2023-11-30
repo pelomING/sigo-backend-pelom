@@ -266,5 +266,59 @@ module.exports = function(app) {
     */
     app.get("/api/reportes/v1/historicoedp", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.historicoEdp);
 
+    /*********************************************************************************** */
+    /* Devuelve la permanencia semanal por brigada
+      app.get("/api/reportes/v1/permanencia_por_brigada", reportesController.permanenciaByBrigadaHistorial)
+    */
+    app.get("/api/reportes/v1/permanencia_por_brigada_historial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.permanenciaByBrigadaHistorial);
+
+  /*********************************************************************************** */
+  /* Devuelve las horas extra realizadas
+    app.get("/api/reportes/v1/horasextrafindHorasExtrasHistorial", reportesController.findHorasExtrasHistorial)
+  */
+    app.get("/api/reportes/v1/horasextrafindHorasExtrasHistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findHorasExtrasHistorial);
+
+    /*********************************************************************************** */
+    /* Devuelve los turnos adicionales
+      app.get("/api/reportes/v1/turnosadicionaleshistorial", reportesController.findTurnosAdicionalesHistorial)
+    */
+    app.get("/api/reportes/v1/turnosadicionaleshistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findTurnosAdicionalesHistorial);
+
+    /*********************************************************************************** */
+    /* Devuelve los turnos de contingencia
+      app.get("/api/reportes/v1/turnoscontingenciahistorial", reportesController.findTurnosContingenciaHistorial)
+    */
+    app.get("/api/reportes/v1/turnoscontingenciahistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findTurnosContingenciaHistorial);  
+
+    /*********************************************************************************** */
+    /* Devuelve la produccion PxQ
+      app.get("/api/reportes/v1/produccionpxqhistorial", reportesController.findProduccionPxQHistorial)
+    */
+    app.get("/api/reportes/v1/produccionpxqhistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findProduccionPxQHistorial);
+
+
+    /*********************************************************************************** */
+    /* Devuelve la tabla de cobros adicionales historicos para el EDP
+      app.get("/api/reportes/v1/reportecobroadicionalhistorial", reportesController.findRepCobroAdicionalHistorial)
+    */
+    app.get("/api/reportes/v1/reportecobroadicionalhistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findRepCobroAdicionalHistorial);
+
+    /*********************************************************************************** */
+    /* Devuelve la tabla de descuentos para el EDP
+      app.get("/api/reportes/v1/reportedescuentoshistorial", reportesController.findRepDescuentosHistorial)
+    */
+    app.get("/api/reportes/v1/reportedescuentoshistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findRepDescuentosHistorial);
+
+    /*********************************************************************************** */
+    /* Devuelve la tabla de resumen para el EDP
+      app.get("/api/reportes/v1/reporteresumenhistorial", reportesController.findRepResumenHistorial)
+    */
+    app.get("/api/reportes/v1/reporteresumenhistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findRepResumenHistorial);
+
+    /*********************************************************************************** */
+    /* Devuelve el detalle de PxQ para planilla Excel, ingresando parámetro del paquete
+      app.get("/api/reportes/v1/detallepxqhistorial", reportesController.detallePxQHistorial)
+    */
+    app.get("/api/reportes/v1/detallepxqhistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.detallePxQHistorial);
 
 }

@@ -3881,6 +3881,299 @@
           }
         }
       }
+    },
+    "/api/reportes/v1/permanencia_por_brigada_historial": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP - Historial"
+        ],
+        "description": "Devuelve la permanencia semanal por brigada",
+        "parameters": [
+          {
+            "name": "id_estado_pago",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/horasextrafindHorasExtrasHistorial": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP - Historial"
+        ],
+        "description": "Devuelve las horas extra realizadas",
+        "parameters": [
+          {
+            "name": "id_estado_pago",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/turnosadicionaleshistorial": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP - Historial"
+        ],
+        "description": "Devuelve los turnos adicionales",
+        "parameters": [
+          {
+            "name": "id_estado_pago",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/turnoscontingenciahistorial": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP - Historial"
+        ],
+        "description": "Devuelve los turnos de contingencia",
+        "parameters": [
+          {
+            "name": "id_estado_pago",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/produccionpxqhistorial": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP - Historial"
+        ],
+        "description": "Devuelve la produccion PxQ",
+        "parameters": [
+          {
+            "name": "id_estado_pago",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/reportecobroadicionalhistorial": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP - Historial"
+        ],
+        "description": "Devuelve la tabla de cobros adicionales para el EDP",
+        "parameters": [
+          {
+            "name": "id_estado_pago",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/reportedescuentoshistorial": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP - Historial"
+        ],
+        "description": "Devuelve la tabla de descuentos para el EDP",
+        "parameters": [
+          {
+            "name": "id_estado_pago",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/reporteresumenhistorial": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP - Historial"
+        ],
+        "description": "Devuelve la tabla de resumen para el EDP",
+        "parameters": [
+          {
+            "name": "id_estado_pago",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/detallepxqhistorial": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes - EDP - Historial"
+        ],
+        "description": "Devuelve el detalle de PxQ para planilla Excel, se debe ingresar el id_paquete en la url ?id_paquete=[id_paquete]",
+        "parameters": [
+          {
+            "name": "id_paquete",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_estado_pago",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
     }
   }
 }
