@@ -47,4 +47,218 @@ module.exports = function(app) {
     ejemplpo: /api/reportes/v1/resumenturnos?fecha_inicial=2023-08-01&fecha_final=2023-09-30*/
     app.get("/api/reportes/v1/resumenallturnos", [authJwt.verifyToken], reportesController.resumenAllTurnos);
 
+    /*********************************************************************************** */
+    /* Ingresa las observaciones para un estado de pago
+      app.post("/api/reportes/v1/creaobservaciones", reportesController.creaObservaciones)
+    */
+    app.post("/api/reportes/v1/creaobservaciones", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaObservaciones);
+
+    /*********************************************************************************** */
+    /* Actualiza las observaciones para un estado de pago
+      app.post("/api/reportes/v1/updateobservaciones", reportesController.updateObservaciones)
+    */
+    app.put("/api/reportes/v1/updateobservaciones/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateObservaciones);
+
+    /*********************************************************************************** */
+    /* Elimina una observacion para un estado de pago
+      app.post("/api/reportes/v1/deleteobservaciones", reportesController.deleteObservaciones)
+    */
+    app.delete("/api/reportes/v1/deleteobservaciones/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteObservaciones);
+
+    /*********************************************************************************** */
+    /* Devuelve todas las observaciones 
+      app.post("/api/reportes/v1/findallobservaciones", reportesController.findallObservaciones)
+    */
+    app.get("/api/reportes/v1/findallobservaciones", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findallObservaciones);
+
+    /*********************************************************************************** */
+    /* Devuelve las observacion por parametros
+      app.post("/api/reportes/v1/findobservaciones", reportesController.findObservacionesByParams)
+    */
+    app.get("/api/reportes/v1/findobservaciones", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findObservacionesByParams);
+
+    /*********************************************************************************** */
+    /* Devuelve las observaciones no procesadas, id_estado_resultado=null
+      app.post("/api/reportes/v1/observacionesnoprocesadas", reportesController.findObservacionesNoProcesadas)
+    */
+    app.get("/api/reportes/v1/observacionesnoprocesadas", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findObservacionesNoProcesadas);
+
+    /*********************************************************************************** */
+    /* Devuelve los cargos fijo por semana
+      app.post("/api/reportes/v1/semanal_por_brigada", reportesController.semanalByBrigada)
+    */
+    app.get("/api/reportes/v1/semanal_por_brigada", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.semanalByBrigada);
+
+    /*********************************************************************************** */
+    /* Devuelve la permanencia semanal por brigada
+      app.post("/api/reportes/v1/permanencia_por_brigada", reportesController.permanenciaByBrigada)
+    */
+    app.get("/api/reportes/v1/permanencia_por_brigada", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.permanenciaByBrigada);
+
+    /*********************************************************************************** */
+    /* Devuelve las horas extra realizadas
+      app.post("/api/reportes/v1/horasextras", reportesController.findHorasExtras)
+    */
+    app.get("/api/reportes/v1/horasextras", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findHorasExtras);
+
+    /*********************************************************************************** */
+    /* Devuelve los turnos adicionales
+      app.post("/api/reportes/v1/turnosadicionales", reportesController.findTurnosAdicionales)
+    */
+    app.get("/api/reportes/v1/turnosadicionales", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findTurnosAdicionales);
+
+    /*********************************************************************************** */
+    /* Devuelve los turnos de contingencia
+      app.post("/api/reportes/v1/turnoscontingencia", reportesController.findTurnosContingencia)
+    */
+    app.get("/api/reportes/v1/turnoscontingencia", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findTurnosContingencia);
+
+    /*********************************************************************************** */
+    /* Devuelve la produccion PxQ
+      app.post("/api/reportes/v1/produccionpxq", reportesController.findProduccionPxQ)
+    */
+    app.get("/api/reportes/v1/produccionpxq", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findProduccionPxQ);
+
+    /*********************************************************************************** */
+    /* Devuelve la tabla de cobros adicionales para el EDP
+      app.post("/api/reportes/v1/reportecobroadicional", reportesController.findRepCobroAdicional)
+    */
+    app.get("/api/reportes/v1/reportecobroadicional", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findRepCobroAdicional);
+
+    /*********************************************************************************** */
+    /* Devuelve la tabla de descuentos para el EDP
+      app.post("/api/reportes/v1/reportedescuentos", reportesController.findRepDescuentos)
+    */
+    app.get("/api/reportes/v1/reportedescuentos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findRepDescuentos);
+    /*********************************************************************************** */
+    /* Devuelve la tabla de resumen para el EDP
+      app.post("/api/reportes/v1/reporteresumen", reportesController.findRepResumen)
+    */
+    app.get("/api/reportes/v1/reporteresumen", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findRepResumen);
+
+    /*********************************************************************************** */
+    /* Ingresa las observaciones para un estado de pago
+      app.post("/api/reportes/v1/creacobroadicional", reportesController.creaCobroAdicional)
+    */
+    app.post("/api/reportes/v1/creacobroadicional", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaCobroAdicional);
+
+    /* Actualiza los cobros adicionales para un estado de pago
+    app.post("/api/reportes/v1/updatecobroadicional", reportesController.updateCobroAdicional)
+    */
+    app.put("/api/reportes/v1/updatecobroadicional/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateCobroAdicional);
+
+    /*********************************************************************************** */
+    /* Elimina un cobro adicional para un estado de pago
+      app.post("/api/reportes/v1/deletecobroadicional", reportesController.deleteCobroAdicional)
+    */
+    app.delete("/api/reportes/v1/deletecobroadicional/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteCobroAdicional);
+
+    /*********************************************************************************** */
+    /* Devuelve todos los cobros adicionales 
+      app.post("/api/reportes/v1/findallcobroadicional", reportesController.findallCobroAdicional)
+    */
+    app.get("/api/reportes/v1/findallcobroadicional", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findallCobroAdicional);
+
+    /*********************************************************************************** */
+    /* Devuelve los cobros adicionales por parametros
+      app.post("/api/reportes/v1/findcobroadicional", reportesController.findCobroAdicionalByParams)
+    */
+    app.get("/api/reportes/v1/findcobroadicional", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findCobroAdicionalByParams);
+
+    /*********************************************************************************** */
+    /* Devuelve los cobros adicionales no procesados, id_estado_resultado=null
+      app.post("/api/reportes/v1/cobroadicionalnoprocesado", reportesController.findCobroAdicionalNoProcesado)
+    */
+    app.get("/api/reportes/v1/cobroadicionalnoprocesado", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findCobroAdicionalNoProcesado);
+
+    /*********************************************************************************** */
+    /* Ingresa los descuentos para un estado de pago
+      app.post("/api/reportes/v1/creadescuentos", reportesController.creaDescuentos)
+    */
+    app.post("/api/reportes/v1/creadescuentos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaDescuentos);
+
+    /*********************************************************************************** */
+    /* Actualiza los descuentos para un estado de pago
+      app.post("/api/reportes/v1/updatedescuentos", reportesController.updateDescuentos)
+    */
+    app.put("/api/reportes/v1/updatedescuentos/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateDescuentos);
+
+    /*********************************************************************************** */
+    /* Elimina un descuento para un estado de pago
+      app.post("/api/reportes/v1/deletedescuento", reportesController.deleteDescuentos)
+    */
+    app.delete("/api/reportes/v1/deletedescuento/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteDescuentos);
+
+    /*********************************************************************************** */
+    /* Devuelve todos los descuentos 
+      app.post("/api/reportes/v1/findalldescuentos", reportesController.findallDescuentos)
+    */
+    app.get("/api/reportes/v1/findalldescuentos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findallDescuentos);
+
+    /*********************************************************************************** */
+    /* Devuelve los descuentos por parametros
+      app.post("/api/reportes/v1/finddescuentos", reportesController.findDescuentosByParams)
+    */
+    app.get("/api/reportes/v1/finddescuentos", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findDescuentosByParams);
+
+    /*********************************************************************************** */
+    /* Devuelve los descuentos no procesados, id_estado_resultado=null
+      app.post("/api/reportes/v1/descuentosnoprocesados", reportesController.findDescuentosNoProcesados)
+    */
+    app.get("/api/reportes/v1/descuentosnoprocesados", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findDescuentosNoProcesados);
+
+    /*********************************************************************************** */
+    /* Devuelve la lsita de brigadas para seleccionar dentro del módulo de horas extra
+      app.get("/api/movil/v1/listabrigadassae", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.listaBrigadasSae)
+    */
+    app.get("/api/movil/v1/listabrigadassae", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.listaBrigadasSae);
+
+    /*********************************************************************************** */
+    /* Ingresa las horas extra para un estado de pago
+      app.post("/api/reportes/v1/creahoraextra", reportesController.creaHoraExtra)
+    */
+    app.post("/api/reportes/v1/creahoraextra", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaHoraExtra);
+
+    /* Actualiza las horas extra para un estado de pago
+    app.put("/api/reportes/v1/updatehoraextra", reportesController.updateHoraExtra)
+    */
+    app.put("/api/reportes/v1/updatehoraextra/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateHoraExtra);
+
+    /*********************************************************************************** */
+    /* Elimina un registro de hora extra para un estado de pago
+      app.post("/api/reportes/v1/deletehoraextra", reportesController.deleteHoraExtra)
+    */
+    app.delete("/api/reportes/v1/deletehoraextra/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteHoraExtra);
+
+    /*********************************************************************************** */
+    /* Devuelve todos los registros de hora extra
+      app.get("/api/reportes/v1/findallhoraextra", reportesController.findallHoraExtra)
+    */
+    app.get("/api/reportes/v1/findallhoraextra", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findallHoraExtra);
+
+    /*********************************************************************************** */
+    /* Devuelve los registros de hora extra por parametros
+      app.get("/api/reportes/v1/findhoraextra", reportesController.findHoraExtraByParams)
+    */
+    app.get("/api/reportes/v1/findhoraextra", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findHoraExtraByParams);
+
+    /*********************************************************************************** */
+    /* Devuelve los registros de hora extra no procesados, id_estado_resultado=null
+      app.get("/api/reportes/v1/horaextranoprocesados", reportesController.findHoraExtraNoProcesados)
+    */
+    app.get("/api/reportes/v1/horaextranoprocesados", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findHoraExtraNoProcesados);
+
+    /*********************************************************************************** */
+    /* Devuelve el detalle de PxQ para planilla Excel, ingresando parámetro del paquete
+      app.get("/api/reportes/v1/detallepxq", reportesController.detallePxQ)
+    */
+    app.get("/api/reportes/v1/detallepxq", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.detallePxQ);
+
+    /*********************************************************************************** */
+    /* Realiza el cierre de un estado de pago
+      app.post("/api/reportes/v1/cierraedp", reportesController.cierraEstadoPago)
+    */
+    app.post("/api/reportes/v1/cierraedp", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.cierraEstadoPago);
+
+
 }

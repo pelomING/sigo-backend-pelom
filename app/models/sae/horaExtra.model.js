@@ -1,19 +1,20 @@
 module.exports = (sequelize, Sequelize) => {
-    const Descuentos = sequelize.define("reporte_descuentos", {
+    const HoraExtra = sequelize.define("reporte_hora_extra", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        detalle: {
-            type: Sequelize.STRING
+        brigada: {
+            type: Sequelize.INTEGER,
+            allowNull: false
         },
         cantidad: {
-            type: Sequelize.INTEGER
-        },
-        valor: {
             type: Sequelize.FLOAT,
             allowNull: false
+        },
+        comentario: {
+            type: Sequelize.STRING
         },
         id_estado_resultado: {
             type: Sequelize.INTEGER
@@ -25,8 +26,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         }
         },
-        {
-            schema: "sae",
-        });
-    return Descuentos;
+    {
+        schema: "sae",
+    });
+    return HoraExtra;
   };

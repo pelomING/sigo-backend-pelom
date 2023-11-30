@@ -104,7 +104,9 @@ db.detalleEstadoResultado = require("./sae/detalleEstadoResultado.model.js")(seq
 db.estadoResultado = require("./sae/estadoResultado.model.js")(sequelize, Sequelize);
 db.estados = require("./sae/estados.model.js")(sequelize, Sequelize);
 db.eventos = require("./sae/eventos.model.js")(sequelize, Sequelize);
+db.horaExtra = require("./sae/horaExtra.model.js")(sequelize, Sequelize);
 db.jornada = require("./sae/jornada.model.js")(sequelize, Sequelize);
+db.observaciones = require("./sae/observaciones.model.js")(sequelize, Sequelize);
 db.preciosBase = require("./sae/preciosBase.model.js")(sequelize, Sequelize);
 
 module.exports = db;
