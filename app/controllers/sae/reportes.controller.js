@@ -2073,8 +2073,13 @@ exports.creaHoraExtra = async (req, res) => {
       comentario: req.body.comentario,
       estado: 1
     };
+    const horaExtraCreate = await HoraExtra.create(horaExtra)
+        .then(data => {
+            res.send(data);
+        }).catch(err => {
+            res.status(500).send({ message: err.message });
+        });
 
-    c
     
   }catch (error) {
     res.status(500).send(error);
