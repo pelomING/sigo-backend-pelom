@@ -268,11 +268,11 @@ exports.findAllJornadas = async (req, res) => {
                 id_estado_resultado: data.id,
                 id_evento: detalle
               }).then(data => {
-                //res.send(data);
+                //data ok
               }).catch(err => {
                 hayError = true;
                 mensajeError = err.message;
-                //res.status(500).send({ message: err.message });
+                //mensaje de error
                 return;
               });
             }
@@ -468,7 +468,6 @@ exports.resumenTurnos = async (req, res) => {
         return;
       }
     };
-    
     const sql = "select r.*, (r.cantidad_brigada*r.precio*r.uso_semanal)::integer as monto from \
     (SELECT id_paquete, id_turno, (substring(t.inicio::text,1,5) || ' - ' || substring(t.fin::text,1,5)) as permanencia_semanal, \
     cantidad_brigada, valor as precio, ((date :fec_fin - (date :fec_ini - 1))::numeric/7)::numeric(6,4) \
@@ -1208,17 +1207,6 @@ exports.findTurnosContingencia = async (req, res) => {
 exports.findProduccionPxQ = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la produccion PxQ' */
-/*
-  const produccionPxQ = {
-    detalle: [
-      {tipo_evento: 'Evento domiciliario', valor_total: 500000},
-      {tipo_evento: 'Evento en SSEE y/o BT', valor_total: 500000},
-      {tipo_evento: 'Evento en línea MT', valor_total: 500000},
-      {tipo_evento: 'Trabajos menores de reparacación en líneas por falla', valor_total: 500000}
-    ],
-    subtotal: 2000000
-  }
-  res.send(produccionPxQ);*/
 
   try {
     let param_fecha_ini = req.query.fecha_ini;
@@ -1347,6 +1335,7 @@ exports. findRepCobroAdicional = async (req, res) => {
     res.status(500).send(error);
   }
 
+  
 
 }
 /*********************************************************************************** */
@@ -2484,8 +2473,8 @@ exports.cierraEstadoPago = async (req, res) => {
           if (param_fecha_fin.length == 10){
             //ok
             param_fecha_fin = param_fecha_fin + " 23:59:59";
-            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"});
+            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " " + fecha.slice(12)
             condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
             condicion_fecha_permanencia = `and fecha_hora_ini <= '${fecha}'::timestamp`;
           }else {
