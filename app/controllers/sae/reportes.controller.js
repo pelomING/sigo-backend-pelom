@@ -6,6 +6,7 @@ const Observaciones = db.observaciones;
 const CobroAdicional = db.cobroAdicional;
 const Descuentos = db.descuentos;
 const HoraExtra = db.horaExtra;
+const EstadoPago = db.estadoPago;
 
 exports.readAllJornada = async (req, res) => {
   //metodo GET
@@ -29,33 +30,37 @@ exports.findAllJornadas = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todas las jornadas' */
     try {
-      const sql = "SELECT rj.id, rut_maestro, rut_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
-      patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  null as brigada, \
+      const sql = "SELECT rj.id, rut_maestro,(pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || \
+      trim(pe1.apellido_2) end) as nombre_maestro, rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null \
+      then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) \
+      as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  null as brigada, \
       null as tipo_turno, case when rj.coordenadas is not null then rj.coordenadas->>'latitude' else null end as latitude, case when \
-      rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_jornada rj \
-      JOIN _comun.turnos t on rj.codigo_turno = t.id WHERE brigada is null UNION SELECT rj.id, rut_maestro, rut_ayudante, \
-      br.turno as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, \
-      estado,  br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where \
-        id = rj.tipo_turno) else null end as tipo_turno, case when rj.coordenadas is not null then rj.coordenadas->>'latitude' \
-        else null end as latitude, case when rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as \
-        longitude FROM sae.reporte_jornada rj join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) \
-        || ' - ' || substr(t.fin::text,1,5)) as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) \
-        || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join \
-        _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br on rj.brigada = br.id \
-        WHERE rj.brigada is not null ORDER BY id DESC;";
-        console.log(sql);
+      rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_jornada rj JOIN _auth.personas \
+      pe1 on rj.rut_maestro = pe1.rut JOIN _auth.personas pe2 on rj.rut_ayudante = pe2.rut JOIN _comun.turnos t on rj.codigo_turno = t.id WHERE \
+      brigada is null UNION SELECT rj.id, rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' \
+      else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 \
+      is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, br.turno as turno, patente, id_paquete as paquete, km_inicial, \
+      km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  br.brigada as brigada, case when tipo_turno is not null then \
+      (select nombre from _comun.tipo_turno where id = rj.tipo_turno) else null end as tipo_turno, case when rj.coordenadas is not null \
+      then rj.coordenadas->>'latitude' else null end as latitude, case when rj.coordenadas is not null then rj.coordenadas->>'longitude' \
+      else null end as longitude FROM sae.reporte_jornada rj JOIN _auth.personas pe1 on rj.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
+      rj.rut_ayudante = pe2.rut join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || \
+      substr(t.fin::text,1,5)) as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada \
+      FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on \
+      br.id_turno = t.id) as br on rj.brigada = br.id WHERE rj.brigada is not null ORDER BY id DESC;";
+
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const jornadas = await sequelize.query(sql, { type: QueryTypes.SELECT });
       let salida = [];
       if (jornadas) {
-        console.log('jornadas ok');
         for (const element of jornadas) {
-          console.log('elemento ok', element.id);
           if (
             typeof element.id === 'number' && 
             typeof element.rut_maestro === 'string' &&
+            (typeof element.nombre_maestro === 'string' || typeof element.nombre_maestro === 'object') &&
             typeof element.rut_ayudante === 'string' &&
+            (typeof element.nombre_ayudante === 'string' || typeof element.nombre_ayudante === 'object') &&
             typeof element.turno === 'string' &&
             typeof element.patente === 'string' &&
             (typeof element.km_inicial === 'number' || typeof element.km_inicial === 'string') &&
@@ -67,13 +72,14 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.tipo_turno === 'string' || typeof element.tipo_turno === 'object') &&
             (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
             (typeof element.longitude === 'string' || typeof element.longitude === 'object'))  {
-              console.log('if ok', element.id);
 
               const detalle_salida = {
 
                 id: Number(element.id),
                 rut_maestro: String(element.rut_maestro),
+                nombre_maestro: String(element.nombre_maestro),
                 rut_ayudante: String(element.rut_ayudante),
+                nombre_ayudante: String(element.nombre_ayudante),
                 turno: String(element.turno),
                 patente: String(element.patente),
                 paquete: Number(element.paquete),
@@ -121,23 +127,27 @@ exports.findAllJornadas = async (req, res) => {
     /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todos los eventos' */
     try {
-      const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, (substr(t.inicio::text,1,5) \
-      || ' - ' || substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, \
-      e.estado, null as hora_inicio, null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when \
-      e.coordenadas is not null  then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null \
-      then e.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_eventos e join _comun.eventos_tipo et on \
-      e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join _comun.paquete p on e.id_paquete = p.id \
-      WHERE brigada is null UNION SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, \
-      br.turno as turno, br.paquete as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, hora_inicio, \
-      hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where \
-        id = e.tipo_turno) else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas \
-          where codigo = e.comuna ) else null end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' \
-          else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else null end as \
-          longitude FROM sae.reporte_eventos e join _comun.eventos_tipo et on e.tipo_evento = et.codigo join \
-          (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) \
-          as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada \
-          FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id \
-          join _comun.turnos t on br.id_turno = t.id) as br on e.brigada = br.id WHERE e.brigada is not null order by fecha_hora desc, id desc;";
+      const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 \
+      is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case \
+      when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, (substr(t.inicio::text,1,5) || ' - ' || \
+      substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, null as hora_inicio, \
+      null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when e.coordenadas is not null  \
+      then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else \
+      null end as longitude FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
+      e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
+      _comun.paquete p on e.id_paquete = p.id WHERE brigada is null UNION SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, \
+      (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, \
+      e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as \
+      nombre_ayudante, br.turno as turno, br.paquete as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, hora_inicio, \
+      hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where id = e.tipo_turno) \
+      else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas where codigo = e.comuna ) else null \
+      end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' else null end as latitude, case when \
+      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_eventos e JOIN _auth.personas pe1 \
+      on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo \
+      join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
+      (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join \
+      _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br \
+      on e.brigada = br.id WHERE e.brigada is not null order by fecha_hora desc, id desc;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -149,7 +159,9 @@ exports.findAllJornadas = async (req, res) => {
             typeof element.numero_ot === 'string' &&
             typeof element.tipo_evento === 'string' &&
             typeof element.rut_maestro === 'string' &&
+            (typeof element.nombre_maestro === 'string' || typeof element.nombre_maestro === 'object') &&
             typeof element.rut_ayudante === 'string' &&
+            (typeof element.nombre_ayudante === 'string' || typeof element.nombre_ayudante === 'object') &&
             typeof element.turno === 'string' &&
             typeof element.paquete === 'string' &&
             typeof element.requerimiento === 'string' &&
@@ -171,7 +183,9 @@ exports.findAllJornadas = async (req, res) => {
                 numero_ot: String(element.numero_ot),
                 tipo_evento: String(element.tipo_evento),
                 rut_maestro: String(element.rut_maestro),
+                nombre_maestro: String(element.nombre_maestro),
                 rut_ayudante: String(element.rut_ayudante),
+                nombre_ayudante: String(element.nombre_ayudante),
                 turno: String(element.turno),
                 paquete: String(element.paquete),
                 requerimiento: String(element.requerimiento),
@@ -267,11 +281,11 @@ exports.findAllJornadas = async (req, res) => {
                 id_estado_resultado: data.id,
                 id_evento: detalle
               }).then(data => {
-                //res.send(data);
+                //data ok
               }).catch(err => {
                 hayError = true;
                 mensajeError = err.message;
-                //res.status(500).send({ message: err.message });
+                //mensaje de error
                 return;
               });
             }
@@ -467,7 +481,6 @@ exports.resumenTurnos = async (req, res) => {
         return;
       }
     };
-    
     const sql = "select r.*, (r.cantidad_brigada*r.precio*r.uso_semanal)::integer as monto from \
     (SELECT id_paquete, id_turno, (substring(t.inicio::text,1,5) || ' - ' || substring(t.fin::text,1,5)) as permanencia_semanal, \
     cantidad_brigada, valor as precio, ((date :fec_fin - (date :fec_ini - 1))::numeric/7)::numeric(6,4) \
@@ -1207,17 +1220,6 @@ exports.findTurnosContingencia = async (req, res) => {
 exports.findProduccionPxQ = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la produccion PxQ' */
-/*
-  const produccionPxQ = {
-    detalle: [
-      {tipo_evento: 'Evento domiciliario', valor_total: 500000},
-      {tipo_evento: 'Evento en SSEE y/o BT', valor_total: 500000},
-      {tipo_evento: 'Evento en línea MT', valor_total: 500000},
-      {tipo_evento: 'Trabajos menores de reparacación en líneas por falla', valor_total: 500000}
-    ],
-    subtotal: 2000000
-  }
-  res.send(produccionPxQ);*/
 
   try {
     let param_fecha_ini = req.query.fecha_ini;
@@ -1249,20 +1251,18 @@ exports.findProduccionPxQ = async (req, res) => {
     let subtotal = 0;
     if (permanencia) {
       for (const element of permanencia) {
+        console.log('element.descripcion', typeof element.descripcion);
+        console.log('element.valor_total', typeof element.valor_total);
         if (
-          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
-          (typeof element.turnos === 'object' || typeof element.turnos === 'string') &&
-          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
-          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'string') ) {
+          (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
+          (typeof element.valor_total === 'object' || typeof element.valor_total === 'string')  ) {
 
             const detalle_salida = {
-              brigada: String(element.brigada),
-              turnos: Number(element.turnos),
-              valor_dia: Number(element.valor_dia),
-              valor_mes: Number(element.valor_mes)
+              tipo_evento: String(element.descripcion),
+              valor_total: Number(element.valor_total)
 
             }
-            subtotal = subtotal + detalle_salida.valor_mes;
+            subtotal = subtotal + detalle_salida.valor_total;
             salida.push(detalle_salida);
 
         }else {
@@ -1348,6 +1348,7 @@ exports. findRepCobroAdicional = async (req, res) => {
     res.status(500).send(error);
   }
 
+  
 
 }
 /*********************************************************************************** */
@@ -1417,7 +1418,7 @@ exports.findRepDescuentos = async (req, res) => {
 /* Devuelve la tabla de resumen para el EDP
   app.post("/api/reportes/v1/reporteresumen", reportesController.findRepResumen)
 */
-exports.findRepResumen = async (req, res) => {
+exports. findRepResumen = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve la tabla de resumen para el EDP' */
 
@@ -1484,7 +1485,7 @@ exports.findRepResumen = async (req, res) => {
                 valor from (select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, (select valor from \
                   sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) \
                   as valor_cobrar, et.id as tipo_evento FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join \
-                  _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo where id_estado_resultado \
+                  _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo WHERE id_estado_resultado \
                   is null " + condicion_fecha + " order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento) xc \
                   UNION \
                   SELECT  6::integer as orden, 'COBROS ADICIONALES'::text as item, case when sum(valor) is null then 0 else sum(valor) end as valor \
@@ -2074,13 +2075,13 @@ exports.creaHoraExtra = async (req, res) => {
       comentario: req.body.comentario,
       estado: 1
     };
-
     const horaExtraCreate = await HoraExtra.create(horaExtra)
         .then(data => {
             res.send(data);
         }).catch(err => {
             res.status(500).send({ message: err.message });
         });
+
     
   }catch (error) {
     res.status(500).send(error);
@@ -2478,6 +2479,29 @@ exports.cierraEstadoPago = async (req, res) => {
             return;
           }
         };
+        let param_fecha_fin = req.body.fecha_final;
+        let condicion_fecha= "";
+        let condicion_fecha_permanencia= "";
+        if (param_fecha_fin) {
+          if (param_fecha_fin.length == 10){
+            //ok
+            param_fecha_fin = param_fecha_fin + " 23:59:59";
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"});
+            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " " + fecha.slice(12)
+            condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
+            condicion_fecha_permanencia = `and fecha_hora_ini <= '${fecha}'::timestamp`;
+          }else {
+            res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+            return;
+          }
+        }
+
+        const codigo_estado = 'Z1-Z3-SAE-' + Math.floor(Math.random() * 999).toString() + '-' + req.body.periodo;
+        let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2) + " " + fecha_hoy.slice(12,20);
+
+
+
         const edp = {
           "periodo": req.body.periodo,
           "zonal": req.body.zonal,
@@ -2488,12 +2512,822 @@ exports.cierraEstadoPago = async (req, res) => {
           "turnos_comprometidos": req.body.turnos_comprometidos,
           "fecha_generacion": req.body.fecha_generacion
         }
-          
+        const estadoP = {
+          "codigo_estado": codigo_estado,
+          "encabezado": edp,
+          "fecha_hora": fecha_hoy
+        }
 
-        res.status(200).send(edp);
+        const estadoPago = await EstadoPago.create(estadoP)
+        .then(async data => {
+            //actualizar las otras tablas
+            const sql2 = "update sae.reporte_cobro_adicional set id_estado_resultado = " + data.id + " WHERE id_estado_resultado is null " + condicion_fecha + "; \
+            update sae.reporte_descuentos set id_estado_resultado = " + data.id + " WHERE id_estado_resultado is null " + condicion_fecha + "; \
+            update sae.reporte_hora_extra set id_estado_resultado = " + data.id + " where id_estado_resultado is null " + condicion_fecha + "; \
+            update sae.reporte_jornada set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null " + condicion_fecha_permanencia + "; \
+            update sae.reporte_eventos set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null " + condicion_fecha + "; \
+            update sae.reporte_observaciones set id_estado_resultado = " + data.id + " where id_estado_resultado is null " + condicion_fecha + ";";
+            console.log(sql2);
+
+            const { QueryTypes } = require('sequelize');
+            const sequelize = db.sequelize;
+            const resultado = await sequelize.query(sql2, { type: QueryTypes.UPDATE })
+            .then(data => {
+              res.send(data);
+            }).catch(err => {
+              res.status(500).send({ message: err.message });
+            })
+        }).catch(err => {
+            res.status(500).send({ message: err.message });
+        });
 
       } catch (error) {
         res.status(500).send(error);
       }
 
+}
+
+/*********************************************************************************** */
+/* Devuelve el listado historico de estados de pago
+  app.get("/api/reportes/v1/historicoedp", reportesController.historicoEdp)
+*/
+exports.historicoEdp = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
+      #swagger.description = 'Obtiene el historico de estados de pago'
+        } */
+
+  try {
+      const sql = "select id,codigo_estado, (encabezado->>'fecha_generacion' )::text as fecha_generacion, encabezado \
+      from sae.reporte_estado_pago order by (encabezado->>'fecha_generacion')::date desc";
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      const edp = await sequelize.query(sql, { type: QueryTypes.SELECT });
+      let salida = [];
+      if (edp) {
+        for (const element of edp) {
+          if (
+            typeof element.id === 'number' &&
+            (typeof element.codigo_estado === 'object' || typeof element.codigo_estado === 'string') &&
+            (typeof element.fecha_generacion === 'object' || typeof element.fecha_generacion === 'string') &&
+            (typeof element.encabezado === 'object' || typeof element.encabezado === 'string') ) {
+  
+              const detalle_salida = {
+
+                id: Number(element.id),
+                codigo_estado: String(element.codigo_estado),
+                fecha_generacion: String(element.fecha_generacion),
+                encabezado: element.encabezado
+  
+              }
+              salida.push(detalle_salida);
+  
+          }else {
+              salida=undefined;
+              break;
+          }
+        };
+      }
+      if (salida===undefined){
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }else{
+        res.status(200).send(salida);
+      }
+
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+
+/*********************************************************************************** */
+/* Devuelve la permanencia semanal por brigada
+  app.get("/api/reportes/v1/permanencia_por_brigada_historial", reportesController.permanenciaByBrigadaHistorial)
+*/
+exports.permanenciaByBrigadaHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve la permanencia semanal por brigada' */
+
+  try {
+    const campos = [
+      'id_estado_pago'
+    ];
+    for (const element of campos) {
+      if (!req.query[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+
+    const sql = "select brigada.nombre_brigada as brigada, case when tabla.turnos is null then 0 else tabla.turnos end as turnos, \
+    brigada.valor_dia, case when tabla.turnos is null then 0 else tabla.turnos*brigada.valor_dia end as valor_mes from \
+    (select br.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as \
+    nombre_brigada, 0 as turnos, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base \
+    WHERE id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno) as valor_dia, 0 as valor_mes from \
+    _comun.brigadas br JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id \
+    JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join (select id_brigada as id, count(id_brigada) \
+    as turnos from (SELECT rj.id, br.id as id_brigada FROM sae.reporte_jornada rj join _comun.brigadas br on \
+    rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id WHERE brigada is not null and s.sae and \
+    id_estado_resultado = :id_estado_pago and rj.tipo_turno = 1) as rj group by id_brigada) as tabla using (id) order by id";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago },type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.turnos === 'object' || typeof element.turnos === 'string') &&
+          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
+          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'string') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              turnos: Number(element.turnos),
+              valor_dia: Number(element.valor_dia),
+              valor_mes: Number(element.valor_mes)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_mes;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+  
+
+}
+/*********************************************************************************** */
+/* Devuelve las horas extra realizadas
+  app.get("/api/reportes/v1/horasextrafindHorasExtrasHistorial", reportesController.findHorasExtrasHistorial)
+*/
+exports.findHorasExtrasHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve las horas extra realizadas' */
+
+    try {
+      
+      const campos = [
+        'id_estado_pago'
+      ];
+      for (const element of campos) {
+        if (!req.query[element]) {
+          res.status(400).send({
+            message: "No puede estar nulo el campo " + element
+          });
+          return;
+        }
+      };
+    
+    const sql = "select xc.nombre_brigada as brigada, xc.cantidad as horas, xc.valor_hora as valor_base, xc.cantidad*valor_hora as valor_total \
+    from (select rhe.*, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as nombre_brigada, \
+    ((SELECT (valor::numeric/7)::integer/8 as valor_dia FROM sae.cargo_fijo_x_base WHERE id_cliente=1 and id_base= br.id_base and \
+    id_turno=br.id_turno)*(select valor FROM sae.cargo_hora_extra order by fecha desc limit 1))::integer as valor_hora from \
+    (select brigada, sum(cantidad) as cantidad from sae.reporte_hora_extra where id_estado_resultado = :id_estado_pago \
+    group by brigada) rhe JOIN _comun.brigadas br on rhe.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id \
+    JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id) as xc order by xc.brigada";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago }, type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.horas === 'object' || typeof element.horas === 'string') &&
+          (typeof element.valor_base === 'object' || typeof element.valor_base === 'number') &&
+          (typeof element.valor_total === 'object' || typeof element.valor_total === 'string') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              horas: Number(element.horas),
+              valor_base: Number(element.valor_base),
+              valor_total: Number(element.valor_total)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_total;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+  
+
+}
+/*********************************************************************************** */
+/* Devuelve los turnos adicionales
+  app.get("/api/reportes/v1/turnosadicionaleshistorial", reportesController.findTurnosAdicionalesHistorial)
+*/
+exports.findTurnosAdicionalesHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve los turnos adicionales' */
+
+  try {
+
+    const campos = [
+      'id_estado_pago'
+    ];
+    for (const element of campos) {
+      if (!req.query[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    
+    const sql = "select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, sum(valor_dia::integer) \
+    as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' \
+    as nombre_brigada, br.id as id_brigada, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base WHERE \
+    id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on (fecha, tipo_turno) factor FROM \
+    sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM \
+    sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = \
+    s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is not null \
+    and s.sae and id_estado_resultado :id_estado_pago and rj.tipo_turno = 2 ) as rj group by id_brigada, nombre_brigada, valor_dia";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago }, type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.turnos === 'object' || typeof element.turnos === 'string') &&
+          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
+          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'string') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              turnos: Number(element.turnos),
+              valor_dia: Number(element.valor_dia),
+              valor_mes: Number(element.valor_mes)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_mes;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+
+}
+
+/*********************************************************************************** */
+/* Devuelve los turnos de contingencia
+  app.get("/api/reportes/v1/turnoscontingenciahistorial", reportesController.findTurnosContingenciaHistorial)
+*/
+exports.findTurnosContingenciaHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve los turnos de contingencia' */
+
+  try {
+
+    const campos = [
+      'id_estado_pago'
+    ];
+    for (const element of campos) {
+      if (!req.query[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    
+    const sql = "select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, sum(valor_dia::integer) \
+    as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' \
+    as nombre_brigada, br.id as id_brigada, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base WHERE \
+    id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on (fecha, tipo_turno) factor FROM \
+    sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM \
+    sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = \
+    s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is not null \
+    and s.sae and id_estado_resultado = :id_estado_pago and rj.tipo_turno = 3 ) as rj group by id_brigada, nombre_brigada, valor_dia";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago }, type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.turnos === 'object' || typeof element.turnos === 'string') &&
+          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
+          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'string') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              turnos: Number(element.turnos),
+              valor_dia: Number(element.valor_dia),
+              valor_mes: Number(element.valor_mes)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_mes;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+
+}
+/*********************************************************************************** */
+/* Devuelve la produccion PxQ
+  app.get("/api/reportes/v1/produccionpxqhistorial", reportesController.findProduccionPxQHistorial)
+*/
+exports.findProduccionPxQHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve la produccion PxQ' */
+
+
+  try {
+
+    const campos = [
+      'id_estado_pago'
+    ];
+    for (const element of campos) {
+      if (!req.query[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    
+    const sql = "select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, \
+      (select valor from sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and \
+        id_evento_tipo = et.id and id_turno = br.id_turno) as valor_cobrar, et.id as tipo_evento FROM \
+        sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join _comun.base b on \
+        br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo where id_estado_resultado = :id_estado_pago \
+        order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago }, type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        console.log('element.descripcion', typeof element.descripcion);
+        console.log('element.valor_total', typeof element.valor_total);
+        if (
+          (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
+          (typeof element.valor_total === 'object' || typeof element.valor_total === 'string')  ) {
+
+            const detalle_salida = {
+              tipo_evento: String(element.descripcion),
+              valor_total: Number(element.valor_total)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_total;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+
+
+}
+
+/*********************************************************************************** */
+/* Devuelve la tabla de cobros adicionales historicos para el EDP
+  app.get("/api/reportes/v1/reportecobroadicionalhistorial", reportesController.findRepCobroAdicionalHistorial)
+*/
+exports. findRepCobroAdicionalHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve la tabla de cobros adicionales para el EDP' */
+
+
+  try {
+    const campos = [
+      'id_estado_pago'
+    ];
+    for (const element of campos) {
+      if (!req.query[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    
+    const sql = "SELECT detalle, cantidad, valor FROM sae.reporte_cobro_adicional WHERE id_estado_resultado = :id_estado_pago order by fecha_hora";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago },type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.detalle === 'object' || typeof element.detalle === 'string') &&
+          (typeof element.cantidad === 'object' || typeof element.cantidad === 'string') &&
+          (typeof element.valor === 'object' || typeof element.valor === 'string')  ) {
+
+            const detalle_salida = {
+              detalle: String(element.detalle),
+              cantidad: Number(element.cantidad),
+              valor: Number(element.valor)
+
+            }
+            subtotal = subtotal + detalle_salida.valor;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+
+
+}
+
+/*********************************************************************************** */
+/* Devuelve la tabla de descuentos para el EDP
+  app.get("/api/reportes/v1/reportedescuentoshistorial", reportesController.findRepDescuentosHistorial)
+*/
+exports.findRepDescuentosHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve la tabla de descuentos para el EDP' */
+
+      try {
+        
+        const campos = [
+          'id_estado_pago'
+        ];
+        for (const element of campos) {
+          if (!req.query[element]) {
+            res.status(400).send({
+              message: "No puede estar nulo el campo " + element
+            });
+            return;
+          }
+        };
+
+        const sql = "SELECT detalle, cantidad, valor FROM sae.reporte_descuentos WHERE id_estado_resultado = :id_estado_pago order by fecha_hora";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const permanencia = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago }, type: QueryTypes.SELECT });
+        let salida = [];
+        let subtotal = 0;
+        if (permanencia) {
+          for (const element of permanencia) {
+            if (
+              (typeof element.detalle === 'object' || typeof element.detalle === 'string') &&
+              (typeof element.cantidad === 'object' || typeof element.cantidad === 'string') &&
+              (typeof element.valor === 'object' || typeof element.valor === 'string')  ) {
+    
+                const detalle_salida = {
+                  detalle: String(element.detalle),
+                  cantidad: Number(element.cantidad),
+                  valor: Number(element.valor)
+    
+                }
+                subtotal = subtotal + detalle_salida.valor;
+                salida.push(detalle_salida);
+    
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send({detalle: salida, subtotal: subtotal});
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
+
+}
+
+/*********************************************************************************** */
+/* Devuelve la tabla de resumen para el EDP
+  app.get("/api/reportes/v1/reporteresumenhistorial", reportesController.findRepResumenHistorial)
+*/
+exports. findRepResumenHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve la tabla de resumen para el EDP' */
+
+      try {
+        const campos = [
+          'id_estado_pago'
+        ];
+        for (const element of campos) {
+          if (!req.query[element]) {
+            res.status(400).send({
+              message: "No puede estar nulo el campo " + element
+            });
+            return;
+          }
+        };
+        
+        const sql = "select 1::integer as orden, 'BASE PERMANENCIA'::text as item, case when sum(valor_mes) is null then 0 else sum(valor_mes) \
+        end as valor from (select brigada.nombre_brigada as brigada, case when tabla.turnos is null then 0 else tabla.turnos end as turnos, \
+          brigada.valor_dia, case when tabla.turnos is null then 0 else tabla.turnos*brigada.valor_dia end as valor_mes from \
+          (select br.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as nombre_brigada, \
+          0 as turnos, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base WHERE id_cliente=1 and id_base= br.id_base \
+          and id_turno=br.id_turno) as valor_dia, 0 as valor_mes from _comun.brigadas br JOIN _comun.servicios s ON br.id_servicio = \
+          s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join \
+          (select id_brigada as id, count(id_brigada) as turnos from (SELECT rj.id, br.id as id_brigada FROM sae.reporte_jornada \
+            rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id WHERE brigada is not \
+            null and s.sae and id_estado_resultado = :id_estado_pago and rj.tipo_turno = 1 ) as rj group by id_brigada) as tabla using (id) order by id) as xc \
+            UNION \
+            select  2::integer as orden, 'HORAS EXTRAS'::text as item, case when sum(valor_total) is null then 0 else sum(valor_total) end as valor \
+            from (select xc.nombre_brigada as brigada, xc.cantidad as horas, xc.valor_hora as valor_base, xc.cantidad*valor_hora as valor_total \
+              from (select rhe.*, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as nombre_brigada, \
+              ((SELECT (valor::numeric/7)::integer/8 as valor_dia FROM sae.cargo_fijo_x_base WHERE id_cliente=1 and id_base= br.id_base and \
+              id_turno=br.id_turno)*(select valor FROM sae.cargo_hora_extra order by fecha desc limit 1))::integer as valor_hora from \
+              (select brigada, sum(cantidad) as cantidad from sae.reporte_hora_extra where id_estado_resultado = :id_estado_pago group by brigada) rhe \
+              JOIN _comun.brigadas br on rhe.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON \
+              br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id) as xc order by xc.brigada) as xc \
+              UNION \
+              select  3::integer as orden, 'TURNOS ADICIONALES'::text as item, case when sum(valor_mes) is null then 0 else sum(valor_mes) end \
+              as valor from (select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, sum(valor_dia::integer) \
+              as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' \
+              as nombre_brigada, br.id as id_brigada, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base WHERE \
+              id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on (fecha, tipo_turno) factor FROM sae.cargo_turno_adicional \
+              where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM sae.reporte_jornada rj join _comun.brigadas \
+              br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos \
+              t on br.id_turno = t.id WHERE brigada is not null and s.sae and id_estado_resultado = :id_estado_pago and rj.tipo_turno = 2 ) as rj group by \
+              id_brigada, nombre_brigada, valor_dia) xc \
+              UNION \
+              select  4::integer as orden, 'TURNOS CONTINGENCIA'::text as item, case when sum(valor_mes) is null then 0 else \
+              sum(valor_mes) end as valor from (select nombre_brigada as brigada, count(nombre_brigada) as turnos, valor_dia::integer, \
+              sum(valor_dia::integer) as valor_mes from (SELECT rj.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) \
+              || ' (' || b.nombre || ')' as nombre_brigada, br.id as id_brigada, (SELECT (valor::numeric/7)::integer as valor_dia \
+              FROM sae.cargo_fijo_x_base WHERE id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on \
+                (fecha, tipo_turno) factor FROM sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) \
+                as valor_dia FROM sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON \
+                br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is \
+                not null and s.sae and id_estado_resultado = :id_estado_pago and rj.tipo_turno = 3 ) as rj group by id_brigada, nombre_brigada, valor_dia) xc \
+                UNION \
+                select  5::integer as orden, 'PRODUCCION'::text as item, case when sum(valor_total) is null then 0 else sum(valor_total) end as \
+                valor from (select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, (select valor from \
+                  sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) \
+                  as valor_cobrar, et.id as tipo_evento FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join \
+                  _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo WHERE id_estado_resultado = :id_estado_pago \
+                  order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento) xc \
+                  UNION \
+                  SELECT  6::integer as orden, 'COBROS ADICIONALES'::text as item, case when sum(valor) is null then 0 else sum(valor) end as valor \
+                  FROM sae.reporte_cobro_adicional WHERE id_estado_resultado = :id_estado_pago \
+                  UNION \
+                  SELECT  7::integer as orden, 'DESCUENTOS'::text as item, \
+                  case when sum(valor) is null then 0 else sum(valor) end as valor FROM sae.reporte_descuentos WHERE id_estado_resultado = :id_estado_pago order by orden";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const resumen = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago }, type: QueryTypes.SELECT });
+        let salida = [];
+        let costo_directo = 0;
+        if (resumen) {
+          for (const element of resumen) {
+            if (
+              (typeof element.orden === 'object' || typeof element.orden === 'number') &&
+              (typeof element.item === 'object' || typeof element.item === 'string') &&
+              (typeof element.valor === 'object' || typeof element.valor === 'string')  ) {
+    
+                const detalle_salida = {
+                  orden: Number(element.orden),
+                  item: String(element.item),
+                  valor: Number(element.valor)
+                }
+                if (element.orden === 7){
+                  // Se resta el descuento
+                  costo_directo = costo_directo - Number(element.valor);
+                }else{
+                  costo_directo = costo_directo + Number(element.valor);
+                }    
+                salida.push(detalle_salida);
+    
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+          
+          if (costo_directo){
+            //Agregar el costo por ditancia y por emergencia
+            let detalle_salida = {
+              orden: Number(8),
+              item: String('COSTO DIRECTO'),
+              valor: Number(costo_directo)
+            }
+            salida.push(detalle_salida);
+            detalle_salida = {
+              orden: Number(9),
+              item: String('RECARGO POR DISTANCIA'),
+              valor: Number(0)
+            }
+            salida.push(detalle_salida);
+            detalle_salida = {
+              orden: Number(10),
+              item: String('ESTADO DE EMERGENCIA'),
+              valor: Number(0)
+            }
+            salida.push(detalle_salida);
+            let total = salida.reduce(((total, num) => total + num.valor), 0);
+            let valor_neto = (total/1.19).toFixed(0);
+            let iva = Number(total - valor_neto).toFixed(0);  
+
+            detalle_salida = {
+              orden: Number(11),
+              item: String('VALOR NETO'),
+              valor: Number(valor_neto)
+            }
+            salida.push(detalle_salida);
+
+            detalle_salida = {
+              orden: Number(12),
+              item: String('IVA'),
+              valor: Number(iva)
+            }
+            salida.push(detalle_salida);
+
+            detalle_salida = {
+              orden: Number(13),
+              item: String('TOTAL ESTADO DE PAGO'),
+              valor: Number(total)
+            }
+            salida.push(detalle_salida);
+
+          } else {
+            let detalle_salida = {orden: Number(8), item: String('COSTO DIRECTO'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(9), item: String('RECARGO POR DISTANCIA'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(10), item: String('ESTADO DE EMERGENCIA'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(11), item: String('VALOR NETO'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(12), item: String('IVA'), valor: Number(0)};
+            salida.push(detalle_salida);
+            detalle_salida = {orden: Number(13), item: String('TOTAL ESTADO DE PAGO'), valor: Number(0)};
+            salida.push(detalle_salida);
+
+          }
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send({detalle: salida});
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
+
+}
+
+
+/*********************************************************************************** */
+/* Devuelve el detalle de PxQ para planilla Excel, ingresando parámetro del paquete
+  app.get("/api/reportes/v1/detallepxqhistorial", reportesController.detallePxQHistorial)
+*/
+exports.detallePxQHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve el detalle de PxQ para planilla Excel, se debe ingresar el id_paquete en la url ?id_paquete=[id_paquete]' */
+      try {
+        const campos = [
+          'id_paquete', 'id_estado_pago'
+        ];
+        for (const element of campos) {
+          if (!req.query[element]) {
+            res.status(400).send({
+              message: "No puede estar nulo el campo " + element
+            });
+            return;
+          }
+        };
+        
+        const sql = "SELECT re.id, to_char(re.fecha_hora::timestamp with time zone, 'DD-MM-YYYY'::text) AS fecha, hora_termino::text, \
+        numero_ot as centrality, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro from _auth.personas \
+        where rut = re.rut_maestro) as maestro, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro \
+        from _auth.personas where rut = re.rut_ayudante) as ayudante, despachador, c.nombre as comuna, direccion, \
+        requerimiento as aviso, et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base where \
+          id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) as \
+          valor_cobrar, ti.nombre as tipo_turno FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id \
+          join _comun.base b on br.id_base = b.id left join _comun.comunas c on re.comuna = c.codigo left join \
+          _comun.eventos_tipo et on re.tipo_evento = et.codigo join _comun.tipo_turno ti on re.tipo_turno = ti.id \
+          where b.id_paquete = :id_paquete and id_estado_resultado = :id_estado_pago order by fecha_hora;";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.query.id_paquete, id_estado_pago: req.query.id_estado_pago }, type: QueryTypes.SELECT });
+        let salida = [];
+        if (eventos) {
+          for (const element of eventos) {
+            if (
+              typeof element.id === 'number' &&
+              (typeof element.fecha === 'object' || typeof element.fecha === 'string') &&
+              (typeof element.hora_termino === 'object' || typeof element.hora_termino === 'string') &&
+              (typeof element.centrality === 'object' || typeof element.centrality === 'string') &&
+              (typeof element.maestro === 'object' || typeof element.maestro === 'string') &&
+              (typeof element.ayudante === 'object' || typeof element.ayudante === 'string') &&
+              (typeof element.despachador === 'object' || typeof element.despachador === 'string') &&
+              (typeof element.comuna === 'object' || typeof element.comuna === 'string') &&
+              (typeof element.direccion === 'object' || typeof element.direccion === 'string') &&
+              (typeof element.aviso === 'object' || typeof element.aviso === 'string') &&
+              (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
+              (typeof element.valor_cobrar === 'number' || typeof element.valor_cobrar === 'string') &&
+              (typeof element.tipo_turno === 'object' || typeof element.tipo_turno === 'string')) {
+    
+                const detalle_salida = {
+                  id: Number(element.id),
+                  fecha: String(element.fecha),
+                  hora_termino: String(element.hora_termino),
+                  centrality: String(element.centrality),
+                  maestro: String(element.maestro),
+                  ayudante: String(element.ayudante),
+                  patente: String('SWCX-56'),
+                  despachador: String(element.despachador),
+                  comuna: String(element.comuna),
+                  direccion: String(element.direccion),
+                  aviso: String(element.aviso),
+                  descripcion: String(element.descripcion),
+                  valor_cobrar: Number(element.valor_cobrar),
+                  tipo_turno: String(element.tipo_turno)
+    
+                }
+                salida.push(detalle_salida);
+    
+            }else {
+                salida=undefined;
+                break;
+            }
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send(salida);
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
 }

@@ -101,6 +101,7 @@ db.cargoFijo = require("./sae/cargoFijo.model.js")(sequelize, Sequelize);
 db.cobroAdicional = require("./sae/cobroAdicional.model.js")(sequelize, Sequelize);
 db.descuentos = require("./sae/descuentos.model.js")(sequelize, Sequelize);
 db.detalleEstadoResultado = require("./sae/detalleEstadoResultado.model.js")(sequelize, Sequelize);
+db.estadoPago = require("./sae/estadoPago.model.js")(sequelize, Sequelize);
 db.estadoResultado = require("./sae/estadoResultado.model.js")(sequelize, Sequelize);
 db.estados = require("./sae/estados.model.js")(sequelize, Sequelize);
 db.eventos = require("./sae/eventos.model.js")(sequelize, Sequelize);
