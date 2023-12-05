@@ -30,33 +30,37 @@ exports.findAllJornadas = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todas las jornadas' */
     try {
-      const sql = "SELECT rj.id, rut_maestro, rut_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
-      patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  null as brigada, \
+      const sql = "SELECT rj.id, rut_maestro,(pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || \
+      trim(pe1.apellido_2) end) as nombre_maestro, rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null \
+      then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) \
+      as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  null as brigada, \
       null as tipo_turno, case when rj.coordenadas is not null then rj.coordenadas->>'latitude' else null end as latitude, case when \
-      rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_jornada rj \
-      JOIN _comun.turnos t on rj.codigo_turno = t.id WHERE brigada is null UNION SELECT rj.id, rut_maestro, rut_ayudante, \
-      br.turno as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, \
-      estado,  br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where \
-        id = rj.tipo_turno) else null end as tipo_turno, case when rj.coordenadas is not null then rj.coordenadas->>'latitude' \
-        else null end as latitude, case when rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as \
-        longitude FROM sae.reporte_jornada rj join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) \
-        || ' - ' || substr(t.fin::text,1,5)) as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) \
-        || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join \
-        _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br on rj.brigada = br.id \
-        WHERE rj.brigada is not null ORDER BY id DESC;";
-        console.log(sql);
+      rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_jornada rj JOIN _auth.personas \
+      pe1 on rj.rut_maestro = pe1.rut JOIN _auth.personas pe2 on rj.rut_ayudante = pe2.rut JOIN _comun.turnos t on rj.codigo_turno = t.id WHERE \
+      brigada is null UNION SELECT rj.id, rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' \
+      else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 \
+      is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, br.turno as turno, patente, id_paquete as paquete, km_inicial, \
+      km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  br.brigada as brigada, case when tipo_turno is not null then \
+      (select nombre from _comun.tipo_turno where id = rj.tipo_turno) else null end as tipo_turno, case when rj.coordenadas is not null \
+      then rj.coordenadas->>'latitude' else null end as latitude, case when rj.coordenadas is not null then rj.coordenadas->>'longitude' \
+      else null end as longitude FROM sae.reporte_jornada rj JOIN _auth.personas pe1 on rj.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
+      rj.rut_ayudante = pe2.rut join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || \
+      substr(t.fin::text,1,5)) as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada \
+      FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on \
+      br.id_turno = t.id) as br on rj.brigada = br.id WHERE rj.brigada is not null ORDER BY id DESC;";
+
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const jornadas = await sequelize.query(sql, { type: QueryTypes.SELECT });
       let salida = [];
       if (jornadas) {
-        console.log('jornadas ok');
         for (const element of jornadas) {
-          console.log('elemento ok', element.id);
           if (
             typeof element.id === 'number' && 
             typeof element.rut_maestro === 'string' &&
+            (typeof element.nombre_maestro === 'string' || typeof element.nombre_maestro === 'object') &&
             typeof element.rut_ayudante === 'string' &&
+            (typeof element.nombre_ayudante === 'string' || typeof element.nombre_ayudante === 'object') &&
             typeof element.turno === 'string' &&
             typeof element.patente === 'string' &&
             (typeof element.km_inicial === 'number' || typeof element.km_inicial === 'string') &&
@@ -68,13 +72,14 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.tipo_turno === 'string' || typeof element.tipo_turno === 'object') &&
             (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
             (typeof element.longitude === 'string' || typeof element.longitude === 'object'))  {
-              console.log('if ok', element.id);
 
               const detalle_salida = {
 
                 id: Number(element.id),
                 rut_maestro: String(element.rut_maestro),
+                nombre_maestro: String(element.nombre_maestro),
                 rut_ayudante: String(element.rut_ayudante),
+                nombre_ayudante: String(element.nombre_ayudante),
                 turno: String(element.turno),
                 patente: String(element.patente),
                 paquete: Number(element.paquete),
@@ -122,23 +127,27 @@ exports.findAllJornadas = async (req, res) => {
     /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todos los eventos' */
     try {
-      const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, (substr(t.inicio::text,1,5) \
-      || ' - ' || substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, \
-      e.estado, null as hora_inicio, null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when \
-      e.coordenadas is not null  then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null \
-      then e.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_eventos e join _comun.eventos_tipo et on \
-      e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join _comun.paquete p on e.id_paquete = p.id \
-      WHERE brigada is null UNION SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, e.rut_ayudante, \
-      br.turno as turno, br.paquete as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, hora_inicio, \
-      hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where \
-        id = e.tipo_turno) else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas \
-          where codigo = e.comuna ) else null end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' \
-          else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else null end as \
-          longitude FROM sae.reporte_eventos e join _comun.eventos_tipo et on e.tipo_evento = et.codigo join \
-          (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) \
-          as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada \
-          FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id \
-          join _comun.turnos t on br.id_turno = t.id) as br on e.brigada = br.id WHERE e.brigada is not null order by fecha_hora desc, id desc;";
+      const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 \
+      is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case \
+      when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, (substr(t.inicio::text,1,5) || ' - ' || \
+      substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, null as hora_inicio, \
+      null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when e.coordenadas is not null  \
+      then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else \
+      null end as longitude FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
+      e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
+      _comun.paquete p on e.id_paquete = p.id WHERE brigada is null UNION SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, \
+      (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, \
+      e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as \
+      nombre_ayudante, br.turno as turno, br.paquete as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, hora_inicio, \
+      hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where id = e.tipo_turno) \
+      else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas where codigo = e.comuna ) else null \
+      end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' else null end as latitude, case when \
+      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_eventos e JOIN _auth.personas pe1 \
+      on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo \
+      join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
+      (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join \
+      _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br \
+      on e.brigada = br.id WHERE e.brigada is not null order by fecha_hora desc, id desc;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -150,7 +159,9 @@ exports.findAllJornadas = async (req, res) => {
             typeof element.numero_ot === 'string' &&
             typeof element.tipo_evento === 'string' &&
             typeof element.rut_maestro === 'string' &&
+            (typeof element.nombre_maestro === 'string' || typeof element.nombre_maestro === 'object') &&
             typeof element.rut_ayudante === 'string' &&
+            (typeof element.nombre_ayudante === 'string' || typeof element.nombre_ayudante === 'object') &&
             typeof element.turno === 'string' &&
             typeof element.paquete === 'string' &&
             typeof element.requerimiento === 'string' &&
@@ -172,7 +183,9 @@ exports.findAllJornadas = async (req, res) => {
                 numero_ot: String(element.numero_ot),
                 tipo_evento: String(element.tipo_evento),
                 rut_maestro: String(element.rut_maestro),
+                nombre_maestro: String(element.nombre_maestro),
                 rut_ayudante: String(element.rut_ayudante),
+                nombre_ayudante: String(element.nombre_ayudante),
                 turno: String(element.turno),
                 paquete: String(element.paquete),
                 requerimiento: String(element.requerimiento),

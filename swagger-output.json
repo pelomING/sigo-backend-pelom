@@ -427,6 +427,19 @@
         }
       }
     },
+    "/api/mantenedor/v1/upload": {
+      "post": {
+        "tags": [
+          "SAE - Mantenedores - Upload"
+        ],
+        "description": "Sube un archivo al servidor",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/alltipoobras": {
       "get": {
         "tags": [
