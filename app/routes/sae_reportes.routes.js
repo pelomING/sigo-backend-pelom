@@ -14,9 +14,20 @@ module.exports = function(app) {
     /* Devuelve todos las jornadas */
     app.get("/api/reportes/v1/alljornada", [authJwt.verifyToken], reportesController.findAllJornadas);
 
+    /* Actualiza la fecha de Jornada por Id de jornada
+      app.put("/api/reportes/v1/updatejornada", reportesController.updateJornada)
+    */
+    app.put("/api/reportes/v1/updatejornada/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateJornada);
+
 
     /* Devuelve detalle de eventos */
     app.get("/api/reportes/v1/alleventos", [authJwt.verifyToken], reportesController.findAllEventos);
+
+    /*********************************************************************************** */
+    /* Actualiza la fecha de Evento por Id de evento
+      app.put("/api/reportes/v1/updateevento", reportesController.updateEvento)
+    */
+    app.put("/api/reportes/v1/updateevento/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateEvento);
 
 
     /* Devuelve el reporte de estado con los eventos asociados */
