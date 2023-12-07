@@ -7,6 +7,7 @@ const CobroAdicional = db.cobroAdicional;
 const Descuentos = db.descuentos;
 const HoraExtra = db.horaExtra;
 const EstadoPago = db.estadoPago;
+const Eventos = db.eventos;
 
 exports.readAllJornada = async (req, res) => {
   //metodo GET
@@ -281,6 +282,7 @@ exports.findAllJornadas = async (req, res) => {
       const evento = {
         fecha_hora: req.body.fecha_hora
       };
+      console.log(evento)
       await Eventos.update(evento, { where: { id: id } })
         .then(data => {
           if (data == 1) {
