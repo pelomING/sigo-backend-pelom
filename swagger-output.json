@@ -2066,132 +2066,6 @@
         }
       }
     },
-    "/api/movil/v1/creaevento": {
-      "post": {
-        "tags": [
-          "SAE - Móvil"
-        ],
-        "description": "Crea un nuevo evento",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "numero_ot": {
-                  "example": "any"
-                },
-                "tipo_evento": {
-                  "example": "any"
-                },
-                "rut_maestro": {
-                  "example": "any"
-                },
-                "rut_ayudante": {
-                  "example": "any"
-                },
-                "codigo_turno": {
-                  "example": "any"
-                },
-                "id_base": {
-                  "example": "any"
-                },
-                "requerimiento": {
-                  "example": "any"
-                },
-                "direccion": {
-                  "example": "any"
-                },
-                "fecha_hora": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/movil/v1/creajornada": {
-      "post": {
-        "tags": [
-          "SAE - Móvil"
-        ],
-        "description": "Crea una nueva jornada",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "rut_maestro": {
-                  "example": "any"
-                },
-                "rut_ayudante": {
-                  "example": "any"
-                },
-                "codigo_turno": {
-                  "example": "any"
-                },
-                "patente": {
-                  "example": "any"
-                },
-                "base": {
-                  "example": "any"
-                },
-                "km_inicial": {
-                  "example": "any"
-                },
-                "km_final": {
-                  "example": "any"
-                },
-                "fecha_hora_ini": {
-                  "example": "any"
-                },
-                "fecha_hora_fin": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
     "/api/movil/v1/actualizaEvento/{id}": {
       "put": {
         "tags": [
@@ -2346,12 +2220,106 @@
         }
       }
     },
+    "/api/reportes/v1/updatejornada/{id}": {
+      "put": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Actualiza las fechas de inicio y final de Jornada por Id de jornada",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para actualizar",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_hora_ini": {
+                  "type": "string",
+                  "example": "2023-10-30 12:00:00"
+                },
+                "fecha_hora_fin": {
+                  "type": "string",
+                  "example": "2023-10-30 12:00:00"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/reportes/v1/alleventos": {
       "get": {
         "tags": [
           "SAE - Backoffice - Reportes"
         ],
         "description": "Devuelve todos los eventos",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/updateevento/{id}": {
+      "put": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Actualiza la fecha de Evento por Id de evento",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para actualizar",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_hora": {
+                  "type": "string",
+                  "example": "2023-10-30 12:00:00"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"

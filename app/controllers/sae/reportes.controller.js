@@ -7,6 +7,7 @@ const CobroAdicional = db.cobroAdicional;
 const Descuentos = db.descuentos;
 const HoraExtra = db.horaExtra;
 const EstadoPago = db.estadoPago;
+const Eventos = db.eventos;
 
 exports.readAllJornada = async (req, res) => {
   //metodo GET
@@ -116,7 +117,45 @@ exports.findAllJornadas = async (req, res) => {
     
   }
 /*********************************************************************************** */
+/* Actualiza la fecha de Jornada por Id de jornada
+  app.put("/api/reportes/v1/updatejornada", reportesController.updateJornada)
+*/
+  exports.updateJornada = async (req, res) => {
+    /* #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Actualiza las fechas de inicio y final de Jornada por Id de jornada' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para actualizar',
+            required: true,
+            schema: {
+                fecha_hora_ini: "2023-10-30 12:00:00",
+                fecha_hora_fin: "2023-10-30 12:00:00"
+            }
+        }*/
+    try {
+      const id = req.params.id;
+      const jornada = {
+        fecha_hora_ini: req.body.fecha_hora_ini,
+        fecha_hora_fin: req.body.fecha_hora_fin
+      };
+      await Jornada.update(jornada, { where: { id: id } })
+        .then(data => {
+          if (data == 1) {
+            res.send({ message: "Jornada actualizada" });
+          } else {
+            res.status(500).send({ message: "No se pudo actualizar la jornada" });
+          }
+        })
+        .catch(err => {
+          res.status(500).send({
+            message: `No se pudo actualizar la jornada con el id=${id}`
+          });
+        });
+    } catch (error) {
+      res.status(500).send(error);
+    }
 
+  }
 
 /*********************************************************************************** */
 /* Devuelve detalle de eventos
@@ -223,6 +262,44 @@ exports.findAllJornadas = async (req, res) => {
     
   }
 /*********************************************************************************** */
+/*********************************************************************************** */
+/* Actualiza la fecha de Evento por Id de evento
+  app.put("/api/reportes/v1/updateevento", reportesController.updateEvento)
+*/
+  exports.updateEvento = async (req, res) => {
+    /* #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Actualiza la fecha de Evento por Id de evento' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para actualizar',
+            required: true,
+            schema: {
+                fecha_hora: "2023-10-30 12:00:00"
+            }
+        }*/
+    try {
+      const id = req.params.id;
+      const evento = {
+        fecha_hora: req.body.fecha_hora
+      };
+      console.log(evento)
+      await Eventos.update(evento, { where: { id: id } })
+        .then(data => {
+          if (data == 1) {
+            res.send({ message: "Evento actualizado" });
+          } else {
+            res.status(500).send({ message: "No se pudo actualizar el evento" });
+          }
+        })
+        .catch(err => {
+          res.status(500).send({
+            message: `No se pudo actualizar el evento con el id=${id}`
+          });
+        });
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  }
 
 
 /*********************************************************************************** */
