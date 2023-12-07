@@ -2845,7 +2845,7 @@ exports.findTurnosAdicionalesHistorial = async (req, res) => {
     sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM \
     sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = \
     s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is not null \
-    and s.sae and id_estado_resultado :id_estado_pago and rj.tipo_turno = 2 ) as rj group by id_brigada, nombre_brigada, valor_dia";
+    and s.sae and id_estado_resultado = :id_estado_pago and rj.tipo_turno = 2 ) as rj group by id_brigada, nombre_brigada, valor_dia";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago }, type: QueryTypes.SELECT });
