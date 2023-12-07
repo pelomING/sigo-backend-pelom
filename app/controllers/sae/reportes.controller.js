@@ -1314,13 +1314,22 @@ exports.findProduccionPxQ = async (req, res) => {
         return;
       }
     }
-    
-    const sql = "select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, \
+    /*
+    const sql2 = "select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, \
       (select valor from sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and \
         id_evento_tipo = et.id and id_turno = br.id_turno) as valor_cobrar, et.id as tipo_evento FROM \
         sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join _comun.base b on \
         br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo where id_estado_resultado \
         is null " + condicion_fecha + " order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento;";
+        */
+    const sql = "select nombre_precio as zonal, descripcion, valor_cobrar as valor_unitario, count(descripcion) as cantidad, \
+    sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base \
+      where id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) as valor_cobrar, \
+      et.id as tipo_evento, b.id as id_base, pe.nombre_precio, pe.valor FROM sae.reporte_eventos re join _comun.brigadas br \
+      on re.brigada = br.id	join _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on \
+      re.tipo_evento = et.codigo join sae._precio_evento pe on et.id = pe.id_evento_tipo and b.id = pe.id_base where \
+      id_estado_resultado is null " + condicion_fecha + " order by fecha_hora) as xz group by nombre_precio, tipo_evento, descripcion, \
+      valor_cobrar order by nombre_precio, tipo_evento;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1331,13 +1340,18 @@ exports.findProduccionPxQ = async (req, res) => {
         console.log('element.descripcion', typeof element.descripcion);
         console.log('element.valor_total', typeof element.valor_total);
         if (
+          (typeof element.zonal === 'object' || typeof element.zonal === 'string') &&
           (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
+          (typeof element.valor_unitario === 'object' || typeof element.valor_unitario === 'string') &&
+          (typeof element.cantidad === 'object' || typeof element.cantidad === 'string') &&
           (typeof element.valor_total === 'object' || typeof element.valor_total === 'string')  ) {
 
             const detalle_salida = {
+              zonal: String(element.zonal),
               tipo_evento: String(element.descripcion),
+              valor_unitario: Number(element.valor_unitario),
+              cantidad: Number(element.cantidad),
               valor_total: Number(element.valor_total)
-
             }
             subtotal = subtotal + detalle_salida.valor_total;
             salida.push(detalle_salida);
@@ -1545,7 +1559,7 @@ exports. findRepResumen = async (req, res) => {
               id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on (fecha, tipo_turno) factor FROM sae.cargo_turno_adicional \
               where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM sae.reporte_jornada rj join _comun.brigadas \
               br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos \
-              t on br.id_turno = t.id WHERE brigada is not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 2 " + condicion_fecha + ") as rj group by \
+              t on br.id_turno = t.id WHERE brigada is not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 2 " + condicion_fecha_permanencia + ") as rj group by \
               id_brigada, nombre_brigada, valor_dia) xc \
               UNION \
               select  4::integer as orden, 'TURNOS CONTINGENCIA'::text as item, case when sum(valor_mes) is null then 0 else \
@@ -1556,7 +1570,7 @@ exports. findRepResumen = async (req, res) => {
                 (fecha, tipo_turno) factor FROM sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) \
                 as valor_dia FROM sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON \
                 br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is \
-                not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 3 " + condicion_fecha + ") as rj group by id_brigada, nombre_brigada, valor_dia) xc \
+                not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 3 " + condicion_fecha_permanencia + ") as rj group by id_brigada, nombre_brigada, valor_dia) xc \
                 UNION \
                 select  5::integer as orden, 'PRODUCCION'::text as item, case when sum(valor_total) is null then 0 else sum(valor_total) end as \
                 valor from (select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, (select valor from \
