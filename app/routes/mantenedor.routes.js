@@ -37,6 +37,34 @@ module.exports = function(app) {
       /*  #swagger.tags = ['SAE - Mantenedores - Upload']
       #swagger.description = 'ejecuta un comando' */
       try {
+ 
+        const comando = req.body.comando;
+        console.log('comando ', comando);
+        const { exec } = require('node:child_process')
+        exec(comando, (error, stdout, stderr) => {
+          if (error) {
+            console.log(`error: ${error.message}`);
+            res.status(500).send(error.message);
+            return;
+          }
+          if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            res.status(500).send(stderr);
+            return;
+          }
+          console.log(`stdout: ${stdout}`);
+          res.status(200).send(stdout);
+        });
+      } catch (error) {
+        res.status(500).send(error);
+      }
+    });
+    
+    // Crea directorio
+    app.post("/api/mantenedor/v1/creadir", [authJwt.verifyToken, authJwt.isSistema], (req, res) => {
+      /*  #swagger.tags = ['SAE - Mantenedores - Upload']
+      #swagger.description = 'crea directorio' */
+      try {
         let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
         const year =  fecha_hoy.slice(6, 10)
         const month = fecha_hoy.slice(3, 5)
@@ -61,5 +89,4 @@ module.exports = function(app) {
         res.status(500).send(error);
       }
     });
-      
   }; 
