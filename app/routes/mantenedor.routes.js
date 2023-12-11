@@ -31,4 +31,28 @@ module.exports = function(app) {
       #swagger.description = 'Sube un archivo al servidor' */
       res.json({ message: 'File uploaded successfully!' });
     });
+
+    // Ejecuta comando
+    app.post("/api/mantenedor/v1/ejecuta", [authJwt.verifyToken, authJwt.isSistema], (req, res) => {
+      /*  #swagger.tags = ['SAE - Mantenedores - Upload']
+      #swagger.description = 'ejecuta un comando' */
+      try {
+        const { exec } = require('node:child_process')
+        exec(req.body.comando, (error, stdout, stderr) => {
+          if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+          }
+          if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+          }
+          console.log(`stdout: ${stdout}`);
+          res.status(200).send(stdout);
+        });
+      } catch (error) {
+        res.status(500).send(error);
+      }
+    });
+      
   }; 
