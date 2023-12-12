@@ -489,7 +489,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "comando": {
+                "nuevodirectorio": {
                   "example": "any"
                 }
               }
