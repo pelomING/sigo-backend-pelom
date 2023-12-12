@@ -952,13 +952,45 @@ exports.semanalByBrigada = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
       #swagger.description = 'Devuelve los cargos fijo por semana' */
 
-  const cargosFijos = [
-    {localidad:'Curicó', valor_cargo: 1390344},
-    {localidad:'Parral', valor_cargo: 1509516},
-    {localidad:'Pelluhue', valor_cargo: 1551447}
-  ]
+      // metodo GET
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Devuelve el resumen de turnos por paquete y rango de fechas' */
+  try {
+    
+    const sql = "select nombre_precio, valor from sae._precio_turno group by nombre_precio, valor order by nombre_precio;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const cargosFijos = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    if (cargosFijos) {
+      for (const element of cargosFijos) {
+        if (
+          (typeof element.nombre_precio === 'object' || typeof element.nombre_precio === 'string') &&
+          (typeof element.valor === 'object' || typeof element.valor === 'string') ) {
 
-  res.send(cargosFijos);
+            const detalle_salida = {
+              //Campos
+              localidad: String(element.nombre_precio),
+              valor_cargo: Number(element.valor)
+              //**************************** */
+
+            }
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
 
 }
 /*********************************************************************************** */
@@ -2828,6 +2860,45 @@ exports.findHorasExtrasHistorial = async (req, res) => {
     res.status(500).send(error);
   }
   
+
+}
+/* Devuelve las observacion histocias por ID de estado de pago
+  app.post("/api/reportes/v1/findobservacioneshistorial", reportesController.findObservacionesHistorial)
+*/
+exports.findObservacionesHistorial = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP - Historial']
+      #swagger.description = 'Devuelve las observacion por campos' */
+      try{
+        const parametros = {
+          id_estado_resultado: req.query.id_estado_resultado
+        }
+        const keys = Object.keys(parametros)
+        let sql_array = [];
+        let param = {};
+        for (element of keys) {
+          if (parametros[element]){
+            sql_array.push( element + " = :" + element);
+            param[element] = parametros[element];
+          }
+        }
+        const where = sql_array.join(" AND ");
+        console.log('where => ', where, param);
+        if (sql_array.length === 0) {
+          res.status(500).send("Debe incluir algun parametro para consultar");
+        }else {
+          await Observaciones.findAll({
+            where: param
+          }).then(data => {
+            res.send(data);
+          }).catch(err => {
+            res.status(500).send({ message: err.message });
+          })
+        }
+        
+  
+    }catch (error) {
+      res.status(500).send(error);
+    }
 
 }
 /*********************************************************************************** */
