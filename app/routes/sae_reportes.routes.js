@@ -289,6 +289,12 @@ module.exports = function(app) {
   */
     app.get("/api/reportes/v1/horasextrafindHorasExtrasHistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findHorasExtrasHistorial);
 
+    /* Devuelve las observacion histocias por ID de estado de pago
+      app.post("/api/reportes/v1/findobservacioneshistorial", reportesController.findObservacionesHistorial)
+    */
+   app.get("/api/reportes/v1/findobservacioneshistorial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.findObservacionesHistorial);
+
+
     /*********************************************************************************** */
     /* Devuelve los turnos adicionales
       app.get("/api/reportes/v1/turnosadicionaleshistorial", reportesController.findTurnosAdicionalesHistorial)

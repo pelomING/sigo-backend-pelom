@@ -30,6 +30,13 @@ module.exports = function(app) {
     app.post("/api/mantenedor/v1/upload", upload.single('file'), (req, res) => {
       /*  #swagger.tags = ['SAE - Mantenedores - Upload']
       #swagger.description = 'Sube un archivo al servidor' */
+
+      const file = req.file;
+      const folderName = req.body.folderName;
+      if (!req.file) {
+        res.status(400).send('No file uploaded');
+        return;
+      }
       res.json({ message: 'File uploaded successfully!' });
     });
 
