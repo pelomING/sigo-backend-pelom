@@ -2358,6 +2358,110 @@
         }
       }
     },
+    "/api/reportes/v1/creajornada": {
+      "post": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Crea una nueva jornada",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para crear una Jornada",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rut_maestro": {
+                  "type": "string",
+                  "example": "12345678-9"
+                },
+                "rut_ayudante": {
+                  "type": "string",
+                  "example": "12345678-9"
+                },
+                "patente": {
+                  "type": "string",
+                  "example": "AABB11"
+                },
+                "km_inicial": {
+                  "type": "number",
+                  "example": 1
+                },
+                "km_final": {
+                  "type": "number",
+                  "example": 1
+                },
+                "fecha_hora_ini": {
+                  "type": "string",
+                  "example": "2023-10-30 12:00:00"
+                },
+                "fecha_hora_fin": {
+                  "type": "string",
+                  "example": "2023-10-30 12:00:00"
+                },
+                "brigada": {
+                  "type": "number",
+                  "example": 1
+                },
+                "tipo_turno": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/deletejornada/{id}": {
+      "delete": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Elimina una jornada por id de jornada",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/reportes/v1/alleventos": {
       "get": {
         "tags": [

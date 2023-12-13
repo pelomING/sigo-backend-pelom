@@ -156,6 +156,109 @@ exports.findAllJornadas = async (req, res) => {
     }
 
   }
+/*********************************************************************************** */
+/* Crea una jornada nueva 
+  app.post("/api/reportes/v1/creajornada", reportesController.creaJornada)
+*/
+  exports.creaJornada = async (req, res) => {
+    /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Crea una nueva jornada' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para crear una Jornada',
+            required: true,
+            schema: {
+                rut_maestro: "12345678-9",
+                rut_ayudante: "12345678-9",
+                patente: "AABB11",
+                km_inicial: 1,
+                km_final: 1,
+                fecha_hora_ini: "2023-10-30 12:00:00",
+                fecha_hora_fin: "2023-10-30 12:00:00",
+                brigada: 1,
+                tipo_turno: 1
+            }
+        }*/
+    try {
+      const campos = [
+        'rut_maestro',
+        'rut_ayudante',
+        'patente',
+        'km_inicial',
+        'km_final',
+        'fecha_hora_ini',
+        'fecha_hora_fin',
+        'brigada',
+        'tipo_turno'
+      ];
+      for (const element of campos) {
+        if (!req.body[element]) {
+          res.status(400).send({
+            message: "No puede estar nulo el campo " + element
+          });
+          return;
+        }
+      };
+
+
+      const jornada = {
+        rut_maestro: req.body.rut_maestro,
+        rut_ayudante: req.body.rut_ayudante,
+        patente: req.body.patente,
+        km_inicial: req.body.km_inicial,
+        km_final: req.body.km_final,
+        fecha_hora_ini: req.body.fecha_hora_ini,
+        fecha_hora_fin: req.body.fecha_hora_fin,
+        brigada: req.body.brigada,
+        tipo_turno: req.body.tipo_turno,
+        estado: 1
+      };
+      await Jornada.create(jornada)
+        .then(data => {
+          res.send(data);
+        })
+        .catch(err => {
+          res.status(500).send({
+            message:
+              err.message || "Error al crear la jornada"
+          });
+        });
+    } catch (error) {
+      res.status(500).send(error);
+    }
+
+  }
+  /*********************************************************************************** */
+/* Elimina una jornada por id de jornada 
+  app.delete("/api/reportes/v1/deletejornada", reportesController.deleteJornada)
+*/
+  exports.deleteJornada = async (req, res) => {
+    // metodo DELETE
+    /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Elimina una jornada por id de jornada' */
+    try {
+      const id = req.params.id;
+      const jornada = {
+        estado: 0
+      };
+      await Jornada.update(jornada, { where: { id: id } })
+        .then(data => {
+          if (data == 1) {
+            res.send({ message: "Jornada marcada como eliminada" });
+          } else {
+            res.status(500).send({ message: "No se pudo eliminar la jornada" });
+          }
+        })
+        .catch(err => {
+          res.status(500).send({
+            message: `No se pudo actualizar la jornada con el id=${id}`
+          });
+        });
+    } catch (error) {
+      res.status(500).send(error);
+    }
+
+  }
 
 /*********************************************************************************** */
 /* Devuelve detalle de eventos
@@ -3062,13 +3165,22 @@ exports.findProduccionPxQHistorial = async (req, res) => {
         return;
       }
     };
-    
+    /*
     const sql = "select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, \
       (select valor from sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and \
         id_evento_tipo = et.id and id_turno = br.id_turno) as valor_cobrar, et.id as tipo_evento FROM \
         sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join _comun.base b on \
         br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo where id_estado_resultado = :id_estado_pago \
         order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento;";
+        */
+    const sql = "select nombre_precio as zonal, descripcion, valor_cobrar as valor_unitario, count(descripcion) as cantidad, \
+    sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base \
+      where id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) as valor_cobrar, \
+      et.id as tipo_evento, b.id as id_base, pe.nombre_precio, pe.valor FROM sae.reporte_eventos re join _comun.brigadas br \
+      on re.brigada = br.id	join _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on \
+      re.tipo_evento = et.codigo join sae._precio_evento pe on et.id = pe.id_evento_tipo and b.id = pe.id_base where \
+      id_estado_resultado = :id_estado_pago order by fecha_hora) as xz group by nombre_precio, tipo_evento, descripcion, \
+      valor_cobrar order by nombre_precio, tipo_evento;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { replacements: { id_estado_pago: req.query.id_estado_pago }, type: QueryTypes.SELECT });
@@ -3079,11 +3191,17 @@ exports.findProduccionPxQHistorial = async (req, res) => {
         console.log('element.descripcion', typeof element.descripcion);
         console.log('element.valor_total', typeof element.valor_total);
         if (
+          (typeof element.zonal === 'object' || typeof element.zonal === 'string') &&
           (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
+          (typeof element.valor_unitario === 'object' || typeof element.valor_unitario === 'string') &&
+          (typeof element.cantidad === 'object' || typeof element.cantidad === 'string') &&
           (typeof element.valor_total === 'object' || typeof element.valor_total === 'string')  ) {
 
             const detalle_salida = {
+              zonal: String(element.zonal),
               tipo_evento: String(element.descripcion),
+              valor_unitario: Number(element.valor_unitario),
+              cantidad: Number(element.cantidad),
               valor_total: Number(element.valor_total)
 
             }
