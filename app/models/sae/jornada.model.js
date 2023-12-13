@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         codigo_turno: {
             type: Sequelize.INTEGER,
-            allowNull: false
+            allowNull: true
         },
         patente: {
             type: Sequelize.STRING,
@@ -23,7 +23,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         id_paquete: {
             type: Sequelize.INTEGER,
-            allowNull: false
+            allowNull: true
         },
         km_inicial: {
             type: Sequelize.FLOAT,
@@ -40,6 +40,21 @@ module.exports = (sequelize, Sequelize) => {
             type : Sequelize.STRING
         },
         estado: {
+            type: Sequelize.INTEGER
+        },
+        id_movil: {
+            type: Sequelize.STRING
+        },
+        coordenadas: {
+            type: Sequelize.JSON
+        },
+        brigada: {
+            type: Sequelize.INTEGER
+        },
+        tipo_turno: {
+            type: Sequelize.INTEGER
+        },
+        id_estado_resultado: {
             type: Sequelize.INTEGER
         }
     },

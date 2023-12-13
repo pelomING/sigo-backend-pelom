@@ -19,6 +19,16 @@ module.exports = function(app) {
     */
     app.put("/api/reportes/v1/updatejornada/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateJornada);
 
+    /*********************************************************************************** */
+    /* Crea una jornada nueva 
+      app.post("/api/reportes/v1/creajornada", reportesController.creaJornada)
+    */
+    app.post("/api/reportes/v1/creajornada", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaJornada);
+      /*********************************************************************************** */
+      /* Elimina una jornada por id de jornada 
+        app.delete("/api/reportes/v1/deletejornada", reportesController.deleteJornada)
+      */
+    app.delete("/api/reportes/v1/deletejornada/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteJornada);
 
     /* Devuelve detalle de eventos */
     app.get("/api/reportes/v1/alleventos", [authJwt.verifyToken], reportesController.findAllEventos);
