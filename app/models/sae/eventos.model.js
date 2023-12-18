@@ -40,6 +40,12 @@ module.exports = (sequelize, Sequelize) => {
           },
           estado: {
             type: Sequelize.INTEGER
+          },
+          trabajo_solicitado: {
+            type: Sequelize.STRING
+          },
+          trabajo_realizado: {
+            type: Sequelize.STRING
           }
     },
     {

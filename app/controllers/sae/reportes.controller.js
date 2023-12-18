@@ -249,7 +249,7 @@ exports.findAllJornadas = async (req, res) => {
             res.status(500).send({ message: "No se pudo eliminar la jornada" });
           }
         })
-        .catch(err => {
+        .catch(err => {Eventos
           res.status(500).send({
             message: `No se pudo actualizar la jornada con el id=${id}`
           });
@@ -275,7 +275,7 @@ exports.findAllJornadas = async (req, res) => {
       substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, null as hora_inicio, \
       null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when e.coordenadas is not null  \
       then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else \
-      null end as longitude FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
+      null end as longitude, e.trabajo_solicitado, e.trabajo_realizado FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
       e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
       _comun.paquete p on e.id_paquete = p.id WHERE brigada is null UNION SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, \
       (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, \
@@ -284,7 +284,7 @@ exports.findAllJornadas = async (req, res) => {
       hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where id = e.tipo_turno) \
       else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas where codigo = e.comuna ) else null \
       end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' else null end as latitude, case when \
-      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_eventos e JOIN _auth.personas pe1 \
+      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude, e.trabajo_solicitado, e.trabajo_realizado FROM sae.reporte_eventos e JOIN _auth.personas pe1 \
       on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo \
       join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
       (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join \
@@ -317,7 +317,9 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.comuna === 'string' || typeof element.comuna === 'object') &&
             (typeof element.despachador === 'string' || typeof element.despachador === 'object') &&
             (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
-            (typeof element.longitude === 'string' || typeof element.longitude === 'object')) {
+            (typeof element.longitude === 'string' || typeof element.longitude === 'object') &&
+            (typeof element.trabajo_solicitado === 'string' || typeof element.trabajo_solicitado === 'object') &&
+            (typeof element.trabajo_realizado === 'string' || typeof element.trabajo_realizado === 'object') ) {
 
               const detalle_salida = {
 
@@ -343,7 +345,9 @@ exports.findAllJornadas = async (req, res) => {
                 coordenadas: {
                   latitude: String(element.latitude),
                   longitude: String(element.longitude)
-                }
+                },
+                trabajo_solicitado: String(element.trabajo_solicitado),
+                trabajo_realizado: String(element.trabajo_realizado)
 
               }
               salida.push(detalle_salida);
@@ -1472,8 +1476,6 @@ exports.findProduccionPxQ = async (req, res) => {
     let subtotal = 0;
     if (permanencia) {
       for (const element of permanencia) {
-        console.log('element.descripcion', typeof element.descripcion);
-        console.log('element.valor_total', typeof element.valor_total);
         if (
           (typeof element.zonal === 'object' || typeof element.zonal === 'string') &&
           (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
@@ -2609,7 +2611,7 @@ exports.detallePxQ = async (req, res) => {
         numero_ot as centrality, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro from _auth.personas \
         where rut = re.rut_maestro) as maestro, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro \
         from _auth.personas where rut = re.rut_ayudante) as ayudante, despachador, c.nombre as comuna, direccion, \
-        requerimiento as aviso, et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base where \
+        requerimiento as aviso, re.trabajo_solicitado, re.trabajo_realizado, et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base where \
           id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) as \
           valor_cobrar, ti.nombre as tipo_turno FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id \
           join _comun.base b on br.id_base = b.id left join _comun.comunas c on re.comuna = c.codigo left join \
@@ -2634,7 +2636,9 @@ exports.detallePxQ = async (req, res) => {
               (typeof element.aviso === 'object' || typeof element.aviso === 'string') &&
               (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
               (typeof element.valor_cobrar === 'number' || typeof element.valor_cobrar === 'string') &&
-              (typeof element.tipo_turno === 'object' || typeof element.tipo_turno === 'string')) {
+              (typeof element.tipo_turno === 'object' || typeof element.tipo_turno === 'string') &&
+              (typeof element.trabajo_realizado === 'object' || typeof element.trabajo_realizado === 'string') &&
+              (typeof element.trabajo_solicitado === 'object' || typeof element.trabajo_solicitado === 'string') ) {
     
                 const detalle_salida = {
                   id: Number(element.id),
@@ -2650,7 +2654,9 @@ exports.detallePxQ = async (req, res) => {
                   aviso: String(element.aviso),
                   descripcion: String(element.descripcion),
                   valor_cobrar: Number(element.valor_cobrar),
-                  tipo_turno: String(element.tipo_turno)
+                  tipo_turno: String(element.tipo_turno),
+                  trabajo_realizado: String(element.trabajo_realizado),
+                  trabajo_solicitado: String(element.trabajo_solicitado)
     
                 }
                 salida.push(detalle_salida);
@@ -3188,8 +3194,6 @@ exports.findProduccionPxQHistorial = async (req, res) => {
     let subtotal = 0;
     if (permanencia) {
       for (const element of permanencia) {
-        console.log('element.descripcion', typeof element.descripcion);
-        console.log('element.valor_total', typeof element.valor_total);
         if (
           (typeof element.zonal === 'object' || typeof element.zonal === 'string') &&
           (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
