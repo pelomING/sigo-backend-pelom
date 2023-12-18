@@ -296,9 +296,6 @@ exports.findAllJornadas = async (req, res) => {
       let salida = [];
       if (eventos) {
         for (const element of eventos) {
-          console.log(typeof element.trabajo_solicitado);
-          console.log(typeof element.trabajo_realizado);
-          console.log(typeof element.requerimiento);
           if (
             typeof element.id === 'number' && 
             typeof element.numero_ot === 'string' &&
@@ -320,7 +317,9 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.comuna === 'string' || typeof element.comuna === 'object') &&
             (typeof element.despachador === 'string' || typeof element.despachador === 'object') &&
             (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
-            (typeof element.longitude === 'string' || typeof element.longitude === 'object') ) {
+            (typeof element.longitude === 'string' || typeof element.longitude === 'object') &&
+            (typeof element.trabajo_solicitado === 'string' || typeof element.trabajo_solicitado === 'object') &&
+            (typeof element.trabajo_realizado === 'string' || typeof element.trabajo_realizado === 'object')) {
 
               const detalle_salida = {
 
