@@ -3554,7 +3554,7 @@ exports.detallePxQHistorial = async (req, res) => {
         numero_ot as centrality, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro from _auth.personas \
         where rut = re.rut_maestro) as maestro, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro \
         from _auth.personas where rut = re.rut_ayudante) as ayudante, despachador, c.nombre as comuna, direccion, \
-        requerimiento as aviso, et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base where \
+        requerimiento as aviso, re.trabajo_solicitado, re.trabajo_realizado, et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base where \
           id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) as \
           valor_cobrar, ti.nombre as tipo_turno FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id \
           join _comun.base b on br.id_base = b.id left join _comun.comunas c on re.comuna = c.codigo left join \
@@ -3579,7 +3579,9 @@ exports.detallePxQHistorial = async (req, res) => {
               (typeof element.aviso === 'object' || typeof element.aviso === 'string') &&
               (typeof element.descripcion === 'object' || typeof element.descripcion === 'string') &&
               (typeof element.valor_cobrar === 'number' || typeof element.valor_cobrar === 'string') &&
-              (typeof element.tipo_turno === 'object' || typeof element.tipo_turno === 'string')) {
+              (typeof element.tipo_turno === 'object' || typeof element.tipo_turno === 'string') &&
+              (typeof element.trabajo_realizado === 'object' || typeof element.trabajo_realizado === 'string') &&
+              (typeof element.trabajo_solicitado === 'object' || typeof element.trabajo_solicitado === 'string')) {
     
                 const detalle_salida = {
                   id: Number(element.id),
@@ -3595,7 +3597,9 @@ exports.detallePxQHistorial = async (req, res) => {
                   aviso: String(element.aviso),
                   descripcion: String(element.descripcion),
                   valor_cobrar: Number(element.valor_cobrar),
-                  tipo_turno: String(element.tipo_turno)
+                  tipo_turno: String(element.tipo_turno),
+                  trabajo_realizado: String(element.trabajo_realizado),
+                  trabajo_solicitado: String(element.trabajo_solicitado)
     
                 }
                 salida.push(detalle_salida);
