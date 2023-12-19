@@ -34,10 +34,21 @@ module.exports = function(app) {
     app.get("/api/reportes/v1/alleventos", [authJwt.verifyToken], reportesController.findAllEventos);
 
     /*********************************************************************************** */
+    /* Crea un nuevo evento  
+      app.post("/api/reportes/v1/creaevento", reportesController.creaEvento)
+    */
+    app.post("/api/reportes/v1/creaevento", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.creaEvento);
+
+    /*********************************************************************************** */
     /* Actualiza la fecha de Evento por Id de evento
       app.put("/api/reportes/v1/updateevento", reportesController.updateEvento)
     */
     app.put("/api/reportes/v1/updateevento/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.updateEvento);
+
+    /* Elimina un evento por id de evento 
+      app.delete("/api/reportes/v1/deleteevento", reportesController.deleteEvento)
+    */
+    app.delete("/api/reportes/v1/deleteevento/:id", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.deleteEvento);
 
 
     /* Devuelve el reporte de estado con los eventos asociados */

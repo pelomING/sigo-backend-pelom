@@ -23,8 +23,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false
           },
           codigo_turno: {
-            type: Sequelize.INTEGER,
-            allowNull: false
+            type: Sequelize.INTEGER
           },
           id_paquete: {
             type: Sequelize.INTEGER
@@ -40,6 +39,36 @@ module.exports = (sequelize, Sequelize) => {
           },
           estado: {
             type: Sequelize.INTEGER
+          },
+          id_movil: {
+            type: Sequelize.STRING
+          },
+          coordenadas: {
+            type: Sequelize.JSON
+          },
+          hora_inicio: {
+            type: Sequelize.STRING
+          },
+          hora_termino: {
+            type: Sequelize.STRING
+          },
+          brigada: {
+            type: Sequelize.INTEGER
+          },
+          comuna: {
+            type: Sequelize.STRING
+          },
+          despachador: {
+            type: Sequelize.STRING
+          },
+          id_estado_resultado: {
+            type: Sequelize.INTEGER
+          },
+          tipo_turno: {
+            type: Sequelize.INTEGER
+          },
+          patente: {
+            type: Sequelize.STRING
           },
           trabajo_solicitado: {
             type: Sequelize.STRING

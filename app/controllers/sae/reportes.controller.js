@@ -249,7 +249,7 @@ exports.findAllJornadas = async (req, res) => {
             res.status(500).send({ message: "No se pudo eliminar la jornada" });
           }
         })
-        .catch(err => {Eventos
+        .catch(err => {
           res.status(500).send({
             message: `No se pudo actualizar la jornada con el id=${id}`
           });
@@ -370,6 +370,103 @@ exports.findAllJornadas = async (req, res) => {
   }
 /*********************************************************************************** */
 /*********************************************************************************** */
+/* Crea un nuevo evento  
+  app.post("/api/reportes/v1/creaevento", reportesController.creaEvento)
+*/
+exports.creaEvento = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Crea una evento nuevo' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para crear un evento',
+            required: true,
+            schema: {
+                numero_ot: '123456',
+                tipo_evento: 'DOMIC',
+                rut_maestro: '12345678-9',
+                rut_ayudante: '12345678-9',
+                direccion: 'calle uno 123',
+                fecha_hora: '2023-01-01 12:00:00',
+                coordenadas: '{34.23, -56.34}',
+                hora_inicio: '12:00',
+                hora_termino: '13:00',
+                brigada: 1,
+                comuna: '76345',
+                despachador: 'Miguel Soto',
+                tipo_turno: 2,
+                patente: 'AAA11',
+                trabajo_solicitado: ' Trabajo solicitado',
+                trabajo_realizado: ' Trabajo realizado',
+            }
+        }*/
+
+  try {
+    const campos = [
+      'numero_ot',
+      'tipo_evento',
+      'rut_maestro',
+      'rut_ayudante',
+      'direccion',
+      'fecha_hora',
+      'coordenadas',
+      'hora_inicio',
+      'hora_termino',
+      'brigada',
+      'comuna',
+      'despachador',
+      'tipo_turno',
+      'patente',
+      'trabajo_solicitado',
+      'trabajo_realizado'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+
+    console.log('datos: ' + req.body);
+    const evento = {
+      numero_ot: req.body.numero_ot,
+      tipo_evento: req.body.tipo_evento,
+      rut_maestro: req.body.rut_maestro,
+      rut_ayudante: req.body.rut_ayudante,
+      direccion: req.body.direccion,
+      fecha_hora: req.body.fecha_hora,
+      coordenadas: req.body.coordenadas,
+      hora_inicio: req.body.hora_inicio,
+      hora_termino: req.body.hora_termino,
+      brigada: req.body.brigada,
+      comuna: req.body.comuna,
+      despachador: req.body.despachador,
+      tipo_turno: req.body.tipo_turno,
+      patente: req.body.patente,
+      trabajo_solicitado: req.body.trabajo_solicitado,
+      trabajo_realizado: req.body.trabajo_realizado,
+      estado: 1
+      
+    };
+
+    await Eventos.create(evento)
+      .then(data => {
+        res.send(data);
+      })
+      .catch(err => {
+        res.status(500).send({
+          message:
+            err.message || "Error al crear el evento"
+        });
+      });
+  } catch (error) {
+    res.status(500).send(error);
+  }
+
+}
+
+/*********************************************************************************** */
 /* Actualiza la fecha de Evento por Id de evento
   app.put("/api/reportes/v1/updateevento", reportesController.updateEvento)
 */
@@ -487,7 +584,36 @@ exports.findAllJornadas = async (req, res) => {
     }
   }
 /*********************************************************************************** */
-
+  /*********************************************************************************** */
+/* Elimina un evento por id de evento 
+  app.delete("/api/reportes/v1/deleteevento", reportesController.deleteEvento)
+*/
+  exports.deleteEvento = async (req, res) => {
+    // metodo DELETE
+    /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Elimina un evento pr id de jornada' */
+      try {
+        const id = req.params.id;
+        const evento = {
+          estado: 0
+        };
+        await Eventos.update(evento, { where: { id: id } })
+          .then(data => {
+            if (data == 1) {
+              res.send({ message: "Evento marcado como eliminado" });
+            } else {
+              res.status(500).send({ message: "No se pudo eliminar el evento" });
+            }
+          })
+          .catch(err => {
+            res.status(500).send({
+              message: `No se pudo actualizar el evento con el id=${id}`
+            });
+          });
+      } catch (error) {
+        res.status(500).send(error);
+      }
+  }
 
 /*********************************************************************************** */
 /* Devuelve el reporte de estado con los eventos asociados
