@@ -125,18 +125,38 @@ exports.findAllJornadas = async (req, res) => {
       #swagger.description = 'Actualiza las fechas de inicio y final de Jornada por Id de jornada' 
       #swagger.parameters['body'] = {
             in: 'body',
-            description: 'Datos para actualizar',
+            description: 'Datos para actualizar, No son obligatorios, llenar sólo los que se necesiten',
             required: true,
             schema: {
+                rut_maestro: "17332391-3",
+                rut_ayudante: "17332391-3",
+                patente: "AABB00",
+                km_inicial: 1,
+                km_final: 1,
                 fecha_hora_ini: "2023-10-30 12:00:00",
-                fecha_hora_fin: "2023-10-30 12:00:00"
+                fecha_hora_fin: "2023-10-30 12:00:00",
+                brigada: 1,
+                tipo_turno: 1,
+                coordenada_x: '34.23',
+                coordenada_y: '-54.34'
             }
         }*/
     try {
       const id = req.params.id;
       const jornada = {
+        rut_maestro: req.body.rut_maestro,
+        rut_ayudante: req.body.rut_ayudante,
+        patente: req.body.patente,
+        km_inicial: req.body.km_inicial,
+        km_final: req.body.km_final,
         fecha_hora_ini: req.body.fecha_hora_ini,
-        fecha_hora_fin: req.body.fecha_hora_fin
+        fecha_hora_fin: req.body.fecha_hora_fin,
+        brigada: req.body.brigada,
+        tipo_turno: req.body.tipo_turno,
+        coordenadas: {
+          latitude: String(req.body.coordenada_x),
+          longitude: String(req.body.coordenada_y)
+        }
       };
       await Jornada.update(jornada, { where: { id: id } })
         .then(data => {
@@ -168,15 +188,17 @@ exports.findAllJornadas = async (req, res) => {
             description: 'Datos para crear una Jornada',
             required: true,
             schema: {
-                rut_maestro: "12345678-9",
-                rut_ayudante: "12345678-9",
-                patente: "AABB11",
+                rut_maestro: "17332391-3",
+                rut_ayudante: "17332391-3",
+                patente: "AABB00",
                 km_inicial: 1,
                 km_final: 1,
                 fecha_hora_ini: "2023-10-30 12:00:00",
                 fecha_hora_fin: "2023-10-30 12:00:00",
                 brigada: 1,
-                tipo_turno: 1
+                tipo_turno: 1,
+                coordenada_x: '34.23',
+                coordenada_y: '-54.34'
             }
         }*/
     try {
@@ -211,6 +233,10 @@ exports.findAllJornadas = async (req, res) => {
         fecha_hora_fin: req.body.fecha_hora_fin,
         brigada: req.body.brigada,
         tipo_turno: req.body.tipo_turno,
+        coordenadas: {
+          latitude: String(req.body.coordenada_x),
+          longitude: String(req.body.coordenada_y)
+        },
         estado: 1
       };
       await Jornada.create(jornada)
@@ -383,18 +409,19 @@ exports.creaEvento = async (req, res) => {
             schema: {
                 numero_ot: '123456',
                 tipo_evento: 'DOMIC',
-                rut_maestro: '12345678-9',
-                rut_ayudante: '12345678-9',
+                rut_maestro: '17332391-3',
+                rut_ayudante: '17332391-3',
                 direccion: 'calle uno 123',
                 fecha_hora: '2023-01-01 12:00:00',
-                coordenadas: '{34.23, -56.34}',
+                coordenada_x: '34.23',
+                coordenada_y: '-56.34',
                 hora_inicio: '12:00',
                 hora_termino: '13:00',
                 brigada: 1,
-                comuna: '76345',
+                comuna: '07301',
                 despachador: 'Miguel Soto',
                 tipo_turno: 2,
-                patente: 'AAA11',
+                patente: 'AABB00',
                 trabajo_solicitado: ' Trabajo solicitado',
                 trabajo_realizado: ' Trabajo realizado',
             }
@@ -408,7 +435,6 @@ exports.creaEvento = async (req, res) => {
       'rut_ayudante',
       'direccion',
       'fecha_hora',
-      'coordenadas',
       'hora_inicio',
       'hora_termino',
       'brigada',
@@ -436,7 +462,10 @@ exports.creaEvento = async (req, res) => {
       rut_ayudante: req.body.rut_ayudante,
       direccion: req.body.direccion,
       fecha_hora: req.body.fecha_hora,
-      coordenadas: req.body.coordenadas,
+      coordenadas: {
+        latitude: String(req.body.coordenada_x),
+        longitude: String(req.body.coordenada_y)
+      },
       hora_inicio: req.body.hora_inicio,
       hora_termino: req.body.hora_termino,
       brigada: req.body.brigada,
@@ -475,16 +504,50 @@ exports.creaEvento = async (req, res) => {
       #swagger.description = 'Actualiza la fecha de Evento por Id de evento' 
       #swagger.parameters['body'] = {
             in: 'body',
-            description: 'Datos para actualizar',
+            description: 'Datos para actualizar, No son obligatorios, llenar sólo los que se necesiten',
             required: true,
             schema: {
-                fecha_hora: "2023-10-30 12:00:00"
+                numero_ot: '123456',
+                tipo_evento: 'DOMIC',
+                rut_maestro: '17332391-3',
+                rut_ayudante: '17332391-3',
+                direccion: 'calle uno 123',
+                fecha_hora: '2023-01-01 12:00:00',
+                coordenada_x: '34.23',
+                coordenada_y: '-56.34',
+                hora_inicio: '12:00',
+                hora_termino: '13:00',
+                brigada: 1,
+                comuna: '07301',
+                despachador: 'Miguel Soto',
+                tipo_turno: 2,
+                patente: 'AABB00',
+                trabajo_solicitado: ' Trabajo solicitado',
+                trabajo_realizado: ' Trabajo realizado',
             }
         }*/
     try {
       const id = req.params.id;
       const evento = {
-        fecha_hora: req.body.fecha_hora
+        numero_ot: req.body.numero_ot,
+        tipo_evento: req.body.tipo_evento,
+        rut_maestro: req.body.rut_maestro,
+        rut_ayudante: req.body.rut_ayudante,
+        direccion: req.body.direccion,
+        fecha_hora: req.body.fecha_hora,
+        coordenadas: {
+          latitude: String(req.body.coordenada_x),
+          longitude: String(req.body.coordenada_y)
+        },
+        hora_inicio: req.body.hora_inicio,
+        hora_termino: req.body.hora_termino,
+        brigada: req.body.brigada,
+        comuna: req.body.comuna,
+        despachador: req.body.despachador,
+        tipo_turno: req.body.tipo_turno,
+        patente: req.body.patente,
+        trabajo_solicitado: req.body.trabajo_solicitado,
+        trabajo_realizado: req.body.trabajo_realizado
       };
       console.log(evento)
       await Eventos.update(evento, { where: { id: id } })

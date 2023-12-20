@@ -2325,11 +2325,31 @@
           {
             "name": "body",
             "in": "body",
-            "description": "Datos para actualizar",
+            "description": "Datos para actualizar, No son obligatorios, llenar sólo los que se necesiten",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
+                "rut_maestro": {
+                  "type": "string",
+                  "example": "17332391-3"
+                },
+                "rut_ayudante": {
+                  "type": "string",
+                  "example": "17332391-3"
+                },
+                "patente": {
+                  "type": "string",
+                  "example": "AABB00"
+                },
+                "km_inicial": {
+                  "type": "number",
+                  "example": 1
+                },
+                "km_final": {
+                  "type": "number",
+                  "example": 1
+                },
                 "fecha_hora_ini": {
                   "type": "string",
                   "example": "2023-10-30 12:00:00"
@@ -2337,6 +2357,22 @@
                 "fecha_hora_fin": {
                   "type": "string",
                   "example": "2023-10-30 12:00:00"
+                },
+                "brigada": {
+                  "type": "number",
+                  "example": 1
+                },
+                "tipo_turno": {
+                  "type": "number",
+                  "example": 1
+                },
+                "coordenada_x": {
+                  "type": "string",
+                  "example": "34.23"
+                },
+                "coordenada_y": {
+                  "type": "string",
+                  "example": "-54.34"
                 }
               }
             }
@@ -2375,15 +2411,15 @@
               "properties": {
                 "rut_maestro": {
                   "type": "string",
-                  "example": "12345678-9"
+                  "example": "17332391-3"
                 },
                 "rut_ayudante": {
                   "type": "string",
-                  "example": "12345678-9"
+                  "example": "17332391-3"
                 },
                 "patente": {
                   "type": "string",
-                  "example": "AABB11"
+                  "example": "AABB00"
                 },
                 "km_inicial": {
                   "type": "number",
@@ -2408,6 +2444,14 @@
                 "tipo_turno": {
                   "type": "number",
                   "example": 1
+                },
+                "coordenada_x": {
+                  "type": "string",
+                  "example": "34.23"
+                },
+                "coordenada_y": {
+                  "type": "string",
+                  "example": "-54.34"
                 }
               }
             }
@@ -2509,11 +2553,11 @@
                 },
                 "rut_maestro": {
                   "type": "string",
-                  "example": "12345678-9"
+                  "example": "17332391-3"
                 },
                 "rut_ayudante": {
                   "type": "string",
-                  "example": "12345678-9"
+                  "example": "17332391-3"
                 },
                 "direccion": {
                   "type": "string",
@@ -2523,9 +2567,13 @@
                   "type": "string",
                   "example": "2023-01-01 12:00:00"
                 },
-                "coordenadas": {
+                "coordenada_x": {
                   "type": "string",
-                  "example": "{34.23, -56.34}"
+                  "example": "34.23"
+                },
+                "coordenada_y": {
+                  "type": "string",
+                  "example": "-56.34"
                 },
                 "hora_inicio": {
                   "type": "string",
@@ -2541,7 +2589,7 @@
                 },
                 "comuna": {
                   "type": "string",
-                  "example": "76345"
+                  "example": "07301"
                 },
                 "despachador": {
                   "type": "string",
@@ -2553,7 +2601,7 @@
                 },
                 "patente": {
                   "type": "string",
-                  "example": "AAA11"
+                  "example": "AABB00"
                 },
                 "trabajo_solicitado": {
                   "type": "string",
@@ -2602,14 +2650,78 @@
           {
             "name": "body",
             "in": "body",
-            "description": "Datos para actualizar",
+            "description": "Datos para actualizar, No son obligatorios, llenar sólo los que se necesiten",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
+                "numero_ot": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "tipo_evento": {
+                  "type": "string",
+                  "example": "DOMIC"
+                },
+                "rut_maestro": {
+                  "type": "string",
+                  "example": "17332391-3"
+                },
+                "rut_ayudante": {
+                  "type": "string",
+                  "example": "17332391-3"
+                },
+                "direccion": {
+                  "type": "string",
+                  "example": "calle uno 123"
+                },
                 "fecha_hora": {
                   "type": "string",
-                  "example": "2023-10-30 12:00:00"
+                  "example": "2023-01-01 12:00:00"
+                },
+                "coordenada_x": {
+                  "type": "string",
+                  "example": "34.23"
+                },
+                "coordenada_y": {
+                  "type": "string",
+                  "example": "-56.34"
+                },
+                "hora_inicio": {
+                  "type": "string",
+                  "example": "12:00"
+                },
+                "hora_termino": {
+                  "type": "string",
+                  "example": "13:00"
+                },
+                "brigada": {
+                  "type": "number",
+                  "example": 1
+                },
+                "comuna": {
+                  "type": "string",
+                  "example": "07301"
+                },
+                "despachador": {
+                  "type": "string",
+                  "example": "Miguel Soto"
+                },
+                "tipo_turno": {
+                  "type": "number",
+                  "example": 2
+                },
+                "patente": {
+                  "type": "string",
+                  "example": "AABB00"
+                },
+                "trabajo_solicitado": {
+                  "type": "string",
+                  "example": " Trabajo solicitado"
+                },
+                "trabajo_realizado": {
+                  "type": "string",
+                  "example": " Trabajo realizado"
                 }
               }
             }
