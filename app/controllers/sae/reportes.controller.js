@@ -428,6 +428,17 @@ exports.creaEvento = async (req, res) => {
         }*/
 
   try {
+
+    const num_ot = await Eventos.findOne({
+      where: {
+        numero_ot: req.body.numero_ot,
+      },
+    });
+
+    if (num_ot) {
+      return res.status(404).send({ message: "El número de OT ya existe" });
+    }
+
     const campos = [
       'numero_ot',
       'tipo_evento',
@@ -526,8 +537,26 @@ exports.creaEvento = async (req, res) => {
                 trabajo_realizado: ' Trabajo realizado',
             }
         }*/
+    const { Op } = require("sequelize");
     try {
+      console.log('body: ' + req.body);
       const id = req.params.id;
+      if (req.body.numero_ot) {
+        const num_ot = await Eventos.findOne({
+          where: {
+            [Op.and]: [{
+              numero_ot: req.body.numero_ot
+            },
+            { id: { [Op.ne]: id } }
+          ]
+          },
+        });
+    
+        if (num_ot) {
+          return res.status(404).send({ message: "El número de OT está asociado a otro evento" });
+        }
+      }
+      
       const evento = {
         numero_ot: req.body.numero_ot,
         tipo_evento: req.body.tipo_evento,
