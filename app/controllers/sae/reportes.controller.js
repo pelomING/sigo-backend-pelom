@@ -301,7 +301,7 @@ exports.findAllJornadas = async (req, res) => {
       substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, null as hora_inicio, \
       null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when e.coordenadas is not null  \
       then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else \
-      null end as longitude, e.trabajo_solicitado, e.trabajo_realizado FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
+      null end as longitude, e.trabajo_solicitado, e.trabajo_realizado, e.patente FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
       e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
       _comun.paquete p on e.id_paquete = p.id WHERE brigada is null UNION SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, \
       (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, \
@@ -310,7 +310,7 @@ exports.findAllJornadas = async (req, res) => {
       hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where id = e.tipo_turno) \
       else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas where codigo = e.comuna ) else null \
       end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' else null end as latitude, case when \
-      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude, e.trabajo_solicitado, e.trabajo_realizado FROM sae.reporte_eventos e JOIN _auth.personas pe1 \
+      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude, e.trabajo_solicitado, e.trabajo_realizado, e.patente FROM sae.reporte_eventos e JOIN _auth.personas pe1 \
       on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo \
       join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
       (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join \
@@ -345,7 +345,8 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
             (typeof element.longitude === 'string' || typeof element.longitude === 'object') &&
             (typeof element.trabajo_solicitado === 'string' || typeof element.trabajo_solicitado === 'object') &&
-            (typeof element.trabajo_realizado === 'string' || typeof element.trabajo_realizado === 'object')) {
+            (typeof element.trabajo_realizado === 'string' || typeof element.trabajo_realizado === 'object') &&
+            (typeof element.patente === 'string' || typeof element.patente === 'object')) {
 
               const detalle_salida = {
 
@@ -373,7 +374,8 @@ exports.findAllJornadas = async (req, res) => {
                   longitude: String(element.longitude)
                 },
                 trabajo_solicitado: String(element.trabajo_solicitado),
-                trabajo_realizado: String(element.trabajo_realizado)
+                trabajo_realizado: String(element.trabajo_realizado),
+                patente: String(element.patente)
 
               }
               salida.push(detalle_salida);
