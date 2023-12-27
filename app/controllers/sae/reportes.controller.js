@@ -1412,6 +1412,24 @@ exports.permanenciaByBrigada = async (req, res) => {
   
 
 }
+/*********************************************************************************** */
+/* Devuelve la permanencia total como si no hubiera faltado ningún turno
+  app.post("/api/reportes/v1/permanencia_total", reportesController.permanenciaTotal)
+*/
+exports.permanenciaTotal = async (req, res) => {
+  /*
+  select brigada.nombre_brigada as brigada, case when tabla.turnos is null then 0 else tabla.turnos end as turnos, 
+    brigada.valor_dia, case when tabla.turnos is null then 0 else tabla.turnos*brigada.valor_dia end as valor_mes from 
+    (select br.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as 
+    nombre_brigada, 0 as turnos, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base 
+    WHERE id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno) as valor_dia, 0 as valor_mes from 
+    _comun.brigadas br JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id 
+    JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join (SELECT id, 30::integer as turnos
+	FROM _comun.brigadas
+	WHERE activo) as tabla using (id) order by id
+  */
+  
+}
 
 /*********************************************************************************** */
 /* Devuelve las horas extra realizadas
@@ -2833,7 +2851,7 @@ exports.detallePxQ = async (req, res) => {
         from _auth.personas where rut = re.rut_ayudante) as ayudante, despachador, c.nombre as comuna, direccion, \
         requerimiento as aviso, re.trabajo_solicitado, re.trabajo_realizado, et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base where \
           id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) as \
-          valor_cobrar, ti.nombre as tipo_turno FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id \
+          valor_cobrar, ti.nombre as tipo_turno, case when re.patente is null then 'XXXX'::varchar else re.patente end as patente FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id \
           join _comun.base b on br.id_base = b.id left join _comun.comunas c on re.comuna = c.codigo left join \
           _comun.eventos_tipo et on re.tipo_evento = et.codigo join _comun.tipo_turno ti on re.tipo_turno = ti.id \
           where b.id_paquete = :id_paquete and id_estado_resultado is null " + condicion_fecha + " order by fecha_hora;";
@@ -2858,7 +2876,8 @@ exports.detallePxQ = async (req, res) => {
               (typeof element.valor_cobrar === 'number' || typeof element.valor_cobrar === 'string') &&
               (typeof element.tipo_turno === 'object' || typeof element.tipo_turno === 'string') &&
               (typeof element.trabajo_realizado === 'object' || typeof element.trabajo_realizado === 'string') &&
-              (typeof element.trabajo_solicitado === 'object' || typeof element.trabajo_solicitado === 'string') ) {
+              (typeof element.trabajo_solicitado === 'object' || typeof element.trabajo_solicitado === 'string') &&
+              (typeof element.patente === 'object' || typeof element.patente === 'string')) {
     
                 const detalle_salida = {
                   id: Number(element.id),
@@ -2867,7 +2886,7 @@ exports.detallePxQ = async (req, res) => {
                   centrality: String(element.centrality),
                   maestro: String(element.maestro),
                   ayudante: String(element.ayudante),
-                  patente: String('SWCX-56'),
+                  patente: String(element.patente),
                   despachador: String(element.despachador),
                   comuna: String(element.comuna),
                   direccion: String(element.direccion),
