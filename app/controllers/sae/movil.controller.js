@@ -257,7 +257,7 @@ exports.eventostipo = async (req, res) => {
             const detalle_salida = {
               id: Number(element.id),
               codigo: String(element.codigo),
-              descripcion: Number(element.descripcion)
+              descripcion: String(element.descripcion)
             }
             salida.push(detalle_salida);
 

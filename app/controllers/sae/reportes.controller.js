@@ -125,18 +125,38 @@ exports.findAllJornadas = async (req, res) => {
       #swagger.description = 'Actualiza las fechas de inicio y final de Jornada por Id de jornada' 
       #swagger.parameters['body'] = {
             in: 'body',
-            description: 'Datos para actualizar',
+            description: 'Datos para actualizar, No son obligatorios, llenar sólo los que se necesiten',
             required: true,
             schema: {
+                rut_maestro: "17332391-3",
+                rut_ayudante: "17332391-3",
+                patente: "AABB00",
+                km_inicial: 1,
+                km_final: 1,
                 fecha_hora_ini: "2023-10-30 12:00:00",
-                fecha_hora_fin: "2023-10-30 12:00:00"
+                fecha_hora_fin: "2023-10-30 12:00:00",
+                brigada: 1,
+                tipo_turno: 1,
+                coordenada_x: '34.23',
+                coordenada_y: '-54.34'
             }
         }*/
     try {
       const id = req.params.id;
       const jornada = {
+        rut_maestro: req.body.rut_maestro,
+        rut_ayudante: req.body.rut_ayudante,
+        patente: req.body.patente,
+        km_inicial: req.body.km_inicial,
+        km_final: req.body.km_final,
         fecha_hora_ini: req.body.fecha_hora_ini,
-        fecha_hora_fin: req.body.fecha_hora_fin
+        fecha_hora_fin: req.body.fecha_hora_fin,
+        brigada: req.body.brigada,
+        tipo_turno: req.body.tipo_turno,
+        coordenadas: {
+          latitude: String(req.body.coordenada_x),
+          longitude: String(req.body.coordenada_y)
+        }
       };
       await Jornada.update(jornada, { where: { id: id } })
         .then(data => {
@@ -168,15 +188,17 @@ exports.findAllJornadas = async (req, res) => {
             description: 'Datos para crear una Jornada',
             required: true,
             schema: {
-                rut_maestro: "12345678-9",
-                rut_ayudante: "12345678-9",
-                patente: "AABB11",
+                rut_maestro: "17332391-3",
+                rut_ayudante: "17332391-3",
+                patente: "AABB00",
                 km_inicial: 1,
                 km_final: 1,
                 fecha_hora_ini: "2023-10-30 12:00:00",
                 fecha_hora_fin: "2023-10-30 12:00:00",
                 brigada: 1,
-                tipo_turno: 1
+                tipo_turno: 1,
+                coordenada_x: '34.23',
+                coordenada_y: '-54.34'
             }
         }*/
     try {
@@ -211,6 +233,10 @@ exports.findAllJornadas = async (req, res) => {
         fecha_hora_fin: req.body.fecha_hora_fin,
         brigada: req.body.brigada,
         tipo_turno: req.body.tipo_turno,
+        coordenadas: {
+          latitude: String(req.body.coordenada_x),
+          longitude: String(req.body.coordenada_y)
+        },
         estado: 1
       };
       await Jornada.create(jornada)
@@ -249,7 +275,7 @@ exports.findAllJornadas = async (req, res) => {
             res.status(500).send({ message: "No se pudo eliminar la jornada" });
           }
         })
-        .catch(err => {Eventos
+        .catch(err => {
           res.status(500).send({
             message: `No se pudo actualizar la jornada con el id=${id}`
           });
@@ -275,7 +301,7 @@ exports.findAllJornadas = async (req, res) => {
       substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, null as hora_inicio, \
       null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when e.coordenadas is not null  \
       then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else \
-      null end as longitude, e.trabajo_solicitado, e.trabajo_realizado FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
+      null end as longitude, e.trabajo_solicitado, e.trabajo_realizado, e.patente FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
       e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
       _comun.paquete p on e.id_paquete = p.id WHERE brigada is null UNION SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, \
       (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, \
@@ -284,7 +310,7 @@ exports.findAllJornadas = async (req, res) => {
       hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where id = e.tipo_turno) \
       else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas where codigo = e.comuna ) else null \
       end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' else null end as latitude, case when \
-      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude, e.trabajo_solicitado, e.trabajo_realizado FROM sae.reporte_eventos e JOIN _auth.personas pe1 \
+      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude, e.trabajo_solicitado, e.trabajo_realizado, e.patente FROM sae.reporte_eventos e JOIN _auth.personas pe1 \
       on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo \
       join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
       (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join \
@@ -319,7 +345,8 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
             (typeof element.longitude === 'string' || typeof element.longitude === 'object') &&
             (typeof element.trabajo_solicitado === 'string' || typeof element.trabajo_solicitado === 'object') &&
-            (typeof element.trabajo_realizado === 'string' || typeof element.trabajo_realizado === 'object')) {
+            (typeof element.trabajo_realizado === 'string' || typeof element.trabajo_realizado === 'object') &&
+            (typeof element.patente === 'string' || typeof element.patente === 'object')) {
 
               const detalle_salida = {
 
@@ -347,7 +374,8 @@ exports.findAllJornadas = async (req, res) => {
                   longitude: String(element.longitude)
                 },
                 trabajo_solicitado: String(element.trabajo_solicitado),
-                trabajo_realizado: String(element.trabajo_realizado)
+                trabajo_realizado: String(element.trabajo_realizado),
+                patente: String(element.patente)
 
               }
               salida.push(detalle_salida);
@@ -370,6 +398,117 @@ exports.findAllJornadas = async (req, res) => {
   }
 /*********************************************************************************** */
 /*********************************************************************************** */
+/* Crea un nuevo evento  
+  app.post("/api/reportes/v1/creaevento", reportesController.creaEvento)
+*/
+exports.creaEvento = async (req, res) => {
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Crea una evento nuevo' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para crear un evento',
+            required: true,
+            schema: {
+                numero_ot: '123456',
+                tipo_evento: 'DOMIC',
+                rut_maestro: '17332391-3',
+                rut_ayudante: '17332391-3',
+                direccion: 'calle uno 123',
+                fecha_hora: '2023-01-01 12:00:00',
+                coordenada_x: '34.23',
+                coordenada_y: '-56.34',
+                hora_inicio: '12:00',
+                hora_termino: '13:00',
+                brigada: 1,
+                comuna: '07301',
+                despachador: 'Miguel Soto',
+                tipo_turno: 2,
+                patente: 'AABB00',
+                trabajo_solicitado: ' Trabajo solicitado',
+                trabajo_realizado: ' Trabajo realizado',
+            }
+        }*/
+
+  try {
+
+    const num_ot = await Eventos.findOne({
+      where: {
+        numero_ot: req.body.numero_ot,
+      },
+    });
+
+    if (num_ot) {
+      return res.status(404).send({ message: "El número de OT ya existe" });
+    }
+
+    const campos = [
+      'numero_ot',
+      'tipo_evento',
+      'rut_maestro',
+      'rut_ayudante',
+      'direccion',
+      'fecha_hora',
+      'hora_inicio',
+      'hora_termino',
+      'brigada',
+      'comuna',
+      'despachador',
+      'tipo_turno',
+      'patente',
+      'trabajo_solicitado',
+      'trabajo_realizado'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+
+    console.log('datos: ' + req.body);
+    const evento = {
+      numero_ot: req.body.numero_ot,
+      tipo_evento: req.body.tipo_evento,
+      rut_maestro: req.body.rut_maestro,
+      rut_ayudante: req.body.rut_ayudante,
+      direccion: req.body.direccion,
+      fecha_hora: req.body.fecha_hora,
+      coordenadas: {
+        latitude: String(req.body.coordenada_x),
+        longitude: String(req.body.coordenada_y)
+      },
+      hora_inicio: req.body.hora_inicio,
+      hora_termino: req.body.hora_termino,
+      brigada: req.body.brigada,
+      comuna: req.body.comuna,
+      despachador: req.body.despachador,
+      tipo_turno: req.body.tipo_turno,
+      patente: req.body.patente,
+      trabajo_solicitado: req.body.trabajo_solicitado,
+      trabajo_realizado: req.body.trabajo_realizado,
+      estado: 1
+      
+    };
+
+    await Eventos.create(evento)
+      .then(data => {
+        res.send(data);
+      })
+      .catch(err => {
+        res.status(500).send({
+          message:
+            err.message || "Error al crear el evento"
+        });
+      });
+  } catch (error) {
+    res.status(500).send(error);
+  }
+
+}
+
+/*********************************************************************************** */
 /* Actualiza la fecha de Evento por Id de evento
   app.put("/api/reportes/v1/updateevento", reportesController.updateEvento)
 */
@@ -378,16 +517,68 @@ exports.findAllJornadas = async (req, res) => {
       #swagger.description = 'Actualiza la fecha de Evento por Id de evento' 
       #swagger.parameters['body'] = {
             in: 'body',
-            description: 'Datos para actualizar',
+            description: 'Datos para actualizar, No son obligatorios, llenar sólo los que se necesiten',
             required: true,
             schema: {
-                fecha_hora: "2023-10-30 12:00:00"
+                numero_ot: '123456',
+                tipo_evento: 'DOMIC',
+                rut_maestro: '17332391-3',
+                rut_ayudante: '17332391-3',
+                direccion: 'calle uno 123',
+                fecha_hora: '2023-01-01 12:00:00',
+                coordenada_x: '34.23',
+                coordenada_y: '-56.34',
+                hora_inicio: '12:00',
+                hora_termino: '13:00',
+                brigada: 1,
+                comuna: '07301',
+                despachador: 'Miguel Soto',
+                tipo_turno: 2,
+                patente: 'AABB00',
+                trabajo_solicitado: ' Trabajo solicitado',
+                trabajo_realizado: ' Trabajo realizado',
             }
         }*/
+    const { Op } = require("sequelize");
     try {
+      console.log('body: ' + req.body);
       const id = req.params.id;
+      if (req.body.numero_ot) {
+        const num_ot = await Eventos.findOne({
+          where: {
+            [Op.and]: [{
+              numero_ot: req.body.numero_ot
+            },
+            { id: { [Op.ne]: id } }
+          ]
+          },
+        });
+    
+        if (num_ot) {
+          return res.status(404).send({ message: "El número de OT está asociado a otro evento" });
+        }
+      }
+      
       const evento = {
-        fecha_hora: req.body.fecha_hora
+        numero_ot: req.body.numero_ot,
+        tipo_evento: req.body.tipo_evento,
+        rut_maestro: req.body.rut_maestro,
+        rut_ayudante: req.body.rut_ayudante,
+        direccion: req.body.direccion,
+        fecha_hora: req.body.fecha_hora,
+        coordenadas: {
+          latitude: String(req.body.coordenada_x),
+          longitude: String(req.body.coordenada_y)
+        },
+        hora_inicio: req.body.hora_inicio,
+        hora_termino: req.body.hora_termino,
+        brigada: req.body.brigada,
+        comuna: req.body.comuna,
+        despachador: req.body.despachador,
+        tipo_turno: req.body.tipo_turno,
+        patente: req.body.patente,
+        trabajo_solicitado: req.body.trabajo_solicitado,
+        trabajo_realizado: req.body.trabajo_realizado
       };
       console.log(evento)
       await Eventos.update(evento, { where: { id: id } })
@@ -487,7 +678,36 @@ exports.findAllJornadas = async (req, res) => {
     }
   }
 /*********************************************************************************** */
-
+  /*********************************************************************************** */
+/* Elimina un evento por id de evento 
+  app.delete("/api/reportes/v1/deleteevento", reportesController.deleteEvento)
+*/
+  exports.deleteEvento = async (req, res) => {
+    // metodo DELETE
+    /*  #swagger.tags = ['SAE - Backoffice - Reportes']
+      #swagger.description = 'Elimina un evento pr id de jornada' */
+      try {
+        const id = req.params.id;
+        const evento = {
+          estado: 0
+        };
+        await Eventos.update(evento, { where: { id: id } })
+          .then(data => {
+            if (data == 1) {
+              res.send({ message: "Evento marcado como eliminado" });
+            } else {
+              res.status(500).send({ message: "No se pudo eliminar el evento" });
+            }
+          })
+          .catch(err => {
+            res.status(500).send({
+              message: `No se pudo actualizar el evento con el id=${id}`
+            });
+          });
+      } catch (error) {
+        res.status(500).send(error);
+      }
+  }
 
 /*********************************************************************************** */
 /* Devuelve el reporte de estado con los eventos asociados
