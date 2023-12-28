@@ -40,7 +40,8 @@ exports.findAllJornadas = async (req, res) => {
       null as tipo_turno, case when rj.coordenadas is not null then rj.coordenadas->>'latitude' else null end as latitude, case when \
       rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_jornada rj JOIN _auth.personas \
       pe1 on rj.rut_maestro = pe1.rut JOIN _auth.personas pe2 on rj.rut_ayudante = pe2.rut JOIN _comun.turnos t on rj.codigo_turno = t.id WHERE \
-      brigada is null UNION SELECT rj.id, rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' \
+      brigada is null " + condicion + " UNION \
+      SELECT rj.id, rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' \
       else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 \
       is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, br.turno as turno, patente, id_paquete as paquete, km_inicial, \
       km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  br.brigada as brigada, case when tipo_turno is not null then \
@@ -306,7 +307,8 @@ exports.findAllJornadas = async (req, res) => {
       then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else \
       null end as longitude, e.trabajo_solicitado, e.trabajo_realizado, e.patente FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
       e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
-      _comun.paquete p on e.id_paquete = p.id WHERE brigada is null UNION SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, \
+      _comun.paquete p on e.id_paquete = p.id WHERE brigada is null " + condicion + " UNION \
+      SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, \
       (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, \
       e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as \
       nombre_ayudante, br.turno as turno, br.paquete as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, hora_inicio, \
