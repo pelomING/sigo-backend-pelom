@@ -2293,6 +2293,13 @@
           "SAE - Backoffice - Reportes"
         ],
         "description": "Devuelve todas las jornadas",
+        "parameters": [
+          {
+            "name": "vertodo",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2512,6 +2519,13 @@
           "SAE - Backoffice - Reportes"
         ],
         "description": "Devuelve todos los eventos",
+        "parameters": [
+          {
+            "name": "vertodo",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"

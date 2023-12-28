@@ -31,6 +31,8 @@ exports.findAllJornadas = async (req, res) => {
   /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todas las jornadas' */
     try {
+
+      const condicion = req.query.vertodo==='true'?'':'and rj.id_estado_resultado is null';
       const sql = "SELECT rj.id, rut_maestro,(pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || \
       trim(pe1.apellido_2) end) as nombre_maestro, rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null \
       then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) \
@@ -48,7 +50,7 @@ exports.findAllJornadas = async (req, res) => {
       rj.rut_ayudante = pe2.rut join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || \
       substr(t.fin::text,1,5)) as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada \
       FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on \
-      br.id_turno = t.id) as br on rj.brigada = br.id WHERE rj.brigada is not null ORDER BY id DESC;";
+      br.id_turno = t.id) as br on rj.brigada = br.id WHERE rj.brigada is not null " + condicion + " ORDER BY id DESC;";
 
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
@@ -295,6 +297,7 @@ exports.findAllJornadas = async (req, res) => {
     /*  #swagger.tags = ['SAE - Backoffice - Reportes']
       #swagger.description = 'Devuelve todos los eventos' */
     try {
+      const condicion = req.query.vertodo==='true'?'':'and e.id_estado_resultado is null';
       const sql = "SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 \
       is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case \
       when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, (substr(t.inicio::text,1,5) || ' - ' || \
@@ -315,7 +318,7 @@ exports.findAllJornadas = async (req, res) => {
       join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
       (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join \
       _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br \
-      on e.brigada = br.id WHERE e.brigada is not null order by fecha_hora desc, id desc;";
+      on e.brigada = br.id WHERE e.brigada is not null " + condicion + " order by fecha_hora desc, id desc;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
