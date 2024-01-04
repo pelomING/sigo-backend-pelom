@@ -1359,7 +1359,7 @@ exports.permanenciaByBrigada = async (req, res) => {
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
         let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
       }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
@@ -1522,7 +1522,7 @@ exports.findHorasExtras = async (req, res) => {
           //ok
           param_fecha_fin = param_fecha_fin + " 23:59:59";
           let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-          fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+          fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
           condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
         }else {
           res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
@@ -1608,7 +1608,7 @@ exports.findTurnosAdicionales = async (req, res) => {
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
         let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
       }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
@@ -1686,7 +1686,7 @@ exports.findTurnosContingencia = async (req, res) => {
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
         let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
       }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
@@ -1758,7 +1758,7 @@ exports.findProduccionPxQ = async (req, res) => {
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
         let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
       }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
@@ -1843,7 +1843,7 @@ exports. findRepCobroAdicional = async (req, res) => {
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
         let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+        fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
       }else {
         res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
@@ -1908,7 +1908,7 @@ exports.findRepDescuentos = async (req, res) => {
             //ok
             param_fecha_fin = param_fecha_fin + " 23:59:59";
             let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
             condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
           }else {
             res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
@@ -1972,7 +1972,7 @@ exports. findRepResumen = async (req, res) => {
             //ok
             param_fecha_fin = param_fecha_fin + " 23:59:59";
             let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
             condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
             condicion_fecha_permanencia = `and fecha_hora_ini <= '${fecha}'::timestamp`;
           }else {
@@ -2911,7 +2911,7 @@ exports.detallePxQ = async (req, res) => {
             //ok
             param_fecha_fin = param_fecha_fin + " 23:59:59";
             let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2);
+            fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
             condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
           }else {
             res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
