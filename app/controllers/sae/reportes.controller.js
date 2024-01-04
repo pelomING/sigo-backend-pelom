@@ -29,29 +29,29 @@ exports.readAllJornada = async (req, res) => {
 exports.findAllJornadas = async (req, res) => {
   //metodo GET
   /*  #swagger.tags = ['SAE - Backoffice - Reportes']
-      #swagger.description = 'Devuelve todas las jornadas' */
+      #swagger.description = 'Devuelve todas las jornadas. Si se especifica vertodo=true devuelve todas las jornadas, en caso contrario devuelve solo las jornadas pendientes' */
     try {
 
       const condicion = req.query.vertodo==='true'?'':'and rj.id_estado_resultado is null';
       const sql = "SELECT rj.id, rut_maestro,(pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || \
       trim(pe1.apellido_2) end) as nombre_maestro, rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null \
       then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) \
-      as turno, patente, id_paquete as paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  null as brigada, \
+      as turno, patente, id_paquete as id_paquete, km_inicial, km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  null as brigada, \
       null as tipo_turno, case when rj.coordenadas is not null then rj.coordenadas->>'latitude' else null end as latitude, case when \
-      rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude FROM sae.reporte_jornada rj JOIN _auth.personas \
+      rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude, 'NULO' as paquete FROM sae.reporte_jornada rj JOIN _auth.personas \
       pe1 on rj.rut_maestro = pe1.rut JOIN _auth.personas pe2 on rj.rut_ayudante = pe2.rut JOIN _comun.turnos t on rj.codigo_turno = t.id WHERE \
-      brigada is null " + condicion + " UNION \
+      brigada is null and rj.estado <> 0 " + condicion + " UNION \
       SELECT rj.id, rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' \
       else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 \
-      is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, br.turno as turno, patente, id_paquete as paquete, km_inicial, \
+      is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, br.turno as turno, patente, id_paquete as id_paquete, km_inicial, \
       km_final, fecha_hora_ini::text, fecha_hora_fin::text, estado,  br.brigada as brigada, case when tipo_turno is not null then \
       (select nombre from _comun.tipo_turno where id = rj.tipo_turno) else null end as tipo_turno, case when rj.coordenadas is not null \
       then rj.coordenadas->>'latitude' else null end as latitude, case when rj.coordenadas is not null then rj.coordenadas->>'longitude' \
-      else null end as longitude FROM sae.reporte_jornada rj JOIN _auth.personas pe1 on rj.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
+      else null end as longitude, br.paquete as paquete FROM sae.reporte_jornada rj JOIN _auth.personas pe1 on rj.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
       rj.rut_ayudante = pe2.rut join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || \
       substr(t.fin::text,1,5)) as turno, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada \
       FROM _comun.brigadas  br join _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on \
-      br.id_turno = t.id) as br on rj.brigada = br.id WHERE rj.brigada is not null " + condicion + " ORDER BY id DESC;";
+      br.id_turno = t.id) as br on rj.brigada = br.id WHERE rj.brigada is not null and rj.estado <> 0 " + condicion + " ORDER BY id DESC;";
 
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
@@ -75,7 +75,8 @@ exports.findAllJornadas = async (req, res) => {
             (typeof element.brigada === 'string' || typeof element.brigada === 'object') &&
             (typeof element.tipo_turno === 'string' || typeof element.tipo_turno === 'object') &&
             (typeof element.latitude === 'string' || typeof element.latitude === 'object') &&
-            (typeof element.longitude === 'string' || typeof element.longitude === 'object'))  {
+            (typeof element.longitude === 'string' || typeof element.longitude === 'object') &&
+            (typeof element.paquete === 'string' || typeof element.paquete === 'object'))  {
 
               const detalle_salida = {
 
@@ -86,7 +87,7 @@ exports.findAllJornadas = async (req, res) => {
                 nombre_ayudante: String(element.nombre_ayudante),
                 turno: String(element.turno),
                 patente: String(element.patente),
-                paquete: Number(element.paquete),
+                paquete: String(element.paquete),
                 km_inicial: String(element.km_inicial),
                 km_final: String(element.km_final),
                 fecha_hora_ini: String(element.fecha_hora_ini),
@@ -307,7 +308,7 @@ exports.findAllJornadas = async (req, res) => {
       then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else \
       null end as longitude, e.trabajo_solicitado, e.trabajo_realizado, e.patente FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
       e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
-      _comun.paquete p on e.id_paquete = p.id WHERE brigada is null " + condicion + " UNION \
+      _comun.paquete p on e.id_paquete = p.id WHERE brigada is null and e.estado <> 0 " + condicion + " UNION \
       SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, \
       (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, \
       e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as \
@@ -320,7 +321,7 @@ exports.findAllJornadas = async (req, res) => {
       join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
       (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join \
       _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br \
-      on e.brigada = br.id WHERE e.brigada is not null " + condicion + " order by fecha_hora desc, id desc;";
+      on e.brigada = br.id WHERE e.brigada is not null and e.estado <> 0 " + condicion + " order by fecha_hora desc, id desc;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const eventos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1376,7 +1377,7 @@ exports.permanenciaByBrigada = async (req, res) => {
     JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join (select id_brigada as id, count(id_brigada) \
     as turnos from (SELECT rj.id, br.id as id_brigada FROM sae.reporte_jornada rj join _comun.brigadas br on \
     rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id WHERE brigada is not null and s.sae and \
-    id_estado_resultado is null and rj.tipo_turno = 1 " + condicion_fecha + ") as rj group by id_brigada) as tabla using (id) order by id";
+    id_estado_resultado is null and rj.tipo_turno = 1 and rj.estado <> 0 " + condicion_fecha + ") as rj group by id_brigada) as tabla using (id) order by id";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1422,17 +1423,83 @@ exports.permanenciaByBrigada = async (req, res) => {
   app.post("/api/reportes/v1/permanencia_total", reportesController.permanenciaTotal)
 */
 exports.permanenciaTotal = async (req, res) => {
-  /*
-  select brigada.nombre_brigada as brigada, case when tabla.turnos is null then 0 else tabla.turnos end as turnos, 
-    brigada.valor_dia, case when tabla.turnos is null then 0 else tabla.turnos*brigada.valor_dia end as valor_mes from 
-    (select br.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as 
-    nombre_brigada, 0 as turnos, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base 
-    WHERE id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno) as valor_dia, 0 as valor_mes from 
-    _comun.brigadas br JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id 
-    JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join (SELECT id, 30::integer as turnos
-	FROM _comun.brigadas
-	WHERE activo) as tabla using (id) order by id
-  */
+  /*  #swagger.tags = ['SAE - Backoffice - Reportes - EDP']
+      #swagger.description = 'Devuelve la permanencia total óptima por brigada entre fechas' */
+
+
+  try {
+
+    let param_fecha_ini = req.query.fecha_ini;
+    let param_fecha_fin = req.query.fecha_fin;
+    let dias= "";
+    if (param_fecha_fin && param_fecha_ini) {
+      if (param_fecha_fin.length == 10){
+        //ok
+        const firstDate = new Date(param_fecha_ini)
+        const secondDate = new Date(param_fecha_fin + " 23:59:59")
+        if (firstDate.getTime() > secondDate.getTime()) {
+          res.status(500).send('La fecha_fin debe ser mayor o igual a la fecha_ini');
+          return;
+        }
+        const millisecondsDiff = secondDate.getTime() - firstDate.getTime()
+        const daysDiff = Math.round( millisecondsDiff / (1000 * 60 * 60 * 24))
+        dias = daysDiff.toString();
+
+      }else {
+        res.status(500).send('Debe incluir la fecha_fin en formato YYYY-MM-DD');
+        return;
+      }
+    }else {
+      res.status(500).send('Las fechas no pueden estar vacías');
+      return;
+    }
+
+
+    const sql = "select brigada.nombre_brigada as brigada, case when tabla.turnos is null then 0 else tabla.turnos end as turnos, \
+    brigada.valor_dia, case when tabla.turnos is null then 0 else tabla.turnos*brigada.valor_dia end as valor_mes from \
+    (select br.id, (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as \
+    nombre_brigada, 0 as turnos, (SELECT (valor::numeric/7)::integer as valor_dia FROM sae.cargo_fijo_x_base \
+    WHERE id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno) as valor_dia, 0 as valor_mes from \
+    _comun.brigadas br JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id \
+    JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join (SELECT id, " + dias + "::integer as turnos FROM _comun.brigadas	\
+      WHERE activo) as tabla using (id) order by id";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    let subtotal = 0;
+    if (permanencia) {
+      for (const element of permanencia) {
+        if (
+          (typeof element.brigada === 'object' || typeof element.brigada === 'string') &&
+          (typeof element.turnos === 'object' || typeof element.turnos === 'number') &&
+          (typeof element.valor_dia === 'object' || typeof element.valor_dia === 'number') &&
+          (typeof element.valor_mes === 'object' || typeof element.valor_mes === 'number') ) {
+
+            const detalle_salida = {
+              brigada: String(element.brigada),
+              turnos: Number(element.turnos),
+              valor_dia: Number(element.valor_dia),
+              valor_mes: Number(element.valor_mes)
+
+            }
+            subtotal = subtotal + detalle_salida.valor_mes;
+            salida.push(detalle_salida);
+
+        }else {
+            salida=undefined;
+            break;
+        }
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send({detalle: salida, subtotal: subtotal});
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
   
 }
 
@@ -1554,7 +1621,7 @@ exports.findTurnosAdicionales = async (req, res) => {
     sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM \
     sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = \
     s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is not null \
-    and s.sae and id_estado_resultado is null and rj.tipo_turno = 2 " + condicion_fecha + ") as rj group by id_brigada, nombre_brigada, valor_dia";
+    and s.sae and id_estado_resultado is null and rj.tipo_turno = 2 and rj.estado <> 0 " + condicion_fecha + ") as rj group by id_brigada, nombre_brigada, valor_dia";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1632,7 +1699,7 @@ exports.findTurnosContingencia = async (req, res) => {
     sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM \
     sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = \
     s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is not null \
-    and s.sae and id_estado_resultado is null and rj.tipo_turno = 3 " + condicion_fecha + ") as rj group by id_brigada, nombre_brigada, valor_dia";
+    and s.sae and id_estado_resultado is null and rj.tipo_turno = 3 and rj.estado <> 0 " + condicion_fecha + ") as rj group by id_brigada, nombre_brigada, valor_dia";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1710,7 +1777,7 @@ exports.findProduccionPxQ = async (req, res) => {
       et.id as tipo_evento, b.id as id_base, pe.nombre_precio, pe.valor FROM sae.reporte_eventos re join _comun.brigadas br \
       on re.brigada = br.id	join _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on \
       re.tipo_evento = et.codigo join sae._precio_evento pe on et.id = pe.id_evento_tipo and b.id = pe.id_base where \
-      id_estado_resultado is null " + condicion_fecha + " order by fecha_hora) as xz group by nombre_precio, tipo_evento, descripcion, \
+      id_estado_resultado is null and re.estado <> 0 " + condicion_fecha + " order by fecha_hora) as xz group by nombre_precio, tipo_evento, descripcion, \
       valor_cobrar order by nombre_precio, tipo_evento;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
@@ -1921,7 +1988,7 @@ exports. findRepResumen = async (req, res) => {
           s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id) as brigada left join \
           (select id_brigada as id, count(id_brigada) as turnos from (SELECT rj.id, br.id as id_brigada FROM sae.reporte_jornada \
             rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id WHERE brigada is not \
-            null and s.sae and id_estado_resultado is null and rj.tipo_turno = 1 " + condicion_fecha_permanencia + ") as rj group by id_brigada) as tabla using (id) order by id) as xc \
+            null and s.sae and id_estado_resultado is null and rj.tipo_turno = 1 and rj.estado <> 0 " + condicion_fecha_permanencia + ") as rj group by id_brigada) as tabla using (id) order by id) as xc \
             UNION \
             select  2::integer as orden, 'HORAS EXTRAS'::text as item, case when sum(valor_total) is null then 0 else sum(valor_total) end as valor \
             from (select xc.nombre_brigada as brigada, xc.cantidad as horas, xc.valor_hora as valor_base, xc.cantidad*valor_hora as valor_total \
@@ -1939,7 +2006,7 @@ exports. findRepResumen = async (req, res) => {
               id_cliente=1 and id_base= br.id_base and id_turno=br.id_turno)*(SELECT distinct on (fecha, tipo_turno) factor FROM sae.cargo_turno_adicional \
               where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) as valor_dia FROM sae.reporte_jornada rj join _comun.brigadas \
               br on rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos \
-              t on br.id_turno = t.id WHERE brigada is not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 2 " + condicion_fecha_permanencia + ") as rj group by \
+              t on br.id_turno = t.id WHERE brigada is not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 2 and rj.estado <> 0 " + condicion_fecha_permanencia + ") as rj group by \
               id_brigada, nombre_brigada, valor_dia) xc \
               UNION \
               select  4::integer as orden, 'TURNOS CONTINGENCIA'::text as item, case when sum(valor_mes) is null then 0 else \
@@ -1950,14 +2017,14 @@ exports. findRepResumen = async (req, res) => {
                 (fecha, tipo_turno) factor FROM sae.cargo_turno_adicional where tipo_turno = rj.tipo_turno order by fecha desc, tipo_turno) \
                 as valor_dia FROM sae.reporte_jornada rj join _comun.brigadas br on rj.brigada = br.id JOIN _comun.servicios s ON \
                 br.id_servicio = s.id JOIN _comun.base b ON br.id_base = b.id JOIN _comun.turnos t on br.id_turno = t.id WHERE brigada is \
-                not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 3 " + condicion_fecha_permanencia + ") as rj group by id_brigada, nombre_brigada, valor_dia) xc \
+                not null and s.sae and id_estado_resultado is null and rj.tipo_turno = 3 and rj.estado <> 0 " + condicion_fecha_permanencia + ") as rj group by id_brigada, nombre_brigada, valor_dia) xc \
                 UNION \
                 select  5::integer as orden, 'PRODUCCION'::text as item, case when sum(valor_total) is null then 0 else sum(valor_total) end as \
                 valor from (select descripcion, sum(valor_cobrar) as valor_total from (SELECT et.descripcion as descripcion, (select valor from \
                   sae.cargo_variable_x_base where id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) \
                   as valor_cobrar, et.id as tipo_evento FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id join \
                   _comun.base b on br.id_base = b.id left join _comun.eventos_tipo et on re.tipo_evento = et.codigo WHERE id_estado_resultado \
-                  is null " + condicion_fecha + " order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento) xc \
+                  is null and re.estado <> 0 " + condicion_fecha + " order by fecha_hora) as xz group by tipo_evento, descripcion order by tipo_evento) xc \
                   UNION \
                   SELECT  6::integer as orden, 'COBROS ADICIONALES'::text as item, case when sum(valor) is null then 0 else sum(valor) end as valor \
                   FROM sae.reporte_cobro_adicional WHERE id_estado_resultado is null " + condicion_fecha + " \
@@ -2859,7 +2926,7 @@ exports.detallePxQ = async (req, res) => {
           valor_cobrar, ti.nombre as tipo_turno, case when re.patente is null then 'XXXX'::varchar else re.patente end as patente FROM sae.reporte_eventos re join _comun.brigadas br on re.brigada = br.id \
           join _comun.base b on br.id_base = b.id left join _comun.comunas c on re.comuna = c.codigo left join \
           _comun.eventos_tipo et on re.tipo_evento = et.codigo join _comun.tipo_turno ti on re.tipo_turno = ti.id \
-          where b.id_paquete = :id_paquete and id_estado_resultado is null " + condicion_fecha + " order by fecha_hora;";
+          where b.id_paquete = :id_paquete and id_estado_resultado is null and re.estado <> 0 " + condicion_fecha + " order by fecha_hora;";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const eventos = await sequelize.query(sql, { replacements: { id_paquete: req.query.id_paquete }, type: QueryTypes.SELECT });
@@ -3000,8 +3067,8 @@ exports.cierraEstadoPago = async (req, res) => {
             const sql2 = "update sae.reporte_cobro_adicional set id_estado_resultado = " + data.id + " WHERE id_estado_resultado is null " + condicion_fecha + "; \
             update sae.reporte_descuentos set id_estado_resultado = " + data.id + " WHERE id_estado_resultado is null " + condicion_fecha + "; \
             update sae.reporte_hora_extra set id_estado_resultado = " + data.id + " where id_estado_resultado is null " + condicion_fecha + "; \
-            update sae.reporte_jornada set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null " + condicion_fecha_permanencia + "; \
-            update sae.reporte_eventos set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null " + condicion_fecha + "; \
+            update sae.reporte_jornada set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null and rj.estado <> 0 " + condicion_fecha_permanencia + "; \
+            update sae.reporte_eventos set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null and re.estado <> 0 " + condicion_fecha + "; \
             update sae.reporte_observaciones set id_estado_resultado = " + data.id + " where id_estado_resultado is null " + condicion_fecha + ";";
             console.log(sql2);
 

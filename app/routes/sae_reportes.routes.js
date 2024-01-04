@@ -120,7 +120,11 @@ module.exports = function(app) {
       app.post("/api/reportes/v1/semanal_por_brigada", reportesController.semanalByBrigada)
     */
     app.get("/api/reportes/v1/semanal_por_brigada", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.semanalByBrigada);
-
+    /*********************************************************************************** */
+    /* Devuelve la permanencia total como si no hubiera faltado ningún turno
+      app.post("/api/reportes/v1/permanencia_total", reportesController.permanenciaTotal)
+    */
+    app.get("/api/reportes/v1/permanencia_total", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.permanenciaTotal);
     /*********************************************************************************** */
     /* Devuelve la permanencia semanal por brigada
       app.post("/api/reportes/v1/permanencia_por_brigada", reportesController.permanenciaByBrigada)
@@ -300,7 +304,7 @@ module.exports = function(app) {
 
     /*********************************************************************************** */
     /* Devuelve la permanencia semanal por brigada
-      app.get("/api/reportes/v1/permanencia_por_brigada", reportesController.permanenciaByBrigadaHistorial)
+      app.get("/api/reportes/v1/permanencia_por_brigada_historial", reportesController.permanenciaByBrigadaHistorial)
     */
     app.get("/api/reportes/v1/permanencia_por_brigada_historial", [authJwt.verifyToken, authJwt.isSistemaOrAdminSae], reportesController.permanenciaByBrigadaHistorial);
 
