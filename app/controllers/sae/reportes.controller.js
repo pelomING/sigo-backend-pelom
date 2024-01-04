@@ -1378,6 +1378,8 @@ exports.permanenciaByBrigada = async (req, res) => {
     as turnos from (SELECT rj.id, br.id as id_brigada FROM sae.reporte_jornada rj join _comun.brigadas br on \
     rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id WHERE brigada is not null and s.sae and \
     id_estado_resultado is null and rj.tipo_turno = 1 and rj.estado <> 0 " + condicion_fecha + ") as rj group by id_brigada) as tabla using (id) order by id";
+
+    console.log('sl permanencia', sql);
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
