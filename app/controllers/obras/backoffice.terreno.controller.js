@@ -12,6 +12,7 @@ exports.findAllVisitaTerreno = async (req, res) => {
       #swagger.description = 'Devuelve todas las visitas a terreno' */
     try {
 
+      /*
       console.log('findAllVisitaTerreno');
         let id_user = req.userId;
         let codigo_api = 'obras.backoffice.terreno';
@@ -28,7 +29,7 @@ exports.findAllVisitaTerreno = async (req, res) => {
             error: true,
             message: "No tiene permiso para realizar esta operación"
           })
-        }
+        }*/
 
 
         const sql = "SELECT vt.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \

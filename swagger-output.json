@@ -529,7 +529,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alltipoobras": {
+    "/api/obras/backoffice/general/v1/alltipoobras": {
       "get": {
         "tags": [
           "Obras - General"
@@ -551,7 +551,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alltipoperacion": {
+    "/api/obras/backoffice/general/v1/alltipoperacion": {
       "get": {
         "tags": [
           "Obras - General"
@@ -573,7 +573,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alltipoactividad": {
+    "/api/obras/backoffice/general/v1/alltipoactividad": {
       "get": {
         "tags": [
           "Obras - General"
@@ -595,7 +595,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allmaestroactividad": {
+    "/api/obras/backoffice/general/v1/allmaestroactividad": {
       "get": {
         "tags": [
           "Obras - General"
@@ -617,7 +617,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/maestroactividadporid": {
+    "/api/obras/backoffice/general/v1/maestroactividadporid": {
       "get": {
         "tags": [
           "Obras - General"
@@ -649,7 +649,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/maestroactividadporactividad": {
+    "/api/obras/backoffice/general/v1/maestroactividadporactividad": {
       "get": {
         "tags": [
           "Obras - General"
@@ -681,7 +681,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allzonales": {
+    "/api/obras/backoffice/general/v1/allzonales": {
       "get": {
         "tags": [
           "Obras - General"
@@ -703,7 +703,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alldelegaciones": {
+    "/api/obras/backoffice/general/v1/alldelegaciones": {
       "get": {
         "tags": [
           "Obras - General"
@@ -725,7 +725,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alltipotrabajos": {
+    "/api/obras/backoffice/general/v1/alltipotrabajos": {
       "get": {
         "tags": [
           "Obras - General"
@@ -747,7 +747,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allempresacontratistas": {
+    "/api/obras/backoffice/general/v1/allempresacontratistas": {
       "get": {
         "tags": [
           "Obras - General"
@@ -769,7 +769,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allcoordinadorcontratistas": {
+    "/api/obras/backoffice/general/v1/allcoordinadorcontratistas": {
       "get": {
         "tags": [
           "Obras - General"
@@ -791,7 +791,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allcomunas": {
+    "/api/obras/backoffice/general/v1/allcomunas": {
       "get": {
         "tags": [
           "Obras - General"
@@ -813,7 +813,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allestados": {
+    "/api/obras/backoffice/general/v1/allestados": {
       "get": {
         "tags": [
           "Obras - General"
@@ -835,7 +835,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allestadovisitas": {
+    "/api/obras/backoffice/general/v1/allestadovisitas": {
       "get": {
         "tags": [
           "Obras - General"
@@ -857,7 +857,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allsegmentos": {
+    "/api/obras/backoffice/general/v1/allsegmentos": {
       "get": {
         "tags": [
           "Obras - General"
@@ -1528,7 +1528,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allreportesdiarios": {
+    "/api/obras/backoffice/repodiario/v1/allreportesdiarios": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1550,7 +1550,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/reportesdiariosporparametros": {
+    "/api/obras/backoffice/repodiario/v1/reportesdiariosporparametros": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1589,7 +1589,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/creareportediario": {
+    "/api/obras/backoffice/repodiario/v1/creareportediario": {
       "post": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1613,8 +1613,8 @@
                   "example": "2023-10-25"
                 },
                 "jefe_faena": {
-                  "type": "string",
-                  "example": "nombre jefe de faena"
+                  "type": "number",
+                  "example": 1
                 },
                 "sdi": {
                   "type": "string",
@@ -1678,15 +1678,21 @@
                 },
                 "comuna": {
                   "type": "string",
-                  "example": "10345"
+                  "example": "10305"
                 },
                 "num_documento": {
                   "type": "string",
                   "example": "10001000600"
                 },
                 "flexiapp": {
-                  "type": "string",
-                  "example": "CGE-123343-55"
+                  "type": "array",
+                  "example": [
+                    "CGE-123343-55",
+                    "CGE-123343-56"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -1711,7 +1717,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/actualizareportediario/{id}": {
+    "/api/obras/backoffice/repodiario/v1/actualizareportediario/{id}": {
       "put": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1741,7 +1747,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/eliminareportediario/{id}": {
+    "/api/obras/backoffice/repodiario/v1/eliminareportediario/{id}": {
       "delete": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1771,7 +1777,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allreportesdiariosactividad": {
+    "/api/obras/backoffice/repodiario/v1/allreportesdiariosactividad": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1793,7 +1799,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/reportesdiariosactividadporid": {
+    "/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporid": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1825,7 +1831,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/reportesdiariosactividadporparametros": {
+    "/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporparametros": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1859,7 +1865,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/creardetalleactividad": {
+    "/api/obras/backoffice/repodiario/v1/creardetalleactividad": {
       "post": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1900,6 +1906,94 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/alljefesfaena": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los jefes de faena",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/alltipooperacion": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los tipo de operación",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/alltipoactividad": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los tipo de actividad",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/allmaestroactividad": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todas las actividades dentro del Maestro Actividades",
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "401": {
             "description": "Unauthorized"

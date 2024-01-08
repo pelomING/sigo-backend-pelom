@@ -4,6 +4,8 @@ const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
 const tipoOperacion = db.tipoOperacion;
 const maestroActividad = db.maestroActividad;
 const encabezado_reporte_diario = db.encabezadoReporteDiario;
+const JefesFaena = db.jefesFaena;
+const TipoActividad = db.tipoActividad;
 
 /***********************************************************************************/
 /*                                                                                 */
@@ -179,7 +181,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
             schema: {
                 id_obra: 1,
                 fecha_reporte: "2023-10-25",
-                jefe_faena: "nombre jefe de faena",
+                jefe_faena: 1,
                 sdi: "sdi",
                 gestor_cliente: "nombre gestor cliente",
                 id_area: 1,
@@ -195,9 +197,9 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
                 hora_salida_terreno: "2023-10-25 18:30",
                 hora_llegada_base: "2023-10-25 19:30",
                 alimentador: "alimentador",
-                comuna: "10345",
+                comuna: "10305",
                 num_documento: "10001000600",
-                flexiapp: "CGE-123343-55"
+                flexiapp: ["CGE-123343-55", "CGE-123343-56"]
             }
         } */
   try{
@@ -232,11 +234,13 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
         if (salir) {
           return;
         }
-
+        const flexiapp = req.body.flexiapp;
+        console.log(flexiapp[0]);
+        console.log(flexiapp[1]);
         const encabezado_reporte_diario = {
             id_obra: Number(req.body.id_obra),
             fecha_reporte: String(req.body.fecha_reporte),
-            jefe_faena: String(req.body.jefe_faena),
+            jefe_faena: Number(req.body.jefe_faena),
             sdi: String(req.body.sdi),
             gestor_cliente: String(req.body.gestor_cliente),
             id_area: Number(req.body.id_area),
@@ -254,7 +258,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
             alimentador: String(req.body.alimentador),
             comuna: String(req.body.comuna),
             num_documento: String(req.body.num_documento),
-            flexiapp: String(req.body.flexiapp)
+            //flexiapp: String(req.body.flexiapp)
         }
 
         await EncabezadoReporteDiario.create(encabezado_reporte_diario)
@@ -572,4 +576,97 @@ exports.createOneDetalleReporteDiarioActividad = async (req, res) => {
     res.status(500).send(error);
   }
 
+}
+
+/*********************************************************************************** */
+/* Obtiene todos los jefes de faena
+*/
+exports.findAllJefesFaena = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los jefes de faena' */
+  try {
+    await JefesFaena.findAll().then(data => {
+      res.send(data);
+    }).catch(err => {
+        res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+/*********************************************************************************** */
+/* Obtiene todos los tipo de operación
+*/
+exports.findAllTipoOperacion = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los tipo de operación' */
+  try {
+    await tipoOperacion.findAll().then(data => {
+      res.send(data);
+    }).catch(err => {
+        res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+/*********************************************************************************** */
+/* Obtiene todos los tipo de actividad
+*/
+exports.findAllTipoActividad = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los tipo de actividad' */
+  try {
+    await TipoActividad.findAll().then(data => {
+      res.send(data);
+    }).catch(err => {
+        res.status(500).send({ message: err.message });
+    })
+  }catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+/*********************************************************************************** */
+/* Obtiene todos las actividades del maestro actividades
+*/
+exports.findAllMaestroActividad = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+    #swagger.description = 'Devuelve todas las actividades dentro del Maestro Actividades' */
+  try {
+    const sql = "SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, \
+    uc_retiro, uc_traslado, ma.descripcion FROM obras.maestro_actividades ma \
+    join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const maestroActividad = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida;
+    if (maestroActividad) {
+      salida = [];
+      for (const element of maestroActividad) {
+
+            const detalle_salida = {
+              id: Number(element.id),
+              actividad: String(element.actividad),
+              tipo_actividad: element.tipo_actividad,  //json {"id": 1, "descripcion": "Instalación"}
+              uc_instalacion: Number(element.uc_instalacion),
+              uc_retiro:  Number(element.uc_retiro),
+              uc_traslado:  Number(element.uc_traslado),
+              descripcion: String(element.descripcion)
+              
+            }
+            salida.push(detalle_salida);
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
 }
