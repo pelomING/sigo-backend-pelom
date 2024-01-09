@@ -18,7 +18,15 @@ exports.findAllTipoObra = async (req, res) => {
     /*  #swagger.tags = ['Obras - General']
       #swagger.description = 'Devuelve todos los tipo de Obra' */
       await TipoObra.findAll().then(data => {
-          res.send(data);
+          let salida = [];
+          for (element of data) {
+            const detalle_salida = {
+              id: Number(element.id),
+              descripcion: String(element.descripcion)
+            }
+            salida.push(detalle_salida);
+          }
+          res.send(salida);
       }).catch(err => {
           res.status(500).send({ message: err.message });
       })

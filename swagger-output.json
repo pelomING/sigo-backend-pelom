@@ -1718,6 +1718,54 @@
                   "items": {
                     "type": "string"
                   }
+                },
+                "det_actividad": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "clase": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "tipo": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "actividad": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 3
+                      }
+                    }
+                  }
+                },
+                "det_otros": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "glosa": {
+                        "type": "string",
+                        "example": "descripcion de la tarea 2"
+                      },
+                      "uc_unitaria": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "uc_total": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
                 }
               }
             }

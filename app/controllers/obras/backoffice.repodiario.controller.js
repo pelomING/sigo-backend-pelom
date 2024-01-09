@@ -200,7 +200,35 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
                 alimentador: "alimentador",
                 comuna: "10305",
                 num_documento: "10001000600",
-                flexiapp: ["CGE-123343-55", "CGE-123343-56"]
+                flexiapp: ["CGE-123343-55", "CGE-123343-56"],
+                det_actividad: [
+                    {
+                      "clase": 1,
+                      "tipo": 1,
+                      "actividad": 1,
+                      "cantidad": 1
+                    },
+                    {
+                      "clase": 1,
+                      "tipo": 1,
+                      "actividad": 2,
+                      "cantidad": 3
+                    }
+                ],
+                det_otros: [
+                      {
+                        "glosa": "descripcion de la tarea 1", 
+                        "uc_unitaria": 1, 
+                        "cantidad": 1, 
+                        "uc_total": 1
+                      },
+                      {
+                        "glosa": "descripcion de la tarea 2", 
+                        "uc_unitaria": 1, 
+                        "cantidad": 1, 
+                        "uc_total": 1
+                      }
+                ]
             }
         } */
   try{
@@ -235,17 +263,43 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
         if (salir) {
           return;
         }
-        const flexiapp = req.body.flexiapp;
-        let salida = "{";
-        for (const b of flexiapp){
-          if (salida.length==1) {
-            salida = salida + b
+        //const flexiapp = req.body.flexiapp;
+        let flexiapp = "{";
+        for (const b of req.body.flexiapp){
+          if (flexiapp.length==1) {
+            flexiapp = flexiapp + b
           }else {
-            salida = salida + ", " + b
+            flexiapp = flexiapp + ", " + b
           }
         }
-        salida = salida + "}"
+        flexiapp = flexiapp + "}"
+        // procesa detalle de actividad
+        for (const element of req.body.det_actividad) {
+          if (!element.clase || !element.actividad || !element.cantidad) {
+            res.status(400).send({
+              message: "No puede estar nulo el campo " + element
+            });
+            return;
+          }
+        };
+
+        // Busca el ID de encabezado disponible
+        const sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        let encabezado_reporte_diario_id = 0;
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          console.log('data', data);
+          encabezado_reporte_diario_id = data[0].valor;
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+        console.log('id', encabezado_reporte_diario_id);
+
         const encabezado_reporte_diario = {
+            id: encabezado_reporte_diario_id,
             id_obra: Number(req.body.id_obra),
             fecha_reporte: String(req.body.fecha_reporte),
             jefe_faena: Number(req.body.jefe_faena),
@@ -266,7 +320,178 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
             alimentador: String(req.body.alimentador),
             comuna: String(req.body.comuna),
             num_documento: String(req.body.num_documento),
-            flexiapp: String(salida)
+            flexiapp: String(flexiapp)
+        }
+        /*
+        sql_insert_encabezado = `INSERT INTO obras.encabezado_reporte_diario(id, id_obra, fecha_reporte, sdi, gestor_cliente, \
+          id_area, brigada_pesada, observaciones, entregado_por_persona, fecha_entregado, revisado_por_persona, fecha_revisado, \
+          sector, hora_salida_base, hora_llegada_terreno, hora_salida_terreno, hora_llegada_base, alimentador, comuna, \
+          num_documento, jefe_faena, flexiapp) VALUES (${encabezado_reporte_diario.id}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+*/
+        await EncabezadoReporteDiario.create(encabezado_reporte_diario)
+          .then(data => {
+              res.send(data);
+          }).catch(err => {
+              res.status(500).send({ message: err.message });
+          })
+  }catch (error) {
+    res.status(500).send(error);
+  }
+
+}
+/*********************************************************************************** */
+/* Crea un reporte diario Versión 2
+;
+*/
+exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Crea un encabezado de reporte diario'
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos encabezado reporte diario',
+            required: true,
+            schema: {
+                id_obra: 1,
+                fecha_reporte: "2023-10-25",
+                jefe_faena: 1,
+                sdi: "sdi",
+                gestor_cliente: "nombre gestor cliente",
+                id_area: 1,
+                brigada_pesada: false,
+                observaciones: "observaciones",
+                entregado_por_persona: "nombre persona",
+                fecha_entregado: "2023-10-25",
+                revisado_por_persona: "nombre persona que revisa",
+                fecha_revisado: "2023-10-25",
+                sector: "direccion sector",
+                hora_salida_base: "2023-10-25 07:30:00",
+                hora_llegada_terreno: "2023-10-25 08:00",
+                hora_salida_terreno: "2023-10-25 18:30",
+                hora_llegada_base: "2023-10-25 19:30",
+                alimentador: "alimentador",
+                comuna: "10305",
+                num_documento: "10001000600",
+                flexiapp: ["CGE-123343-55", "CGE-123343-56"],
+                det_actividad: [
+                    {
+                      "clase": 1,
+                      "tipo": 1,
+                      "actividad": 1,
+                      "cantidad": 1
+                    },
+                    {
+                      "clase": 1,
+                      "tipo": 1,
+                      "actividad": 2,
+                      "cantidad": 3
+                    }
+                ],
+                det_otros: [
+                      {
+                        "glosa": "descripcion de la tarea 1", 
+                        "uc_unitaria": 1, 
+                        "cantidad": 1, 
+                        "uc_total": 1
+                      },
+                      {
+                        "glosa": "descripcion de la tarea 2", 
+                        "uc_unitaria": 1, 
+                        "cantidad": 1, 
+                        "uc_total": 1
+                      }
+                ]
+            }
+        } */
+  try{
+      let salir = false;
+      const campos = [
+        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'gestor_cliente', 'id_area', 
+        'observaciones', 'entregado_por_persona', 'fecha_entregado', 
+        'revisado_por_persona', 'fecha_revisado', 'sector', 'hora_salida_base', 
+        'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base'
+      ];
+      for (const element of campos) {
+        if (!req.body[element]) {
+          res.status(400).send({
+            message: "No puede estar nulo el campo " + element
+          });
+          return;
+        }
+      };
+
+      //Verifica que la fecha de reporte no este asignada a una obra
+      await EncabezadoReporteDiario.findAll({where: {id_obra: req.body.id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
+          //el rut ya existe
+          if (data.length > 0) {
+            salir = true;
+            res.status(403).send({ message: 'El Codigo de Obra ya se encuentra ingresado en la base' });
+          }
+        }).catch(err => {
+            salir = true;
+            res.status(500).send({ message: err.message });
+        })
+      
+        if (salir) {
+          return;
+        }
+        //const flexiapp = req.body.flexiapp;
+        let flexiapp = "{";
+        for (const b of req.body.flexiapp){
+          if (flexiapp.length==1) {
+            flexiapp = flexiapp + b
+          }else {
+            flexiapp = flexiapp + ", " + b
+          }
+        }
+        flexiapp = flexiapp + "}"
+        // procesa detalle de actividad
+        for (const element of req.body.det_actividad) {
+          if (!element.clase || !element.actividad || !element.cantidad) {
+            res.status(400).send({
+              message: "No puede estar nulo el campo " + element
+            });
+            return;
+          }
+        };
+
+        // Busca el ID de encabezado disponible
+        const sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        let encabezado_reporte_diario_id = 0;
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          console.log('data', data);
+          encabezado_reporte_diario_id = data[0].valor;
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+        console.log('id', encabezado_reporte_diario_id);
+
+        const encabezado_reporte_diario = {
+            id: encabezado_reporte_diario_id,
+            id_obra: Number(req.body.id_obra),
+            fecha_reporte: String(req.body.fecha_reporte),
+            jefe_faena: Number(req.body.jefe_faena),
+            sdi: String(req.body.sdi),
+            gestor_cliente: String(req.body.gestor_cliente),
+            id_area: Number(req.body.id_area),
+            brigada_pesada: Boolean(req.body.brigada_pesada),
+            observaciones: String(req.body.observaciones),
+            entregado_por_persona: String(req.body.entregado_por_persona),
+            fecha_entregado: String(req.body.fecha_entregado),
+            revisado_por_persona: String(req.body.revisado_por_persona),
+            fecha_revisado: String(req.body.fecha_revisado),
+            sector: String(req.body.sector),
+            hora_salida_base: String(req.body.hora_salida_base),
+            hora_llegada_terreno: String(req.body.hora_llegada_terreno),
+            hora_salida_terreno: String(req.body.hora_salida_terreno),
+            hora_llegada_base: String(req.body.hora_llegada_base),
+            alimentador: String(req.body.alimentador),
+            comuna: String(req.body.comuna),
+            num_documento: String(req.body.num_documento),
+            flexiapp: String(flexiapp)
         }
 
         await EncabezadoReporteDiario.create(encabezado_reporte_diario)
