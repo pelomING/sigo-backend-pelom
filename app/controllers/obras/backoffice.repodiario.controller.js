@@ -24,12 +24,13 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
       #swagger.description = 'Devuelve todos los ancabezados de reporte diario' */
     try {
-        const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
-        fecha_reporte::text, jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, \
-        observaciones, entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, \
-        sector, hora_salida_base::text, hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, \
-        alimentador, row_to_json(c) as comuna, num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo \
-        tt on rd.id_area = tt.id join obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo";
+        const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
+        case when jf.id is not null then json_build_object('id', jf.id, 'nombre', jf.nombre) else null end as jefe_faena, sdi, \
+        rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, entregado_por_persona, fecha_entregado::text, \
+        revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, hora_llegada_terreno::text, \
+        hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, num_documento, flexiapp \
+        FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o on \
+        rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo	left join obras.jefes_faena jf on rd.jefe_faena = jf.id";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const encabezadoReporte = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -41,7 +42,7 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
                   id: Number(element.id),
                   id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
                   fecha_reporte: String(element.fecha_reporte),
-                  jefe_faena: String(element.jefe_faena),
+                  jefe_faena: element.jefe_faena, //json {"id": id, "nombre": nombre jefe}
                   sdi: String(element.sdi),
                   gestor_cliente: String(element.gestor_cliente),
                   id_area: element.id_area, //json {"id": id, "descripcion": descripcion}
@@ -235,8 +236,15 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
           return;
         }
         const flexiapp = req.body.flexiapp;
-        console.log(flexiapp[0]);
-        console.log(flexiapp[1]);
+        let salida = "{";
+        for (const b of flexiapp){
+          if (salida.length==1) {
+            salida = salida + b
+          }else {
+            salida = salida + ", " + b
+          }
+        }
+        salida = salida + "}"
         const encabezado_reporte_diario = {
             id_obra: Number(req.body.id_obra),
             fecha_reporte: String(req.body.fecha_reporte),
@@ -258,7 +266,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
             alimentador: String(req.body.alimentador),
             comuna: String(req.body.comuna),
             num_documento: String(req.body.num_documento),
-            //flexiapp: String(req.body.flexiapp)
+            flexiapp: String(salida)
         }
 
         await EncabezadoReporteDiario.create(encabezado_reporte_diario)

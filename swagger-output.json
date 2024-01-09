@@ -911,77 +911,102 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Datos básicos de una obra",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "codigo_obra": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "CGE-123456"
                 },
                 "nombre_obra": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre de la obra"
                 },
                 "numero_ot": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "123456"
                 },
                 "zona": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "delegacion": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "gestor_cliente": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre gestor cliente (cge)"
                 },
                 "numero_aviso": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 123456
                 },
                 "numero_oc": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "123456"
                 },
                 "monto": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1000
                 },
                 "cantidad_uc": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 100
                 },
                 "fecha_llegada": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "fecha_inicio": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "fecha_termino": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "tipo_trabajo": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "persona_envia_info": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre persona envia info"
                 },
                 "cargo_persona_envia_info": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "cargo persona envia info"
                 },
                 "empresa_contratista": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "coordinador_contratista": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "comuna": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "07234"
                 },
                 "ubicacion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "dirección donde se trabajará en la obra"
                 },
                 "estado": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "tipo_obra": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "segmento": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 }
               }
             }

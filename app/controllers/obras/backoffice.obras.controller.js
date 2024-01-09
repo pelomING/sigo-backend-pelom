@@ -84,7 +84,38 @@ exports.findAllObra = async (req, res) => {
 */
 exports.createObra = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Obras']
-      #swagger.description = 'Crea una nueva obra' */
+      #swagger.description = 'Crea una nueva obra' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos básicos de una obra',
+            required: true,
+            schema: {
+              codigo_obra: "CGE-123456",
+                nombre_obra: "nombre de la obra",
+                numero_ot: "123456",
+                zona: 1,
+                delegacion: 1,
+                gestor_cliente: "nombre gestor cliente (cge)",
+                numero_aviso: 123456,
+                numero_oc: "123456",
+                monto: 1000,
+                cantidad_uc: 100,
+                fecha_llegada: "2023-10-25",
+                fecha_inicio: "2023-10-25",
+                fecha_termino: "2023-10-25",
+                tipo_trabajo: 1,
+                persona_envia_info: "nombre persona envia info",
+                cargo_persona_envia_info: "cargo persona envia info",
+                empresa_contratista: 1,
+                coordinador_contratista: 1,
+                comuna: "07234",
+                ubicacion: "dirección donde se trabajará en la obra",
+                estado: 1,
+                tipo_obra: 1,
+                segmento: 1
+            }
+        }
+      */
   try {
       let salir = false;
       const campos = [
