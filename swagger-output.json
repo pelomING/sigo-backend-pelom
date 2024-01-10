@@ -2064,6 +2064,13 @@
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Devuelve todas las actividades dentro del Maestro Actividades",
+        "parameters": [
+          {
+            "name": "tipo_actividad",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"

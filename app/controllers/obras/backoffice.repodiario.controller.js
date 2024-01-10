@@ -1,6 +1,7 @@
 const db = require("../../models");
 const EncabezadoReporteDiario = db.encabezadoReporteDiario;
 const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
+const DetalleRporteDiarioOtrasActividades = db.detalleReporteDiarioOtrasActividades; 
 const tipoOperacion = db.tipoOperacion;
 const maestroActividad = db.maestroActividad;
 const encabezado_reporte_diario = db.encabezadoReporteDiario;
@@ -494,12 +495,35 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             flexiapp: String(flexiapp)
         }
 
-        await EncabezadoReporteDiario.create(encabezado_reporte_diario)
-          .then(data => {
-              res.send(data);
-          }).catch(err => {
-              res.status(500).send({ message: err.message });
-          })
+        const result = await sequelize.transaction(async () => {
+          // both of these queries will run in the transaction
+          const encabezadoReporteDiario = await EncabezadoReporteDiario.create(encabezado_reporte_diario);
+      
+          for (const element of req.body.det_actividad) {
+            const det_actividad = {
+              id_encabezado_rep: Number(encabezado_reporte_diario_id),
+              tipo_operacion: Number(element.clase),
+              id_actividad: Number(element.actividad),
+              cantidad: Number(element.cantidad)
+            }
+            await DetalleReporteDiarioActividad.create(det_actividad);
+          }
+
+          for (const element of req.body.det_otros) {
+            const det_otros = {
+              id_encabezado_rep: Number(encabezado_reporte_diario_id),
+              glosa: String(element.glosa),
+              uc_unitaria: Number(element.uc_unitaria),
+              total_uc: Number(element.uc_total),
+              cantidad: Number(element.cantidad)
+            }
+            await DetalleRporteDiarioOtrasActividades.create(det_otros);
+          }
+          res.status(200).send(encabezadoReporteDiario);
+        });
+
+        
+
   }catch (error) {
     res.status(500).send(error);
   }
@@ -567,8 +591,9 @@ exports.findAllDetalleReporteDiarioActividad = async (req, res) => {
       const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
       json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte \
       FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on dra.tipo_operacion = top.id \
-      join obras.maestro_actividades ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd \
-      on dra.id_encabezado_rep = erd.id";
+      join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, uc_retiro, uc_traslado, ma.descripcion \
+      FROM obras.maestro_actividades ma join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id) ma on dra.id_actividad = \
+      ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const detalleReporteDiarioActividad = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -579,10 +604,10 @@ exports.findAllDetalleReporteDiarioActividad = async (req, res) => {
   
               const detalle_salida = {
                 id: Number(element.id),
-              tipo_operacion: element.tipo_operacion,
-              tipo_actividad: element.tipo_actividad,
-              cantidad: Number(element.cantidad),
-              id_encabezado_rep: element.encabezado_reporte
+                clase: element.tipo_operacion,
+                actividad: element.tipo_actividad,
+                cantidad: Number(element.cantidad),
+                id_encabezado_rep: element.encabezado_reporte
                 
               }
               salida.push(detalle_salida);
@@ -618,11 +643,20 @@ exports.findOneDetalleReporteDiarioActividad = async (req, res) => {
       }
     };
     const id = req.query.id;
+    /*
     const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
     json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte \
     FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on dra.tipo_operacion = top.id \
     join obras.maestro_actividades ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd \
-    on dra.id_encabezado_rep = erd.id WHERE dra.id = :id";
+    on dra.id_encabezado_rep = erd.id WHERE dra.id = :id";*/
+
+    const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
+        json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte \
+        FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on dra.tipo_operacion = top.id \
+        join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, uc_retiro, uc_traslado, ma.descripcion \
+        FROM obras.maestro_actividades ma join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id) ma on dra.id_actividad = \
+        ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id WHERE dra.id = :id";
+
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const detalleReporteDiarioActividad = await sequelize.query(sql,  { replacements: { id: id }, type: QueryTypes.SELECT });
@@ -686,11 +720,23 @@ exports.findDetalleReporteDiarioActividadPorParametros = async (req, res) => {
     try {
       let b = sql_array.reduce((total, num) => total + " AND " + num);
       if (b){
+        /*
         const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
         json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte \
         FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on dra.tipo_operacion = top.id \
         join obras.maestro_actividades ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd \
-        on dra.id_encabezado_rep = erd.id WHERE "+b;
+        on dra.id_encabezado_rep = erd.id WHERE "+b;*/
+
+        const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
+        json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
+        case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 end as unitario, \
+        case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 end * \
+        cantidad as total FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on \
+        dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, uc_retiro, \
+        uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM obras.maestro_actividades ma join obras.tipo_actividad \
+        ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) ma on dra.id_actividad = \
+        ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id WHERE "+b;
+
         console.log("sql: "+sql);
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
@@ -870,9 +916,16 @@ exports.findAllMaestroActividad = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
     #swagger.description = 'Devuelve todas las actividades dentro del Maestro Actividades' */
   try {
-    const sql = "SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, \
-    uc_retiro, uc_traslado, ma.descripcion FROM obras.maestro_actividades ma \
-    join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id";
+    //metodo GET
+    const id_tipo_actividad = req.query.id_tipo_actividad;
+    let where = '';
+    if (id_tipo_actividad) {
+      where = `WHERE ta.id = ${id_tipo_actividad}`
+    }
+
+    const sql = "SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, uc_retiro, \
+    uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM obras.maestro_actividades ma join \
+    obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id	join obras.maestro_unidades mu on ma.id_unidad = mu.id " + where;
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const maestroActividad = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -888,7 +941,8 @@ exports.findAllMaestroActividad = async (req, res) => {
               uc_instalacion: Number(element.uc_instalacion),
               uc_retiro:  Number(element.uc_retiro),
               uc_traslado:  Number(element.uc_traslado),
-              descripcion: String(element.descripcion)
+              descripcion: String(element.descripcion),
+              unidad: element.unidad
               
             }
             salida.push(detalle_salida);
