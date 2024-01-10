@@ -782,6 +782,81 @@ exports.findDetalleReporteDiarioActividadPorParametros = async (req, res) => {
     }
   }
 }
+
+exports.findDetalleReporteDiarioOtrasPorParametros = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve un registro de detalle de reportes diarios otras actividades por parámetros: id_obra, id_encabezado_rep,
+      debe tener al menos un parámetro' */
+  const parametros = {
+    id_obra: req.query.id_obra,
+    id_encabezado_rep: req.query.id_encabezado_rep
+  }
+  const keys = Object.keys(parametros)
+  let sql_array = [];
+  let param = {};
+  for (element of keys) {
+    if (parametros[element]){
+
+      if (element === "id_obra") {
+        sql_array.push("erd.id_obra = :" + element);
+        param[element] = Number(parametros[element]);
+      }
+      if (element === "id_encabezado_rep") {
+        sql_array.push("drd.id_encabezado_rep = :" + element);
+        param[element] = Number(parametros[element]);
+      }
+    }
+  }
+
+  if (sql_array.length === 0) {
+    res.status(500).send("Debe incluir algun parametro para consultar");
+  }else {
+    try {
+      let b = sql_array.reduce((total, num) => total + " AND " + num);
+      if (b){
+        /*
+        const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
+        json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte \
+        FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on dra.tipo_operacion = top.id \
+        join obras.maestro_actividades ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd \
+        on dra.id_encabezado_rep = erd.id WHERE "+b;*/
+
+        const sql = "SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, json_build_object('id', erd.id, 'id_obra', erd.id_obra, \
+        'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades drd \
+        join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE "+b;
+
+        console.log("sql: "+sql);
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const detalleReporteDiarioActividad = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
+        let salida = [];
+        if (detalleReporteDiarioActividad) {
+          for (const element of detalleReporteDiarioActividad) {
+
+            const detalle_salida = {
+              id: Number(element.id),
+              glosa: element.glosa,
+              uc_unitaria: element.uc_unitaria,
+              cantidad: Number(element.cantidad),
+              total_uc: Number(element.total_uc),
+              id_encabezado_rep: element.encabezado_reporte
+            }
+                salida.push(detalle_salida);
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send(salida);
+        }
+      }else {
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }
+    }catch (error) {
+      res.status(500).send(error);
+    }
+  }
+}
 /* Crea un detalle de reporte diario
 ;
 */
