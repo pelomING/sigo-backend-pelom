@@ -2066,7 +2066,7 @@
         "description": "Devuelve todas las actividades dentro del Maestro Actividades",
         "parameters": [
           {
-            "name": "tipo_actividad",
+            "name": "id_tipo_actividad",
             "in": "query",
             "type": "string"
           }

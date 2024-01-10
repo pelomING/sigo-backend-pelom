@@ -588,11 +588,14 @@ exports.findAllDetalleReporteDiarioActividad = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
       #swagger.description = 'Devuelve todos los registros de detalle de reportes diarios' */
     try {
-      const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
-      json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte \
-      FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on dra.tipo_operacion = top.id \
-      join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, uc_retiro, uc_traslado, ma.descripcion \
-      FROM obras.maestro_actividades ma join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id) ma on dra.id_actividad = \
+      const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, \
+      json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
+      case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 end as unitario, \
+      case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 end * \
+      cantidad as total FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on \
+      dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, uc_retiro, \
+      uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM obras.maestro_actividades ma join obras.tipo_actividad \
+      ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) ma on dra.id_actividad = \
       ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
@@ -604,11 +607,13 @@ exports.findAllDetalleReporteDiarioActividad = async (req, res) => {
   
               const detalle_salida = {
                 id: Number(element.id),
-                clase: element.tipo_operacion,
-                actividad: element.tipo_actividad,
+                tipo_operacion: element.tipo_operacion,
+                tipo_actividad: element.tipo_actividad,
+                actividad: element.actividad,
                 cantidad: Number(element.cantidad),
-                id_encabezado_rep: element.encabezado_reporte
-                
+                id_encabezado_rep: element.encabezado_reporte,
+                unitario: Number(element.unitario),
+                total: Number(element.total),                
               }
               salida.push(detalle_salida);
         };
@@ -650,12 +655,15 @@ exports.findOneDetalleReporteDiarioActividad = async (req, res) => {
     join obras.maestro_actividades ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd \
     on dra.id_encabezado_rep = erd.id WHERE dra.id = :id";*/
 
-    const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
-        json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte \
-        FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on dra.tipo_operacion = top.id \
-        join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, uc_retiro, uc_traslado, ma.descripcion \
-        FROM obras.maestro_actividades ma join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id) ma on dra.id_actividad = \
-        ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id WHERE dra.id = :id";
+    const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, \
+    json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
+    case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 end as unitario, \
+    case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 end * \
+    cantidad as total FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion top on \
+    dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, uc_retiro, \
+    uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM obras.maestro_actividades ma join obras.tipo_actividad \
+    ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) ma on dra.id_actividad = \
+    ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id WHERE dra.id = :id";
 
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
@@ -669,8 +677,11 @@ exports.findOneDetalleReporteDiarioActividad = async (req, res) => {
               id: Number(element.id),
               tipo_operacion: element.tipo_operacion,
               tipo_actividad: element.tipo_actividad,
+              actividad: element.actividad,
               cantidad: Number(element.cantidad),
-              id_encabezado_rep: element.encabezado_reporte
+              id_encabezado_rep: element.encabezado_reporte,
+              unitario: Number(element.unitario),
+              total: Number(element.total),
             }
             salida.push(detalle_salida);
       };
@@ -727,7 +738,7 @@ exports.findDetalleReporteDiarioActividadPorParametros = async (req, res) => {
         join obras.maestro_actividades ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd \
         on dra.id_encabezado_rep = erd.id WHERE "+b;*/
 
-        const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, row_to_json(ma) as tipo_actividad, cantidad, \
+        const sql = "SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, \
         json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
         case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 end as unitario, \
         case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 end * \
@@ -749,8 +760,11 @@ exports.findDetalleReporteDiarioActividadPorParametros = async (req, res) => {
               id: Number(element.id),
               tipo_operacion: element.tipo_operacion,
               tipo_actividad: element.tipo_actividad,
+              actividad: element.actividad,
               cantidad: Number(element.cantidad),
-              id_encabezado_rep: element.encabezado_reporte
+              id_encabezado_rep: element.encabezado_reporte,
+              unitario: Number(element.unitario),
+              total: Number(element.total),
             }
                 salida.push(detalle_salida);
           };
