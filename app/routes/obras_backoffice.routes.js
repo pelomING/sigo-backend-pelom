@@ -60,6 +60,8 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/general/v1/allsegmentos", [authJwt.verifyToken], backofficeGeneralController.findAllSegmento);
 
+    
+
 }
 /*/*********************************************************************************** */
 /******* OBRAS ******************************************************************** */    
@@ -144,6 +146,10 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/repodiario/v1/alltipoactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllTipoActividad);
 
     app.get("/api/obras/backoffice/repodiario/v1/allmaestroactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllMaestroActividad);
+
+    app.get("/api/obras/backoffice/repodiario/v1/allareas", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllTipoTrabajo);
+
+
 }
 }
 

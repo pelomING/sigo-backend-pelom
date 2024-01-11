@@ -242,8 +242,19 @@ exports.findAllDelegacion = async (req, res) => {
     /*  #swagger.tags = ['Obras - General']
       #swagger.description = 'Devuelve todos los tipo de Trabajo' */
     try {
-      const data = await TipoTrabajo.findAll();
-      res.send(data);
+        await TipoTrabajo.findAll().then(data => {
+          let salida = [];
+          for (element of data) {
+            const detalle_salida = {
+              id: Number(element.id),
+              descripcion: String(element.descripcion)
+            }
+            salida.push(detalle_salida);
+          }
+          res.send(salida);
+      }).catch(err => {
+          res.status(500).send({ message: err.message });
+      })
     } catch (err) {
       res.status(500).send({ message: err.message });
     }

@@ -2067,6 +2067,28 @@
         }
       }
     },
+    "/api/obras/backoffice/repodiario/v1/allareas": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los tipo de Trabajo",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/movil/v1/paquete": {
       "get": {
         "tags": [
