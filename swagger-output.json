@@ -1795,18 +1795,166 @@
         "tags": [
           "Obras - Backoffice - Reporte diario"
         ],
-        "description": "Actualiza un encabezado de reporte diario por ID",
+        "description": "Actualiza un encabezado de reporte y sus detalles por ID",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_reporte": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "jefe_faena": {
+                  "type": "number",
+                  "example": 1
+                },
+                "sdi": {
+                  "type": "string",
+                  "example": "sdi"
+                },
+                "gestor_cliente": {
+                  "type": "string",
+                  "example": "nombre gestor cliente"
+                },
+                "id_area": {
+                  "type": "number",
+                  "example": 1
+                },
+                "brigada_pesada": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "observaciones": {
+                  "type": "string",
+                  "example": "observaciones"
+                },
+                "entregado_por_persona": {
+                  "type": "string",
+                  "example": "nombre persona"
+                },
+                "fecha_entregado": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "revisado_por_persona": {
+                  "type": "string",
+                  "example": "nombre persona que revisa"
+                },
+                "fecha_revisado": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "sector": {
+                  "type": "string",
+                  "example": "direccion sector"
+                },
+                "hora_salida_base": {
+                  "type": "string",
+                  "example": "2023-10-25 07:30:00"
+                },
+                "hora_llegada_terreno": {
+                  "type": "string",
+                  "example": "2023-10-25 08:00"
+                },
+                "hora_salida_terreno": {
+                  "type": "string",
+                  "example": "2023-10-25 18:30"
+                },
+                "hora_llegada_base": {
+                  "type": "string",
+                  "example": "2023-10-25 19:30"
+                },
+                "alimentador": {
+                  "type": "string",
+                  "example": "alimentador"
+                },
+                "comuna": {
+                  "type": "string",
+                  "example": "10305"
+                },
+                "num_documento": {
+                  "type": "string",
+                  "example": "10001000600"
+                },
+                "flexiapp": {
+                  "type": "array",
+                  "example": [
+                    "CGE-123343-55",
+                    "CGE-123343-56"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "det_actividad": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "clase": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "tipo": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "actividad": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 3
+                      }
+                    }
+                  }
+                },
+                "det_otros": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "glosa": {
+                        "type": "string",
+                        "example": "descripcion de la tarea 2"
+                      },
+                      "uc_unitaria": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "uc_total": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -1825,7 +1973,7 @@
         "tags": [
           "Obras - Backoffice - Reporte diario"
         ],
-        "description": "Borra un encabezado de reporte diario por ID",
+        "description": "Borra un encabezado de reporte diario y sus detalles por ID",
         "parameters": [
           {
             "name": "id",
@@ -1837,6 +1985,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"

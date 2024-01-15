@@ -419,7 +419,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'gestor_cliente', 'id_area', 
         'observaciones', 'entregado_por_persona', 'fecha_entregado', 
         'revisado_por_persona', 'fecha_revisado', 'sector', 'hora_salida_base', 
-        'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base'
+        'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base', 'det_actividad'
       ];
       for (const element of campos) {
         if (!req.body[element]) {
@@ -464,6 +464,27 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             return;
           }
         };
+        const detalle_actividad = JSON.stringify(req.body.det_actividad);
+        if (!detalle_actividad[0]) {
+          res.status(400).send({message: "El detalle debe tener al menos una actividad"});
+          return;
+        }
+        if (!detalle_actividad[0].clase) {
+          res.status(400).send({message: "El campo clase en el detalle debe tener valor"});
+          return;
+        }
+        if (!detalle_actividad[0].tipo) {
+          res.status(400).send({message: "El campo tipo en el detalle debe tener valor"});
+          return;
+        }
+        if (!detalle_actividad[0].actividad) {
+          res.status(400).send({message: "El campo actividad en el detalle debe tener valor"});
+          return;
+        }
+        if (!detalle_actividad[0].cantidad) {
+          res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
+          return;
+        }
 
         // Busca el ID de encabezado disponible
         const sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
@@ -529,15 +550,12 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             }
             await DetalleRporteDiarioOtrasActividades.create(det_otros);
           }
-          res.status(200).send(encabezadoReporteDiario);
+          return encabezadoReporteDiario;
         });
-
-        
-
+        res.status(200).send(result);
   }catch (error) {
     res.status(500).send(error);
   }
-
 }
 /*********************************************************************************** */
 /* Actualiza un reporte diario
@@ -564,26 +582,248 @@ exports.updateEncabezadoReporteDiario = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+/* Actualiza un reporte diario V2
+;
+*/
+exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Actualiza un encabezado de reporte y sus detalles por ID' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos encabezado reporte diario',
+            required: true,
+            schema: {
+                fecha_reporte: "2023-10-25",
+                jefe_faena: 1,
+                sdi: "sdi",
+                gestor_cliente: "nombre gestor cliente",
+                id_area: 1,
+                brigada_pesada: false,
+                observaciones: "observaciones",
+                entregado_por_persona: "nombre persona",
+                fecha_entregado: "2023-10-25",
+                revisado_por_persona: "nombre persona que revisa",
+                fecha_revisado: "2023-10-25",
+                sector: "direccion sector",
+                hora_salida_base: "2023-10-25 07:30:00",
+                hora_llegada_terreno: "2023-10-25 08:00",
+                hora_salida_terreno: "2023-10-25 18:30",
+                hora_llegada_base: "2023-10-25 19:30",
+                alimentador: "alimentador",
+                comuna: "10305",
+                num_documento: "10001000600",
+                flexiapp: ["CGE-123343-55", "CGE-123343-56"],
+                det_actividad: [
+                    {
+                      "clase": 1,
+                      "tipo": 1,
+                      "actividad": 1,
+                      "cantidad": 1
+                    },
+                    {
+                      "clase": 1,
+                      "tipo": 1,
+                      "actividad": 2,
+                      "cantidad": 3
+                    }
+                ],
+                det_otros: [
+                      {
+                        "glosa": "descripcion de la tarea 1", 
+                        "uc_unitaria": 1, 
+                        "cantidad": 1, 
+                        "uc_total": 1
+                      },
+                      {
+                        "glosa": "descripcion de la tarea 2", 
+                        "uc_unitaria": 1, 
+                        "cantidad": 1, 
+                        "uc_total": 1
+                      }
+                ]
+            }
+        } */
+  try{
+    console.log('updateEncabezadoReporteDiario_V2', req.body);
+    const id = req.params.id;
+    let flexiapp = undefined;
+    if (req.body.flexiapp){
+        flexiapp = "{";
+        for (const b of req.body.flexiapp){
+          if (flexiapp.length==1) {
+            flexiapp = flexiapp + b
+          }else {
+            flexiapp = flexiapp + ", " + b
+          }
+        }
+        flexiapp = flexiapp + "}"
+    };
+    let detalle_actividad;
+    if (req.body.det_actividad){
+      detalle_actividad = JSON.stringify(req.body.det_actividad);
+      console.log(detalle_actividad);
+      console.log(detalle_actividad[0]);
+      if (!detalle_actividad[0]) {
+        res.status(400).send({message: "El detalle debe tener al menos una actividad"});
+        return;
+      }
+      if (!detalle_actividad[0].clase) {
+        res.status(400).send({message: "El campo clase en el detalle debe tener valor"});
+        return;
+      }
+      if (!detalle_actividad[0].tipo) {
+        res.status(400).send({message: "El campo tipo en el detalle debe tener valor"});
+        return;
+      }
+      if (!detalle_actividad[0].actividad) {
+        res.status(400).send({message: "El campo actividad en el detalle debe tener valor"});
+        return;
+      }
+      if (!detalle_actividad[0].cantidad) {
+        res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
+        return;
+      }
+    }
+    let detalle_otros;
+    if (req.body.det_otros){
+      detalle_otros = JSON.stringify(req.body.det_otros);
+      if (!detalle_otros[0]) {
+        res.status(400).send({message: "El detalle otros debe tener al menos una actividad"});
+      }
+      if (!detalle_otros[0].glosa) {
+        res.status(400).send({message: "El campo glosa en el detalle otros debe tener valor"});
+      }
+      if (!detalle_otros[0].uc_unitaria) {
+        res.status(400).send({message: "El campo uc_unitaria en el detalle otros debe tener valor"});
+      }
+      if (!detalle_otros[0].uc_total) {
+        res.status(400).send({message: "El campo uc_total en el detalle otros debe tener valor"});
+      }
+      if (!detalle_otros[0].cantidad) {
+        res.status(400).send({message: "El campo cantidad en el detalle otros debe tener valor"});
+      }
+    }
+    const encabezado_reporte_diario = {
+      fecha_reporte: req.body.fecha_reporte?String(req.body.fecha_reporte):undefined,
+      jefe_faena: req.body.jefe_faena?Number(req.body.jefe_faena):undefined,
+      sdi: req.body.sdi?String(req.body.sdi):undefined,
+      gestor_cliente: req.body.gestor_cliente?String(req.body.gestor_cliente):undefined,
+      id_area: req.body.id_area?Number(req.body.id_area):undefined,
+      brigada_pesada: req.body.brigada_pesada?Boolean(req.body.brigada_pesada):undefined,
+      observaciones: req.body.observaciones?String(req.body.observaciones):undefined,
+      entregado_por_persona: req.body.entregado_por_persona?String(req.body.entregado_por_persona):undefined,
+      fecha_entregado: req.body.fecha_entregado?String(req.body.fecha_entregado):undefined,
+      revisado_por_persona: req.body.revisado_por_persona?String(req.body.revisado_por_persona):undefined,
+      fecha_revisado: (req.body.fecha_revisado?String(req.body.fecha_revisado):undefined),
+      sector: req.body.sector?String(req.body.sector):undefined,
+      hora_salida_base: req.body.hora_salida_base?String(req.body.hora_salida_base):undefined,
+      hora_llegada_terreno: req.body.hora_llegada_terreno?String(req.body.hora_llegada_terreno):undefined,
+      hora_salida_terreno: req.body.hora_salida_terreno?String(req.body.hora_salida_terreno):undefined,
+      hora_llegada_base: req.body.hora_llegada_base?String(req.body.hora_llegada_base):undefined,
+      alimentador: req.body.alimentador?String(req.body.alimentador):undefined,
+      comuna: req.body.comuna?String(req.body.comuna):undefined,
+      num_documento: req.body.num_documento?String(req.body.num_documento):undefined,
+      flexiapp: flexiapp?String(flexiapp):undefined
+  }
+
+      const sequelize = db.sequelize;
+      const result = await sequelize.transaction(async () => {
+
+      let salida = {};
+      
+      // realizar la actualizacion del encabezado por id
+      const encabezadoReporteDiario = await EncabezadoReporteDiario.update(encabezado_reporte_diario, {
+        where: { id: id }
+      }).then(async data => {
+        if (data[0] === 1) {
+          if (detalle_actividad){
+            //primer debe borrar los regisatros que tenga asociado el encabezado
+            await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
+            //luego volver a insertar los registros
+            for (const element of detalle_actividad) {
+              const det_actividad = {
+                id_encabezado_rep: Number(id),
+                tipo_operacion: Number(element.clase),
+                id_actividad: Number(element.actividad),
+                cantidad: Number(element.cantidad)
+              }
+              await DetalleReporteDiarioActividad.create(det_actividad);
+            }
+          }
+          if (detalle_otros){
+            //primer debe borrar los regisatros que tenga asociado el encabezado
+            await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id } } );
+            //luego volver a insertar los registros
+            for (const element of detalle_otros) {
+              const det_otros = {
+                id_encabezado_rep: Number(id),
+                glosa: String(element.glosa),
+                uc_unitaria: Number(element.uc_unitaria),
+                total_uc: Number(element.uc_total),
+                cantidad: Number(element.cantidad)
+              }
+              await DetalleRporteDiarioOtrasActividades.create(det_otros);
+            }
+          }
+          console.log('data ok: ', data);
+          salida = { message: "Obra actualizada" }
+          //return { message: "Obra actualizada" }
+          //return encabezadoReporteDiario;
+        } else {
+          console.log('data not ok: ', data);
+          //return { message: `No existe una obra con el id ${id}` }
+          salida = { message: `No existe una obra con el id ${id}` }
+        }
+      }).catch(err => {
+        console.log('catch err: ', err);
+        //return { message: err }
+        salida = { message: err }
+      });
+      return salida;
+    });
+    console.log('result: ', result);
+    if (result.message==="Obra actualizada") {
+      res.status(200).send(result);
+    }else {
+      res.status(400).send(result);
+    }
+  }catch (error) {
+    console.log('catch error: ', error);
+    res.status(500).send(error);
+  }
+}
+/*********************************************************************************** */
 /* Borra un reporte diario
 ;
 */
 exports.deleteEncabezadoReporteDiario = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
-      #swagger.description = 'Borra un encabezado de reporte diario por ID' */
+      #swagger.description = 'Borra un encabezado de reporte diario y sus detalles por ID' */
   try{
     const id = req.params.id;
-    EncabezadoReporteDiario.destroy({
-        where: { id: id }
-      }).then(data => {
-        console.log('data', data);
-        if (data > 0) {
-          res.send({ message: `Reporte eliminado`});
-        } else {
-          res.send({ message: `No existe el reporte con id ${id}` });
-        }
-      }).catch(err => {
-        res.status(500).send({ message: err.message });
-      })
+
+    //Primer debe eliminar el detalle actividad por id de encabezado, luego borrar el detalle otros y por ultimo el encabezado
+    const result = await sequelize.transaction(async () => {
+        let salida = {};
+        await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
+        await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id } } );
+        await EncabezadoReporteDiario.destroy({
+          where: { id: id }
+        }).then(data => {
+          if (data > 0) {
+            console.log('data ok: ', data);
+            salida = { message: `Reporte eliminado`}
+          } else {
+            salida = { message: `No existe el reporte con id ${id}` }
+          }
+        });
+        return salida;
+      });
+    if (result.message==="Reporte eliminado") {
+      res.status(200).send(result);
+    }else {
+      res.status(400).send(result);
+    }
   }catch (error) {
     res.status(500).send(error);
   }
