@@ -45,9 +45,10 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
                   fecha_reporte: String(element.fecha_reporte),
                   jefe_faena: element.jefe_faena,
                   sdi: String(element.sdi),
-                  gestor_cliente: String(element.gestor_cliente),
-                  id_area: element.id_area, //json {"id": id, "descripcion": descripcion}
-                  brigada_pesada: Boolean(element.brigada_pesada),
+                  supervisor: String(element.revisado_por_persona),
+                  ito_mandante: String(element.gestor_cliente),
+                  area: element.id_area, //json {"id": id, "descripcion": descripcion}
+                  brigada_pesada: element.brigada_pesada?{ id: 2, descripcion: 'PESADA' }:{ id: 1, descripcion: 'LIVIANA'},
                   observaciones: String(element.observaciones),
                   entregado_por_persona: String(element.entregado_por_persona),
                   fecha_entregado: String(element.fecha_entregado),
@@ -143,9 +144,10 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
               fecha_reporte: String(element.fecha_reporte),
               jefe_faena: element.jefe_faena,
               sdi: String(element.sdi),
-              gestor_cliente: String(element.gestor_cliente),
-              id_area: element.id_area, //json {"id": id, "descripcion": descripcion}
-              brigada_pesada: Boolean(element.brigada_pesada),
+              supervisor: String(element.revisado_por_persona),
+              ito_mandante: String(element.gestor_cliente),
+              area: element.id_area, //json {"id": id, "descripcion": descripcion}
+              brigada_pesada: element.brigada_pesada?{ id: 2, descripcion: 'PESADA' }:{ id: 1, descripcion: 'LIVIANA'},
               observaciones: String(element.observaciones),
               entregado_por_persona: String(element.entregado_por_persona),
               fecha_entregado: String(element.fecha_entregado),
