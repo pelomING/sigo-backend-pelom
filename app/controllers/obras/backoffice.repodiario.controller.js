@@ -464,7 +464,8 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             return;
           }
         };
-        const detalle_actividad = JSON.stringify(req.body.det_actividad);
+        //const detalle_actividad = JSON.stringify(req.body.det_actividad);
+        const detalle_actividad = req.body.det_actividad;
         if (!detalle_actividad[0]) {
           res.status(400).send({message: "El detalle debe tener al menos una actividad"});
           return;
