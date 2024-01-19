@@ -90,10 +90,12 @@ db.estadoVisita = require("./obras/estadoVisita.model.js")(sequelize, Sequelize)
 db.jefesFaena = require("./obras/jefesFaena.model.js")(sequelize, Sequelize);
 db.maestroActividad = require("./obras/maestroActividad.model.js")(sequelize, Sequelize);
 db.obra = require("./obras/obra.model.js")(sequelize, Sequelize);
+db.recargo = require("./obras/recargo.model.js")(sequelize, Sequelize);
 db.segmento = require("./obras/segmento.model.js")(sequelize, Sequelize);
 db.tipoActividad = require("./obras/tipoActividad.model.js")(sequelize, Sequelize);
 db.tipoObra = require("./obras/tipoObra.model.js")(sequelize, Sequelize);
 db.tipoOperacion = require("./obras/tipoOperacion.model.js")(sequelize, Sequelize);
+db.tipoRecargo = require("./obras/tipoRecargo.model.js")(sequelize, Sequelize);
 db.tipoTrabajo = require("./obras/tipoTrabajo.model.js")(sequelize, Sequelize);
 db.visitaTerreno = require("./obras/visitaTerreno.model.js")(sequelize, Sequelize);
 

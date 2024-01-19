@@ -4,6 +4,7 @@ const backofficeObrasController = require("../controllers/obras/backoffice.obras
 const backofficeBomController = require("../controllers/obras/backoffice.bom.controller");
 const backofficeTerrenoController = require("../controllers/obras/backoffice.terreno.controller");
 const backofficeRepodiarioController = require("../controllers/obras/backoffice.repodiario.controller");
+const backofficeEstadopagoController = require("../controllers/obras/backoffice.estadopago.controller");
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -149,8 +150,18 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/repodiario/v1/allareas", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllTipoTrabajo);
 
-
-}
 }
 
 
+///****************************************** Estado de Pago      */
+
+    // Obtiene todos los tipos de recargo
+    app.get("/api/obras/backoffice/estadopago/v1/alltiporecargo", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.findAllTipoRecargo);
+
+    // Obtiene todos los Recargos
+    app.get("/api/obras/backoffice/estadopago/v1/allrecargos", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.findAllRecargo);
+
+    // Genera un nuevo encabezado para estado de pago
+    app.get("/api/obras/backoffice/estadopago/v1/nuevoencabezado", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.generaNuevoEncabezadoEstadoPago);
+
+}
