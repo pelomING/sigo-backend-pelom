@@ -252,3 +252,35 @@ exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
       }
 
 }
+/*********************************************************************************** */
+/* Graba un estado de pago
+    POST /api/obras/backoffice/estadopago/v1/creaestadopago
+*/
+exports.creaEstadoPago = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Graba un estado de pago' */
+  try {
+    const datos = {
+      id_obra: req.body.id_obra,
+      fecha_estado_pago: "2023-12-30",
+      cliente: req.body.cliente,
+      fecha_asignacion: req.body.fecha_asignacion,
+      tipo_trabajo: req.body.tipo_trabajo,
+      segmento: req.body.segmento,
+      solicitado_por: req.body.solicitado_por,
+      ot_sdi: req.body.ot_sdi,
+      supervisor_pelom: req.body.supervisor_pelom,
+      comuna: req.body.comuna,
+      direccion: req.body.direccion,
+      flexiapp: req.body.flexiapp,
+      fecha_ejecucion: req.body.fecha_ejecucion,
+      jefe_delegacion: req.body.jefe_delegacion,
+      jefe_faena: req.body.jefe_faena,
+      codigo_pelom: req.body.codigo_pelom     
+    }
+    res.status(200).send(datos);
+    // Your code here to handle the creation of a new estado de pago
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
