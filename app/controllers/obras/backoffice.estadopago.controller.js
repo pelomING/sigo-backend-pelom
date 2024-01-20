@@ -173,7 +173,7 @@ exports.getAllActividadesByIdObra = async (req, res) => {
                         unidad: String(element.unidad),
                         cantidad: Number(element.cantidad),
                         unitario: Number(element.unitario),
-                        total: Number(element.cantidad) * Number(element.unitario)
+                        total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2))
                         
                       }
                       salida.push(detalle_salida);
