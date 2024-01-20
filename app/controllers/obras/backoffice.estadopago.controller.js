@@ -80,7 +80,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
       };
     const sql = "select o.id as id_obra, o.codigo_obra as codigo_obra, o.nombre_obra as nombre_obra, row_to_json(d) \
     as cliente, fecha_llegada::text as fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, \
-    gestor_cliente as solicitado_por, numero_ot as ot_sdi, row_to_json(cc) as supervisor_pelom, row_to_json(c) \
+    gestor_cliente as solicitado_por, ('{\"' || numero_ot || '\"}')::character varying[] as ot_sdi, row_to_json(cc) as supervisor_pelom, row_to_json(c) \
     as comuna, ubicacion as direccion, '{\"CGE-0000-234\", \"CGE-0000-456\"}'::character varying[] as flexiapp, \
     fecha_termino as fecha_ejecucion, null as jefe_delegacion, (SELECT row_to_json(jf) as jefe_faena FROM \
     obras.encabezado_reporte_diario erd join obras.jefes_faena jf on erd.jefe_faena = jf.id	where id_obra = 1 \
@@ -105,7 +105,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                     tipo_trabajo: element.tipo_trabajo,
                     segmento: element.segmento,
                     solicitado_por: String(element.solicitado_por),
-                    ot_sdi: String(element.ot_sdi),
+                    ot_sdi: element.ot_sdi,
                     supervisor_pelom: element.supervisor_pelom,
                     comuna: element.comuna,
                     direccion: String(element.direccion),
