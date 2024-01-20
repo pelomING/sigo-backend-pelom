@@ -713,11 +713,8 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         }
         flexiapp = flexiapp + "}"
     };
-    let detalle_actividad;
-    if (req.body.det_actividad){
-      detalle_actividad = JSON.stringify(req.body.det_actividad);
-      console.log(detalle_actividad);
-      console.log(detalle_actividad[0]);
+    let detalle_actividad = req.body.det_actividad;
+    if (detalle_actividad){
       if (!detalle_actividad[0]) {
         res.status(400).send({message: "El detalle debe tener al menos una actividad"});
         return;
@@ -739,9 +736,8 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         return;
       }
     }
-    let detalle_otros;
-    if (req.body.det_otros){
-      detalle_otros = JSON.stringify(req.body.det_otros);
+    let detalle_otros = req.body.det_otros;
+    if (detalle_otros){
       if (!detalle_otros[0]) {
         res.status(400).send({message: "El detalle otros debe tener al menos una actividad"});
       }
@@ -780,6 +776,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       num_documento: req.body.num_documento?String(req.body.num_documento):undefined,
       flexiapp: flexiapp?String(flexiapp):undefined
   }
+  console.log('encabezado_reporte_diario', encabezado_reporte_diario);
 
       const sequelize = db.sequelize;
       const result = await sequelize.transaction(async () => {
@@ -787,48 +784,40 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       let salida = {};
       
       // realizar la actualizacion del encabezado por id
-      const encabezadoReporteDiario = await EncabezadoReporteDiario.update(encabezado_reporte_diario, {
+      await EncabezadoReporteDiario.update(encabezado_reporte_diario, {
         where: { id: id }
       }).then(async data => {
-        if (data[0] === 1) {
-          if (detalle_actividad){
-            //primer debe borrar los regisatros que tenga asociado el encabezado
-            await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
-            //luego volver a insertar los registros
-            for (const element of detalle_actividad) {
-              const det_actividad = {
-                id_encabezado_rep: Number(id),
-                tipo_operacion: Number(element.clase),
-                id_actividad: Number(element.actividad),
-                cantidad: Number(element.cantidad)
-              }
-              await DetalleReporteDiarioActividad.create(det_actividad);
-            }
-          }
-          if (detalle_otros){
-            //primer debe borrar los regisatros que tenga asociado el encabezado
-            await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id } } );
-            //luego volver a insertar los registros
-            for (const element of detalle_otros) {
-              const det_otros = {
-                id_encabezado_rep: Number(id),
-                glosa: String(element.glosa),
-                uc_unitaria: Number(element.uc_unitaria),
-                total_uc: Number(element.uc_total),
-                cantidad: Number(element.cantidad)
-              }
-              await DetalleRporteDiarioOtrasActividades.create(det_otros);
-            }
-          }
-          console.log('data ok: ', data);
           salida = { message: "Obra actualizada" }
-          //return { message: "Obra actualizada" }
-          //return encabezadoReporteDiario;
-        } else {
-          console.log('data not ok: ', data);
-          //return { message: `No existe una obra con el id ${id}` }
-          salida = { message: `No existe una obra con el id ${id}` }
-        }
+          //actualizar detalles
+            if (detalle_actividad){
+              //primer debe borrar los regisatros que tenga asociado el encabezado
+              await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
+              //luego volver a insertar los registros
+              for (const element of detalle_actividad) {
+                const det_actividad = {
+                  id_encabezado_rep: Number(id),
+                  tipo_operacion: Number(element.clase),
+                  id_actividad: Number(element.actividad),
+                  cantidad: Number(element.cantidad)
+                }
+                await DetalleReporteDiarioActividad.create(det_actividad);
+              }
+            }
+            if (detalle_otros){
+              //primer debe borrar los regisatros que tenga asociado el encabezado
+              await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id } } );
+              //luego volver a insertar los registros
+              for (const element of detalle_otros) {
+                const det_otros = {
+                  id_encabezado_rep: Number(id),
+                  glosa: String(element.glosa),
+                  uc_unitaria: Number(element.uc_unitaria),
+                  total_uc: Number(element.uc_total),
+                  cantidad: Number(element.cantidad)
+                }
+                await DetalleRporteDiarioOtrasActividades.create(det_otros);
+              }
+            }
       }).catch(err => {
         console.log('catch err: ', err);
         //return { message: err }

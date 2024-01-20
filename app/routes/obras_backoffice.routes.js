@@ -164,4 +164,10 @@ module.exports = function(app) {
     // Genera un nuevo encabezado para estado de pago
     app.get("/api/obras/backoffice/estadopago/v1/nuevoencabezado", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.generaNuevoEncabezadoEstadoPago);
 
+    // Obtiene todas las actividades no adicionales para un estado de pago
+    app.get("/api/obras/backoffice/estadopago/v1/allactividadesporobra", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.getAllActividadesByIdObra);
+
+    // Obtiene todas las actividades adicionales para un estado de pago
+    app.get("/api/obras/backoffice/estadopago/v1/allactividadesadicionales", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.getAllActividadesAdicionalesByIdObra);
+
 }

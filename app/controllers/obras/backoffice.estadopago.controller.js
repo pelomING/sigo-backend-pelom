@@ -128,3 +128,127 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
     res.status(500).send(error);
   }
 }
+/*********************************************************************************** */
+/* Obtiene todas las actividades no adicionales para un estado de pago
+    GET /api/obras/backoffice/estadopago/v1/allactividades
+*/
+
+exports.getAllActividadesByIdObra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Obtiene todas las actividades no adicionales para un estado de pago' */
+      try {
+        const id_obra = req.query.id_obra;
+        const campos = [
+            'id_obra'
+          ];
+          for (const element of campos) {
+            if (!req.query[element]) {
+              res.status(400).send({
+                message: "No puede estar nulo el campo " + element
+              });
+              return;
+            }
+          };
+        const sql = "select top.clase, ta.descripcion tipo, ma.actividad, mu.codigo_corto as unidad, e.cantidad, \
+        case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' then ma.uc_retiro \
+        when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario from \
+        (SELECT drda.tipo_operacion, drda.id_actividad, sum(drda.cantidad) as cantidad FROM \
+        obras.encabezado_reporte_diario erd join obras.detalle_reporte_diario_actividad drda on erd.id = \
+        drda.id_encabezado_rep WHERE id_obra = " + id_obra + " group by drda.tipo_operacion, drda.id_actividad) e \
+        join obras.maestro_actividades ma on e.id_actividad = ma.id join obras.tipo_operacion top on \
+        e.tipo_operacion = top.id join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join \
+        obras.maestro_unidades mu on ma.id_unidad = mu.id WHERE ta.id <> 9";
+            const { QueryTypes } = require('sequelize');
+            const sequelize = db.sequelize;
+            const actividades = await sequelize.query(sql, { type: QueryTypes.SELECT });
+            let salida = [];
+            if (actividades) {
+                
+                for (const element of actividades) {
+          
+                      const detalle_salida = {
+                        clase: String(element.clase),
+                        tipo: String(element.tipo),
+                        actividad: String(element.actividad),
+                        unidad: String(element.unidad),
+                        cantidad: Number(element.cantidad),
+                        unitario: Number(element.unitario),
+                        total: Number(element.cantidad) * Number(element.unitario)
+                        
+                      }
+                      salida.push(detalle_salida);
+                };
+              }
+              if (salida===undefined){
+                res.status(500).send("Error en la consulta (servidor backend)");
+              }else{
+                res.status(200).send(salida);
+              }
+      } catch (error) {
+        res.status(500).send(error);
+      }
+}
+
+/*********************************************************************************** */
+/* Obtiene todas las actividades adicionales para un estado de pago
+    GET /api/obras/backoffice/estadopago/v1/allactividadesadicionales
+*/
+exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Obtiene todas las actividades adicionales para un estado de pago' */
+      try {
+        const id_obra = req.query.id_obra;
+        const campos = [
+            'id_obra'
+          ];
+          for (const element of campos) {
+            if (!req.query[element]) {
+              res.status(400).send({
+                message: "No puede estar nulo el campo " + element
+              });
+              return;
+            }
+          };
+        const sql = "select top.clase, ta.descripcion tipo, ma.actividad, mu.codigo_corto as unidad, e.cantidad, \
+        case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' then ma.uc_retiro when top.clase = 'T' \
+        then ma.uc_traslado else 999::double precision end as unitario from (SELECT drda.tipo_operacion, \
+          drda.id_actividad, sum(drda.cantidad) as cantidad FROM obras.encabezado_reporte_diario erd \
+          join obras.detalle_reporte_diario_actividad drda on erd.id = drda.id_encabezado_rep WHERE \
+          erd.id_obra = " + id_obra + " group by drda.tipo_operacion, drda.id_actividad) e join obras.maestro_actividades ma \
+          on e.id_actividad = ma.id join obras.tipo_operacion top on e.tipo_operacion = top.id join obras.tipo_actividad \
+          ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id WHERE ta.id = 9 \
+          UNION	\
+          select 'I'::char as clase, 'Adicionales'::varchar as tipo, glosa as actividad, 'CU'::varchar, cantidad, \
+          uc_unitaria as unitario from obras.detalle_reporte_diario_otras_actividades drdoa join \
+          obras.encabezado_reporte_diario erd on drdoa.id_encabezado_rep = erd.id WHERE erd.id_obra = " + id_obra + " order by 1,2,3";
+            const { QueryTypes } = require('sequelize');
+            const sequelize = db.sequelize;
+            const actividades = await sequelize.query(sql, { type: QueryTypes.SELECT });
+            let salida = [];
+            if (actividades) {
+                
+                for (const element of actividades) {
+          
+                      const detalle_salida = {
+                        clase: String(element.clase),
+                        tipo: String(element.tipo),
+                        actividad: String(element.actividad),
+                        unidad: String(element.unidad),
+                        cantidad: Number(element.cantidad),
+                        unitario: Number(element.unitario),
+                        total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2))
+                        
+                      }
+                      salida.push(detalle_salida);
+                };
+              }
+              if (salida===undefined){
+                res.status(500).send("Error en la consulta (servidor backend)");
+              }else{
+                res.status(200).send(salida);
+              }
+      } catch (error) {
+        res.status(500).send(error);
+      }
+
+}
