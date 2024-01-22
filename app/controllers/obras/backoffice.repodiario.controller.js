@@ -825,7 +825,13 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
     if (result.message==="Obra actualizada") {
       res.status(200).send(result);
     }else {
-      res.status(400).send(result);
+      console.log(result.message.parent.detail);
+      if (result.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
+        res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
+      }else{
+        res.status(400).send(result);
+      }
+      
     }
   }catch (error) {
     res.status(500).send(error);
