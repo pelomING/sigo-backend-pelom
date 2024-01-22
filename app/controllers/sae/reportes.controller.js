@@ -104,7 +104,7 @@ exports.findAllJornadas = async (req, res) => {
               salida.push(detalle_salida);
 
           }else {
-              console.log('else ok', element.id);
+              //console.log('else ok', element.id);
               salida=undefined;
               break;
           }
@@ -473,7 +473,7 @@ exports.creaEvento = async (req, res) => {
       }
     };
 
-    console.log('datos: ' + req.body);
+
     const evento = {
       numero_ot: req.body.numero_ot,
       tipo_evento: req.body.tipo_evento,
@@ -547,7 +547,7 @@ exports.creaEvento = async (req, res) => {
         }*/
     const { Op } = require("sequelize");
     try {
-      console.log('body: ' + req.body);
+
       const id = req.params.id;
       if (req.body.numero_ot) {
         const num_ot = await Eventos.findOne({
@@ -586,7 +586,7 @@ exports.creaEvento = async (req, res) => {
         trabajo_solicitado: req.body.trabajo_solicitado,
         trabajo_realizado: req.body.trabajo_realizado
       };
-      console.log(evento)
+
       await Eventos.update(evento, { where: { id: id } })
         .then(data => {
           if (data == 1) {
@@ -1118,7 +1118,7 @@ exports.creaObservaciones = async (req, res) => {
         return;
     }*/
 
-    console.log('param_fecha_ini', param_fecha_ini);
+
 
     const observaciones = {
       detalle: req.body.detalle,
@@ -1240,7 +1240,7 @@ exports.findObservacionesByParams = async (req, res) => {
           }
         }
         const where = sql_array.join(" AND ");
-        console.log('where => ', where, param);
+
         if (sql_array.length === 0) {
           res.status(500).send("Debe incluir algun parametro para consultar");
         }else {
@@ -1379,7 +1379,7 @@ exports.permanenciaByBrigada = async (req, res) => {
     rj.brigada = br.id JOIN _comun.servicios s ON br.id_servicio = s.id WHERE brigada is not null and s.sae and \
     id_estado_resultado is null and rj.tipo_turno = 1 and rj.estado <> 0 " + condicion_fecha + ") as rj group by id_brigada) as tabla using (id) order by id";
 
-    console.log('sl permanencia', sql);
+
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const permanencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -2084,12 +2084,17 @@ exports. findRepResumen = async (req, res) => {
               valor: Number(0)
             }
             salida.push(detalle_salida);
-            console.log('salida',salida);
-            //let total = salida.reduce(((total, num) => total + num.valor), 0);
+            /*
             let total = salida.filter((item) => item.orden > 7).reduce(((total, num) => total + num.valor), 0)
             console.log('total',total);
             let valor_neto = (total/1.19).toFixed(0);
             let iva = Number(total - valor_neto).toFixed(0);  
+            */
+
+            let valor_neto = salida.filter((item) => item.orden > 7).reduce(((total, num) => total + num.valor), 0)
+            let total = Number((valor_neto * 1.19).toFixed(0));
+            let iva = Number(total - valor_neto).toFixed(0);
+
 
             detalle_salida = {
               orden: Number(11),
@@ -2298,7 +2303,6 @@ exports.findCobroAdicionalByParams = async (req, res) => {
         }
       }
       const where = sql_array.join(" AND ");
-      console.log('where => ', where, param);
       if (sql_array.length === 0) {
         res.status(500).send("Debe incluir algun parametro para consultar");
       }else {
@@ -3075,7 +3079,6 @@ exports.cierraEstadoPago = async (req, res) => {
             update sae.reporte_jornada set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null and rj.estado <> 0 " + condicion_fecha_permanencia + "; \
             update sae.reporte_eventos set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null and re.estado <> 0 " + condicion_fecha + "; \
             update sae.reporte_observaciones set id_estado_resultado = " + data.id + " where id_estado_resultado is null " + condicion_fecha + ";";
-            console.log(sql2);
 
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
@@ -3307,7 +3310,6 @@ exports.findObservacionesHistorial = async (req, res) => {
           }
         }
         const where = sql_array.join(" AND ");
-        console.log('where => ', where, param);
         if (sql_array.length === 0) {
           res.status(500).send("Debe incluir algun parametro para consultar");
         }else {
@@ -3793,10 +3795,14 @@ exports. findRepResumenHistorial = async (req, res) => {
               valor: Number(0)
             }
             salida.push(detalle_salida);
-            //let total = salida.reduce(((total, num) => total + num.valor), 0);
+/*
             let total = salida.filter((item) => item.orden > 7).reduce(((total, num) => total + num.valor), 0)
             let valor_neto = (total/1.19).toFixed(0);
             let iva = Number(total - valor_neto).toFixed(0);  
+            */
+            let valor_neto = salida.filter((item) => item.orden > 7).reduce(((total, num) => total + num.valor), 0)
+            let total = Number((valor_neto * 1.19).toFixed(0));
+            let iva = Number(total - valor_neto).toFixed(0);
 
             detalle_salida = {
               orden: Number(11),
