@@ -180,7 +180,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
        jf.id WHERE "+b;
 
         //console.log("sql: "+sql);
-        const { QueryTypes } = require('sequelize');
+        const { QueryTypes } = require('sequelize'); 
         const sequelize = db.sequelize;
         const encabezadoReporte = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
         let salida = [];
@@ -356,12 +356,10 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
         await sequelize.query(sql, {
           type: QueryTypes.SELECT
         }).then(data => {
-          console.log('data', data);
           encabezado_reporte_diario_id = data[0].valor;
         }).catch(err => {
           res.status(500).send({ message: err.message });
         })
-        console.log('id', encabezado_reporte_diario_id);
 
         const encabezado_reporte_diario = {
             id: encabezado_reporte_diario_id,
@@ -549,12 +547,10 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         await sequelize.query(sql, {
           type: QueryTypes.SELECT
         }).then(data => {
-          console.log('data', data);
           encabezado_reporte_diario_id = data[0].valor;
         }).catch(err => {
           res.status(500).send({ message: err.message });
         })
-        console.log('id', encabezado_reporte_diario_id);
 
         const encabezado_reporte_diario = {
             id: encabezado_reporte_diario_id,
@@ -699,7 +695,6 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
             }
         } */
   try{
-    console.log('updateEncabezadoReporteDiario_V2', req.body);
     const id = req.params.id;
     let flexiapp = undefined;
     if (req.body.flexiapp){
@@ -713,8 +708,9 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         }
         flexiapp = flexiapp + "}"
     };
-    /*
+    
     let detalle_actividad = req.body.det_actividad;
+    /*
     if (detalle_actividad){
       if (!detalle_actividad[0]) {
         res.status(400).send({message: "El detalle debe tener al menos una actividad"});
@@ -736,8 +732,9 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
         return;
       }
-    }
+    }*/
     let detalle_otros = req.body.det_otros;
+    /*
     if (detalle_otros){
       if (!detalle_otros[0]) {
         res.status(400).send({message: "El detalle otros debe tener al menos una actividad"});
@@ -778,7 +775,6 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       num_documento: req.body.num_documento?String(req.body.num_documento):undefined,
       flexiapp: flexiapp?String(flexiapp):undefined
   }
-  console.log('encabezado_reporte_diario', encabezado_reporte_diario);
 
       const sequelize = db.sequelize;
       const result = await sequelize.transaction(async () => {
@@ -821,20 +817,17 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
               }
             }
       }).catch(err => {
-        console.log('catch err: ', err);
         //return { message: err }
         salida = { message: err }
       });
       return salida;
     });
-    console.log('result: ', result);
     if (result.message==="Obra actualizada") {
       res.status(200).send(result);
     }else {
       res.status(400).send(result);
     }
   }catch (error) {
-    console.log('catch error: ', error);
     res.status(500).send(error);
   }
 }
@@ -857,7 +850,6 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
           where: { id: id }
         }).then(data => {
           if (data > 0) {
-            console.log('data ok: ', data);
             salida = { message: `Reporte eliminado`}
           } else {
             salida = { message: `No existe el reporte con id ${id}` }
@@ -1044,7 +1036,6 @@ exports.findDetalleReporteDiarioActividadPorParametros = async (req, res) => {
         ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) ma on dra.id_actividad = \
         ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id WHERE "+b;
 
-        console.log("sql: "+sql);
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const detalleReporteDiarioActividad = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
@@ -1121,7 +1112,7 @@ exports.findDetalleReporteDiarioOtrasPorParametros = async (req, res) => {
         'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades drd \
         join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE "+b;
 
-        console.log("sql: "+sql);
+
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const detalleReporteDiarioActividad = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
