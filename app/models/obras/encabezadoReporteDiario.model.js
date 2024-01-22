@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
         },
         jefe_faena: {
-            type: Sequelize.STRING
+            type: Sequelize.INTEGER
         },
         sdi: {
             type: Sequelize.STRING

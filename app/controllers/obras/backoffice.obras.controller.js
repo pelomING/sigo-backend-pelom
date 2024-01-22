@@ -19,15 +19,16 @@ exports.findAllObra = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Obras']
       #swagger.description = 'Devuelve todas las obras de la tabla de obras' */
     try {
-      const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, gestor_cliente, \
+      const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, o.gestor_cliente, \
       numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, fecha_termino::text, row_to_json(tt) as tipo_trabajo, \
       persona_envia_info, cargo_persona_envia_info, row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, \
-      row_to_json(c) as comuna, ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada \
-      FROM obras.obras o left join _comun.zonal z on o.zona = z.id left join obras.delegaciones d on o.delegacion = d.id left join \
-      obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left \
-      join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo \
-      left join obras.estado_obra eo on o.estado = eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento \
-      s on o.segmento = s.id WHERE not o.eliminada";
+      row_to_json(c) as comuna, ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
+      case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes FROM obras.obras o left join _comun.zonal z on o.zona = \
+      z.id left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left \
+      join obras.empresas_contratista ec on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on \
+      o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on o.estado = \
+      eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id left join \
+      (select id_obra, count(id) as cuenta from obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra WHERE not o.eliminada";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const obras = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -60,7 +61,8 @@ exports.findAllObra = async (req, res) => {
                 estado: element.estado, //json
                 tipo_obra: element.tipo_obra, //json
                 segmento: element.segmento, //json
-                eliminada: Boolean(element.eliminada) ? true : false
+                eliminada: element.eliminada ? true : false,
+                cantidad_reportes: Number(element.cantidad_reportes)
               }
               salida.push(detalle_salida);
         };
@@ -82,7 +84,38 @@ exports.findAllObra = async (req, res) => {
 */
 exports.createObra = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Obras']
-      #swagger.description = 'Crea una nueva obra' */
+      #swagger.description = 'Crea una nueva obra' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos básicos de una obra',
+            required: true,
+            schema: {
+              codigo_obra: "CGE-123456",
+                nombre_obra: "nombre de la obra",
+                numero_ot: "123456",
+                zona: 1,
+                delegacion: 1,
+                gestor_cliente: "nombre gestor cliente (cge)",
+                numero_aviso: 123456,
+                numero_oc: "123456",
+                monto: 1000,
+                cantidad_uc: 100,
+                fecha_llegada: "2023-10-25",
+                fecha_inicio: "2023-10-25",
+                fecha_termino: "2023-10-25",
+                tipo_trabajo: 1,
+                persona_envia_info: "nombre persona envia info",
+                cargo_persona_envia_info: "cargo persona envia info",
+                empresa_contratista: 1,
+                coordinador_contratista: 1,
+                comuna: "07234",
+                ubicacion: "dirección donde se trabajará en la obra",
+                estado: 1,
+                tipo_obra: 1,
+                segmento: 1
+            }
+        }
+      */
   try {
       let salir = false;
       const campos = [

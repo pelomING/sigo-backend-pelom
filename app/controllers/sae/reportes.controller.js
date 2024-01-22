@@ -2084,7 +2084,10 @@ exports. findRepResumen = async (req, res) => {
               valor: Number(0)
             }
             salida.push(detalle_salida);
-            let total = salida.reduce(((total, num) => total + num.valor), 0);
+            console.log('salida',salida);
+            //let total = salida.reduce(((total, num) => total + num.valor), 0);
+            let total = salida.filter((item) => item.orden > 7).reduce(((total, num) => total + num.valor), 0)
+            console.log('total',total);
             let valor_neto = (total/1.19).toFixed(0);
             let iva = Number(total - valor_neto).toFixed(0);  
 
@@ -3790,7 +3793,8 @@ exports. findRepResumenHistorial = async (req, res) => {
               valor: Number(0)
             }
             salida.push(detalle_salida);
-            let total = salida.reduce(((total, num) => total + num.valor), 0);
+            //let total = salida.reduce(((total, num) => total + num.valor), 0);
+            let total = salida.filter((item) => item.orden > 7).reduce(((total, num) => total + num.valor), 0)
             let valor_neto = (total/1.19).toFixed(0);
             let iva = Number(total - valor_neto).toFixed(0);  
 

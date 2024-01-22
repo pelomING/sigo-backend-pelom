@@ -4,6 +4,7 @@ const backofficeObrasController = require("../controllers/obras/backoffice.obras
 const backofficeBomController = require("../controllers/obras/backoffice.bom.controller");
 const backofficeTerrenoController = require("../controllers/obras/backoffice.terreno.controller");
 const backofficeRepodiarioController = require("../controllers/obras/backoffice.repodiario.controller");
+const backofficeEstadopagoController = require("../controllers/obras/backoffice.estadopago.controller");
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -16,49 +17,51 @@ module.exports = function(app) {
     
 {/***** BACKOFFICE */
     /* Devuelve todos los tipo de obras */
-    app.get("/api/obras/backoffice/v1/alltipoobras", [authJwt.verifyToken], backofficeGeneralController.findAllTipoObra);
+    app.get("/api/obras/backoffice/general/v1/alltipoobras", [authJwt.verifyToken], backofficeGeneralController.findAllTipoObra);
 
 
-    app.get("/api/obras/backoffice/v1/alltipoperacion", [authJwt.verifyToken], backofficeGeneralController.findAllTipoOperacion);
+    app.get("/api/obras/backoffice/general/v1/alltipoperacion", [authJwt.verifyToken], backofficeGeneralController.findAllTipoOperacion);
 
 
-    app.get("/api/obras/backoffice/v1/alltipoactividad", [authJwt.verifyToken], backofficeGeneralController.findAllTipoActividad);
+    app.get("/api/obras/backoffice/general/v1/alltipoactividad", [authJwt.verifyToken], backofficeGeneralController.findAllTipoActividad);
 
 
-    app.get("/api/obras/backoffice/v1/allmaestroactividad", [authJwt.verifyToken], backofficeGeneralController.findAllMaestroActividad);
+    app.get("/api/obras/backoffice/general/v1/allmaestroactividad", [authJwt.verifyToken], backofficeGeneralController.findAllMaestroActividad);
 
 
-    app.get("/api/obras/backoffice/v1/maestroactividadporid", [authJwt.verifyToken], backofficeGeneralController.findOneMaestroActividad);
+    app.get("/api/obras/backoffice/general/v1/maestroactividadporid", [authJwt.verifyToken], backofficeGeneralController.findOneMaestroActividad);
 
 
-    app.get("/api/obras/backoffice/v1/maestroactividadporactividad", [authJwt.verifyToken], backofficeGeneralController.findAllMaestroActividadActividad);
+    app.get("/api/obras/backoffice/general/v1/maestroactividadporactividad", [authJwt.verifyToken], backofficeGeneralController.findAllMaestroActividadActividad);
 
 
-    app.get("/api/obras/backoffice/v1/allzonales", [authJwt.verifyToken], backofficeGeneralController.findAllZonal);
+    app.get("/api/obras/backoffice/general/v1/allzonales", [authJwt.verifyToken], backofficeGeneralController.findAllZonal);
 
 
-    app.get("/api/obras/backoffice/v1/alldelegaciones", [authJwt.verifyToken], backofficeGeneralController.findAllDelegacion);
+    app.get("/api/obras/backoffice/general/v1/alldelegaciones", [authJwt.verifyToken], backofficeGeneralController.findAllDelegacion);
 
 
-    app.get("/api/obras/backoffice/v1/alltipotrabajos", [authJwt.verifyToken], backofficeGeneralController.findAllTipoTrabajo);
+    app.get("/api/obras/backoffice/general/v1/alltipotrabajos", [authJwt.verifyToken], backofficeGeneralController.findAllTipoTrabajo);
 
 
-    app.get("/api/obras/backoffice/v1/allempresacontratistas", [authJwt.verifyToken], backofficeGeneralController.findAllEmpresaContratista);
+    app.get("/api/obras/backoffice/general/v1/allempresacontratistas", [authJwt.verifyToken], backofficeGeneralController.findAllEmpresaContratista);
 
 
-    app.get("/api/obras/backoffice/v1/allcoordinadorcontratistas", [authJwt.verifyToken], backofficeGeneralController.findAllCoordinadorContratista);
+    app.get("/api/obras/backoffice/general/v1/allcoordinadorcontratistas", [authJwt.verifyToken], backofficeGeneralController.findAllCoordinadorContratista);
 
 
-    app.get("/api/obras/backoffice/v1/allcomunas", [authJwt.verifyToken], backofficeGeneralController.findAllComuna);
+    app.get("/api/obras/backoffice/general/v1/allcomunas", [authJwt.verifyToken], backofficeGeneralController.findAllComuna);
 
 
-    app.get("/api/obras/backoffice/v1/allestados", [authJwt.verifyToken], backofficeGeneralController.findAllEstadoObra);
+    app.get("/api/obras/backoffice/general/v1/allestados", [authJwt.verifyToken], backofficeGeneralController.findAllEstadoObra);
 
 
-    app.get("/api/obras/backoffice/v1/allestadovisitas", [authJwt.verifyToken], backofficeGeneralController.findAllEstadoVisita);
+    app.get("/api/obras/backoffice/general/v1/allestadovisitas", [authJwt.verifyToken], backofficeGeneralController.findAllEstadoVisita);
 
 
-    app.get("/api/obras/backoffice/v1/allsegmentos", [authJwt.verifyToken], backofficeGeneralController.findAllSegmento);
+    app.get("/api/obras/backoffice/general/v1/allsegmentos", [authJwt.verifyToken], backofficeGeneralController.findAllSegmento);
+
+    
 
 }
 /*/*********************************************************************************** */
@@ -106,7 +109,7 @@ module.exports = function(app) {
 }
 
 { /*** VISITA TERRENOS ** */
-  app.get("/api/obras/backoffice/v1/allvisitaterreno", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeTerrenoController.findAllVisitaTerreno);
+  app.get("/api/obras/backoffice/v1/allvisitaterreno", [authJwt.verifyToken, authJwt.readObrasBackofficeTerreno], backofficeTerrenoController.findAllVisitaTerreno);
 
   app.get("/api/obras/backoffice/v1/visitaterreno", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeTerrenoController.findVisitaTerrenoByIdObra);
 
@@ -117,29 +120,57 @@ module.exports = function(app) {
 
 {/*** REPORTES DIARIOS ** */
 
-    app.get("/api/obras/backoffice/v1/allreportesdiarios", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllEncabezadoReporteDiario);
+    app.get("/api/obras/backoffice/repodiario/v1/allreportesdiarios", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllEncabezadoReporteDiario);
 
-    app.get("/api/obras/backoffice/v1/reportesdiariosporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllEncabezadoReporteDiarioByParametros);
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllEncabezadoReporteDiarioByParametros);
 
-    app.post("/api/obras/backoffice/v1/creareportediario", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.createEncabezadoReporteDiario);
+    app.post("/api/obras/backoffice/repodiario/v1/creareportediario", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.createEncabezadoReporteDiario_V2);
 
-    app.put("/api/obras/backoffice/v1/actualizareportediario/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.updateEncabezadoReporteDiario);
+    app.put("/api/obras/backoffice/repodiario/v1/actualizareportediario/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.updateEncabezadoReporteDiario_V2);
 
-    app.delete("/api/obras/backoffice/v1/eliminareportediario/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.deleteEncabezadoReporteDiario);
+    app.delete("/api/obras/backoffice/repodiario/v1/eliminareportediario/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.deleteEncabezadoReporteDiario);
 
+    app.get("/api/obras/backoffice/repodiario/v1/allreportesdiariosactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllDetalleReporteDiarioActividad);
 
-    app.get("/api/obras/backoffice/v1/allreportesdiariosactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllDetalleReporteDiarioActividad);
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporid", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findOneDetalleReporteDiarioActividad);
 
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findDetalleReporteDiarioActividadPorParametros);
 
-    app.get("/api/obras/backoffice/v1/reportesdiariosactividadporid", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findOneDetalleReporteDiarioActividad);
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosotrosporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findDetalleReporteDiarioOtrasPorParametros);
 
-    app.get("/api/obras/backoffice/v1/reportesdiariosactividadporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findDetalleReporteDiarioActividadPorParametros);
+    //app.post("/api/obras/backoffice/repodiario/v1/creardetalleactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.createOneDetalleReporteDiarioActividad);
 
-    app.post("/api/obras/backoffice/v1/creardetalleactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.createOneDetalleReporteDiarioActividad);
+    app.get("/api/obras/backoffice/repodiario/v1/alljefesfaena", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllJefesFaena);
 
+    app.get("/api/obras/backoffice/repodiario/v1/alltipooperacion", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllTipoOperacion);
+
+    app.get("/api/obras/backoffice/repodiario/v1/alltipoactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllTipoActividad);
+
+    app.get("/api/obras/backoffice/repodiario/v1/allmaestroactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllMaestroActividad);
+
+    app.get("/api/obras/backoffice/repodiario/v1/allareas", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllTipoTrabajo);
 
 }
-  
+
+
+///****************************************** Estado de Pago      */
+
+    // Obtiene todos los tipos de recargo
+    app.get("/api/obras/backoffice/estadopago/v1/alltiporecargo", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.findAllTipoRecargo);
+
+    // Obtiene todos los Recargos
+    app.get("/api/obras/backoffice/estadopago/v1/allrecargos", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.findAllRecargo);
+
+    // Genera un nuevo encabezado para estado de pago
+    app.get("/api/obras/backoffice/estadopago/v1/nuevoencabezado", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.generaNuevoEncabezadoEstadoPago);
+
+    // Obtiene todas las actividades no adicionales para un estado de pago
+    app.get("/api/obras/backoffice/estadopago/v1/allactividadesporobra", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.getAllActividadesByIdObra);
+
+    // Obtiene todas las actividades adicionales para un estado de pago
+    app.get("/api/obras/backoffice/estadopago/v1/allactividadesadicionales", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.getAllActividadesAdicionalesByIdObra);
+
+    // Graba un estado de pago
+    app.post("/api/obras/backoffice/estadopago/v1/creaestadopago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.creaEstadoPago);
+
 }
-
-

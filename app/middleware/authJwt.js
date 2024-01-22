@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 const db = require("../models");
 const User = db.user;
+const VerificaAuth = db.verificaAuth;
 
 let verifyToken = (req, res, next) => {
   let token = req.session.token;
@@ -199,6 +200,449 @@ let isSupervisorOrAdminOrSistema = async (req, res, next) => {
   }
 };
 
+let readObrasBackofficeTerreno = async (req, res, next) => {
+        let id_user = req.userId;
+        let codigo_api = 'obras.backoffice.terreno';
+        let crud = 'leer';
+        const verificaAuth = await VerificaAuth.findOne({
+          where: {
+            user_id: id_user,
+            codigo: codigo_api,
+            [crud]: true
+          }
+        });
+        if (!verificaAuth) {
+          return res.status(403).send({
+            error: true,
+            message: "No tiene permiso para realizar esta operación"
+          })
+        }else{
+            next();
+        }
+  
+}
+
+let createObrasBackofficeTerreno = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.terreno';
+  let crud = 'crear';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+      next();
+  }
+
+}
+
+let updateObrasBackofficeTerreno = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.terreno';
+  let crud = 'actualizar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+      next();
+  }
+
+}
+
+let deleteObrasBackofficeTerreno = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.terreno';
+  let crud = 'borrar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+      next();
+  }
+
+}
+
+let readObrasBackofficeBom = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.bom';
+  let crud = 'leer';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+      next();
+  }
+
+}
+
+let createObrasBackofficeBom = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.bom';
+  let crud = 'crear';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+      }
+  });
+
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+    next();
+  }
+
+}
+
+let updateObrasBackofficeBom = async (req, res, next) => {
+    let id_user = req.userId;
+    let codigo_api = 'obras.backoffice.bom';
+    let crud = 'actualizar';
+    const verificaAuth = await VerificaAuth.findOne({
+      where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+    });
+    if (!verificaAuth) {
+      return res.status(403).send({
+        error: true,
+        message: "No tiene permiso para realizar esta operación"
+      })
+    }else{
+      next();
+    }
+
+}
+
+let deleteObrasBackofficeBom = async (req, res, next) => {
+    let id_user = req.userId;
+    let codigo_api = 'obras.backoffice.bom';
+    let crud = 'borrar';
+    const verificaAuth = await VerificaAuth.findOne({
+    where: {
+    user_id: id_user,
+    codigo: codigo_api,
+    [crud]: true
+    }
+    });
+    if (!verificaAuth) {
+    return res.status(403).send({
+    error: true,
+    message: "No tiene permiso para realizar esta operación"
+    })
+    }else{
+    next();
+    }
+
+}
+
+let readObrasBackofficeGeneral = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.general';
+  let crud = 'leer';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+      next();
+  }
+
+}
+
+let createObrasBackofficeGeneral = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.general';
+  let crud = 'crear';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+      }
+  });
+
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+    next();
+  }
+
+}
+
+let updateObrasBackofficeGeneral = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.general';
+  let crud = 'actualizar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+    user_id: id_user,
+    codigo: codigo_api,
+    [crud]: true
+  }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+    next();
+  }
+
+}
+
+let deleteObrasBackofficeGeneral = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.general';
+  let crud = 'borrar';
+  const verificaAuth = await VerificaAuth.findOne({
+  where: {
+  user_id: id_user,
+  codigo: codigo_api,
+  [crud]: true
+  }
+  });
+  if (!verificaAuth) {
+  return res.status(403).send({
+  error: true,
+  message: "No tiene permiso para realizar esta operación"
+  })
+  }else{
+  next();
+  }
+
+}
+
+let readObrasBackofficeObras = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.obras';
+  let crud = 'leer';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+      next();
+  }
+
+}
+
+let createObrasBackofficeObras = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.obras';
+  let crud = 'crear';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+      }
+  });
+
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+    next();
+  }
+
+}
+
+let updateObrasBackofficeObras = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.obras';
+  let crud = 'actualizar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+    user_id: id_user,
+    codigo: codigo_api,
+    [crud]: true
+  }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+    next();
+  }
+
+}
+
+let deleteObrasBackofficeObras = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.obras';
+  let crud = 'borrar';
+  const verificaAuth = await VerificaAuth.findOne({
+  where: {
+  user_id: id_user,
+  codigo: codigo_api,
+  [crud]: true
+  }
+  });
+  if (!verificaAuth) {
+  return res.status(403).send({
+  error: true,
+  message: "No tiene permiso para realizar esta operación"
+  })
+  }else{
+  next();
+  }
+
+}
+
+let readObrasBackofficeRepodiario = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.repodiario';
+  let crud = 'leer';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+      next();
+  }
+
+}
+
+let createObrasBackofficeRepodiario = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.repodiario';
+  let crud = 'crear';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+      }
+  });
+
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+    next();
+  }
+
+}
+
+let updateObrasBackofficeRepodiario = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.repodiario';
+  let crud = 'actualizar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+    user_id: id_user,
+    codigo: codigo_api,
+    [crud]: true
+  }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+    next();
+  }
+
+}
+
+let deleteObrasBackofficeRepodiario = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.repodiario';
+  let crud = 'borrar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send({
+      error: true,
+      message: "No tiene permiso para realizar esta operación"
+    })
+  }else{
+  next();
+  }
+
+}
 
 const authJwt = {
   verifyToken,
@@ -208,6 +652,26 @@ const authJwt = {
   isSupervisor,
   isSupervisorOrAdmin,
   isSupervisorOrAdminOrSistema,
-  isSistemaOrAdminSae
+  isSistemaOrAdminSae,
+  readObrasBackofficeTerreno,
+  createObrasBackofficeTerreno,
+  updateObrasBackofficeTerreno,
+  deleteObrasBackofficeTerreno,
+  readObrasBackofficeBom,
+  createObrasBackofficeBom,
+  updateObrasBackofficeBom,
+  deleteObrasBackofficeBom,
+  readObrasBackofficeGeneral,
+  createObrasBackofficeGeneral,
+  updateObrasBackofficeGeneral,
+  deleteObrasBackofficeGeneral,
+  readObrasBackofficeObras,
+  createObrasBackofficeObras,
+  updateObrasBackofficeObras,
+  deleteObrasBackofficeObras,
+  readObrasBackofficeRepodiario,
+  createObrasBackofficeRepodiario,
+  updateObrasBackofficeRepodiario,
+  deleteObrasBackofficeRepodiario
 };
 module.exports = authJwt;

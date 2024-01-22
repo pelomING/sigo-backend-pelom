@@ -529,7 +529,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alltipoobras": {
+    "/api/obras/backoffice/general/v1/alltipoobras": {
       "get": {
         "tags": [
           "Obras - General"
@@ -551,7 +551,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alltipoperacion": {
+    "/api/obras/backoffice/general/v1/alltipoperacion": {
       "get": {
         "tags": [
           "Obras - General"
@@ -573,7 +573,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alltipoactividad": {
+    "/api/obras/backoffice/general/v1/alltipoactividad": {
       "get": {
         "tags": [
           "Obras - General"
@@ -595,7 +595,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allmaestroactividad": {
+    "/api/obras/backoffice/general/v1/allmaestroactividad": {
       "get": {
         "tags": [
           "Obras - General"
@@ -617,7 +617,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/maestroactividadporid": {
+    "/api/obras/backoffice/general/v1/maestroactividadporid": {
       "get": {
         "tags": [
           "Obras - General"
@@ -649,7 +649,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/maestroactividadporactividad": {
+    "/api/obras/backoffice/general/v1/maestroactividadporactividad": {
       "get": {
         "tags": [
           "Obras - General"
@@ -681,7 +681,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allzonales": {
+    "/api/obras/backoffice/general/v1/allzonales": {
       "get": {
         "tags": [
           "Obras - General"
@@ -703,7 +703,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alldelegaciones": {
+    "/api/obras/backoffice/general/v1/alldelegaciones": {
       "get": {
         "tags": [
           "Obras - General"
@@ -725,7 +725,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/alltipotrabajos": {
+    "/api/obras/backoffice/general/v1/alltipotrabajos": {
       "get": {
         "tags": [
           "Obras - General"
@@ -747,7 +747,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allempresacontratistas": {
+    "/api/obras/backoffice/general/v1/allempresacontratistas": {
       "get": {
         "tags": [
           "Obras - General"
@@ -769,7 +769,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allcoordinadorcontratistas": {
+    "/api/obras/backoffice/general/v1/allcoordinadorcontratistas": {
       "get": {
         "tags": [
           "Obras - General"
@@ -791,7 +791,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allcomunas": {
+    "/api/obras/backoffice/general/v1/allcomunas": {
       "get": {
         "tags": [
           "Obras - General"
@@ -813,7 +813,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allestados": {
+    "/api/obras/backoffice/general/v1/allestados": {
       "get": {
         "tags": [
           "Obras - General"
@@ -835,7 +835,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allestadovisitas": {
+    "/api/obras/backoffice/general/v1/allestadovisitas": {
       "get": {
         "tags": [
           "Obras - General"
@@ -857,7 +857,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allsegmentos": {
+    "/api/obras/backoffice/general/v1/allsegmentos": {
       "get": {
         "tags": [
           "Obras - General"
@@ -911,77 +911,102 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Datos básicos de una obra",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "codigo_obra": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "CGE-123456"
                 },
                 "nombre_obra": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre de la obra"
                 },
                 "numero_ot": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "123456"
                 },
                 "zona": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "delegacion": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "gestor_cliente": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre gestor cliente (cge)"
                 },
                 "numero_aviso": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 123456
                 },
                 "numero_oc": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "123456"
                 },
                 "monto": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1000
                 },
                 "cantidad_uc": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 100
                 },
                 "fecha_llegada": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "fecha_inicio": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "fecha_termino": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "tipo_trabajo": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "persona_envia_info": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "nombre persona envia info"
                 },
                 "cargo_persona_envia_info": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "cargo persona envia info"
                 },
                 "empresa_contratista": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "coordinador_contratista": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "comuna": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "07234"
                 },
                 "ubicacion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "dirección donde se trabajará en la obra"
                 },
                 "estado": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "tipo_obra": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "segmento": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 }
               }
             }
@@ -1528,7 +1553,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allreportesdiarios": {
+    "/api/obras/backoffice/repodiario/v1/allreportesdiarios": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1550,7 +1575,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/reportesdiariosporparametros": {
+    "/api/obras/backoffice/repodiario/v1/reportesdiariosporparametros": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1589,7 +1614,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/creareportediario": {
+    "/api/obras/backoffice/repodiario/v1/creareportediario": {
       "post": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1613,8 +1638,8 @@
                   "example": "2023-10-25"
                 },
                 "jefe_faena": {
-                  "type": "string",
-                  "example": "nombre jefe de faena"
+                  "type": "number",
+                  "example": 1
                 },
                 "sdi": {
                   "type": "string",
@@ -1678,15 +1703,69 @@
                 },
                 "comuna": {
                   "type": "string",
-                  "example": "10345"
+                  "example": "10305"
                 },
                 "num_documento": {
                   "type": "string",
                   "example": "10001000600"
                 },
                 "flexiapp": {
-                  "type": "string",
-                  "example": "CGE-123343-55"
+                  "type": "array",
+                  "example": [
+                    "CGE-123343-55",
+                    "CGE-123343-56"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "det_actividad": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "clase": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "tipo": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "actividad": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 3
+                      }
+                    }
+                  }
+                },
+                "det_otros": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "glosa": {
+                        "type": "string",
+                        "example": "descripcion de la tarea 2"
+                      },
+                      "uc_unitaria": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "uc_total": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -1711,23 +1790,171 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/actualizareportediario/{id}": {
+    "/api/obras/backoffice/repodiario/v1/actualizareportediario/{id}": {
       "put": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
         ],
-        "description": "Actualiza un encabezado de reporte diario por ID",
+        "description": "Actualiza un encabezado de reporte y sus detalles por ID",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_reporte": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "jefe_faena": {
+                  "type": "number",
+                  "example": 1
+                },
+                "sdi": {
+                  "type": "string",
+                  "example": "sdi"
+                },
+                "gestor_cliente": {
+                  "type": "string",
+                  "example": "nombre gestor cliente"
+                },
+                "id_area": {
+                  "type": "number",
+                  "example": 1
+                },
+                "brigada_pesada": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "observaciones": {
+                  "type": "string",
+                  "example": "observaciones"
+                },
+                "entregado_por_persona": {
+                  "type": "string",
+                  "example": "nombre persona"
+                },
+                "fecha_entregado": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "revisado_por_persona": {
+                  "type": "string",
+                  "example": "nombre persona que revisa"
+                },
+                "fecha_revisado": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "sector": {
+                  "type": "string",
+                  "example": "direccion sector"
+                },
+                "hora_salida_base": {
+                  "type": "string",
+                  "example": "2023-10-25 07:30:00"
+                },
+                "hora_llegada_terreno": {
+                  "type": "string",
+                  "example": "2023-10-25 08:00"
+                },
+                "hora_salida_terreno": {
+                  "type": "string",
+                  "example": "2023-10-25 18:30"
+                },
+                "hora_llegada_base": {
+                  "type": "string",
+                  "example": "2023-10-25 19:30"
+                },
+                "alimentador": {
+                  "type": "string",
+                  "example": "alimentador"
+                },
+                "comuna": {
+                  "type": "string",
+                  "example": "10305"
+                },
+                "num_documento": {
+                  "type": "string",
+                  "example": "10001000600"
+                },
+                "flexiapp": {
+                  "type": "array",
+                  "example": [
+                    "CGE-123343-55",
+                    "CGE-123343-56"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "det_actividad": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "clase": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "tipo": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "actividad": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 3
+                      }
+                    }
+                  }
+                },
+                "det_otros": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "glosa": {
+                        "type": "string",
+                        "example": "descripcion de la tarea 2"
+                      },
+                      "uc_unitaria": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "uc_total": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -1741,12 +1968,12 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/eliminareportediario/{id}": {
+    "/api/obras/backoffice/repodiario/v1/eliminareportediario/{id}": {
       "delete": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
         ],
-        "description": "Borra un encabezado de reporte diario por ID",
+        "description": "Borra un encabezado de reporte diario y sus detalles por ID",
         "parameters": [
           {
             "name": "id",
@@ -1758,6 +1985,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -1771,7 +2001,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allreportesdiariosactividad": {
+    "/api/obras/backoffice/repodiario/v1/allreportesdiariosactividad": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1793,7 +2023,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/reportesdiariosactividadporid": {
+    "/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporid": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1825,7 +2055,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/reportesdiariosactividadporparametros": {
+    "/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporparametros": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
@@ -1859,39 +2089,212 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/creardetalleactividad": {
-      "post": {
+    "/api/obras/backoffice/repodiario/v1/reportesdiariosotrosporparametros": {
+      "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
         ],
-        "description": "Crea un detalle de reporte diario",
+        "description": "Devuelve un registro de detalle de reportes diarios otras actividades por parámetros: id_obra, id_encabezado_rep,\r  debe tener al menos un parámetro",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "description": "Datos para el detalle de reporte diario",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "tipo_operacion": {
-                  "type": "number",
-                  "example": 1
-                },
-                "id_actividad": {
-                  "type": "number",
-                  "example": 537
-                },
-                "cantidad": {
-                  "type": "number",
-                  "example": 2.3
-                },
-                "id_encabezado_rep": {
-                  "type": "number",
-                  "example": 3
-                }
-              }
-            }
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_encabezado_rep",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/alljefesfaena": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los jefes de faena",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/alltipooperacion": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los tipo de operación",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/alltipoactividad": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los tipo de actividad",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/allmaestroactividad": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todas las actividades dentro del Maestro Actividades",
+        "parameters": [
+          {
+            "name": "id_tipo_actividad",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/allareas": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los tipo de Trabajo",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/estadopago/v1/alltiporecargo": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Devuelve todos los tipos de recargo",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/estadopago/v1/allrecargos": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Devuelve todos los Recargos",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/estadopago/v1/nuevoencabezado": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Genera un nuevo encabezado para estado de pago",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1900,6 +2303,148 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/estadopago/v1/allactividadesporobra": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Obtiene todas las actividades no adicionales para un estado de pago",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/estadopago/v1/allactividadesadicionales": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Obtiene todas las actividades adicionales para un estado de pago",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/estadopago/v1/creaestadopago": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Graba un estado de pago",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_obra": {
+                  "example": "any"
+                },
+                "cliente": {
+                  "example": "any"
+                },
+                "fecha_asignacion": {
+                  "example": "any"
+                },
+                "tipo_trabajo": {
+                  "example": "any"
+                },
+                "segmento": {
+                  "example": "any"
+                },
+                "solicitado_por": {
+                  "example": "any"
+                },
+                "ot_sdi": {
+                  "example": "any"
+                },
+                "supervisor_pelom": {
+                  "example": "any"
+                },
+                "comuna": {
+                  "example": "any"
+                },
+                "direccion": {
+                  "example": "any"
+                },
+                "flexiapp": {
+                  "example": "any"
+                },
+                "fecha_ejecucion": {
+                  "example": "any"
+                },
+                "jefe_delegacion": {
+                  "example": "any"
+                },
+                "jefe_faena": {
+                  "example": "any"
+                },
+                "codigo_pelom": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "401": {
             "description": "Unauthorized"
