@@ -713,6 +713,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         }
         flexiapp = flexiapp + "}"
     };
+    /*
     let detalle_actividad = req.body.det_actividad;
     if (detalle_actividad){
       if (!detalle_actividad[0]) {
@@ -754,6 +755,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         res.status(400).send({message: "El campo cantidad en el detalle otros debe tener valor"});
       }
     }
+    */
     const encabezado_reporte_diario = {
       fecha_reporte: req.body.fecha_reporte?String(req.body.fecha_reporte):undefined,
       jefe_faena: req.body.jefe_faena?Number(req.body.jefe_faena):undefined,
