@@ -1279,23 +1279,34 @@ exports.findAllTipoOperacion = async (req, res) => {
 exports.findAllTipoActividad = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
       #swagger.description = 'Devuelve todos los tipo de actividad' */
-  try {
-    await TipoActividad.findAll().then(data => {
-          let salida = [];
-          for (element of data) {
-            const detalle_salida = {
-              id: Number(element.id),
-              descripcion: String(element.descripcion)
-            }
-            salida.push(detalle_salida);
-          }
-          res.send(salida);
-    }).catch(err => {
-        res.status(500).send({ message: err.message });
-    })
-  }catch (error) {
-    res.status(500).send(error);
-  }
+
+      try {
+            
+        const sql = "select * from (SELECT distinct on (ta.id) ta.* FROM obras.tipo_actividad ta join \
+        obras.maestro_actividades ma on ta.id = ma.id_tipo_actividad order by 1) a order by 2";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const tipoActividad = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida;
+        if (tipoActividad) {
+          salida = [];
+          for (const element of tipoActividad) {
+    
+                const detalle_salida = {
+                  id: Number(element.id),
+                  descripcion: String(element.descripcion)
+                }
+                salida.push(detalle_salida);
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send(salida);
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
 }
 
 /*********************************************************************************** */
