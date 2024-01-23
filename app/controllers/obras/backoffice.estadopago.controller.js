@@ -1,6 +1,7 @@
 const db = require("../../models");
 const Recargo = db.recargo;
 const TipoRecargo = db.tipoRecargo;
+const EncabezadoEstadoPago = db.encabezadoEstadoPago;
 
 /*********************************************************************************** */
 /* Obtiene todos los tipos de recargo
@@ -80,14 +81,18 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
       };
     const sql = "select o.id as id_obra, o.codigo_obra as codigo_obra, o.nombre_obra as nombre_obra, row_to_json(d) \
     as cliente, fecha_llegada::text as fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, \
-    gestor_cliente as solicitado_por, ('{\"' || numero_ot || '\"}')::character varying[] as ot_sdi, row_to_json(cc) as supervisor_pelom, row_to_json(c) \
-    as comuna, ubicacion as direccion, '{\"CGE-0000-234\", \"CGE-0000-456\"}'::character varying[] as flexiapp, \
-    fecha_termino as fecha_ejecucion, null as jefe_delegacion, (SELECT row_to_json(jf) as jefe_faena FROM \
-    obras.encabezado_reporte_diario erd join obras.jefes_faena jf on erd.jefe_faena = jf.id	where id_obra = 1 \
-    order by fecha_reporte desc  limit 1) as jefe_faena, null as codigo_pelom from obras.obras o left \
-    join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id \
-    left join obras.segmento s on o.segmento = s.id left join obras.coordinadores_contratista cc on \
-    o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo WHERE o.id = " + id_obra;
+    gestor_cliente as solicitado_por, string_to_array(numero_ot || ',' || (select string_agg(sdi, ',') as sdi from \
+    (SELECT distinct on (sdi, id_obra) id_obra, sdi	FROM obras.encabezado_reporte_diario WHERE sdi is not null and \
+    id_obra = 1	order by sdi, id_obra) a group by id_obra), ',') as ot_sdi, row_to_json(cc) as supervisor_pelom, \
+    row_to_json(c) as comuna, ubicacion as direccion, (SELECT string_to_array(string_agg(array_to_string(\
+      flexiapp, ','::text), ','), ',') as datos	FROM obras.encabezado_reporte_diario WHERE id_obra = o.id and \
+      flexiapp is not null group by id_obra) as flexiapp, fecha_termino as fecha_ejecucion, null as jefe_delegacion, \
+      (SELECT row_to_json(jf) as jefe_faena FROM obras.encabezado_reporte_diario erd join obras.jefes_faena jf \
+      on erd.jefe_faena = jf.id	where id_obra = 1 order by fecha_reporte desc  limit 1) as jefe_faena, null as \
+      codigo_pelom from obras.obras o left join obras.delegaciones d on o.delegacion = d.id left join \
+      obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.segmento s on o.segmento = s.id left \
+      join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c \
+      on o.comuna = c.codigo WHERE o.id = " + id_obra;
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const nuevoEncabezado = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -260,26 +265,81 @@ exports.creaEstadoPago = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
       #swagger.description = 'Graba un estado de pago' */
   try {
+    const campos = [
+      'id_obra', 'cliente', 'fecha_asignacion', 'tipo_trabajo',
+      'segmento', 'solicitado_por', 'ot_sdi', 'supervisor_pelom', 'comuna',
+      'direccion', 'flexiapp', 'fecha_ejecucion', 'jefe_delegacion', 'jefe_faena',
+      'codigo_pelom'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send({
+          message: "No puede estar nulo el campo " + element
+        });
+        return;
+      }
+    };
+    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const fecha_estado_pago = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
+
+    const sql = "select nextval('obras.encabezado_estado_pago_id_seq'::regclass) as valor";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        let encabezado_estado_pago_id = 0;
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          encabezado_estado_pago_id = data[0].valor;
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        })
+
+        let flexiapp = "{";
+        for (const b of req.body.flexiapp){
+          if (flexiapp.length==1) {
+            flexiapp = flexiapp + b
+          }else {
+            flexiapp = flexiapp + ", " + b
+          }
+        }
+        flexiapp = flexiapp + "}"
+
+        let ot_sdi = "{";
+        for (const b of req.body.ot_sdi){
+          if (ot_sdi.length==1) {
+            ot_sdi = ot_sdi + b
+          }else {
+            ot_sdi = ot_sdi + ", " + b
+          }
+        }
+        ot_sdi = ot_sdi + "}"
+        
+
     const datos = {
+      id: encabezado_estado_pago_id,
       id_obra: req.body.id_obra,
-      fecha_estado_pago: "2023-12-30",
-      cliente: req.body.cliente,
+      fecha_estado_pago: fecha_estado_pago,
+      cliente: req.body.cliente.id,
       fecha_asignacion: req.body.fecha_asignacion,
-      tipo_trabajo: req.body.tipo_trabajo,
-      segmento: req.body.segmento,
+      tipo_trabajo: req.body.tipo_trabajo.id,
+      segmento: req.body.segmento.id,
       solicitado_por: req.body.solicitado_por,
-      ot_sdi: req.body.ot_sdi,
-      supervisor_pelom: req.body.supervisor_pelom,
-      comuna: req.body.comuna,
+      ot_sdi:ot_sdi,
+      supervisor: req.body.supervisor_pelom.id,
+      comuna: req.body.comuna.codigo,
       direccion: req.body.direccion,
-      flexiapp: req.body.flexiapp,
+      flexiapp: flexiapp,
       fecha_ejecucion: req.body.fecha_ejecucion,
       jefe_delegacion: req.body.jefe_delegacion,
-      jefe_faena: req.body.jefe_faena,
+      jefe_faena: req.body.jefe_faena.id,
       codigo_pelom: req.body.codigo_pelom     
     }
-    res.status(200).send(datos);
-    // Your code here to handle the creation of a new estado de pago
+    await EncabezadoEstadoPago.create(datos)
+          .then(data => {
+              res.status(200).send(data);
+          }).catch(err => {
+              res.status(500).send({ message: err.message });
+          })
   } catch (error) {
     res.status(500).send(error);
   }

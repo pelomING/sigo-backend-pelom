@@ -2393,6 +2393,12 @@
             "schema": {
               "type": "object",
               "properties": {
+                "flexiapp": {
+                  "example": "any"
+                },
+                "ot_sdi": {
+                  "example": "any"
+                },
                 "id_obra": {
                   "example": "any"
                 },
@@ -2411,9 +2417,6 @@
                 "solicitado_por": {
                   "example": "any"
                 },
-                "ot_sdi": {
-                  "example": "any"
-                },
                 "supervisor_pelom": {
                   "example": "any"
                 },
@@ -2421,9 +2424,6 @@
                   "example": "any"
                 },
                 "direccion": {
-                  "example": "any"
-                },
-                "flexiapp": {
                   "example": "any"
                 },
                 "fecha_ejecucion": {
@@ -2445,6 +2445,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"

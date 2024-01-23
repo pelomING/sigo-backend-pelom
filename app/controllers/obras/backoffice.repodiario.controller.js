@@ -487,7 +487,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           //el rut ya existe
           if (data.length > 0) {
             salir = true;
-            res.status(403).send({ message: 'El Codigo de Obra ya se encuentra ingresado en la base' });
+            res.status(403).send({ message: `La fecha de reporte '${fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`});
           }
         }).catch(err => {
             salir = true;
@@ -560,7 +560,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             sdi: String(req.body.sdi),
             gestor_cliente: String(req.body.gestor_cliente),
             id_area: Number(req.body.id_area),
-            brigada_pesada: Boolean(req.body.brigada_pesada),
+            brigada_pesada: req.body.brigada_pesada===undefined?false:Boolean(req.body.brigada_pesada),
             observaciones: String(req.body.observaciones),
             entregado_por_persona: String(req.body.entregado_por_persona),
             fecha_entregado: String(req.body.fecha_entregado),
@@ -759,7 +759,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       sdi: req.body.sdi?String(req.body.sdi):undefined,
       gestor_cliente: req.body.gestor_cliente?String(req.body.gestor_cliente):undefined,
       id_area: req.body.id_area?Number(req.body.id_area):undefined,
-      brigada_pesada: req.body.brigada_pesada?Boolean(req.body.brigada_pesada):undefined,
+      brigada_pesada: req.body.brigada_pesada===undefined?undefined:Boolean(req.body.brigada_pesada),
       observaciones: req.body.observaciones?String(req.body.observaciones):undefined,
       entregado_por_persona: req.body.entregado_por_persona?String(req.body.entregado_por_persona):undefined,
       fecha_entregado: req.body.fecha_entregado?String(req.body.fecha_entregado):undefined,
