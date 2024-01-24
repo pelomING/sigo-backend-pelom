@@ -156,7 +156,8 @@ exports.getAllActividadesByIdObra = async (req, res) => {
           };
         const sql = "select top.clase, ta.descripcion tipo, ma.actividad, mu.codigo_corto as unidad, e.cantidad, \
         case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' then ma.uc_retiro \
-        when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario from \
+        when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, \
+        (SELECT precio FROM obras.valor_uc order by fecha desc limit 1) as valor_uc from \
         (SELECT drda.tipo_operacion, drda.id_actividad, sum(drda.cantidad) as cantidad FROM \
         obras.encabezado_reporte_diario erd join obras.detalle_reporte_diario_actividad drda on erd.id = \
         drda.id_encabezado_rep WHERE id_obra = " + id_obra + " group by drda.tipo_operacion, drda.id_actividad) e \
@@ -178,7 +179,9 @@ exports.getAllActividadesByIdObra = async (req, res) => {
                         unidad: String(element.unidad),
                         cantidad: Number(element.cantidad),
                         unitario: Number(element.unitario),
-                        total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2))
+                        unitario_pesos: Number(element.unitario * element.valor_uc),
+                        total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
+                        total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc).toFixed(0))
                         
                       }
                       salida.push(detalle_salida);
@@ -216,7 +219,8 @@ exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
           };
         const sql = "select top.clase, ta.descripcion tipo, ma.actividad, mu.codigo_corto as unidad, e.cantidad, \
         case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' then ma.uc_retiro when top.clase = 'T' \
-        then ma.uc_traslado else 999::double precision end as unitario from (SELECT drda.tipo_operacion, \
+        then ma.uc_traslado else 999::double precision end as unitario, (SELECT precio FROM obras.valor_uc order by \
+          fecha desc limit 1) as valor_uc from (SELECT drda.tipo_operacion, \
           drda.id_actividad, sum(drda.cantidad) as cantidad FROM obras.encabezado_reporte_diario erd \
           join obras.detalle_reporte_diario_actividad drda on erd.id = drda.id_encabezado_rep WHERE \
           erd.id_obra = " + id_obra + " group by drda.tipo_operacion, drda.id_actividad) e join obras.maestro_actividades ma \
@@ -224,7 +228,8 @@ exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
           ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id WHERE ta.id = 9 \
           UNION	\
           select 'I'::char as clase, 'Adicionales'::varchar as tipo, glosa as actividad, 'CU'::varchar, cantidad, \
-          uc_unitaria as unitario from obras.detalle_reporte_diario_otras_actividades drdoa join \
+          uc_unitaria as unitario, (SELECT precio FROM obras.valor_uc order by fecha desc limit 1) as valor_uc \
+          from obras.detalle_reporte_diario_otras_actividades drdoa join \
           obras.encabezado_reporte_diario erd on drdoa.id_encabezado_rep = erd.id WHERE erd.id_obra = " + id_obra + " order by 1,2,3";
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
@@ -241,7 +246,9 @@ exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
                         unidad: String(element.unidad),
                         cantidad: Number(element.cantidad),
                         unitario: Number(element.unitario),
-                        total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2))
+                        unitario_pesos: Number(element.unitario * element.valor_uc),
+                        total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
+                        total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc).toFixed(0))
                         
                       }
                       salida.push(detalle_salida);
@@ -332,7 +339,8 @@ exports.creaEstadoPago = async (req, res) => {
       fecha_ejecucion: req.body.fecha_ejecucion,
       jefe_delegacion: req.body.jefe_delegacion,
       jefe_faena: req.body.jefe_faena.id,
-      codigo_pelom: req.body.codigo_pelom     
+      codigo_pelom: req.body.codigo_pelom,
+      estado: 0     //0: pendiente, 1: cerrado, 2: facturado
     }
     await EncabezadoEstadoPago.create(datos)
           .then(data => {

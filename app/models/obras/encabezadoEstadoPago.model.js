@@ -68,6 +68,10 @@ module.exports = (sequelize, Sequelize) => {
         jefe_faena: {
             type: Sequelize.INTEGER,
             allowNull: false
+        },
+        estado: {
+            type: Sequelize.INTEGER,
+            allowNull: false
         }
     },
         {
