@@ -341,3 +341,77 @@ exports.findAllSegmento = async (req, res) => {
     }
 }
  /*********************************************************************************** */
+
+exports.findAllOficinas = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Obras - General']
+    #swagger.description = 'Devuelve todas las Oficinas' */
+  try {
+    //metodo GET
+    
+
+    const sql = "SELECT os.id, o.nombre as oficina, so.nombre as supervisor FROM obras.oficina_supervisor os \
+    join _comun.oficinas o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const oficinaSupervisor = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida;
+    if (oficinaSupervisor) {
+      salida = [];
+      for (const element of oficinaSupervisor) {
+
+            const detalle_salida = {
+              id: Number(element.id),
+              oficina: String(element.oficina),
+              supervisor: String(element.supervisor)
+            }
+            salida.push(detalle_salida);
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+ /*********************************************************************************** */
+
+ exports.findAllRecargosDistancia = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Obras - General']
+    #swagger.description = 'Devuelve todas los recargos por distancia' */
+  try {
+    //metodo GET
+    
+
+    const sql = "SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 2 order by 1";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const recargoDistancia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida;
+    if (recargoDistancia) {
+      salida = [];
+      for (const element of recargoDistancia) {
+
+            const detalle_salida = {
+              id: Number(element.id),
+              nombre: String(element.nombre),
+              porcentaje: Number(element.porcentaje)
+              
+            }
+            salida.push(detalle_salida);
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}

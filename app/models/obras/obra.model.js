@@ -79,6 +79,15 @@ module.exports = (sequelize, Sequelize) => {
         },
         eliminada: {
             type: Sequelize.BOOLEAN
+        },
+        jefe_delegacion: {
+            type: Sequelize.STRING
+        },
+        oficina: {
+            type: Sequelize.INTEGER
+        },
+        recargo_distancia: {
+            type: Sequelize.INTEGER
         }
         },
         {

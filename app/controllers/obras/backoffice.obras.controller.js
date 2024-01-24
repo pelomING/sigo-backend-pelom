@@ -19,16 +19,23 @@ exports.findAllObra = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Obras']
       #swagger.description = 'Devuelve todas las obras de la tabla de obras' */
     try {
-      const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, o.gestor_cliente, \
-      numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, fecha_termino::text, row_to_json(tt) as tipo_trabajo, \
-      persona_envia_info, cargo_persona_envia_info, row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, \
-      row_to_json(c) as comuna, ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
-      case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes FROM obras.obras o left join _comun.zonal z on o.zona = \
-      z.id left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left \
-      join obras.empresas_contratista ec on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on \
-      o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on o.estado = \
-      eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id left join \
-      (select id_obra, count(id) as cuenta from obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra WHERE not o.eliminada";
+      const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, \
+      o.gestor_cliente, numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, \
+      fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, \
+      row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
+      ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
+      case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, \
+      row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia FROM obras.obras o left join _comun.zonal z \
+      on o.zona = z.id left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on \
+      o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left join \
+      obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c on \
+      o.comuna = c.codigo left join obras.estado_obra eo on o.estado = eo.id left join obras.tipo_obra tob on \
+      o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id left join (select id_obra, count(id) \
+      as cuenta from obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra left join \
+      (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor os join _comun.oficinas \
+        o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) ofi on o.oficina = \
+        ofi.id left join (SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 2) rec \
+        on o.recargo_distancia = rec.id WHERE not o.eliminada";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const obras = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -61,8 +68,11 @@ exports.findAllObra = async (req, res) => {
                 estado: element.estado, //json
                 tipo_obra: element.tipo_obra, //json
                 segmento: element.segmento, //json
-                eliminada: element.eliminada ? true : false,
-                cantidad_reportes: Number(element.cantidad_reportes)
+                eliminada: element.eliminada,
+                cantidad_reportes: Number(element.cantidad_reportes),
+                jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
+                oficina: element.oficina, //json
+                recargo_distancia: element.recargo_distancia, //json
               }
               salida.push(detalle_salida);
         };
@@ -112,7 +122,10 @@ exports.createObra = async (req, res) => {
                 ubicacion: "dirección donde se trabajará en la obra",
                 estado: 1,
                 tipo_obra: 1,
-                segmento: 1
+                segmento: 1,
+                jefe_delegacion: "nombre jefe delegacion",
+                oficina: {'id':1,'oficina':'Curicó','supervisor':'Eduardo Soto'},
+                recargo_distancia: {'id':7,'nombre':'Menos de 30km','porcentaje':0}
             }
         }
       */
@@ -171,7 +184,10 @@ exports.createObra = async (req, res) => {
           estado: req.body.estado?req.body.estado:1,
           tipo_obra: req.body.tipo_obra,
           segmento: req.body.segmento,
-          eliminada: false
+          eliminada: false,
+          jefe_delegacion: req.body.jefe_delegacion,
+          oficina: req.body.oficina?req.body.oficina.id:null,
+          recargo_distancia: req.body.recargo_distancia?req.body.recargo_distancia.id:null
 
       }
 
@@ -194,11 +210,76 @@ exports.createObra = async (req, res) => {
 */
 exports.updateObra = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Obras']
-      #swagger.description = 'Actualiza una obra' */
+      #swagger.description = 'Actualiza una obra' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos básicos de una obra',
+            required: true,
+            schema: {
+              codigo_obra: "CGE-123456",
+                nombre_obra: "nombre de la obra",
+                numero_ot: "123456",
+                zona: 1,
+                delegacion: 1,
+                gestor_cliente: "nombre gestor cliente (cge)",
+                numero_aviso: 123456,
+                numero_oc: "123456",
+                monto: 1000,
+                cantidad_uc: 100,
+                fecha_llegada: "2023-10-25",
+                fecha_inicio: "2023-10-25",
+                fecha_termino: "2023-10-25",
+                tipo_trabajo: 1,
+                persona_envia_info: "nombre persona envia info",
+                cargo_persona_envia_info: "cargo persona envia info",
+                empresa_contratista: 1,
+                coordinador_contratista: 1,
+                comuna: "07234",
+                ubicacion: "dirección donde se trabajará en la obra",
+                estado: 1,
+                tipo_obra: 1,
+                segmento: 1,
+                jefe_delegacion: "nombre jefe delegacion",
+                oficina: {'id':1,'oficina':'Curicó','supervisor':'Eduardo Soto'},
+                recargo_distancia: {'id':7,'nombre':'Menos de 30km','porcentaje':0}
+            }
+        }
+      */
+  
   try{
     const id = req.params.id;
+    const obra = {
 
-    await Obra.update(req.body, {
+      codigo_obra: req.body.codigo_obra?req.body.codigo_obra:undefined,
+      nombre_obra: req.body.nombre_obra?req.body.nombre_obra:undefined,
+      numero_ot: req.body.numero_ot?req.body.numero_ot:undefined,
+      zona: req.body.zona?req.body.zona:undefined,
+      delegacion: req.body.delegacion?req.body.delegacion:undefined,
+      gestor_cliente: req.body.gestor_cliente?req.body.gestor_cliente:undefined,
+      numero_aviso: req.body.numero_aviso?req.body.numero_aviso:undefined,
+      numero_oc: req.body.numero_oc?req.body.numero_oc:undefined,
+      monto: req.body.monto?req.body.monto:undefined,
+      cantidad_uc: req.body.cantidad_uc?req.body.cantidad_uc:undefined,
+      fecha_llegada: req.body.fecha_llegada?req.body.fecha_llegada:undefined,
+      fecha_inicio: req.body.fecha_inicio?req.body.fecha_inicio:undefined,
+      fecha_termino: req.body.fecha_termino?req.body.fecha_termino:undefined,
+      tipo_trabajo: req.body.tipo_trabajo?req.body.tipo_trabajo:undefined,
+      persona_envia_info: req.body.persona_envia_info?req.body.persona_envia_info:undefined,
+      cargo_persona_envia_info: req.body.cargo_persona_envia_info?req.body.cargo_persona_envia_info:undefined,
+      empresa_contratista: req.body.empresa_contratista?req.body.empresa_contratista:undefined,
+      coordinador_contratista: req.body.coordinador_contratista?req.body.coordinador_contratista:undefined,
+      comuna: req.body.comuna?req.body.comuna:undefined,
+      ubicacion: req.body.ubicacion?req.body.ubicacion:undefined,
+      estado: req.body.estado?req.body.estado:undefined,
+      tipo_obra: req.body.tipo_obra?req.body.tipo_obra:undefined,
+      segmento: req.body.segmento?req.body.segmento:undefined,
+      jefe_delegacion: req.body.jefe_delegacion?req.body.jefe_delegacion:undefined,
+      oficina: req.body.oficina?req.body.oficina.id:undefined,
+      recargo_distancia: req.body.recargo_distancia?req.body.recargo_distancia.id:undefined
+
+  }
+
+    await Obra.update(obra, {
       where: { id: id }
     }).then(data => {
       if (data[0] === 1) {
@@ -254,6 +335,7 @@ exports.findObraById = async (req, res) => {
   const id = req.params.id;
 
   try {
+    /*
     const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, gestor_cliente, \
     numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, fecha_termino::text, row_to_json(tt) as tipo_trabajo, \
     persona_envia_info, cargo_persona_envia_info, row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, \
@@ -263,6 +345,24 @@ exports.findObraById = async (req, res) => {
     join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo \
     left join obras.estado_obra eo on o.estado = eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento \
     s on o.segmento = s.id WHERE o.id = :id";
+    */
+    const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, \
+      o.gestor_cliente, numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, \
+      fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, \
+      row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
+      ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
+      case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, \
+      row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia FROM obras.obras o left join _comun.zonal z \
+      on o.zona = z.id left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on \
+      o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left join \
+      obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c on \
+      o.comuna = c.codigo left join obras.estado_obra eo on o.estado = eo.id left join obras.tipo_obra tob on \
+      o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id left join (select id_obra, count(id) \
+      as cuenta from obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra left join \
+      (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor os join _comun.oficinas \
+        o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) ofi on o.oficina = \
+        ofi.id left join (SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 2) rec \
+        on o.recargo_distancia = rec.id WHERE o.id = :id";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const obras = await sequelize.query(sql, { replacements: { id: id }, type: QueryTypes.SELECT });
@@ -295,7 +395,11 @@ exports.findObraById = async (req, res) => {
               estado: element.estado, //json
               tipo_obra: element.tipo_obra, //json
               segmento: element.segmento, //json
-              eliminada: Boolean(element.eliminada) ? true : false
+              eliminada: element.eliminada,
+              cantidad_reportes: Number(element.cantidad_reportes),
+              jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
+              oficina: element.oficina, //json
+              recargo_distancia: element.recargo_distancia, //json
             }
             salida.push(detalle_salida);
       };
@@ -323,6 +427,7 @@ exports.findObraByCodigo = async (req, res) => {
   const codigo_obra = req.query.codigo_obra;
 
   try {
+    /*
     const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, gestor_cliente, \
     numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, fecha_termino::text, row_to_json(tt) as tipo_trabajo, \
     persona_envia_info, cargo_persona_envia_info, row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, \
@@ -331,7 +436,25 @@ exports.findObraByCodigo = async (req, res) => {
     obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left \
     join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo \
     left join obras.estado_obra eo on o.estado = eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento \
-    s on o.segmento = s.id WHERE o.codigo_obra = :codigo_obra";
+    s on o.segmento = s.id WHERE o.codigo_obra = :codigo_obra";*/
+    const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, \
+      o.gestor_cliente, numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, \
+      fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, \
+      row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
+      ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
+      case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, \
+      row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia FROM obras.obras o left join _comun.zonal z \
+      on o.zona = z.id left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on \
+      o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left join \
+      obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c on \
+      o.comuna = c.codigo left join obras.estado_obra eo on o.estado = eo.id left join obras.tipo_obra tob on \
+      o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id left join (select id_obra, count(id) \
+      as cuenta from obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra left join \
+      (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor os join _comun.oficinas \
+        o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) ofi on o.oficina = \
+        ofi.id left join (SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 2) rec \
+        on o.recargo_distancia = rec.id WHERE o.codigo_obra = :codigo_obra";
+    
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const obras = await sequelize.query(sql, { replacements: { codigo_obra: codigo_obra }, type: QueryTypes.SELECT });
@@ -364,7 +487,11 @@ exports.findObraByCodigo = async (req, res) => {
               estado: element.estado, //json
               tipo_obra: element.tipo_obra, //json
               segmento: element.segmento, //json
-              eliminada: Boolean(element.eliminada) ? true : false
+              eliminada: element.eliminada,
+              cantidad_reportes: Number(element.cantidad_reportes),
+              jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
+              oficina: element.oficina, //json
+              recargo_distancia: element.recargo_distancia, //json
             }
             salida.push(detalle_salida);
       };

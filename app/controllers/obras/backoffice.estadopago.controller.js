@@ -79,6 +79,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
           return;
         }
       };
+      /*
     const sql = "select o.id as id_obra, o.codigo_obra as codigo_obra, o.nombre_obra as nombre_obra, row_to_json(d) \
     as cliente, fecha_llegada::text as fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, \
     gestor_cliente as solicitado_por, string_to_array(numero_ot || ',' || (select string_agg(sdi, ',') as sdi from \
@@ -93,6 +94,23 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
       obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.segmento s on o.segmento = s.id left \
       join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c \
       on o.comuna = c.codigo WHERE o.id = " + id_obra;
+      */
+     const sql = "select o.id as id_obra, o.codigo_obra as codigo_obra, o.nombre_obra as nombre_obra, d.nombre \
+     as cliente, fecha_llegada::text as fecha_asignacion, tt.descripcion as tipo_trabajo, s.nombre as segmento, \
+     gestor_cliente as solicitado_por, repo.sdi as sdi, ofi.supervisor as supervisor_pelom, cc.nombre as coordinador, \
+     c.nombre as comuna, ubicacion as direccion, repo.flexiapp as flexiapp, fecha_termino::text as fecha_ejecucion, \
+     o.jefe_delegacion as jefe_delegacion, repo.jefe_faena as jefe_faena, repo.num_documento as numero_documento, \
+     rec.nombre as recargo_nombre, rec.porcentaje as recargo_porcentaje, \
+     (SELECT 'EDP-' || (max(id) + 10000001)::text || '-' || substring(current_timestamp::text,1,4) FROM \
+     obras.encabezado_estado_pago) as codigo_pelom from obras.obras o left join obras.delegaciones d on \
+     o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.segmento s \
+     on o.segmento = s.id left join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left \
+     join _comun.comunas c on o.comuna = c.codigo left join (SELECT os.id, o.nombre as oficina, so.nombre as \
+      supervisor FROM obras.oficina_supervisor os join _comun.oficinas o on os.oficina = o.id join \
+      obras.supervisores_contratista so on os.supervisor = so.id) ofi on o.oficina = ofi.id left join \
+      (SELECT id_obra, jf.nombre as jefe_faena, sdi, num_documento, flexiapp[1]  FROM obras.encabezado_reporte_diario \
+        erd join obras.jefes_faena jf on erd.jefe_faena = jf.id	where id_obra = " + id_obra + " order by fecha_reporte desc limit 1) \
+        as repo on o.id = repo.id_obra left join obras.recargos rec on o.recargo_distancia = rec.id";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const nuevoEncabezado = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -103,22 +121,26 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
       
                   const detalle_salida = {
                     id_obra: Number(element.id_obra),
-                    codigo_obra: String(element.codigo_obra),
-                    nombre_obra: String(element.nombre_obra),
-                    cliente: element.cliente,
-                    fecha_asignacion: String(element.fecha_asignacion),
-                    tipo_trabajo: element.tipo_trabajo,
-                    segmento: element.segmento,
-                    solicitado_por: String(element.solicitado_por),
-                    ot_sdi: element.ot_sdi,
-                    supervisor_pelom: element.supervisor_pelom,
-                    comuna: element.comuna,
-                    direccion: String(element.direccion),
-                    flexiapp: element.flexiapp,
-                    fecha_ejecucion: String(element.fecha_ejecucion),
-                    jefe_delegacion: String(element.jefe_delegacion),
-                    jefe_faena: element.jefe_faena,
-                    codigo_pelom: String(element.codigo_pelom)
+                    cliente: element.cliente?String(element.cliente):null,
+                    fecha_asignacion: element.fecha_asignacion?String(element.fecha_asignacion):null,
+                    tipo_trabajo: element.tipo_trabajo?String(element.tipo_trabajo):null,
+                    segmento: element.segmento?String(element.segmento):null,
+                    solicitado_por: element.solicitado_por?String(element.solicitado_por):null,
+                    ot: element.numero_documento?String(element.numero_documento):null,
+                    sdi: element.sdi?String(element.sdi):null,
+                    supervisor_pelom: element.supervisor_pelom?String(element.supervisor_pelom):null,
+                    coordinador: element.coordinador?String(element.coordinador):null,
+                    comuna: element.comuna?String(element.comuna):null,
+                    direccion: element.direccion?String(element.direccion):null,
+                    flexiapp: element.flexiapp?String(element.flexiapp):null,
+                    fecha_ejecucion: element.fecha_ejecucion?String(element.fecha_ejecucion):null,
+                    jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
+                    jefe_faena: element.jefe_faena?String(element.jefe_faena):null,
+                    codigo_pelom: element.codigo_pelom?String(element.codigo_pelom):null,
+                    codigo_obra: element.codigo_obra?String(element.codigo_obra):null,
+                    nombre_obra: element.nombre_obra?String(element.nombre_obra):null,
+                    recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
+                    recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null
  
                   }
                   salida.push(detalle_salida);
@@ -175,7 +197,7 @@ exports.getAllActividadesByIdObra = async (req, res) => {
                       const detalle_salida = {
                         clase: String(element.clase),
                         tipo: String(element.tipo),
-                        actividad: String(element.actividad),
+                        actividad: String(element.actividad), 
                         unidad: String(element.unidad),
                         cantidad: Number(element.cantidad),
                         unitario: Number(element.unitario),
