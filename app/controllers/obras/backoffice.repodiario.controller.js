@@ -1422,6 +1422,7 @@ exports.findAllTipoTrabajo = async (req, res) => {
             const detalle_salida = {
               id: Number(element.id),
               nombre: String(element.nombre),
+              id_tipo_recargo: Number(3),
               porcentaje: Number(element.porcentaje)
               
             }
