@@ -214,6 +214,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
               comuna: element.comuna,
               num_documento: String(element.num_documento),
               flexiapp: element.flexiapp,
+              recargo_hora: element.recargo,
               det_actividad: element.detalle_actividad,
               det_otros: element.detalle_otros
 
