@@ -1382,3 +1382,41 @@ exports.findAllTipoTrabajo = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+
+
+
+ exports.findAllRecargosHoraExtra = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+    #swagger.description = 'Devuelve todas los recargos por hora extra' */
+  try {
+    //metodo GET
+    
+
+    const sql = "SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 3 order by 1";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const recargoHora = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida;
+    if (recargoHora) {
+      salida = [];
+      for (const element of recargoHora) {
+
+            const detalle_salida = {
+              id: Number(element.id),
+              nombre: String(element.nombre),
+              porcentaje: Number(element.porcentaje)
+              
+            }
+            salida.push(detalle_salida);
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}

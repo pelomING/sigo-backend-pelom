@@ -155,6 +155,8 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/repodiario/v1/allareas", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllTipoTrabajo);
 
+    app.get("/api/obras/backoffice/repodiario/v1/allrecargoshora", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.findAllRecargosHoraExtra);
+
 }
 
 

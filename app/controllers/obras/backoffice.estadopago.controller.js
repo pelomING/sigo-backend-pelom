@@ -110,7 +110,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
       obras.supervisores_contratista so on os.supervisor = so.id) ofi on o.oficina = ofi.id left join \
       (SELECT id_obra, jf.nombre as jefe_faena, sdi, num_documento, flexiapp[1]  FROM obras.encabezado_reporte_diario \
         erd join obras.jefes_faena jf on erd.jefe_faena = jf.id	where id_obra = " + id_obra + " order by fecha_reporte desc limit 1) \
-        as repo on o.id = repo.id_obra left join obras.recargos rec on o.recargo_distancia = rec.id";
+        as repo on o.id = repo.id_obra left join obras.recargos rec on o.recargo_distancia = rec.id WHERE o.id = " + id_obra;
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const nuevoEncabezado = await sequelize.query(sql, { type: QueryTypes.SELECT });
