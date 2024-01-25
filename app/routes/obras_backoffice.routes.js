@@ -177,6 +177,9 @@ module.exports = function(app) {
     // Obtiene todas las actividades adicionales para un estado de pago
     app.get("/api/obras/backoffice/estadopago/v1/allactividadesadicionales", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.getAllActividadesAdicionalesByIdObra);
 
+    // Obtiene todas las actividades adicionales y normales que tengan hora extra para un estado de pago
+    app.get("/api/obras/backoffice/estadopago/v1/allactividadesconhoraextra", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.getAllActividadesHoraExtraByIdObra);
+
     // Graba un estado de pago
     app.post("/api/obras/backoffice/estadopago/v1/creaestadopago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.creaEstadoPago);
 
