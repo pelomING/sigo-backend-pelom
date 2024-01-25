@@ -2736,6 +2736,9 @@
                 },
                 "recargo_porcentaje": {
                   "example": "any"
+                },
+                "valor_uc": {
+                  "example": "any"
                 }
               }
             }

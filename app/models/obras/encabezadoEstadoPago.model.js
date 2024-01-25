@@ -84,6 +84,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         recargo_porcentaje: {
             type: Sequelize.FLOAT
+        },
+        valor_uc: {
+            type: Sequelize.FLOAT
         }
     },
         {

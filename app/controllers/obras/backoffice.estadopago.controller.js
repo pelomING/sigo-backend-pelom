@@ -101,17 +101,18 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
      coordinador, row_to_json(c) as comuna, ubicacion as direccion, repo.flexiapp as flexiapp, fecha_termino::text as \
      fecha_ejecucion, o.jefe_delegacion as jefe_delegacion, json_build_object('id', repo.id_jefe, 'nombre', \
      repo.jefe_faena) as jefe_faena, repo.num_documento as numero_documento, rec.nombre as recargo_nombre, \
-     rec.porcentaje as recargo_porcentaje, (SELECT 'EDP-' || (max(id) + 10000001)::text || '-' || substring(\
-      current_timestamp::text,1,4) FROM obras.encabezado_estado_pago) as codigo_pelom from obras.obras o left join \
-      obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left \
-      join obras.segmento s on o.segmento = s.id left join obras.coordinadores_contratista cc on \
-      o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join \
-      (SELECT os.id, o.nombre as oficina, so.nombre as supervisor FROM obras.oficina_supervisor os join \
-        _comun.oficinas o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) \
-        ofi on o.oficina = ofi.id left join (SELECT id_obra, jf.nombre as jefe_faena, jf.id as id_jefe, sdi, \
-          num_documento, flexiapp[1]  FROM obras.encabezado_reporte_diario erd join obras.jefes_faena jf on \
-          erd.jefe_faena = jf.id	where id_obra = " + id_obra + " order by fecha_reporte desc limit 1) as repo on o.id = \
-          repo.id_obra left join obras.recargos rec on o.recargo_distancia = rec.id WHERE o.id = " + id_obra;
+     rec.porcentaje as recargo_porcentaje, (SELECT 'EDP-' || (max(id) + 10000001)::text || '-' || \
+     substring(current_timestamp::text,1,4) FROM obras.encabezado_estado_pago) as codigo_pelom, \
+     (SELECT precio FROM obras.valor_uc where oficina = o.oficina order by oficina, fecha desc limit 1) as valor_uc \
+     from obras.obras o left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on \
+     o.tipo_trabajo = tt.id left join obras.segmento s on o.segmento = s.id left join obras.coordinadores_contratista \
+     cc on     o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join \
+     (SELECT os.id, o.nombre as oficina, so.nombre as supervisor FROM obras.oficina_supervisor os join \
+      _comun.oficinas o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) \
+      ofi on o.oficina = ofi.id left join (SELECT id_obra, jf.nombre as jefe_faena, jf.id as id_jefe, sdi, \
+        num_documento, flexiapp[1]  FROM obras.encabezado_reporte_diario erd join obras.jefes_faena jf on \
+        erd.jefe_faena = jf.id	where id_obra = " + id_obra + " order by fecha_reporte desc limit 1) as repo on o.id = \
+        repo.id_obra left join obras.recargos rec on o.recargo_distancia = rec.id WHERE o.id = " + id_obra;
           
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
@@ -142,7 +143,8 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                     codigo_obra: element.codigo_obra?String(element.codigo_obra):null,
                     nombre_obra: element.nombre_obra?String(element.nombre_obra):null,
                     recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
-                    recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null
+                    recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
+                    valor_uc: element.valor_uc?Number(element.valor_uc):null
  
                   }
                   salida.push(detalle_salida);
@@ -300,7 +302,7 @@ exports.creaEstadoPago = async (req, res) => {
       'id_obra', 'cliente', 'fecha_asignacion', 'tipo_trabajo',
       'segmento', 'solicitado_por', 'supervisor_pelom', 'coordinador', 'comuna',
       'direccion', 'flexiapp', 'fecha_ejecucion', 'jefe_delegacion', 'jefe_faena',
-      'codigo_pelom'
+      'codigo_pelom', 'valor_uc'
     ];
     for (const element of campos) {
       if (!req.body[element]) {
@@ -370,6 +372,7 @@ exports.creaEstadoPago = async (req, res) => {
       sdi: req.body.sdi,
       recargo_nombre: req.body.recargo_nombre,
       recargo_porcentaje: req.body.recargo_porcentaje,
+      valor_uc: req.body.valor_uc,
       estado: 0     //0: pendiente, 1: cerrado, 2: facturado
     }
     await EncabezadoEstadoPago.create(datos)
@@ -406,8 +409,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
         eep.fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, eep.solicitado_por, \
         row_to_json(c) as comuna, eep.direccion, eep.fecha_ejecucion, eep.jefe_delegacion, eep.codigo_pelom, \
         row_to_json(sc) as supervisor, row_to_json(jf) as jefe_faena, eep.estado, eep.ot, eep.sdi, \
-        row_to_json(cc) as coordinador, eep.recargo_nombre, eep.recargo_porcentaje, eep.flexiapp, o.codigo_obra, o.nombre_obra FROM \
-        obras.encabezado_estado_pago eep LEFT JOIN obras.delegaciones d on eep.cliente = d.id LEFT JOIN \
+        row_to_json(cc) as coordinador, eep.recargo_nombre, eep.recargo_porcentaje, eep.flexiapp, o.codigo_obra, o.nombre_obra, \
+        eep.valor_uc FROM obras.encabezado_estado_pago eep LEFT JOIN obras.delegaciones d on eep.cliente = d.id LEFT JOIN \
         obras.tipo_trabajo tt on eep.tipo_trabajo = tt.id LEFT JOIN obras.segmento s on eep.segmento = s.id \
         LEFT JOIN _comun.comunas c on eep.comuna = c.codigo LEFT JOIN obras.supervisores_contratista sc on \
         eep.supervisor = sc.id LEFT JOIN obras.jefes_faena jf on eep.jefe_faena = jf.id LEFT JOIN \
@@ -443,6 +446,7 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         nombre_obra: element.nombre_obra?String(element.nombre_obra):null,
                         recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
                         recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
+                        valor_uc: element.valor_uc?Number(element.valor_uc):null
 
                       }
                       salida.push(detalle_salida);
