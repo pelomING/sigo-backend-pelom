@@ -180,4 +180,8 @@ module.exports = function(app) {
     // Graba un estado de pago
     app.post("/api/obras/backoffice/estadopago/v1/creaestadopago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.creaEstadoPago);
 
+    // Lista los estados de pago por id_obra  GET /api/obras/backoffice/estadopago/v1/listaestadospago
+    app.get("/api/obras/backoffice/estadopago/v1/listaestadospago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeEstadopagoController.getAllEstadosPagoByIdObra);
+
+
 }

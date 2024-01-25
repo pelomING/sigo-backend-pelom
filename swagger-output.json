@@ -1942,6 +1942,27 @@
                     "type": "string"
                   }
                 },
+                "recargo_hora": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "nombre": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "id_tipo_recargo": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "porcentaje": {
+                      "type": "number",
+                      "example": 10
+                    }
+                  }
+                },
                 "det_actividad": {
                   "type": "array",
                   "items": {
@@ -2118,6 +2139,27 @@
                   ],
                   "items": {
                     "type": "string"
+                  }
+                },
+                "recargo_hora": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "nombre": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "id_tipo_recargo": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "porcentaje": {
+                      "type": "number",
+                      "example": 10
+                    }
                   }
                 },
                 "det_actividad": {
@@ -2630,7 +2672,7 @@
         "tags": [
           "Obras - Backoffice - Estado de Pago"
         ],
-        "description": "Graba un estado de pago",
+        "description": "ista los estados de pago por id_obra",
         "parameters": [
           {
             "name": "body",
@@ -2638,12 +2680,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "flexiapp": {
-                  "example": "any"
-                },
-                "ot_sdi": {
-                  "example": "any"
-                },
                 "id_obra": {
                   "example": "any"
                 },
@@ -2665,10 +2701,16 @@
                 "supervisor_pelom": {
                   "example": "any"
                 },
+                "coordinador": {
+                  "example": "any"
+                },
                 "comuna": {
                   "example": "any"
                 },
                 "direccion": {
+                  "example": "any"
+                },
+                "flexiapp": {
                   "example": "any"
                 },
                 "fecha_ejecucion": {
@@ -2682,9 +2724,53 @@
                 },
                 "codigo_pelom": {
                   "example": "any"
+                },
+                "ot": {
+                  "example": "any"
+                },
+                "sdi": {
+                  "example": "any"
+                },
+                "recargo_nombre": {
+                  "example": "any"
+                },
+                "recargo_porcentaje": {
+                  "example": "any"
                 }
               }
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/estadopago/v1/listaestadospago": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Lista los estados de pago por id_obra",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {

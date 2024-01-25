@@ -33,10 +33,6 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
-        ot_sdi: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
         comuna: {
             type: Sequelize.STRING,
             allowNull: false
@@ -65,6 +61,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             allowNull: false
         },
+        coordinador: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        },
         jefe_faena: {
             type: Sequelize.INTEGER,
             allowNull: false
@@ -72,6 +72,18 @@ module.exports = (sequelize, Sequelize) => {
         estado: {
             type: Sequelize.INTEGER,
             allowNull: false
+        },
+        ot: {
+            type: Sequelize.STRING
+        },
+        sdi: {
+            type: Sequelize.STRING
+        },
+        recargo_nombre: {
+            type: Sequelize.STRING
+        },
+        recargo_porcentaje: {
+            type: Sequelize.FLOAT
         }
     },
         {

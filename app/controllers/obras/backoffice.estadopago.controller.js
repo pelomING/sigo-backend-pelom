@@ -95,22 +95,24 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
       join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c \
       on o.comuna = c.codigo WHERE o.id = " + id_obra;
       */
-     const sql = "select o.id as id_obra, o.codigo_obra as codigo_obra, o.nombre_obra as nombre_obra, d.nombre \
-     as cliente, fecha_llegada::text as fecha_asignacion, tt.descripcion as tipo_trabajo, s.nombre as segmento, \
-     gestor_cliente as solicitado_por, repo.sdi as sdi, ofi.supervisor as supervisor_pelom, cc.nombre as coordinador, \
-     c.nombre as comuna, ubicacion as direccion, repo.flexiapp as flexiapp, fecha_termino::text as fecha_ejecucion, \
-     o.jefe_delegacion as jefe_delegacion, repo.jefe_faena as jefe_faena, repo.num_documento as numero_documento, \
-     rec.nombre as recargo_nombre, rec.porcentaje as recargo_porcentaje, \
-     (SELECT 'EDP-' || (max(id) + 10000001)::text || '-' || substring(current_timestamp::text,1,4) FROM \
-     obras.encabezado_estado_pago) as codigo_pelom from obras.obras o left join obras.delegaciones d on \
-     o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.segmento s \
-     on o.segmento = s.id left join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left \
-     join _comun.comunas c on o.comuna = c.codigo left join (SELECT os.id, o.nombre as oficina, so.nombre as \
-      supervisor FROM obras.oficina_supervisor os join _comun.oficinas o on os.oficina = o.id join \
-      obras.supervisores_contratista so on os.supervisor = so.id) ofi on o.oficina = ofi.id left join \
-      (SELECT id_obra, jf.nombre as jefe_faena, sdi, num_documento, flexiapp[1]  FROM obras.encabezado_reporte_diario \
-        erd join obras.jefes_faena jf on erd.jefe_faena = jf.id	where id_obra = " + id_obra + " order by fecha_reporte desc limit 1) \
-        as repo on o.id = repo.id_obra left join obras.recargos rec on o.recargo_distancia = rec.id WHERE o.id = " + id_obra;
+     const sql = "select o.id as id_obra, o.codigo_obra as codigo_obra, o.nombre_obra as nombre_obra, row_to_json(d) \
+     as cliente, fecha_llegada::text as fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, \
+     gestor_cliente as solicitado_por, repo.sdi as sdi, row_to_json(ofi) as supervisor_pelom, row_to_json(cc) as \
+     coordinador, row_to_json(c) as comuna, ubicacion as direccion, repo.flexiapp as flexiapp, fecha_termino::text as \
+     fecha_ejecucion, o.jefe_delegacion as jefe_delegacion, json_build_object('id', repo.id_jefe, 'nombre', \
+     repo.jefe_faena) as jefe_faena, repo.num_documento as numero_documento, rec.nombre as recargo_nombre, \
+     rec.porcentaje as recargo_porcentaje, (SELECT 'EDP-' || (max(id) + 10000001)::text || '-' || substring(\
+      current_timestamp::text,1,4) FROM obras.encabezado_estado_pago) as codigo_pelom from obras.obras o left join \
+      obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left \
+      join obras.segmento s on o.segmento = s.id left join obras.coordinadores_contratista cc on \
+      o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join \
+      (SELECT os.id, o.nombre as oficina, so.nombre as supervisor FROM obras.oficina_supervisor os join \
+        _comun.oficinas o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) \
+        ofi on o.oficina = ofi.id left join (SELECT id_obra, jf.nombre as jefe_faena, jf.id as id_jefe, sdi, \
+          num_documento, flexiapp[1]  FROM obras.encabezado_reporte_diario erd join obras.jefes_faena jf on \
+          erd.jefe_faena = jf.id	where id_obra = " + id_obra + " order by fecha_reporte desc limit 1) as repo on o.id = \
+          repo.id_obra left join obras.recargos rec on o.recargo_distancia = rec.id WHERE o.id = " + id_obra;
+          
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const nuevoEncabezado = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -121,21 +123,21 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
       
                   const detalle_salida = {
                     id_obra: Number(element.id_obra),
-                    cliente: element.cliente?String(element.cliente):null,
+                    cliente: element.cliente,
                     fecha_asignacion: element.fecha_asignacion?String(element.fecha_asignacion):null,
-                    tipo_trabajo: element.tipo_trabajo?String(element.tipo_trabajo):null,
-                    segmento: element.segmento?String(element.segmento):null,
+                    tipo_trabajo: element.tipo_trabajo,
+                    segmento: element.segmento,
                     solicitado_por: element.solicitado_por?String(element.solicitado_por):null,
                     ot: element.numero_documento?String(element.numero_documento):null,
                     sdi: element.sdi?String(element.sdi):null,
-                    supervisor_pelom: element.supervisor_pelom?String(element.supervisor_pelom):null,
-                    coordinador: element.coordinador?String(element.coordinador):null,
-                    comuna: element.comuna?String(element.comuna):null,
+                    supervisor_pelom: element.supervisor_pelom,
+                    coordinador: element.coordinador,
+                    comuna: element.comuna,
                     direccion: element.direccion?String(element.direccion):null,
                     flexiapp: element.flexiapp?String(element.flexiapp):null,
                     fecha_ejecucion: element.fecha_ejecucion?String(element.fecha_ejecucion):null,
                     jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
-                    jefe_faena: element.jefe_faena?String(element.jefe_faena):null,
+                    jefe_faena: element.jefe_faena,
                     codigo_pelom: element.codigo_pelom?String(element.codigo_pelom):null,
                     codigo_obra: element.codigo_obra?String(element.codigo_obra):null,
                     nombre_obra: element.nombre_obra?String(element.nombre_obra):null,
@@ -287,16 +289,16 @@ exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
 
 }
 /*********************************************************************************** */
-/* Graba un estado de pago
+/* ista los estados de pago por id_obra
     POST /api/obras/backoffice/estadopago/v1/creaestadopago
 */
 exports.creaEstadoPago = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
-      #swagger.description = 'Graba un estado de pago' */
+      #swagger.description = 'ista los estados de pago por id_obra' */
   try {
     const campos = [
       'id_obra', 'cliente', 'fecha_asignacion', 'tipo_trabajo',
-      'segmento', 'solicitado_por', 'ot_sdi', 'supervisor_pelom', 'comuna',
+      'segmento', 'solicitado_por', 'supervisor_pelom', 'coordinador', 'comuna',
       'direccion', 'flexiapp', 'fecha_ejecucion', 'jefe_delegacion', 'jefe_faena',
       'codigo_pelom'
     ];
@@ -323,6 +325,7 @@ exports.creaEstadoPago = async (req, res) => {
           res.status(500).send({ message: err.message });
         })
 
+        /*
         let flexiapp = "{";
         for (const b of req.body.flexiapp){
           if (flexiapp.length==1) {
@@ -342,6 +345,7 @@ exports.creaEstadoPago = async (req, res) => {
           }
         }
         ot_sdi = ot_sdi + "}"
+        */
         
 
     const datos = {
@@ -353,15 +357,19 @@ exports.creaEstadoPago = async (req, res) => {
       tipo_trabajo: req.body.tipo_trabajo.id,
       segmento: req.body.segmento.id,
       solicitado_por: req.body.solicitado_por,
-      ot_sdi:ot_sdi,
       supervisor: req.body.supervisor_pelom.id,
+      coordinador: req.body.coordinador.id,
       comuna: req.body.comuna.codigo,
       direccion: req.body.direccion,
-      flexiapp: flexiapp,
+      flexiapp: req.body.flexiapp,
       fecha_ejecucion: req.body.fecha_ejecucion,
       jefe_delegacion: req.body.jefe_delegacion,
       jefe_faena: req.body.jefe_faena.id,
       codigo_pelom: req.body.codigo_pelom,
+      ot: req.body.ot,
+      sdi: req.body.sdi,
+      recargo_nombre: req.body.recargo_nombre,
+      recargo_porcentaje: req.body.recargo_porcentaje,
       estado: 0     //0: pendiente, 1: cerrado, 2: facturado
     }
     await EncabezadoEstadoPago.create(datos)
@@ -373,4 +381,79 @@ exports.creaEstadoPago = async (req, res) => {
   } catch (error) {
     res.status(500).send(error);
   }
+}
+/*********************************************************************************** */
+/* Lista los estados de pago por id_obra
+    GET /api/obras/backoffice/estadopago/v1/listaestadospago
+*/
+exports.getAllEstadosPagoByIdObra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Lista los estados de pago por id_obra' */
+      try {
+        const id_obra = req.query.id_obra;
+        const campos = [
+            'id_obra'
+          ];
+          for (const element of campos) {
+            if (!req.query[element]) {
+              res.status(400).send({
+                message: "No puede estar nulo el campo " + element
+              });
+              return;
+            }
+          };
+        const sql = "SELECT eep.id, eep.id_obra, eep.fecha_estado_pago, row_to_json(d) as cliente, \
+        eep.fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, eep.solicitado_por, \
+        row_to_json(c) as comuna, eep.direccion, eep.fecha_ejecucion, eep.jefe_delegacion, eep.codigo_pelom, \
+        row_to_json(sc) as supervisor, row_to_json(jf) as jefe_faena, eep.estado, eep.ot, eep.sdi, \
+        row_to_json(cc) as coordinador, eep.recargo_nombre, eep.recargo_porcentaje, eep.flexiapp, o.codigo_obra, o.nombre_obra FROM \
+        obras.encabezado_estado_pago eep LEFT JOIN obras.delegaciones d on eep.cliente = d.id LEFT JOIN \
+        obras.tipo_trabajo tt on eep.tipo_trabajo = tt.id LEFT JOIN obras.segmento s on eep.segmento = s.id \
+        LEFT JOIN _comun.comunas c on eep.comuna = c.codigo LEFT JOIN obras.supervisores_contratista sc on \
+        eep.supervisor = sc.id LEFT JOIN obras.jefes_faena jf on eep.jefe_faena = jf.id LEFT JOIN \
+        obras.coordinadores_contratista cc on eep.coordinador = cc.id JOIN obras.obras o on eep.id_obra = o.id WHERE id_obra = " + id_obra + ";";
+            const { QueryTypes } = require('sequelize');
+            const sequelize = db.sequelize;
+            const lstEstadosPagos = await sequelize.query(sql, { type: QueryTypes.SELECT });
+            let salida = [];
+            if (lstEstadosPagos) {
+                
+                for (const element of lstEstadosPagos) {
+          
+                      const detalle_salida = {
+                        id: Number(element.id),
+                        id_obra: Number(element.id_obra),
+                        cliente: element.cliente,
+                        fecha_asignacion: element.fecha_asignacion?String(element.fecha_asignacion):null,
+                        tipo_trabajo: element.tipo_trabajo,
+                        segmento: element.segmento,
+                        solicitado_por: element.solicitado_por?String(element.solicitado_por):null,
+                        ot: element.ot?String(element.ot):null,
+                        sdi: element.sdi?String(element.sdi):null,
+                        supervisor_pelom: element.supervisor_pelom,
+                        coordinador: element.coordinador,
+                        comuna: element.comuna,
+                        direccion: element.direccion?String(element.direccion):null,
+                        flexiapp: element.flexiapp?String(element.flexiapp):null,
+                        fecha_ejecucion: element.fecha_ejecucion?String(element.fecha_ejecucion):null,
+                        jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
+                        jefe_faena: element.jefe_faena,
+                        codigo_pelom: element.codigo_pelom?String(element.codigo_pelom):null,
+                        codigo_obra: element.codigo_obra?String(element.codigo_obra):null,
+                        nombre_obra: element.nombre_obra?String(element.nombre_obra):null,
+                        recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
+                        recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
+
+                      }
+                      salida.push(detalle_salida);
+                };
+              }
+              if (salida===undefined){
+                res.status(500).send("Error en la consulta (servidor backend)");
+              }else{
+                res.status(200).send(salida);
+              }
+      } catch (error) {
+        res.status(500).send(error);
+      }
 }

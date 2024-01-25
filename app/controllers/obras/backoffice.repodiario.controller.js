@@ -38,23 +38,24 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-       num_documento, flexiapp, (select array_agg(detalle) as detalle_actividad from (select row_to_json(a) as detalle from \
-       (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, \
-       json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
-       case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 \
-       end as unitario, case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then \
-       uc_traslado else 0 end * cantidad as total FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion \
-       top on dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, \
-       uc_retiro, uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM obras.maestro_actividades ma join \
-       obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) \
-       ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id \
-       WHERE dra.id_encabezado_rep = rd.id) a) b), (select array_agg(detalle) as detalle_otros from (select row_to_json(a) \
-       as detalle from (SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, json_build_object('id', erd.id, 'id_obra', \
-       erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades \
-       drd join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) \
-       a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
-       on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
-       jf.id";
+       num_documento, flexiapp, row_to_json(rec) as recargo, (select array_agg(detalle) as detalle_actividad from \
+       (select row_to_json(a) as detalle from (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, \
+       row_to_json(ma) as actividad, cantidad, json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', \
+       erd.fecha_reporte) as encabezado_reporte, case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro \
+       when top.id = 3 then uc_traslado else 0 end as unitario, case when top.id = 1 then uc_instalacion when top.id = 2 \
+       then uc_retiro when top.id = 3 then uc_traslado else 0 end * cantidad as total FROM obras.detalle_reporte_diario_actividad \
+       dra join obras.tipo_operacion top on dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) \
+       as tipo_actividad, uc_instalacion, uc_retiro, uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM \
+       obras.maestro_actividades ma join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades \
+       mu on ma.id_unidad = mu.id) ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd on \
+       dra.id_encabezado_rep = erd.id WHERE dra.id_encabezado_rep = rd.id) a) b), (select array_agg(detalle) as \
+       detalle_otros from (select row_to_json(a) as detalle from (SELECT drd.id, glosa, uc_unitaria, cantidad, \
+        total_uc, json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as \
+        encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades drd join obras.encabezado_reporte_diario \
+        erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) a) b) FROM obras.encabezado_reporte_diario \
+        rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o on rd.id_obra = o.id join _comun.comunas c \
+        on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = jf.id left join obras.recargos rec on \
+        rd.recargo_hora = rec.id";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const encabezadoReporte = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -86,6 +87,7 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
                   comuna: element.comuna,
                   num_documento: String(element.num_documento),
                   flexiapp: element.flexiapp,
+                  recargo_hora: element.recargo,
                   det_actividad: element.detalle_actividad,
                   det_otros: element.detalle_otros
                   
@@ -161,7 +163,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-       num_documento, flexiapp, (select array_agg(detalle) as detalle_actividad from (select row_to_json(a) as detalle from \
+       num_documento, flexiapp, row_to_json(rec) as recargo, (select array_agg(detalle) as detalle_actividad from (select row_to_json(a) as detalle from \
        (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, \
        json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
        case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 \
@@ -177,7 +179,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
        drd join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) \
        a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
        on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
-       jf.id WHERE "+b;
+       jf.id left join obras.recargos rec on erd.recargo_hora = rec.id WHERE "+b;
 
         //console.log("sql: "+sql);
         const { QueryTypes } = require('sequelize'); 
@@ -435,6 +437,12 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                 comuna: "10305",
                 num_documento: "10001000600",
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
+                recargo_hora: {
+                    'id': 1,
+                    'nombre': 1,
+                    'id_tipo_recargo': 1,
+                    'porcentaje': 10
+                },
                 det_actividad: [
                     {
                       "clase": 1,
@@ -574,7 +582,8 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             alimentador: String(req.body.alimentador),
             comuna: String(req.body.comuna),
             num_documento: String(req.body.num_documento),
-            flexiapp: String(flexiapp)
+            flexiapp: String(flexiapp),
+            recargo_hora: Number(req.body.recargo_hora.id),
         }
 
         const result = await sequelize.transaction(async () => {
@@ -664,6 +673,12 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                 comuna: "10305",
                 num_documento: "10001000600",
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
+                recargo_hora: {
+                    'id': 1,
+                    'nombre': 1,
+                    'id_tipo_recargo': 1,
+                    'porcentaje': 10
+                },
                 det_actividad: [
                     {
                       "clase": 1,
@@ -773,7 +788,8 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       alimentador: req.body.alimentador?String(req.body.alimentador):undefined,
       comuna: req.body.comuna?String(req.body.comuna):undefined,
       num_documento: req.body.num_documento?String(req.body.num_documento):undefined,
-      flexiapp: flexiapp?String(flexiapp):undefined
+      flexiapp: flexiapp?String(flexiapp):undefined,
+      recargo_hora: req.body.recargo_hora?Number(req.body.recargo_hora.id):undefined,
   }
 
       const sequelize = db.sequelize;
