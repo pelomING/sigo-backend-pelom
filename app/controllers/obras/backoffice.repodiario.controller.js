@@ -657,7 +657,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                 fecha_reporte: "2023-10-25",
                 jefe_faena: 1,
                 sdi: "sdi",
-                gestor_cliente: "nombre gestor cliente",
+                ito_mandante: "nombre gestor cliente",
                 id_area: 1,
                 brigada_pesada: false,
                 observaciones: "observaciones",
