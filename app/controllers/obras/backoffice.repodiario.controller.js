@@ -770,7 +770,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       fecha_reporte: req.body.fecha_reporte?String(req.body.fecha_reporte):undefined,
       jefe_faena: req.body.jefe_faena?Number(req.body.jefe_faena):undefined,
       sdi: req.body.sdi?String(req.body.sdi):undefined,
-      gestor_cliente: req.body.gestor_cliente?String(req.body.ito_mandante):undefined,
+      gestor_cliente: req.body.ito_mandante?String(req.body.ito_mandante):undefined,
       id_area: req.body.id_area?Number(req.body.id_area):undefined,
       brigada_pesada: req.body.brigada_pesada===undefined?undefined:Boolean(req.body.brigada_pesada),
       observaciones: req.body.observaciones?String(req.body.observaciones):undefined,
