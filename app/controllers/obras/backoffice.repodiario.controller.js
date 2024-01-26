@@ -764,8 +764,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
     }
     */
    console.log('req.body', req.body);
-   console.log('req.body.recargo_hora.id', req.body.recargo_hora.id);
-   recargo_aplicar = req.body.recargo_hora.id;
+   const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
     const encabezadoReporteDiario = {
       fecha_reporte: req.body.fecha_reporte?String(req.body.fecha_reporte):undefined,
       jefe_faena: req.body.jefe_faena?Number(req.body.jefe_faena):undefined,
