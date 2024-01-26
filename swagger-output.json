@@ -2141,27 +2141,6 @@
                     "type": "string"
                   }
                 },
-                "recargo_hora": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "number",
-                      "example": 1
-                    },
-                    "nombre": {
-                      "type": "number",
-                      "example": 1
-                    },
-                    "id_tipo_recargo": {
-                      "type": "number",
-                      "example": 1
-                    },
-                    "porcentaje": {
-                      "type": "number",
-                      "example": 10
-                    }
-                  }
-                },
                 "det_actividad": {
                   "type": "array",
                   "items": {

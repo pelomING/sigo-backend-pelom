@@ -4,7 +4,7 @@ const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
 const DetalleRporteDiarioOtrasActividades = db.detalleReporteDiarioOtrasActividades; 
 const tipoOperacion = db.tipoOperacion;
 const maestroActividad = db.maestroActividad;
-const encabezado_reporte_diario = db.encabezadoReporteDiario;
+//const encabezado_reporte_diario = db.encabezadoReporteDiario;
 const JefesFaena = db.jefesFaena;
 const TipoActividad = db.tipoActividad;
 const TipoTrabajo = db.tipoTrabajo;
@@ -674,12 +674,6 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                 comuna: "10305",
                 num_documento: "10001000600",
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
-                recargo_hora: {
-                    'id': 1,
-                    'nombre': 1,
-                    'id_tipo_recargo': 1,
-                    'porcentaje': 10
-                },
                 det_actividad: [
                     {
                       "clase": 1,
@@ -769,11 +763,14 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       }
     }
     */
-    const encabezado_reporte_diario = {
+   console.log('req.body', req.body);
+   console.log('req.body.recargo_hora.id', req.body.recargo_hora.id);
+   recargo_aplicar = req.body.recargo_hora.id;
+    const encabezadoReporteDiario = {
       fecha_reporte: req.body.fecha_reporte?String(req.body.fecha_reporte):undefined,
       jefe_faena: req.body.jefe_faena?Number(req.body.jefe_faena):undefined,
       sdi: req.body.sdi?String(req.body.sdi):undefined,
-      gestor_cliente: req.body.gestor_cliente?String(req.body.gestor_cliente):undefined,
+      gestor_cliente: req.body.gestor_cliente?String(req.body.ito_mandante):undefined,
       id_area: req.body.id_area?Number(req.body.id_area):undefined,
       brigada_pesada: req.body.brigada_pesada===undefined?undefined:Boolean(req.body.brigada_pesada),
       observaciones: req.body.observaciones?String(req.body.observaciones):undefined,
@@ -790,16 +787,18 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       comuna: req.body.comuna?String(req.body.comuna):undefined,
       num_documento: req.body.num_documento?String(req.body.num_documento):undefined,
       flexiapp: flexiapp?String(flexiapp):undefined,
-      recargo_hora: req.body.recargo_hora?Number(req.body.recargo_hora.id):undefined,
+      recargo_hora: recargo_aplicar
+
   }
 
+    console.log('encabezado_reporte_diario', encabezadoReporteDiario);
       const sequelize = db.sequelize;
       const result = await sequelize.transaction(async () => {
 
       let salida = {};
       
       // realizar la actualizacion del encabezado por id
-      await EncabezadoReporteDiario.update(encabezado_reporte_diario, {
+      await EncabezadoReporteDiario.update(encabezadoReporteDiario, {
         where: { id: id }
       }).then(async data => {
           salida = { message: "Obra actualizada" }
@@ -1215,7 +1214,7 @@ exports.createOneDetalleReporteDiarioActividad = async (req, res) => {
     });
 
     // Consultar si existe el encabezado de reporte diario en la tabla encabezado_reporte_diario
-    const encabezado_reporte_diarioExists = await encabezado_reporte_diario.findOne({
+    const encabezado_reporte_diarioExists = await EncabezadoReporteDiario.findOne({
       where: {
         id: req.body.id_encabezado_rep
       }
@@ -1410,7 +1409,7 @@ exports.findAllTipoTrabajo = async (req, res) => {
     //metodo GET
     
 
-    const sql = "SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 3 order by 1";
+    const sql = "SELECT id, nombre, id_tipo_recargo, porcentaje, nombre_corto FROM obras.recargos where id_tipo_recargo = 3 order by 1";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const recargoHora = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1423,7 +1422,8 @@ exports.findAllTipoTrabajo = async (req, res) => {
               id: Number(element.id),
               nombre: String(element.nombre),
               id_tipo_recargo: Number(3),
-              porcentaje: Number(element.porcentaje)
+              porcentaje: Number(element.porcentaje),
+              nombre_corto: String(element.nombre_corto)
               
             }
             salida.push(detalle_salida);
