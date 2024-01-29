@@ -252,7 +252,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
                 fecha_reporte: "2023-10-25",
                 jefe_faena: 1,
                 sdi: "sdi",
-                gestor_cliente: "nombre gestor cliente",
+                ito_mandante: "nombre gestor cliente",
                 id_area: 1,
                 brigada_pesada: false,
                 observaciones: "observaciones",
@@ -302,7 +302,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
   try{
       let salir = false;
       const campos = [
-        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'gestor_cliente', 'id_area', 
+        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'ito_mandante', 'id_area', 
         'observaciones', 'entregado_por_persona', 'fecha_entregado', 
         'revisado_por_persona', 'fecha_revisado', 'sector', 'hora_salida_base', 
         'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base'
@@ -370,7 +370,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
             fecha_reporte: String(req.body.fecha_reporte),
             jefe_faena: Number(req.body.jefe_faena),
             sdi: String(req.body.sdi),
-            gestor_cliente: String(req.body.gestor_cliente),
+            gestor_cliente: String(req.body.ito_mandante),
             id_area: Number(req.body.id_area),
             brigada_pesada: Boolean(req.body.brigada_pesada),
             observaciones: String(req.body.observaciones),
@@ -477,7 +477,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
   try{
       let salir = false;
       const campos = [
-        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'gestor_cliente', 'id_area', 
+        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'ito_mandante', 'id_area', 
         'observaciones', 'entregado_por_persona', 'fecha_entregado', 
         'revisado_por_persona', 'fecha_revisado', 'sector', 'hora_salida_base', 
         'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base', 'det_actividad'
