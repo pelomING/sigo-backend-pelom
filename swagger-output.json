@@ -2067,7 +2067,7 @@
                   "type": "string",
                   "example": "sdi"
                 },
-                "gestor_cliente": {
+                "ito_mandante": {
                   "type": "string",
                   "example": "nombre gestor cliente"
                 },
