@@ -3073,13 +3073,14 @@ exports.cierraEstadoPago = async (req, res) => {
         const estadoPago = await EstadoPago.create(estadoP)
         .then(async data => {
             //actualizar las otras tablas
+
             const sql2 = "update sae.reporte_cobro_adicional set id_estado_resultado = " + data.id + " WHERE id_estado_resultado is null " + condicion_fecha + "; \
             update sae.reporte_descuentos set id_estado_resultado = " + data.id + " WHERE id_estado_resultado is null " + condicion_fecha + "; \
             update sae.reporte_hora_extra set id_estado_resultado = " + data.id + " where id_estado_resultado is null " + condicion_fecha + "; \
-            update sae.reporte_jornada set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null and rj.estado <> 0 " + condicion_fecha_permanencia + "; \
-            update sae.reporte_eventos set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null and re.estado <> 0 " + condicion_fecha + "; \
+            update sae.reporte_jornada rj set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null and rj.estado <> 0 " + condicion_fecha_permanencia + "; \
+            update sae.reporte_eventos re set id_estado_resultado = " + data.id + " where brigada is not null and id_estado_resultado is null and re.estado <> 0 " + condicion_fecha + "; \
             update sae.reporte_observaciones set id_estado_resultado = " + data.id + " where id_estado_resultado is null " + condicion_fecha + ";";
-
+            console.log(sql2);
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
             const resultado = await sequelize.query(sql2, { type: QueryTypes.UPDATE })
