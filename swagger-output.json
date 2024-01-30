@@ -879,6 +879,50 @@
         }
       }
     },
+    "/api/obras/backoffice/general/v1/alloficinasupervisor": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todas las Oficinas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/general/v1/allrecargospordistancia": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todas los recargos por distancia",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/allobras": {
       "get": {
         "tags": [
@@ -1007,6 +1051,44 @@
                 "segmento": {
                   "type": "number",
                   "example": 1
+                },
+                "jefe_delegacion": {
+                  "type": "string",
+                  "example": "nombre jefe delegacion"
+                },
+                "oficina": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "oficina": {
+                      "type": "string",
+                      "example": "Curicó"
+                    },
+                    "supervisor": {
+                      "type": "string",
+                      "example": "Eduardo Soto"
+                    }
+                  }
+                },
+                "recargo_distancia": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 7
+                    },
+                    "nombre": {
+                      "type": "string",
+                      "example": "Menos de 30km"
+                    },
+                    "porcentaje": {
+                      "type": "number",
+                      "example": 0
+                    }
+                  }
                 }
               }
             }
@@ -1043,6 +1125,147 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos básicos de una obra",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "codigo_obra": {
+                  "type": "string",
+                  "example": "CGE-123456"
+                },
+                "nombre_obra": {
+                  "type": "string",
+                  "example": "nombre de la obra"
+                },
+                "numero_ot": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "zona": {
+                  "type": "number",
+                  "example": 1
+                },
+                "delegacion": {
+                  "type": "number",
+                  "example": 1
+                },
+                "gestor_cliente": {
+                  "type": "string",
+                  "example": "nombre gestor cliente (cge)"
+                },
+                "numero_aviso": {
+                  "type": "number",
+                  "example": 123456
+                },
+                "numero_oc": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "monto": {
+                  "type": "number",
+                  "example": 1000
+                },
+                "cantidad_uc": {
+                  "type": "number",
+                  "example": 100
+                },
+                "fecha_llegada": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "fecha_inicio": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "fecha_termino": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "tipo_trabajo": {
+                  "type": "number",
+                  "example": 1
+                },
+                "persona_envia_info": {
+                  "type": "string",
+                  "example": "nombre persona envia info"
+                },
+                "cargo_persona_envia_info": {
+                  "type": "string",
+                  "example": "cargo persona envia info"
+                },
+                "empresa_contratista": {
+                  "type": "number",
+                  "example": 1
+                },
+                "coordinador_contratista": {
+                  "type": "number",
+                  "example": 1
+                },
+                "comuna": {
+                  "type": "string",
+                  "example": "07234"
+                },
+                "ubicacion": {
+                  "type": "string",
+                  "example": "dirección donde se trabajará en la obra"
+                },
+                "estado": {
+                  "type": "number",
+                  "example": 1
+                },
+                "tipo_obra": {
+                  "type": "number",
+                  "example": 1
+                },
+                "segmento": {
+                  "type": "number",
+                  "example": 1
+                },
+                "jefe_delegacion": {
+                  "type": "string",
+                  "example": "nombre jefe delegacion"
+                },
+                "oficina": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "oficina": {
+                      "type": "string",
+                      "example": "Curicó"
+                    },
+                    "supervisor": {
+                      "type": "string",
+                      "example": "Eduardo Soto"
+                    }
+                  }
+                },
+                "recargo_distancia": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 7
+                    },
+                    "nombre": {
+                      "type": "string",
+                      "example": "Menos de 30km"
+                    },
+                    "porcentaje": {
+                      "type": "number",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1645,7 +1868,7 @@
                   "type": "string",
                   "example": "sdi"
                 },
-                "gestor_cliente": {
+                "ito_mandante": {
                   "type": "string",
                   "example": "nombre gestor cliente"
                 },
@@ -1717,6 +1940,27 @@
                   ],
                   "items": {
                     "type": "string"
+                  }
+                },
+                "recargo_hora": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "nombre": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "id_tipo_recargo": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "porcentaje": {
+                      "type": "number",
+                      "example": 10
+                    }
                   }
                 },
                 "det_actividad": {
@@ -1823,7 +2067,7 @@
                   "type": "string",
                   "example": "sdi"
                 },
-                "gestor_cliente": {
+                "ito_mandante": {
                   "type": "string",
                   "example": "nombre gestor cliente"
                 },
@@ -2240,6 +2484,28 @@
         }
       }
     },
+    "/api/obras/backoffice/repodiario/v1/allrecargoshora": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todas los recargos por hora extra",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/estadopago/v1/alltiporecargo": {
       "get": {
         "tags": [
@@ -2380,12 +2646,44 @@
         }
       }
     },
+    "/api/obras/backoffice/estadopago/v1/allactividadesconhoraextra": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Obtiene todas las actividades adicionales y normales que tengan hora extra para un estado de pago",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/estadopago/v1/creaestadopago": {
       "post": {
         "tags": [
           "Obras - Backoffice - Estado de Pago"
         ],
-        "description": "Graba un estado de pago",
+        "description": "ista los estados de pago por id_obra",
         "parameters": [
           {
             "name": "body",
@@ -2411,10 +2709,10 @@
                 "solicitado_por": {
                   "example": "any"
                 },
-                "ot_sdi": {
+                "supervisor_pelom": {
                   "example": "any"
                 },
-                "supervisor_pelom": {
+                "coordinador": {
                   "example": "any"
                 },
                 "comuna": {
@@ -2437,6 +2735,21 @@
                 },
                 "codigo_pelom": {
                   "example": "any"
+                },
+                "ot": {
+                  "example": "any"
+                },
+                "sdi": {
+                  "example": "any"
+                },
+                "recargo_nombre": {
+                  "example": "any"
+                },
+                "recargo_porcentaje": {
+                  "example": "any"
+                },
+                "valor_uc": {
+                  "example": "any"
                 }
               }
             }
@@ -2445,6 +2758,41 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/estadopago/v1/listaestadospago": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Lista los estados de pago por id_obra",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"

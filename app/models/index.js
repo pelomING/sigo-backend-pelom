@@ -84,6 +84,7 @@ db.delegacion = require("./obras/delegacion.model.js")(sequelize, Sequelize);
 db.detalleReporteDiarioActividad = require("./obras/detalleReporteDiarioActividad.model.js")(sequelize, Sequelize);
 db.detalleReporteDiarioOtrasActividades = require("./obras/detalleReporteDiarioOtrasActividades.model.js")(sequelize, Sequelize);
 db.empresaContratista = require("./obras/empresaContratista.model.js")(sequelize, Sequelize);
+db.encabezadoEstadoPago = require("./obras/encabezadoEstadoPago.model.js")(sequelize, Sequelize);
 db.encabezadoReporteDiario = require("./obras/encabezadoReporteDiario.model.js")(sequelize, Sequelize);
 db.estadoObra = require("./obras/estadoObra.model.js")(sequelize, Sequelize);
 db.estadoVisita = require("./obras/estadoVisita.model.js")(sequelize, Sequelize);

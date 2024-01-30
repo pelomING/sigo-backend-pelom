@@ -4,7 +4,7 @@ const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
 const DetalleRporteDiarioOtrasActividades = db.detalleReporteDiarioOtrasActividades; 
 const tipoOperacion = db.tipoOperacion;
 const maestroActividad = db.maestroActividad;
-const encabezado_reporte_diario = db.encabezadoReporteDiario;
+//const encabezado_reporte_diario = db.encabezadoReporteDiario;
 const JefesFaena = db.jefesFaena;
 const TipoActividad = db.tipoActividad;
 const TipoTrabajo = db.tipoTrabajo;
@@ -38,23 +38,24 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-       num_documento, flexiapp, (select array_agg(detalle) as detalle_actividad from (select row_to_json(a) as detalle from \
-       (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, \
-       json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
-       case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 \
-       end as unitario, case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then \
-       uc_traslado else 0 end * cantidad as total FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion \
-       top on dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, \
-       uc_retiro, uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM obras.maestro_actividades ma join \
-       obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) \
-       ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id \
-       WHERE dra.id_encabezado_rep = rd.id) a) b), (select array_agg(detalle) as detalle_otros from (select row_to_json(a) \
-       as detalle from (SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, json_build_object('id', erd.id, 'id_obra', \
-       erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades \
-       drd join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) \
-       a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
-       on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
-       jf.id";
+       num_documento, flexiapp, row_to_json(rec) as recargo, (select array_agg(detalle) as detalle_actividad from \
+       (select row_to_json(a) as detalle from (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, \
+       row_to_json(ma) as actividad, cantidad, json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', \
+       erd.fecha_reporte) as encabezado_reporte, case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro \
+       when top.id = 3 then uc_traslado else 0 end as unitario, case when top.id = 1 then uc_instalacion when top.id = 2 \
+       then uc_retiro when top.id = 3 then uc_traslado else 0 end * cantidad as total FROM obras.detalle_reporte_diario_actividad \
+       dra join obras.tipo_operacion top on dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) \
+       as tipo_actividad, uc_instalacion, uc_retiro, uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM \
+       obras.maestro_actividades ma join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades \
+       mu on ma.id_unidad = mu.id) ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd on \
+       dra.id_encabezado_rep = erd.id WHERE dra.id_encabezado_rep = rd.id) a) b), (select array_agg(detalle) as \
+       detalle_otros from (select row_to_json(a) as detalle from (SELECT drd.id, glosa, uc_unitaria, cantidad, \
+        total_uc, json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as \
+        encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades drd join obras.encabezado_reporte_diario \
+        erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) a) b) FROM obras.encabezado_reporte_diario \
+        rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o on rd.id_obra = o.id join _comun.comunas c \
+        on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = jf.id left join obras.recargos rec on \
+        rd.recargo_hora = rec.id";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const encabezadoReporte = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -86,6 +87,7 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
                   comuna: element.comuna,
                   num_documento: String(element.num_documento),
                   flexiapp: element.flexiapp,
+                  recargo_hora: element.recargo,
                   det_actividad: element.detalle_actividad,
                   det_otros: element.detalle_otros
                   
@@ -161,7 +163,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-       num_documento, flexiapp, (select array_agg(detalle) as detalle_actividad from (select row_to_json(a) as detalle from \
+       num_documento, flexiapp, row_to_json(rec) as recargo, (select array_agg(detalle) as detalle_actividad from (select row_to_json(a) as detalle from \
        (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, \
        json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
        case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 \
@@ -177,10 +179,10 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
        drd join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) \
        a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
        on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
-       jf.id WHERE "+b;
+       jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE "+b;
 
-        //console.log("sql: "+sql);
-        const { QueryTypes } = require('sequelize');
+        console.log("sql: "+sql);
+        const { QueryTypes } = require('sequelize'); 
         const sequelize = db.sequelize;
         const encabezadoReporte = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
         let salida = [];
@@ -212,6 +214,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
               comuna: element.comuna,
               num_documento: String(element.num_documento),
               flexiapp: element.flexiapp,
+              recargo_hora: element.recargo,
               det_actividad: element.detalle_actividad,
               det_otros: element.detalle_otros
 
@@ -249,7 +252,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
                 fecha_reporte: "2023-10-25",
                 jefe_faena: 1,
                 sdi: "sdi",
-                gestor_cliente: "nombre gestor cliente",
+                ito_mandante: "nombre gestor cliente",
                 id_area: 1,
                 brigada_pesada: false,
                 observaciones: "observaciones",
@@ -299,7 +302,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
   try{
       let salir = false;
       const campos = [
-        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'gestor_cliente', 'id_area', 
+        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'ito_mandante', 'id_area', 
         'observaciones', 'entregado_por_persona', 'fecha_entregado', 
         'revisado_por_persona', 'fecha_revisado', 'sector', 'hora_salida_base', 
         'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base'
@@ -356,12 +359,10 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
         await sequelize.query(sql, {
           type: QueryTypes.SELECT
         }).then(data => {
-          console.log('data', data);
           encabezado_reporte_diario_id = data[0].valor;
         }).catch(err => {
           res.status(500).send({ message: err.message });
         })
-        console.log('id', encabezado_reporte_diario_id);
 
         const encabezado_reporte_diario = {
             id: encabezado_reporte_diario_id,
@@ -369,7 +370,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
             fecha_reporte: String(req.body.fecha_reporte),
             jefe_faena: Number(req.body.jefe_faena),
             sdi: String(req.body.sdi),
-            gestor_cliente: String(req.body.gestor_cliente),
+            gestor_cliente: String(req.body.ito_mandante),
             id_area: Number(req.body.id_area),
             brigada_pesada: Boolean(req.body.brigada_pesada),
             observaciones: String(req.body.observaciones),
@@ -420,7 +421,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                 fecha_reporte: "2023-10-25",
                 jefe_faena: 1,
                 sdi: "sdi",
-                gestor_cliente: "nombre gestor cliente",
+                ito_mandante: "nombre gestor cliente",
                 id_area: 1,
                 brigada_pesada: false,
                 observaciones: "observaciones",
@@ -437,6 +438,12 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                 comuna: "10305",
                 num_documento: "10001000600",
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
+                recargo_hora: {
+                    'id': 1,
+                    'nombre': 1,
+                    'id_tipo_recargo': 1,
+                    'porcentaje': 10
+                },
                 det_actividad: [
                     {
                       "clase": 1,
@@ -470,7 +477,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
   try{
       let salir = false;
       const campos = [
-        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'gestor_cliente', 'id_area', 
+        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'ito_mandante', 'id_area', 
         'observaciones', 'entregado_por_persona', 'fecha_entregado', 
         'revisado_por_persona', 'fecha_revisado', 'sector', 'hora_salida_base', 
         'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base', 'det_actividad'
@@ -489,7 +496,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           //el rut ya existe
           if (data.length > 0) {
             salir = true;
-            res.status(403).send({ message: 'El Codigo de Obra ya se encuentra ingresado en la base' });
+            res.status(403).send({ message: `La fecha de reporte '${fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`});
           }
         }).catch(err => {
             salir = true;
@@ -549,22 +556,20 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         await sequelize.query(sql, {
           type: QueryTypes.SELECT
         }).then(data => {
-          console.log('data', data);
           encabezado_reporte_diario_id = data[0].valor;
         }).catch(err => {
           res.status(500).send({ message: err.message });
         })
-        console.log('id', encabezado_reporte_diario_id);
-
+        const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
         const encabezado_reporte_diario = {
             id: encabezado_reporte_diario_id,
             id_obra: Number(req.body.id_obra),
             fecha_reporte: String(req.body.fecha_reporte),
             jefe_faena: Number(req.body.jefe_faena),
             sdi: String(req.body.sdi),
-            gestor_cliente: String(req.body.gestor_cliente),
+            gestor_cliente: String(req.body.ito_mandante),
             id_area: Number(req.body.id_area),
-            brigada_pesada: Boolean(req.body.brigada_pesada),
+            brigada_pesada: req.body.brigada_pesada===undefined?false:Boolean(req.body.brigada_pesada),
             observaciones: String(req.body.observaciones),
             entregado_por_persona: String(req.body.entregado_por_persona),
             fecha_entregado: String(req.body.fecha_entregado),
@@ -578,7 +583,8 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             alimentador: String(req.body.alimentador),
             comuna: String(req.body.comuna),
             num_documento: String(req.body.num_documento),
-            flexiapp: String(flexiapp)
+            flexiapp: String(flexiapp),
+            recargo_hora: recargo_aplicar?Number(req.body.recargo_hora.id):null
         }
 
         const result = await sequelize.transaction(async () => {
@@ -651,7 +657,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                 fecha_reporte: "2023-10-25",
                 jefe_faena: 1,
                 sdi: "sdi",
-                gestor_cliente: "nombre gestor cliente",
+                ito_mandante: "nombre gestor cliente",
                 id_area: 1,
                 brigada_pesada: false,
                 observaciones: "observaciones",
@@ -699,7 +705,6 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
             }
         } */
   try{
-    console.log('updateEncabezadoReporteDiario_V2', req.body);
     const id = req.params.id;
     let flexiapp = undefined;
     if (req.body.flexiapp){
@@ -713,7 +718,9 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         }
         flexiapp = flexiapp + "}"
     };
+    
     let detalle_actividad = req.body.det_actividad;
+    /*
     if (detalle_actividad){
       if (!detalle_actividad[0]) {
         res.status(400).send({message: "El detalle debe tener al menos una actividad"});
@@ -735,8 +742,9 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
         return;
       }
-    }
+    }*/
     let detalle_otros = req.body.det_otros;
+    /*
     if (detalle_otros){
       if (!detalle_otros[0]) {
         res.status(400).send({message: "El detalle otros debe tener al menos una actividad"});
@@ -754,13 +762,16 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         res.status(400).send({message: "El campo cantidad en el detalle otros debe tener valor"});
       }
     }
-    const encabezado_reporte_diario = {
+    */
+   console.log('req.body', req.body);
+   const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
+    const encabezadoReporteDiario = {
       fecha_reporte: req.body.fecha_reporte?String(req.body.fecha_reporte):undefined,
       jefe_faena: req.body.jefe_faena?Number(req.body.jefe_faena):undefined,
       sdi: req.body.sdi?String(req.body.sdi):undefined,
-      gestor_cliente: req.body.gestor_cliente?String(req.body.gestor_cliente):undefined,
+      gestor_cliente: req.body.ito_mandante?String(req.body.ito_mandante):undefined,
       id_area: req.body.id_area?Number(req.body.id_area):undefined,
-      brigada_pesada: req.body.brigada_pesada?Boolean(req.body.brigada_pesada):undefined,
+      brigada_pesada: req.body.brigada_pesada===undefined?undefined:Boolean(req.body.brigada_pesada),
       observaciones: req.body.observaciones?String(req.body.observaciones):undefined,
       entregado_por_persona: req.body.entregado_por_persona?String(req.body.entregado_por_persona):undefined,
       fecha_entregado: req.body.fecha_entregado?String(req.body.fecha_entregado):undefined,
@@ -774,17 +785,19 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       alimentador: req.body.alimentador?String(req.body.alimentador):undefined,
       comuna: req.body.comuna?String(req.body.comuna):undefined,
       num_documento: req.body.num_documento?String(req.body.num_documento):undefined,
-      flexiapp: flexiapp?String(flexiapp):undefined
-  }
-  console.log('encabezado_reporte_diario', encabezado_reporte_diario);
+      flexiapp: flexiapp?String(flexiapp):undefined,
+      recargo_hora: recargo_aplicar
 
+  }
+
+    console.log('encabezado_reporte_diario', encabezadoReporteDiario);
       const sequelize = db.sequelize;
       const result = await sequelize.transaction(async () => {
 
       let salida = {};
       
       // realizar la actualizacion del encabezado por id
-      await EncabezadoReporteDiario.update(encabezado_reporte_diario, {
+      await EncabezadoReporteDiario.update(encabezadoReporteDiario, {
         where: { id: id }
       }).then(async data => {
           salida = { message: "Obra actualizada" }
@@ -819,20 +832,23 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
               }
             }
       }).catch(err => {
-        console.log('catch err: ', err);
         //return { message: err }
         salida = { message: err }
       });
       return salida;
     });
-    console.log('result: ', result);
     if (result.message==="Obra actualizada") {
       res.status(200).send(result);
     }else {
-      res.status(400).send(result);
+      console.log(result.message.parent.detail);
+      if (result.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
+        res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
+      }else{
+        res.status(400).send(result);
+      }
+      
     }
   }catch (error) {
-    console.log('catch error: ', error);
     res.status(500).send(error);
   }
 }
@@ -855,7 +871,6 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
           where: { id: id }
         }).then(data => {
           if (data > 0) {
-            console.log('data ok: ', data);
             salida = { message: `Reporte eliminado`}
           } else {
             salida = { message: `No existe el reporte con id ${id}` }
@@ -1042,7 +1057,6 @@ exports.findDetalleReporteDiarioActividadPorParametros = async (req, res) => {
         ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) ma on dra.id_actividad = \
         ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id WHERE "+b;
 
-        console.log("sql: "+sql);
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const detalleReporteDiarioActividad = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
@@ -1119,7 +1133,7 @@ exports.findDetalleReporteDiarioOtrasPorParametros = async (req, res) => {
         'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades drd \
         join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE "+b;
 
-        console.log("sql: "+sql);
+
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const detalleReporteDiarioActividad = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
@@ -1199,7 +1213,7 @@ exports.createOneDetalleReporteDiarioActividad = async (req, res) => {
     });
 
     // Consultar si existe el encabezado de reporte diario en la tabla encabezado_reporte_diario
-    const encabezado_reporte_diarioExists = await encabezado_reporte_diario.findOne({
+    const encabezado_reporte_diarioExists = await EncabezadoReporteDiario.findOne({
       where: {
         id: req.body.id_encabezado_rep
       }
@@ -1280,23 +1294,34 @@ exports.findAllTipoOperacion = async (req, res) => {
 exports.findAllTipoActividad = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
       #swagger.description = 'Devuelve todos los tipo de actividad' */
-  try {
-    await TipoActividad.findAll().then(data => {
-          let salida = [];
-          for (element of data) {
-            const detalle_salida = {
-              id: Number(element.id),
-              descripcion: String(element.descripcion)
-            }
-            salida.push(detalle_salida);
-          }
-          res.send(salida);
-    }).catch(err => {
-        res.status(500).send({ message: err.message });
-    })
-  }catch (error) {
-    res.status(500).send(error);
-  }
+
+      try {
+            
+        const sql = "select * from (SELECT distinct on (ta.id) ta.* FROM obras.tipo_actividad ta join \
+        obras.maestro_actividades ma on ta.id = ma.id_tipo_actividad order by 1) a order by 2";
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const tipoActividad = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida;
+        if (tipoActividad) {
+          salida = [];
+          for (const element of tipoActividad) {
+    
+                const detalle_salida = {
+                  id: Number(element.id),
+                  descripcion: String(element.descripcion)
+                }
+                salida.push(detalle_salida);
+          };
+        }
+        if (salida===undefined){
+          res.status(500).send("Error en la consulta (servidor backend)");
+        }else{
+          res.status(200).send(salida);
+        }
+      } catch (error) {
+        res.status(500).send(error);
+      }
 }
 
 /*********************************************************************************** */
@@ -1372,3 +1397,43 @@ exports.findAllTipoTrabajo = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+
+
+
+ exports.findAllRecargosHoraExtra = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+    #swagger.description = 'Devuelve todas los recargos por hora extra' */
+  try {
+    //metodo GET
+    
+
+    const sql = "SELECT id, nombre, id_tipo_recargo, porcentaje, nombre_corto FROM obras.recargos where id_tipo_recargo = 3 order by 1";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const recargoHora = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida;
+    if (recargoHora) {
+      salida = [];
+      for (const element of recargoHora) {
+
+            const detalle_salida = {
+              id: Number(element.id),
+              nombre: String(element.nombre),
+              id_tipo_recargo: Number(3),
+              porcentaje: Number(element.porcentaje),
+              nombre_corto: String(element.nombre_corto)
+              
+            }
+            salida.push(detalle_salida);
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
