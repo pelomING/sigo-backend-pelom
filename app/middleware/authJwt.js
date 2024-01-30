@@ -171,6 +171,35 @@ let isSistemaOrAdminSae = async (req, res, next) => {
     });
   }
 }
+let isSupervisorOrAdminObrasOrSistema = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.userId);
+    const roles = await user.getRoles();
+
+    for (const element of roles) {
+      if (element.name === "supervisor") {
+        return next();
+      }
+
+      if (element.name === "adminobras" ) {
+        return next();
+      }
+
+      if (element.name === "sistema") {
+        return next();
+      }
+    }
+
+    return res.status(403).send({
+      message: "Debe ser Supervisor o Administrador o Sistema!",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "No es posible determinar el rol",
+    });
+  }
+};
+
 let isSupervisorOrAdminOrSistema = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.userId);
@@ -653,6 +682,7 @@ const authJwt = {
   isSupervisorOrAdmin,
   isSupervisorOrAdminOrSistema,
   isSistemaOrAdminSae,
+  isSupervisorOrAdminObrasOrSistema,
   readObrasBackofficeTerreno,
   createObrasBackofficeTerreno,
   updateObrasBackofficeTerreno,

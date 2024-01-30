@@ -282,29 +282,28 @@ exports.totalesEstadoPago = async (req, res) => {
    
     const actividadesAdicionales = await listadoActividadesAdicionalesByIdObra(id_obra);
     let totalActividadesAdicionales = !actividadesAdicionales.error?actividadesAdicionales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
-    
+
     const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra);
     let totalActividadesHoraExtra = !actividadesHoraExtra.error?actividadesHoraExtra.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
-    // Example code to calculate totals and subtotals
-    const detallesActividades = await DetallesActividades.findAll(); // Replace with your actual code to retrieve the activity details
-    let total = 0;
-    let subtotales = {};
-
-    for (const detalle of detallesActividades) {
-      const subtotal = detalle.cantidad * detalle.unitario;
-      total += subtotal;
-
-      if (subtotales[detalle.actividad]) {
-        subtotales[detalle.actividad] += subtotal;
-      } else {
-        subtotales[detalle.actividad] = subtotal;
-      }
+    if (totalActividadesNormales===undefined || totalActividadesAdicionales===undefined || totalActividadesHoraExtra===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
     }
+    const subtotal1 = Number(totalActividadesNormales);
+    const subtotal2 = Number(totalActividadesAdicionales);
+    const subtotal3 = Number(totalActividadesHoraExtra);
+    const totalNeto = Number(subtotal1+subtotal2+subtotal3);
+    const total = Number((totalNeto * 1.19).toFixed(0));
+    const iva = Number(Number(total - totalNeto).toFixed(0));
+
 
     const result = {
-      total,
-      subtotales
+      subtotal1: subtotal1,
+      subtotal2: subtotal2,
+      subtotal3: subtotal3,
+      totalNeto: totalNeto,
+      total: total,
+      iva: iva
     };
 
     res.status(200).send(result);
