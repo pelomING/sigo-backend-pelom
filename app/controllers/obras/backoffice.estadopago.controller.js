@@ -292,7 +292,9 @@ exports.totalesEstadoPago = async (req, res) => {
     const subtotal1 = Number(totalActividadesNormales);
     const subtotal2 = Number(totalActividadesAdicionales);
     const subtotal3 = Number(totalActividadesHoraExtra);
-    const totalNeto = Number(subtotal1+subtotal2+subtotal3);
+    const valorNeto = Number(subtotal1+subtotal2+subtotal3);
+    const descuentoAvance = Number(10);
+    const totalNeto = Number(valorNeto - descuentoAvance);
     const total = Number((totalNeto * 1.19).toFixed(0));
     const iva = Number(Number(total - totalNeto).toFixed(0));
 
@@ -301,12 +303,46 @@ exports.totalesEstadoPago = async (req, res) => {
       subtotal1: subtotal1,
       subtotal2: subtotal2,
       subtotal3: subtotal3,
+      valorNeto: valorNeto,
+      descuentoAvance: descuentoAvance,
       totalNeto: totalNeto,
       total: total,
       iva: iva
     };
 
     res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+/*********************************************************************************** */
+/* Obtiene la tabla de los avances de estado de pago
+    GET /api/obras/backoffice/estadopago/v1/avancesestadopago
+*/
+exports.avancesEstadoPago = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Obtiene la tabla de los avances de estado de pago' */
+  try {
+    const id_obra = req.query.id_obra;
+    const campos = ['id_obra'];
+      for (const element of campos) {
+        if (!req.query[element]) {
+          res.status(400).send({
+            message: "No puede estar nulo el campo " + element
+          });
+          return;
+        }
+      };
+    const avances = [
+      {codigo_pelom: "EDP-10007867-2024",
+      monto: 5,
+      fecha_avance: "2023-12-01"},
+      {codigo_pelom: "EDP-10007868-2024",
+      monto: 5,
+      fecha_avance: "2024-01-15"}
+    ]
+    res.status(200).send(avances);
+    
   } catch (error) {
     res.status(500).send(error);
   }

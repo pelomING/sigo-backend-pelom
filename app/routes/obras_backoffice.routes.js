@@ -180,6 +180,11 @@ module.exports = function(app) {
     // Obtiene todas las actividades adicionales y normales que tengan hora extra para un estado de pago
     app.get("/api/obras/backoffice/estadopago/v1/allactividadesconhoraextra", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.getAllActividadesHoraExtraByIdObra);
 
+    // Obtiene la tabla de los avances de estado de pago
+    //GET /api/obras/backoffice/estadopago/v1/avancesestadopago
+    app.get("/api/obras/backoffice/estadopago/v1/avancesestadopago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.avancesEstadoPago);
+
+
     // Obtiene Los totales y subtotales de acuerdo a lo que viene de los detalles de actividades
     //GET /api/obras/backoffice/estadopago/v1/totalesestadopago
     app.get("/api/obras/backoffice/estadopago/v1/totalesestadopago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.totalesEstadoPago);
