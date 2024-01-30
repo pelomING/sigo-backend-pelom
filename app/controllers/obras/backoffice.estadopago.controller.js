@@ -180,7 +180,7 @@ exports.getAllActividadesByIdObra = async (req, res) => {
               return;
             }
           };
-        const sql = "select top.clase, ta.descripcion tipo, (case when e.porcentaje = 0 then '' else e.nombre_corto end || ma.actividad) as actividad, \
+        const sql = "select top.clase, ta.descripcion tipo, (case when e.porcentaje is null or e.porcentaje = 0 then '' else e.nombre_corto end || ma.actividad) as actividad, \
         mu.codigo_corto as unidad, e.cantidad, case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' \
         then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, \
         (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, \
@@ -250,7 +250,7 @@ exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
               return;
             }
           };
-        const sql = "select top.clase, ta.descripcion tipo, (case when e.porcentaje = 0 then '' else e.nombre_corto end || ma.actividad) as actividad, \
+        const sql = "select top.clase, ta.descripcion tipo, (case when e.porcentaje is null or e.porcentaje = 0 then '' else e.nombre_corto end || ma.actividad) as actividad, \
         mu.codigo_corto as unidad, e.cantidad, case when top.clase = 'I' then ma.uc_instalacion \
         when top.clase = 'R' then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision \
         end as unitario, (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) \
@@ -267,7 +267,7 @@ exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
           ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id WHERE \
           e.porcentaje = 0 AND ta.id = 9 \
           UNION \
-          select 'I'::char as clase, 'Adicionales'::varchar as tipo, (case when rec.porcentaje = 0 \
+          select 'I'::char as clase, 'Adicionales'::varchar as tipo, (case when rec.porcentaje is null or rec.porcentaje = 0 \
             then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end || glosa) as actividad, 'CU'::varchar, cantidad, \
             uc_unitaria::double precision as unitario, (SELECT precio FROM obras.valor_uc where oficina = o.oficina \
               order by oficina, fecha desc limit 1) as valor_uc, case when rec.porcentaje is null then 0 else \

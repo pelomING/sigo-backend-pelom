@@ -38,6 +38,7 @@ testem.log
 /typings
 /old-modules
 *.bat
+*.zip
 
 # System files
 .DS_Store

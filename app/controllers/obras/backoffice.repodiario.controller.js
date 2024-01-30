@@ -560,7 +560,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         }).catch(err => {
           res.status(500).send({ message: err.message });
         })
-
+        const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
         const encabezado_reporte_diario = {
             id: encabezado_reporte_diario_id,
             id_obra: Number(req.body.id_obra),
@@ -584,7 +584,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             comuna: String(req.body.comuna),
             num_documento: String(req.body.num_documento),
             flexiapp: String(flexiapp),
-            recargo_hora: Number(req.body.recargo_hora.id),
+            recargo_hora: recargo_aplicar?Number(req.body.recargo_hora.id):null
         }
 
         const result = await sequelize.transaction(async () => {
