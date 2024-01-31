@@ -2,6 +2,7 @@ const db = require("../../models");
 const Recargo = db.recargo;
 const TipoRecargo = db.tipoRecargo;
 const EncabezadoEstadoPago = db.encabezadoEstadoPago;
+const EncabezadoReporteDiario = db.encabezadoReporteDiario;
 
 /*********************************************************************************** */
 /* Obtiene todos los tipos de recargo
@@ -286,14 +287,18 @@ exports.totalesEstadoPago = async (req, res) => {
     const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra);
     let totalActividadesHoraExtra = !actividadesHoraExtra.error?actividadesHoraExtra.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
-    if (totalActividadesNormales===undefined || totalActividadesAdicionales===undefined || totalActividadesHoraExtra===undefined){
+    const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
+    let totalAvances = !detalle_avances.error?detalle_avances.detalle.reduce(((total, num) => total + num.monto), 0):undefined;
+
+
+    if (totalActividadesNormales===undefined || totalActividadesAdicionales===undefined || totalActividadesHoraExtra===undefined || totalAvances===undefined) {
       res.status(500).send("Error en la consulta (servidor backend)");
     }
     const subtotal1 = Number(totalActividadesNormales);
     const subtotal2 = Number(totalActividadesAdicionales);
     const subtotal3 = Number(totalActividadesHoraExtra);
     const valorNeto = Number(subtotal1+subtotal2+subtotal3);
-    const descuentoAvance = Number(10);
+    const descuentoAvance = Number(totalAvances);
     const totalNeto = Number(valorNeto - descuentoAvance);
     const total = Number((totalNeto * 1.19).toFixed(0));
     const iva = Number(Number(total - totalNeto).toFixed(0));
@@ -333,15 +338,13 @@ exports.avancesEstadoPago = async (req, res) => {
           return;
         }
       };
-    const avances = [
-      {codigo_pelom: "EDP-10007867-2024",
-      monto: 5,
-      fecha_avance: "2023-12-01"},
-      {codigo_pelom: "EDP-10007868-2024",
-      monto: 5,
-      fecha_avance: "2024-01-15"}
-    ]
-    res.status(200).send(avances);
+      //Va a consultar a la funcion listadoAvancesEstadoPagoIdObra definida mas abajo
+      const consulta = await listadoAvancesEstadoPagoIdObra(id_obra);
+      if (consulta.error === false) {
+        res.status(200).send(consulta.detalle);
+      } else {
+        res.status(500).send(consulta.detalle);
+      }
     
   } catch (error) {
     res.status(500).send(error);
@@ -354,7 +357,7 @@ exports.avancesEstadoPago = async (req, res) => {
 */
 exports.creaEstadoPago = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
-      #swagger.description = 'ista los estados de pago por id_obra' */
+      #swagger.description = 'Lista los estados de pago por id_obra' */
   try {
     const campos = [
       'id_obra', 'cliente', 'fecha_asignacion', 'tipo_trabajo',
@@ -370,8 +373,23 @@ exports.creaEstadoPago = async (req, res) => {
         return;
       }
     };
+
+    const id_obra = req.body.id_obra;
+
     const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
     const fecha_estado_pago = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
+
+    const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
+    let totalAvances = !detalle_avances.error?detalle_avances.detalle.reduce(((total, num) => total + num.monto), 0):undefined;
+
+    const actividadesNormales = await listadoActividadesByIdObra(id_obra);
+    let totalActividadesNormales = !actividadesNormales.error?actividadesNormales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
+   
+    const actividadesAdicionales = await listadoActividadesAdicionalesByIdObra(id_obra);
+    let totalActividadesAdicionales = !actividadesAdicionales.error?actividadesAdicionales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
+
+    const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra);
+    let totalActividadesHoraExtra = !actividadesHoraExtra.error?actividadesHoraExtra.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
     const sql = "select nextval('obras.encabezado_estado_pago_id_seq'::regclass) as valor";
         const { QueryTypes } = require('sequelize');
@@ -425,20 +443,43 @@ exports.creaEstadoPago = async (req, res) => {
       fecha_ejecucion: req.body.fecha_ejecucion,
       jefe_delegacion: req.body.jefe_delegacion,
       jefe_faena: req.body.jefe_faena.id,
+      estado: 1,     //0: pendiente, 1: cerrado, 2: facturado
       codigo_pelom: req.body.codigo_pelom,
       ot: req.body.ot,
       sdi: req.body.sdi,
       recargo_nombre: req.body.recargo_nombre,
       recargo_porcentaje: req.body.recargo_porcentaje,
       valor_uc: req.body.valor_uc,
-      estado: 0     //0: pendiente, 1: cerrado, 2: facturado
+      subtotal1: totalActividadesNormales,
+      subtotal2: totalActividadesAdicionales,
+      subtotal3: totalActividadesHoraExtra,
+      descuentoAvances: totalAvances,
+      detalle_avances: !detalle_avances.error?detalle_avances.detalle:undefined
     }
-    await EncabezadoEstadoPago.create(datos)
-          .then(data => {
-              res.status(200).send(data);
+    console.log('datos', datos);
+    
+    const result = await sequelize.transaction(async () => {
+
+      let salida = {};
+      await EncabezadoEstadoPago.create(datos)
+          .then(async data => {
+            salida = { error: false, message: data }
+            await EncabezadoReporteDiario.update({id_estado_pago: encabezado_estado_pago_id}, {
+              where: {
+                id_estado_pago: null,
+                id_obra: req.body.id_obra
+              }
+            })
           }).catch(err => {
-              res.status(500).send({ message: err.message });
+            salida = { error: true, message: err }
           })
+      return salida;
+    });
+    if (result.error) {
+      res.status(500).send(result.message);
+    }else {
+      res.status(200).send(result.message);
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -695,6 +736,45 @@ let listadoActividadesHoraExtraByIdObra = async (id_obra) => {
                         recargos: recargo_total.toString()+'%',
                         total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+recargo_total/100)).toFixed(0))
                         
+                      }
+                      salida.push(detalle_salida);
+                };
+              }
+              const retorna = {
+                error: false,
+                detalle: salida
+              }
+              return retorna;
+
+  } catch (error) {
+    const retorna = {
+      error: true,
+      detalle: error
+    }
+    return retorna;
+  }
+  
+}
+
+let listadoAvancesEstadoPagoIdObra = async (id_obra) => {
+  try {
+      console.log('listadoAvancesEstadoPagoIdObra', id_obra);
+      const sql = "SELECT codigo_pelom, fecha_estado_pago::text, (subtotal1 + subtotal2 + subtotal3 - descuento_avance) \
+      as monto FROM obras.encabezado_estado_pago WHERE id_obra = " + id_obra + " order by fecha_estado_pago desc, id desc";
+            console.log('sql', sql);
+            const { QueryTypes } = require('sequelize');
+            const sequelize = db.sequelize;
+            const avances = await sequelize.query(sql, { type: QueryTypes.SELECT });
+            let salida = [];
+            if (avances) {
+                
+                for (const element of avances) {
+
+                      const detalle_salida = {
+                        codigo_pelom: element.codigo_pelom,
+                        fecha_avance: element.fecha_estado_pago,
+                        monto: element.monto
+                                                
                       }
                       salida.push(detalle_salida);
                 };

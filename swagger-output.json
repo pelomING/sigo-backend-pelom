@@ -2747,7 +2747,7 @@
         "tags": [
           "Obras - Backoffice - Estado de Pago"
         ],
-        "description": "ista los estados de pago por id_obra",
+        "description": "Lista los estados de pago por id_obra",
         "parameters": [
           {
             "name": "body",
