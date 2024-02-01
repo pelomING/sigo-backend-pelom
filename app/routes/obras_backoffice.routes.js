@@ -195,5 +195,10 @@ module.exports = function(app) {
     // Lista los estados de pago por id_obra  GET /api/obras/backoffice/estadopago/v1/listaestadospago
     app.get("/api/obras/backoffice/estadopago/v1/listaestadospago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.getAllEstadosPagoByIdObra);
 
+    // Obtiene todos los datos para completar un informe de estado de pago historico por id del estado de pago
+    //GET /api/obras/backoffice/estadopago/v1/historicoestadopagoporid
+    app.get("/api/obras/backoffice/estadopago/v1/historicoestadopagoporid", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.getHistoricoEstadosPagoByIdEstadoPago);
+
+
 
 }

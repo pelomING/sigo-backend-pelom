@@ -102,6 +102,15 @@ module.exports = (sequelize, Sequelize) => {
         },
         detalle_avances: {
             type: Sequelize.ARRAY(Sequelize.JSON)
+        },
+        detalle_actividades : {
+            type: Sequelize.ARRAY(Sequelize.JSON)
+        },
+        detalle_otros : {
+            type: Sequelize.ARRAY(Sequelize.JSON)
+        },
+        detalle_horaextra : {
+            type: Sequelize.ARRAY(Sequelize.JSON)
         }
     },
         {
