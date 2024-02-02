@@ -438,12 +438,6 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                 comuna: "10305",
                 num_documento: "10001000600",
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
-                recargo_hora: {
-                    'id': 1,
-                    'nombre': 1,
-                    'id_tipo_recargo': 1,
-                    'porcentaje': 10
-                },
                 det_actividad: [
                     {
                       "clase": 1,
@@ -493,10 +487,9 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
 
       //Verifica que la fecha de reporte no este asignada a una obra
       await EncabezadoReporteDiario.findAll({where: {id_obra: req.body.id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
-          //el rut ya existe
           if (data.length > 0) {
             salir = true;
-            res.status(403).send({ message: `La fecha de reporte '${fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`});
+            res.status(403).send({ message: `La fecha de reporte '${req.body.fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`});
           }
         }).catch(err => {
             salir = true;
