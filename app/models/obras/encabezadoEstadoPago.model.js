@@ -87,6 +87,30 @@ module.exports = (sequelize, Sequelize) => {
         },
         valor_uc: {
             type: Sequelize.FLOAT
+        },
+        subtotal1 : {
+            type: Sequelize.BIGINT
+        },
+        subtotal2: {
+            type: Sequelize.BIGINT
+        },
+        subtotal3: {
+            type: Sequelize.BIGINT
+        },
+        descuento_avance: {
+            type: Sequelize.BIGINT
+        },
+        detalle_avances: {
+            type: Sequelize.ARRAY(Sequelize.JSON)
+        },
+        detalle_actividades : {
+            type: Sequelize.ARRAY(Sequelize.JSON)
+        },
+        detalle_otros : {
+            type: Sequelize.ARRAY(Sequelize.JSON)
+        },
+        detalle_horaextra : {
+            type: Sequelize.ARRAY(Sequelize.JSON)
         }
     },
         {

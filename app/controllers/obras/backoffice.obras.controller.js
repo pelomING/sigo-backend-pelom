@@ -25,6 +25,7 @@ exports.findAllObra = async (req, res) => {
       row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
       ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
       case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, \
+      (select count(id) as cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = o.id) as cantidad_estados_pago, \
       row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia FROM obras.obras o left join _comun.zonal z \
       on o.zona = z.id left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on \
       o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left join \
@@ -71,6 +72,7 @@ exports.findAllObra = async (req, res) => {
                 eliminada: element.eliminada,
                 cantidad_reportes: Number(element.cantidad_reportes),
                 jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
+                cantidad_estados_pago: Number(element.cantidad_estados_pago),
                 oficina: element.oficina, //json
                 recargo_distancia: element.recargo_distancia, //json
               }
@@ -352,6 +354,7 @@ exports.findObraById = async (req, res) => {
       row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
       ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
       case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, \
+      (select count(id) as cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
       row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia FROM obras.obras o left join _comun.zonal z \
       on o.zona = z.id left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on \
       o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left join \
@@ -398,6 +401,7 @@ exports.findObraById = async (req, res) => {
               eliminada: element.eliminada,
               cantidad_reportes: Number(element.cantidad_reportes),
               jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
+              cantidad_estados_pago: Number(element.cantidad_estados_pago),
               oficina: element.oficina, //json
               recargo_distancia: element.recargo_distancia, //json
             }
@@ -443,6 +447,7 @@ exports.findObraByCodigo = async (req, res) => {
       row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
       ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
       case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, \
+      (select count(id) as cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
       row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia FROM obras.obras o left join _comun.zonal z \
       on o.zona = z.id left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on \
       o.tipo_trabajo = tt.id left join obras.empresas_contratista ec on o.empresa_contratista = ec.id left join \
@@ -490,6 +495,7 @@ exports.findObraByCodigo = async (req, res) => {
               eliminada: element.eliminada,
               cantidad_reportes: Number(element.cantidad_reportes),
               jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
+              cantidad_estados_pago: Number(element.cantidad_estados_pago),
               oficina: element.oficina, //json
               recargo_distancia: element.recargo_distancia, //json
             }

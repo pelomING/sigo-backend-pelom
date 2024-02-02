@@ -70,6 +70,9 @@ module.exports = (sequelize, Sequelize) => {
         flexiapp: {
             type: Sequelize.STRING
         },
+        id_estado_pago : {
+            type: Sequelize.BIGINT
+        },
         recargo_hora: {
             type: Sequelize.INTEGER
         }
