@@ -102,8 +102,8 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
      coordinador, row_to_json(c) as comuna, ubicacion as direccion, repo.flexiapp as flexiapp, fecha_termino::text as \
      fecha_ejecucion, o.jefe_delegacion as jefe_delegacion, json_build_object('id', repo.id_jefe, 'nombre', \
      repo.jefe_faena) as jefe_faena, repo.num_documento as numero_documento, rec.nombre as recargo_nombre, \
-     rec.porcentaje as recargo_porcentaje, (SELECT 'EDP-' || (max(id) + 10000001)::text || '-' || \
-     substring(current_timestamp::text,1,4) FROM obras.encabezado_estado_pago) as codigo_pelom, \
+     rec.porcentaje as recargo_porcentaje, (SELECT 'EDP-' || (case when max(id) is null then 0 else max(id) end + 10000001)::text || \
+     '-' || substring(current_timestamp::text,1,4) FROM obras.encabezado_estado_pago) as codigo_pelom, \
      (SELECT precio FROM obras.valor_uc where oficina = o.oficina order by oficina, fecha desc limit 1) as valor_uc \
      from obras.obras o left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on \
      o.tipo_trabajo = tt.id left join obras.segmento s on o.segmento = s.id left join obras.coordinadores_contratista \
