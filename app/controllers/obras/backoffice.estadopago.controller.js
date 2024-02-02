@@ -391,6 +391,12 @@ exports.creaEstadoPago = async (req, res) => {
     const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra);
     let totalActividadesHoraExtra = !actividadesHoraExtra.error?actividadesHoraExtra.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
+    //Chequear si que el total del estado paga sea mayor a cero, si no es así se debe devolver un error
+    if (totalActividadesNormales+totalActividadesAdicionales+totalActividadesHoraExtra-totalAvances <= 0) {
+      res.status(500).send("No es posible crear un estado de pago con un total menor o igual a 0");
+      return;
+    }
+
     const sql = "select nextval('obras.encabezado_estado_pago_id_seq'::regclass) as valor";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
@@ -460,7 +466,6 @@ exports.creaEstadoPago = async (req, res) => {
       detalle_horaextra: !actividadesHoraExtra.error?actividadesHoraExtra.detalle:undefined,
 
     }
-    console.log('datos', datos);
     
     const result = await sequelize.transaction(async () => {
 
@@ -610,9 +615,9 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                   const totalNeto = Number(valorNeto - Number(element.descuento_avance));
                   const total = Number((totalNeto * 1.19).toFixed(0));
                   const iva = Number(Number(total - totalNeto).toFixed(0));
-          
-                      const detalle_salida = {
-                        id_obra: Number(element.id_obra),
+
+                  const encabezado = {
+                    id_obra: Number(element.id_obra),
                         cliente: element.cliente,
                         fecha_asignacion: element.fecha_asignacion?String(element.fecha_asignacion):null,
                         tipo_trabajo: element.tipo_trabajo,
@@ -634,6 +639,10 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                         recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
                         recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
                         valor_uc: element.valor_uc?Number(element.valor_uc):null,
+                    
+                  }
+                  const totales = {
+
                         subtotal1: Number(element.subtotal1),
                         subtotal2: Number(element.subtotal2),
                         subtotal3: Number(element.subtotal3),
@@ -641,7 +650,12 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                         descuentoAvance: Number(element.descuento_avance),
                         totalNeto: totalNeto,
                         total: total,
-                        iva: iva,
+                        iva: iva
+                  }
+          
+                      const detalle_salida = {
+                        encabezado: encabezado,
+                        totales: totales,
                         actividades_por_obra: element.detalle_actividades,
                         actividades_adicionales: element.detalle_otros,
                         actividades_hora_extra: element.detalle_horaextra,
@@ -653,7 +667,7 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
               if (salida===undefined){
                 res.status(500).send("Error en la consulta (servidor backend)");
               }else{
-                res.status(200).send(salida);
+                res.status(200).send(salida[0]);
               }
 
       } catch (error) {
@@ -857,7 +871,6 @@ let listadoActividadesHoraExtraByIdObra = async (id_obra) => {
 
 let listadoAvancesEstadoPagoIdObra = async (id_obra) => {
   try {
-      console.log('listadoAvancesEstadoPagoIdObra', id_obra);
       const sql = "SELECT codigo_pelom, fecha_estado_pago::text, (subtotal1 + subtotal2 + subtotal3 - descuento_avance) \
       as monto FROM obras.encabezado_estado_pago WHERE id_obra = " + id_obra + " order by fecha_estado_pago desc, id desc";
             console.log('sql', sql);
@@ -870,9 +883,9 @@ let listadoAvancesEstadoPagoIdObra = async (id_obra) => {
                 for (const element of avances) {
 
                       const detalle_salida = {
-                        codigo_pelom: element.codigo_pelom,
-                        fecha_avance: element.fecha_estado_pago,
-                        monto: element.monto
+                        codigo_pelom: String(element.codigo_pelom),
+                        fecha_avance: String(element.fecha_estado_pago),
+                        monto: Number(element.monto)
                                                 
                       }
                       salida.push(detalle_salida);

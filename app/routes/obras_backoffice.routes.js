@@ -163,41 +163,41 @@ module.exports = function(app) {
 ///****************************************** Estado de Pago      */
 
     // Obtiene todos los tipos de recargo
-    app.get("/api/obras/backoffice/estadopago/v1/alltiporecargo", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.findAllTipoRecargo);
+    app.get("/api/obras/backoffice/estadopago/v1/alltiporecargo", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.findAllTipoRecargo);
 
     // Obtiene todos los Recargos
-    app.get("/api/obras/backoffice/estadopago/v1/allrecargos", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.findAllRecargo);
+    app.get("/api/obras/backoffice/estadopago/v1/allrecargos", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.findAllRecargo);
 
     // Genera un nuevo encabezado para estado de pago
-    app.get("/api/obras/backoffice/estadopago/v1/nuevoencabezado", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.generaNuevoEncabezadoEstadoPago);
+    app.get("/api/obras/backoffice/estadopago/v1/nuevoencabezado", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.generaNuevoEncabezadoEstadoPago);
 
     // Obtiene todas las actividades no adicionales para un estado de pago
-    app.get("/api/obras/backoffice/estadopago/v1/allactividadesporobra", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.getAllActividadesByIdObra);
+    app.get("/api/obras/backoffice/estadopago/v1/allactividadesporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllActividadesByIdObra);
 
     // Obtiene todas las actividades adicionales para un estado de pago
-    app.get("/api/obras/backoffice/estadopago/v1/allactividadesadicionales", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.getAllActividadesAdicionalesByIdObra);
+    app.get("/api/obras/backoffice/estadopago/v1/allactividadesadicionales", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllActividadesAdicionalesByIdObra);
 
     // Obtiene todas las actividades adicionales y normales que tengan hora extra para un estado de pago
-    app.get("/api/obras/backoffice/estadopago/v1/allactividadesconhoraextra", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.getAllActividadesHoraExtraByIdObra);
+    app.get("/api/obras/backoffice/estadopago/v1/allactividadesconhoraextra", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllActividadesHoraExtraByIdObra);
 
     // Obtiene la tabla de los avances de estado de pago
     //GET /api/obras/backoffice/estadopago/v1/avancesestadopago
-    app.get("/api/obras/backoffice/estadopago/v1/avancesestadopago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.avancesEstadoPago);
+    app.get("/api/obras/backoffice/estadopago/v1/avancesestadopago", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.avancesEstadoPago);
 
 
     // Obtiene Los totales y subtotales de acuerdo a lo que viene de los detalles de actividades
     //GET /api/obras/backoffice/estadopago/v1/totalesestadopago
-    app.get("/api/obras/backoffice/estadopago/v1/totalesestadopago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.totalesEstadoPago);
+    app.get("/api/obras/backoffice/estadopago/v1/totalesestadopago", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.totalesEstadoPago);
 
     // Graba un estado de pago
-    app.post("/api/obras/backoffice/estadopago/v1/creaestadopago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.creaEstadoPago);
+    app.post("/api/obras/backoffice/estadopago/v1/creaestadopago", [authJwt.verifyToken, authJwt.createObrasBackofficeEstadoPago], backofficeEstadopagoController.creaEstadoPago);
 
     // Lista los estados de pago por id_obra  GET /api/obras/backoffice/estadopago/v1/listaestadospago
-    app.get("/api/obras/backoffice/estadopago/v1/listaestadospago", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.getAllEstadosPagoByIdObra);
+    app.get("/api/obras/backoffice/estadopago/v1/listaestadospago", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllEstadosPagoByIdObra);
 
     // Obtiene todos los datos para completar un informe de estado de pago historico por id del estado de pago
     //GET /api/obras/backoffice/estadopago/v1/historicoestadopagoporid
-    app.get("/api/obras/backoffice/estadopago/v1/historicoestadopagoporid", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeEstadopagoController.getHistoricoEstadosPagoByIdEstadoPago);
+    app.get("/api/obras/backoffice/estadopago/v1/historicoestadopagoporid", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getHistoricoEstadosPagoByIdEstadoPago);
 
 
 
