@@ -379,6 +379,7 @@ exports.creaEstadoPago = async (req, res) => {
     const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
     const fecha_estado_pago = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
 
+
     const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
     let totalAvances = !detalle_avances.error?detalle_avances.detalle.reduce(((total, num) => total + num.monto), 0):undefined;
 

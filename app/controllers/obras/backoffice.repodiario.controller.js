@@ -489,7 +489,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
       await EncabezadoReporteDiario.findAll({where: {id_obra: req.body.id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
           if (data.length > 0) {
             salir = true;
-            res.status(403).send({ message: `La fecha de reporte '${req.body.fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`});
+            res.status(403).send(`La fecha de reporte '${req.body.fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`);
           }
         }).catch(err => {
             salir = true;
@@ -835,7 +835,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
     }else {
       console.log(result.message.parent.detail);
       if (result.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
-        res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
+        res.status(403).send('Ya existe un reporte diario para esta fecha en esta obra');
       }else{
         res.status(400).send(result);
       }
