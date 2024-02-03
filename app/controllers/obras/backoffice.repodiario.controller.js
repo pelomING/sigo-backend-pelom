@@ -523,6 +523,9 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         const detalle_otros = req.body.det_otros;
         console.log('detalle_actividad', detalle_actividad);
         console.log('detalle_otros', detalle_otros);
+        if (detalle_actividad==[]) {
+          console.log('entra en detalle_actividad==[]');
+        }
         if (detalle_actividad==[] || detalle_actividad==null) {
           console.log('entra en el if detalle_actividad');
           if (detalle_otros==[] || detalle_otros==null) {
