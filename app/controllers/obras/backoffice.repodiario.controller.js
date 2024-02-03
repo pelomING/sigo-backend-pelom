@@ -526,27 +526,33 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             //revisar arreglo de otras actividades
             if (Array.isArray(detalle_otros)) {
               if (detalle_otros.length==0) {
+                console.log('a1')
                 res.status(400).send({message: "Debe especificar al menos una actividad"});
               }
             }
           }else {
             if (!detalle_actividad[0]) {
+              console.log('a2')
               res.status(400).send({message: "El detalle debe tener al menos una actividad"});
               return;
             }
             if (!detalle_actividad[0].clase) {
+              console.log('a3')
               res.status(400).send({message: "El campo clase en el detalle debe tener valor"});
               return;
             }
             if (!detalle_actividad[0].tipo) {
+              console.log('a4')
               res.status(400).send({message: "El campo tipo en el detalle debe tener valor"});
               return;
             }
             if (!detalle_actividad[0].actividad) {
+              console.log('a5')
               res.status(400).send({message: "El campo actividad en el detalle debe tener valor"});
               return;
             }
             if (!detalle_actividad[0].cantidad) {
+              console.log('a6')
               res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
               return;
             }
@@ -555,9 +561,11 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           //revisar arreglo de otras actividades
           if (Array.isArray(detalle_otros)) {
             if (detalle_otros.length==0) {
+              console.log('a7')
               res.status(400).send({message: "Debe especificar al menos una actividad"});
             }
           }else {
+            console.log('a8')
             res.status(400).send({message: "Debe especificar al menos una actividad"});
           }
         }
@@ -572,6 +580,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         }).then(data => {
           encabezado_reporte_diario_id = data[0].valor;
         }).catch(err => {
+          console.log('a9')
           res.status(500).send({ message: err.message });
         })
         const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
