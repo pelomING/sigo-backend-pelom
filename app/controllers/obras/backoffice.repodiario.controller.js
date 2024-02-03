@@ -520,25 +520,53 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         };
         //const detalle_actividad = JSON.stringify(req.body.det_actividad);
         const detalle_actividad = req.body.det_actividad;
-        if (!detalle_actividad[0]) {
-          res.status(400).send({message: "El detalle debe tener al menos una actividad"});
-          return;
-        }
-        if (!detalle_actividad[0].clase) {
-          res.status(400).send({message: "El campo clase en el detalle debe tener valor"});
-          return;
-        }
-        if (!detalle_actividad[0].tipo) {
-          res.status(400).send({message: "El campo tipo en el detalle debe tener valor"});
-          return;
-        }
-        if (!detalle_actividad[0].actividad) {
-          res.status(400).send({message: "El campo actividad en el detalle debe tener valor"});
-          return;
-        }
-        if (!detalle_actividad[0].cantidad) {
-          res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
-          return;
+        const detalle_otros = req.body.det_otros;
+        if (Array.isArray(detalle_actividad)) {
+          if (detalle_actividad.length==0) {
+            //revisar arreglo de otras actividades
+            if (Array.isArray(detalle_otros)) {
+              if (detalle_otros.length==0) {
+                res.status(400).send({message: "Debe especificar al menos una actividad"});
+                return;
+              }
+            }
+          }else {
+            if (!detalle_actividad[0]) {
+              res.status(400).send({message: "El detalle debe tener al menos una actividad"});
+              return;
+            }
+            if (!detalle_actividad[0].clase) {
+              salir = true;
+              res.status(400).send({message: "El campo clase en el detalle debe tener valor"});
+              return;
+            }
+            if (!detalle_actividad[0].tipo) {
+              console.log('a4')
+              res.status(400).send({message: "El campo tipo en el detalle debe tener valor"});
+              return;
+            }
+            if (!detalle_actividad[0].actividad) {
+              console.log('a5')
+              res.status(400).send({message: "El campo actividad en el detalle debe tener valor"});
+              return;
+            }
+            if (!detalle_actividad[0].cantidad) {
+              console.log('a6')
+              res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
+              return;
+            }
+          }
+        } else {
+          //revisar arreglo de otras actividades
+          if (Array.isArray(detalle_otros)) {
+            if (detalle_otros.length==0) {
+              res.status(400).send({message: "Debe especificar al menos una actividad"});
+              return;
+            }
+          }else {
+            res.status(400).send({message: "Debe especificar al menos una actividad"});
+            return;
+          }
         }
 
         // Busca el ID de encabezado disponible
@@ -1254,7 +1282,11 @@ exports.findAllJefesFaena = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
       #swagger.description = 'Devuelve todos los jefes de faena' */
   try {
-    await JefesFaena.findAll().then(data => {
+    await JefesFaena.findAll({
+      order: [
+        ['nombre', 'ASC']
+      ]
+    }).then(data => {
       res.send(data);
     }).catch(err => {
         res.status(500).send({ message: err.message });

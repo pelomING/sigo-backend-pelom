@@ -228,7 +228,11 @@ exports.findAllDelegacion = async (req, res) => {
     /*  #swagger.tags = ['Obras - General']
       #swagger.description = 'Devuelve todas las delegaciones' */
     try {
-      const data = await Delegacion.findAll();
+      const data = await Delegacion.findAll({
+        order: [
+          ['nombre', 'ASC']
+        ]
+      });
       res.send(data);
     } catch (err) {
       res.status(500).send({ message: err.message });
@@ -281,7 +285,11 @@ exports.findAllCoordinadorContratista = async (req, res) => {
     /*  #swagger.tags = ['Obras - General']
       #swagger.description = 'Devuelve todos los coordinadores contratistas' */
     try {
-      const data = await CoordinadorContratista.findAll();
+      const data = await CoordinadorContratista.findAll({
+        order: [
+          ['nombre', 'ASC']
+        ]
+      });
       res.send(data);
     } catch (err) {
       res.status(500).send({ message: err.message });
@@ -295,7 +303,11 @@ exports.findAllComuna = async (req, res) => {
     /*  #swagger.tags = ['Obras - General']
       #swagger.description = 'Devuelve todas las comunas' */
     try {
-      const data = await Comuna.findAll();
+      const Op = db.Sequelize.Op;
+      const data = await Comuna.findAll({
+        where: { provincia: { [Op.like]: '07%' } },
+        order: [['nombre', 'ASC']],
+      });
       res.send(data);
     } catch (err) {
       res.status(500).send({ message: err.message });
@@ -334,7 +346,9 @@ exports.findAllSegmento = async (req, res) => {
     /*  #swagger.tags = ['Obras - General']
       #swagger.description = 'Devuelve todos los segmentos' */
     try {
-      const data = await Segmento.findAll();
+      const data = await Segmento.findAll({
+        order: [['nombre', 'ASC']],
+      });
       res.send(data);
     } catch (err) {
       res.status(500).send({ message: err.message });
