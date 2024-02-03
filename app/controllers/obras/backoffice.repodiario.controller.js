@@ -520,6 +520,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         };
         //const detalle_actividad = JSON.stringify(req.body.det_actividad);
         const detalle_actividad = req.body.det_actividad;
+        console.log('detalle_actividad', detalle_actividad);
         if (!detalle_actividad[0]) {
           res.status(400).send({message: "El detalle debe tener al menos una actividad"});
           return;
@@ -1254,7 +1255,11 @@ exports.findAllJefesFaena = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
       #swagger.description = 'Devuelve todos los jefes de faena' */
   try {
-    await JefesFaena.findAll().then(data => {
+    await JefesFaena.findAll({
+      order: [
+        ['nombre', 'ASC']
+      ]
+    }).then(data => {
       res.send(data);
     }).catch(err => {
         res.status(500).send({ message: err.message });
