@@ -520,12 +520,17 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         };
         //const detalle_actividad = JSON.stringify(req.body.det_actividad);
         const detalle_actividad = req.body.det_actividad;
+        const detalle_otros = req.body.det_otros;
         console.log('detalle_actividad', detalle_actividad);
+        console.log('detalle_otros', detalle_otros);
         if (detalle_actividad==[] || detalle_actividad==null) {
-          if (det_otros==[] || det_otros==null) {
+          console.log('entra en el if detalle_actividad');
+          if (detalle_otros==[] || detalle_otros==null) {
+            console.log('entra en el if detalle_otros');
             res.status(400).send({message: "Debe especificar al menos una actividad"});
           }
         } else {
+          console.log('entra en el else detalle_actividad');
             if (!detalle_actividad[0]) {
               res.status(400).send({message: "El detalle debe tener al menos una actividad"});
               return;
