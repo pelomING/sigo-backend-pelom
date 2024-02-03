@@ -521,26 +521,33 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         //const detalle_actividad = JSON.stringify(req.body.det_actividad);
         const detalle_actividad = req.body.det_actividad;
         console.log('detalle_actividad', detalle_actividad);
-        if (!detalle_actividad[0]) {
-          res.status(400).send({message: "El detalle debe tener al menos una actividad"});
-          return;
+        if (detalle_actividad==[] || detalle_actividad==null) {
+          if (det_otros==[] || det_otros==null) {
+            res.status(400).send({message: "Debe especificar al menos una actividad"});
+          }
+        } else {
+            if (!detalle_actividad[0]) {
+              res.status(400).send({message: "El detalle debe tener al menos una actividad"});
+              return;
+            }
+            if (!detalle_actividad[0].clase) {
+              res.status(400).send({message: "El campo clase en el detalle debe tener valor"});
+              return;
+            }
+            if (!detalle_actividad[0].tipo) {
+              res.status(400).send({message: "El campo tipo en el detalle debe tener valor"});
+              return;
+            }
+            if (!detalle_actividad[0].actividad) {
+              res.status(400).send({message: "El campo actividad en el detalle debe tener valor"});
+              return;
+            }
+            if (!detalle_actividad[0].cantidad) {
+              res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
+              return;
+            }
         }
-        if (!detalle_actividad[0].clase) {
-          res.status(400).send({message: "El campo clase en el detalle debe tener valor"});
-          return;
-        }
-        if (!detalle_actividad[0].tipo) {
-          res.status(400).send({message: "El campo tipo en el detalle debe tener valor"});
-          return;
-        }
-        if (!detalle_actividad[0].actividad) {
-          res.status(400).send({message: "El campo actividad en el detalle debe tener valor"});
-          return;
-        }
-        if (!detalle_actividad[0].cantidad) {
-          res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
-          return;
-        }
+        
 
         // Busca el ID de encabezado disponible
         const sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
