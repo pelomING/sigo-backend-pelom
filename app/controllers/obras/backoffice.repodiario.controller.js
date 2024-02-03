@@ -521,19 +521,15 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         //const detalle_actividad = JSON.stringify(req.body.det_actividad);
         const detalle_actividad = req.body.det_actividad;
         const detalle_otros = req.body.det_otros;
-        console.log('detalle_actividad', detalle_actividad);
-        console.log('detalle_otros', detalle_otros);
-        if (detalle_actividad==[]) {
-          console.log('entra en detalle_actividad==[]');
-        }
-        if (detalle_actividad==[] || detalle_actividad==null) {
-          console.log('entra en el if detalle_actividad');
-          if (detalle_otros==[] || detalle_otros==null) {
-            console.log('entra en el if detalle_otros');
-            res.status(400).send({message: "Debe especificar al menos una actividad"});
-          }
-        } else {
-          console.log('entra en el else detalle_actividad');
+        if (Array.isArray(detalle_actividad)) {
+          if (detalle_actividad.length==0) {
+            //revisar arreglo de otras actividades
+            if (Array.isArray(detalle_otros)) {
+              if (detalle_otros.length==0) {
+                res.status(400).send({message: "Debe especificar al menos una actividad"});
+              }
+            }
+          }else {
             if (!detalle_actividad[0]) {
               res.status(400).send({message: "El detalle debe tener al menos una actividad"});
               return;
@@ -554,8 +550,17 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
               res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
               return;
             }
+          }
+        } else {
+          //revisar arreglo de otras actividades
+          if (Array.isArray(detalle_otros)) {
+            if (detalle_otros.length==0) {
+              res.status(400).send({message: "Debe especificar al menos una actividad"});
+            }
+          }else {
+            res.status(400).send({message: "Debe especificar al menos una actividad"});
+          }
         }
-        
 
         // Busca el ID de encabezado disponible
         const sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
