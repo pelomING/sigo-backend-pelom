@@ -460,7 +460,7 @@ exports.creaEstadoPago = async (req, res) => {
       subtotal1: totalActividadesNormales,
       subtotal2: totalActividadesAdicionales,
       subtotal3: totalActividadesHoraExtra,
-      descuentoAvances: totalAvances,
+      descuento_avance: totalAvances,
       detalle_avances: !detalle_avances.error?detalle_avances.detalle:undefined,
       detalle_actividades: !actividadesNormales.error?actividadesNormales.detalle:undefined,
       detalle_otros: !actividadesAdicionales.error?actividadesAdicionales.detalle:undefined,

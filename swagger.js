@@ -26,8 +26,13 @@ const doc = {
 };
 
 const outputFile = './swagger-output.json';
-const endpointsFiles = ['./app/routes/auth.routes.js', './app/routes/mantenedor.routes.js', './app/routes/obras_backoffice.routes.js', 
-'./app/routes/sae_movil.routes.js', './app/routes/sae_reportes.routes.js'];
+const endpointsFiles = [
+  './app/routes/auth.routes.js', 
+  './app/routes/mantenedor.routes.js', 
+  './app/routes/obras_backoffice.routes.js',
+  './app/routes/sae_movil.routes.js',
+  './app/routes/sae_reportes.routes.js'
+];
 
 /* NOTE: if you use the express Router, you must pass in the 
    'endpointsFiles' only the root file where the route starts,
