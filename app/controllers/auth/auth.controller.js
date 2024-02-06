@@ -97,12 +97,26 @@ exports.signin = async (req, res) => {
       console.log('err', err);
     })
 
+    const sql = "select menu from _frontend.ver_menu;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const menu = await sequelize.query(sql, { type: QueryTypes.SELECT });
+
+    //determina el menu de salida
+    let menu_salida = [];
+    if (menu) {
+        for (const element of menu) {
+          menu_salida.push(element.menu);
+        }
+      }
+    /////////////////////////////////
     return res.status(200).send({
       id: user.id,
       username: user.username,
       email: user.email,
       roles: authorities,
-      accessToken: token
+      accessToken: token,
+      menu: menu_salida
     });
   } catch (error) {
     if (error.message === "connect ECONNREFUSED ::1:5432") {
