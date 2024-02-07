@@ -78,8 +78,10 @@ exports.signin = async (req, res) => {
                            });
 
     let authorities = [];
+    let idRole = [];
     const roles = await user.getRoles();
     for (const element of roles) {
+      idRole.push(element.id);
       authorities.push("ROLE_" + element.name.toUpperCase());
     }
 
@@ -97,7 +99,7 @@ exports.signin = async (req, res) => {
       console.log('err', err);
     })
 
-    const sql = "select menu from _frontend.ver_menu;";
+    const sql = "select menu from _frontend.ver_menu where rol_id = " + idRole[0] + ";";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const menu = await sequelize.query(sql, { type: QueryTypes.SELECT });
