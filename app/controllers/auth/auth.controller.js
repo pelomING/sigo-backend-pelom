@@ -2,6 +2,7 @@ const db = require("../../models");
 const config = require("../../config/auth.config");
 const User = db.user;
 const Role = db.role;
+const UsuariosFunciones = db.usuariosFunciones;
 const LoginHistorial = db.loginHistorial;
 
 const Op = db.Sequelize.Op;
@@ -48,19 +49,19 @@ exports.signin = async (req, res) => {
     const fechoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12)
   
 
-    const user = await User.findOne({
+    const userFuncion = await UsuariosFunciones.findOne({
       where: {
         username: req.body.username,
       },
     });
 
-    if (!user) {
+    if (!userFuncion) {
       return res.status(404).send({ message: "User Not found." });
     }
 
     const passwordIsValid = bcrypt.compareSync(
       req.body.password,
-      user.password
+      userFuncion.password
     );
 
     if (!passwordIsValid) {
@@ -69,13 +70,19 @@ exports.signin = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user.id },
+    const token = jwt.sign({ id: userFuncion.id },
                            config.secret,
                            {
                             algorithm: 'HS256',
                             allowInsecureKeySizes: true,
                             expiresIn: 86400, // 24 hours
                            });
+
+    const user = await User.findOne({
+      where: {
+        username: req.body.username
+      }
+    })
 
     let authorities = [];
     let idRole = [];
@@ -98,8 +105,9 @@ exports.signin = async (req, res) => {
     }).catch(err => {
       console.log('err', err);
     })
+    const rol_consulta = idRole[0]?idRole[0]:0;
 
-    const sql = "select menu from _frontend.ver_menu where rol_id = " + idRole[0] + ";";
+    const sql = "select menu from _frontend.ver_menu where rol_id = " + rol_consulta + ";";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const menu = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -115,6 +123,8 @@ exports.signin = async (req, res) => {
     return res.status(200).send({
       id: user.id,
       username: user.username,
+      nombre: userFuncion.nombres,
+      funcion: userFuncion.funcion,
       email: user.email,
       roles: authorities,
       accessToken: token,
