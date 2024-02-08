@@ -76,19 +76,19 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/v1/allobras", [authJwt.verifyToken], backofficeObrasController.findAllObra);
 
 
-    app.post("/api/obras/backoffice/v1/creaobra", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeObrasController.createObra);
+    app.post("/api/obras/backoffice/v1/creaobra", [authJwt.verifyToken, authJwt.createObrasBackofficeObras], backofficeObrasController.createObra);
 
 
-    app.put("/api/obras/backoffice/v1/actualizaobra/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeObrasController.updateObra);
+    app.put("/api/obras/backoffice/v1/actualizaobra/:id", [authJwt.verifyToken, authJwt.updateObrasBackofficeObras], backofficeObrasController.updateObra);
 
 
-    app.delete("/api/obras/backoffice/v1/eliminaobra/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeObrasController.deleteObra);
+    app.delete("/api/obras/backoffice/v1/eliminaobra/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeObras], backofficeObrasController.deleteObra);
 
 
-    app.get("/api/obras/backoffice/v1/obras/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeObrasController.findObraById);
+    app.get("/api/obras/backoffice/v1/obras/:id", [authJwt.verifyToken, authJwt.readObrasBackofficeObras], backofficeObrasController.findObraById);
 
 
-    app.get("/api/obras/backoffice/v1/obras", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeObrasController.findObraByCodigo);
+    app.get("/api/obras/backoffice/v1/obras", [authJwt.verifyToken, authJwt.readObrasBackofficeObras], backofficeObrasController.findObraByCodigo);
 
 }
 /*/*********************************************************************************** */
@@ -125,37 +125,42 @@ module.exports = function(app) {
 
 {/*** REPORTES DIARIOS ** */
 
-    app.get("/api/obras/backoffice/repodiario/v1/allreportesdiarios", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findAllEncabezadoReporteDiario);
+    app.get("/api/obras/backoffice/repodiario/v1/allreportesdiarios", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllEncabezadoReporteDiario);
 
-    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findAllEncabezadoReporteDiarioByParametros);
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllEncabezadoReporteDiarioByParametros);
 
-    app.post("/api/obras/backoffice/repodiario/v1/creareportediario", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.createEncabezadoReporteDiario_V2);
+    /*********************************************************************************** */
+/* Consulta el ultimo de encabezado de reporte diario
+*/
+    app.get("/api/obras/backoffice/repodiario/v1/ultimoreportediario", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findUltimoEncabezadoReporteDiarioByIdObra);
 
-    app.put("/api/obras/backoffice/repodiario/v1/actualizareportediario/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.updateEncabezadoReporteDiario_V2);
+    app.post("/api/obras/backoffice/repodiario/v1/creareportediario", [authJwt.verifyToken, authJwt.createObrasBackofficeRepodiario], backofficeRepodiarioController.createEncabezadoReporteDiario_V2);
 
-    app.delete("/api/obras/backoffice/repodiario/v1/eliminareportediario/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.deleteEncabezadoReporteDiario);
+    app.put("/api/obras/backoffice/repodiario/v1/actualizareportediario/:id", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.updateEncabezadoReporteDiario_V2);
 
-    app.get("/api/obras/backoffice/repodiario/v1/allreportesdiariosactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findAllDetalleReporteDiarioActividad);
+    app.delete("/api/obras/backoffice/repodiario/v1/eliminareportediario/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeRepodiario], backofficeRepodiarioController.deleteEncabezadoReporteDiario);
 
-    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporid", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findOneDetalleReporteDiarioActividad);
+    app.get("/api/obras/backoffice/repodiario/v1/allreportesdiariosactividad", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllDetalleReporteDiarioActividad);
 
-    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findDetalleReporteDiarioActividadPorParametros);
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporid", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findOneDetalleReporteDiarioActividad);
 
-    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosotrosporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findDetalleReporteDiarioOtrasPorParametros);
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findDetalleReporteDiarioActividadPorParametros);
+
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosotrosporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findDetalleReporteDiarioOtrasPorParametros);
 
     //app.post("/api/obras/backoffice/repodiario/v1/creardetalleactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.createOneDetalleReporteDiarioActividad);
 
-    app.get("/api/obras/backoffice/repodiario/v1/alljefesfaena", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findAllJefesFaena);
+    app.get("/api/obras/backoffice/repodiario/v1/alljefesfaena", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllJefesFaena);
 
-    app.get("/api/obras/backoffice/repodiario/v1/alltipooperacion", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findAllTipoOperacion);
+    app.get("/api/obras/backoffice/repodiario/v1/alltipooperacion", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllTipoOperacion);
 
-    app.get("/api/obras/backoffice/repodiario/v1/alltipoactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findAllTipoActividad);
+    app.get("/api/obras/backoffice/repodiario/v1/alltipoactividad", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllTipoActividad);
 
-    app.get("/api/obras/backoffice/repodiario/v1/allmaestroactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findAllMaestroActividad);
+    app.get("/api/obras/backoffice/repodiario/v1/allmaestroactividad", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllMaestroActividad);
 
-    app.get("/api/obras/backoffice/repodiario/v1/allareas", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findAllTipoTrabajo);
+    app.get("/api/obras/backoffice/repodiario/v1/allareas", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllTipoTrabajo);
 
-    app.get("/api/obras/backoffice/repodiario/v1/allrecargoshora", [authJwt.verifyToken, authJwt.isSupervisorOrAdminObrasOrSistema], backofficeRepodiarioController.findAllRecargosHoraExtra);
+    app.get("/api/obras/backoffice/repodiario/v1/allrecargoshora", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllRecargosHoraExtra);
 
 }
 

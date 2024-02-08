@@ -1837,6 +1837,35 @@
         }
       }
     },
+    "/api/obras/backoffice/repodiario/v1/ultimoreportediario": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Consulta el ultimo de encabezado de reporte diario por id de obra",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/repodiario/v1/creareportediario": {
       "post": {
         "tags": [
