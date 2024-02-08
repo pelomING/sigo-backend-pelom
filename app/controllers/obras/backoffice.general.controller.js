@@ -26,9 +26,9 @@ exports.findAllTipoObra = async (req, res) => {
             }
             salida.push(detalle_salida);
           }
-          res.send(salida);
+          res.status(200).send(salida);
       }).catch(err => {
-          res.status(500).send({ message: err.message });
+          res.status(500).send(err.message );
       })
   }
   /*********************************************************************************** */
@@ -38,9 +38,9 @@ exports.findAllTipoOperacion = async (req, res) => {
     /*  #swagger.tags = ['Obras - General']
       #swagger.description = 'Devuelve todos los tipo de Operación' */
       await TipoOperacion.findAll().then(data => {
-          res.send(data);
+          res.status(200).send(data);
       }).catch(err => {
-          res.status(500).send({ message: err.message });
+          res.status(500).send( err.message);
       })
   }
   /*********************************************************************************** */
@@ -50,9 +50,9 @@ exports.findAllTipoActividad = async (req, res) => {
     /*  #swagger.tags = ['Obras - General']
       #swagger.description = 'Devuelve todos los tipo de Actividad' */
       await TipoActividad.findAll().then(data => {
-          res.send(data);
+          res.status(200).send(data);
       }).catch(err => {
-          res.status(500).send({ message: err.message });
+          res.status(500).send(err.message );
       })
   }
   /*********************************************************************************** */
@@ -111,9 +111,8 @@ exports.findOneMaestroActividad = async (req, res) => {
       ];
       for (const element of campos) {
         if (!req.query[element]) {
-          res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-          });
+          res.status(400).send( "No puede estar nulo el campo " + element
+          );
           return;
         }
       };
@@ -148,7 +147,7 @@ exports.findOneMaestroActividad = async (req, res) => {
         res.status(200).send(salida);
       }
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send(err.message );
     }
 }
 /*********************************************************************************** */
@@ -166,9 +165,8 @@ exports.findAllMaestroActividadActividad = async (req, res) => {
       ];
       for (const element of campos) {
         if (!req.query[element]) {
-          res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-          });
+          res.status(400).send( "No puede estar nulo el campo " + element
+          );
           return;
         }
       };
@@ -204,7 +202,7 @@ exports.findAllMaestroActividadActividad = async (req, res) => {
         res.status(200).send(salida);
       }
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send(err.message );
     }
 
 }
@@ -215,9 +213,9 @@ exports.findAllZonal = async (req, res) => {
       #swagger.description = 'Devuelve todas las zonales' */
     try {
       const data = await Zonal.findAll();
-      res.send(data);
+      res.status(200).send(data);
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send( err.message );
     }
 }
  /*********************************************************************************** */
@@ -233,9 +231,9 @@ exports.findAllDelegacion = async (req, res) => {
           ['nombre', 'ASC']
         ]
       });
-      res.send(data);
+      res.status(200).send(data);
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send(err.message );
     }
 }
  /*********************************************************************************** */
@@ -255,12 +253,12 @@ exports.findAllDelegacion = async (req, res) => {
             }
             salida.push(detalle_salida);
           }
-          res.send(salida);
+          res.status(200).send(salida);
       }).catch(err => {
-          res.status(500).send({ message: err.message });
+          res.status(500).send(err.message );
       })
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send(err.message );
     }
 }
  /*********************************************************************************** */
@@ -272,9 +270,9 @@ exports.findAllEmpresaContratista = async (req, res) => {
       #swagger.description = 'Devuelve todas las empresas contratistas' */
     try {
       const data = await EmpresaContratista.findAll();
-      res.send(data);
+      res.status(200).send(data);
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send( err.message );
     }
 }
  /*********************************************************************************** */
@@ -290,9 +288,9 @@ exports.findAllCoordinadorContratista = async (req, res) => {
           ['nombre', 'ASC']
         ]
       });
-      res.send(data);
+      res.status(200).send(data);
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send( err.message );
     }
 }
  /*********************************************************************************** */
@@ -308,9 +306,9 @@ exports.findAllComuna = async (req, res) => {
         where: { provincia: { [Op.like]: '07%' } },
         order: [['nombre', 'ASC']],
       });
-      res.send(data);
+      res.status(200).send(data);
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send( err.message );
     }
 }
  /*********************************************************************************** */
@@ -321,9 +319,9 @@ exports.findAllEstadoObra = async (req, res) => {
       #swagger.description = 'Devuelve todos los estados de Obra' */
     try {
       const data = await EstadoObra.findAll();
-      res.send(data);
+      res.status(200).send(data);
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send( err.message );
     }
 }
 /*********************************************************************************** */
@@ -334,9 +332,9 @@ exports.findAllEstadoVisita = async (req, res) => {
     #swagger.description = 'Devuelve todos los estados de Visita Terreno' */
   try {
     const data = await EstadoVisita.findAll();
-    res.send(data);
+    res.status(200).send(data);
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send(err.message );
   }
 }
  /*********************************************************************************** */
@@ -349,9 +347,9 @@ exports.findAllSegmento = async (req, res) => {
       const data = await Segmento.findAll({
         order: [['nombre', 'ASC']],
       });
-      res.send(data);
+      res.status(200).send(data);
     } catch (err) {
-      res.status(500).send({ message: err.message });
+      res.status(500).send( err.message );
     }
 }
  /*********************************************************************************** */

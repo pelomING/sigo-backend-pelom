@@ -93,10 +93,11 @@ app.use(bodyParser.json())
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 // simple route
+/*
 app.get("/", (req, res) => {
   res.json({ message: "App de ejemplo Authentication" });
 });
-
+*/
 // routes
 
 require('./app/routes/auth.routes')(app);

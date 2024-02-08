@@ -138,9 +138,8 @@ exports.createObra = async (req, res) => {
       ];
       for (const element of campos) {
         if (!req.body[element]) {
-          res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-          });
+          res.status(400).send( "No puede estar nulo el campo " + element
+          );
           return;
         }
       };
@@ -150,11 +149,11 @@ exports.createObra = async (req, res) => {
         //el rut ya existe
         if (data.length > 0) {
           salir = true;
-          res.status(403).send({ message: 'El Codigo de Obra ya se encuentra ingresado en la base' });
+          res.status(400).send('El Codigo de Obra ya se encuentra ingresado en la base' );
         }
       }).catch(err => {
           salir = true;
-          res.status(500).send({ message: err.message });
+          res.status(500).send( err.message );
       })
     
       if (salir) {
@@ -195,9 +194,9 @@ exports.createObra = async (req, res) => {
 
       await Obra.create(obra)
           .then(data => {
-              res.send(data);
+              res.status(200).send(data);
           }).catch(err => {
-              res.status(500).send({ message: err.message });
+              res.status(500).send( err.message );
           })
     }catch (error) {
       res.status(500).send(error);
@@ -285,12 +284,12 @@ exports.updateObra = async (req, res) => {
       where: { id: id }
     }).then(data => {
       if (data[0] === 1) {
-        res.send({ message: "Obra actualizada" });
+        res.status(200).send( "Obra actualizada" );
       } else {
-        res.send({ message: `No existe una obra con el id ${id}` });
+        res.status(400).send( `No existe una obra con el id ${id}` );
       }
     }).catch(err => {
-      res.status(500).send({ message: err.message });
+      res.status(500).send( err.message );
     })
   }catch (error) {
     res.status(500).send(error);
@@ -314,10 +313,10 @@ exports.deleteObra = async (req, res) => {
       where: { id: id }
     }).then(data => {
       if (data[0] === 1) {
-        res.send({ message: "Obra eliminada" });
+        res.status(200).send( "Obra eliminada" );
       }
     }).catch(err => {
-      res.status(500).send({ message: err.message });
+      res.status(500).send(err.message );
     })
   }catch (error) {
     res.status(500).send(error);
