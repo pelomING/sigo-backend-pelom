@@ -160,6 +160,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
     res.status(500).send(error);
   }
 }
+
 /*********************************************************************************** */
 /* Obtiene todas las actividades no adicionales para un estado de pago
     GET /api/obras/backoffice/estadopago/v1/allactividades

@@ -512,3 +512,28 @@ exports.findObraByCodigo = async (req, res) => {
   }
 }
   /*********************************************************************************** */
+
+/*********************************************************************************** */
+/* Obtiene el código de obra en caso de que sea de tipo emergencia
+    GET /api/obras/backoffice/estadopago/v1/codigodeobraemergencia
+*/
+exports.getCodigoObraEmergencia = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Obtiene el código de obra en caso de que sea de tipo emergencia' */
+  try {
+    //tipo_obra igual 7 es emergencia
+      const sql = "select case when maximo is null then 'E-0000000001'::text else \
+      ('E-' || to_char(maximo+1, 'FM0999999999'))::text end as valor from \
+      (select max(id) as maximo from obras.obras WHERE tipo_obra = 7) as a";
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      const codigoEmergencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+      if (codigoEmergencia) {
+        res.status(200).send(codigoEmergencia);
+      }else{
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
