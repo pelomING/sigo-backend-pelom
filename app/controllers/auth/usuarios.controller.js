@@ -20,9 +20,8 @@ exports.createPersona = async (req, res) => {
     ];
     for (const element of campos) {
       if (!req.body[element]) {
-        res.status(400).send({
-          message: "No puede estar nulo el campo " + element
-        });
+        res.status(400).send( "No puede estar nulo el campo " + element
+        );
         return;
       }
     };
@@ -32,11 +31,11 @@ exports.createPersona = async (req, res) => {
       //el rut ya existe
       if (data.length > 0) {
         salir = true;
-        res.status(403).send({ message: 'El Rut ya se encuentra ingresado en la base' });
+        res.status(403).send( 'El Rut ya se encuentra ingresado en la base' );
       }
     }).catch(err => {
         salir = true;
-        res.status(500).send({ message: err.message });
+        res.status(500).send( err.message );
     })
   
     if (salir) {
@@ -56,9 +55,9 @@ exports.createPersona = async (req, res) => {
   
     await Persona.create(persona)
         .then(data => {
-            res.send(data);
+            res.status(200).send(data);
         }).catch(err => {
-            res.status(500).send({ message: err.message });
+            res.status(500).send( err.message );
         })
   
   }
@@ -155,9 +154,8 @@ exports.createUser = async (req, res) => {
           ];
           for (const element of campos) {
             if (!req.body[element]) {
-              res.status(400).send({
-                message: "No puede estar nulo el campo " + element
-              });
+              res.status(400).send( "No puede estar nulo el campo " + element
+              );
               return;
             }
           };
@@ -179,23 +177,23 @@ exports.createUser = async (req, res) => {
                   },
                 });
                 const result = user.setRoles(roles);
-                if (result) res.send({ message: "User registered successfully!" });
+                if (result) res.status(200).send( "User registered successfully!" );
               } else {
                 // user has role = 1
                 const result = user.setRoles([1]);
-                if (result) res.send({ message: "User registered successfully!" });
+                if (result) res.status(200).send("User registered successfully!" );
               }
             }else {
               //el rut no existe
               salir = true;
-              res.status(403).send({ message: 'El Rut no se encuentra en la tabla de personas' });
+              res.status(403).send( 'El Rut no se encuentra en la tabla de personas' );
             }
           }).catch(err => {
               salir = true;
-              res.status(500).send({ message: err.message });
+              res.status(500).send( err.message );
           })
         } catch (error) {
-          res.status(500).send({ message: error.message });
+          res.status(500).send( error.message );
           
         }
 }

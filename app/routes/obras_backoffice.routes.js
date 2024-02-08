@@ -90,6 +90,10 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/v1/obras", [authJwt.verifyToken, authJwt.readObrasBackofficeObras], backofficeObrasController.findObraByCodigo);
 
+    /* Obtiene el código de obra en caso de que sea de tipo emergencia*/
+    app.get("/api/obras/backoffice/v1/codigodeobraemergencia", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeObrasController.getCodigoObraEmergencia);
+
+
 }
 /*/*********************************************************************************** */
 /******* BOM ******************************************************************** */    

@@ -29,11 +29,11 @@ exports.signup = async (req, res) => {
         },
       });
       const result = user.setRoles(roles);
-      if (result) res.send({ message: "User registered successfully!" });
+      if (result) res.status(200).send({ message: "User registered successfully!" });
     } else {
       // user has role = 1
       const result = user.setRoles([1]);
-      if (result) res.send({ message: "User registered successfully!" });
+      if (result) res.status(200).send({ message: "User registered successfully!" });
     }
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -56,7 +56,7 @@ exports.signin = async (req, res) => {
     });
 
     if (!userFuncion) {
-      return res.status(404).send({ message: "User Not found." });
+      return res.status(401).send("User Not found." );
     }
 
     const passwordIsValid = bcrypt.compareSync(
@@ -65,9 +65,8 @@ exports.signin = async (req, res) => {
     );
 
     if (!passwordIsValid) {
-      return res.status(401).send({
-        message: "Invalid Password!",
-      });
+      return res.status(401).send("Invalid Password!",
+      );
     }
 
     const token = jwt.sign({ id: userFuncion.id },
@@ -132,11 +131,10 @@ exports.signin = async (req, res) => {
     });
   } catch (error) {
     if (error.message === "connect ECONNREFUSED ::1:5432") {
-      return res.status(400).send({
-        message: "No hay conexión a la base de datos",
-      });
+      return res.status(400).send( "No hay conexión a la base de datos",
+      );
     } else {
-      return res.status(500).send({ message: error.message });
+      return res.status(500).send( error.message );
     }
   }
 };

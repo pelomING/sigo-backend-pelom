@@ -29,9 +29,9 @@ exports.createEstado = (req, res) => {
 
     Estados.create(estado)
         .then(data => {
-            res.send(data);
+            res.status(200).send(data);
         }).catch(err => {
-            res.status(500).send({ message: err.message });
+            res.status(500).send( err.message );
         })
 
 }
@@ -91,9 +91,9 @@ exports.estados = async (req, res) => {
     /*  #swagger.tags = ['SAE - Mantenedores']
       #swagger.description = 'Devuelve todas las bases del sae' */
     await Base.findAll().then(data => {
-        res.send(data);
+        res.status(200).send(data);
     }).catch(err => {
-        res.status(500).send({ message: err.message });
+        res.status(500).send( err.message );
     })
   }
 /*********************************************************************************** */
@@ -107,9 +107,9 @@ exports.findAllClientes = async (req, res) => {
   /*  #swagger.tags = ['SAE - Mantenedores']
       #swagger.description = 'Devuelve todos los clientes sae' */
   await Cliente.findAll().then(data => {
-      res.send(data);
+      res.status(200).send(data);
   }).catch(err => {
-      res.status(500).send({ message: err.message });
+      res.status(500).send( err.message );
   })
 }
 /*********************************************************************************** */
@@ -123,9 +123,9 @@ exports.findAllTipofuncionPersonal = async (req, res) => {
   /*  #swagger.tags = ['SAE - Mantenedores']
       #swagger.description = 'Devuelve todos los tipo de funcion del personal sae' */
   await TipoFuncionPersonal.findAll({where: {sistema: false}}).then(data => {
-      res.send(data);
+      res.status(200).send(data);
   }).catch(err => {
-      res.status(500).send({ message: err.message });
+      res.status(500).send( err.message );
   })
 }
 /*********************************************************************************** */
