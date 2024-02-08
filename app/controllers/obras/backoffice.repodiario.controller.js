@@ -237,6 +237,99 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+/* Consulta el ultimo de encabezado de reporte diario
+*/
+exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+     #swagger.description = 'Consulta el ultimo de encabezado de reporte diario por id de obra' */
+ const parametros = {
+   id_obra: req.query.id_obra,
+ }
+ const keys = Object.keys(parametros)
+ let sql_array = [];
+ let param = {};
+ for (element of keys) {
+   if (parametros[element]){
+     if (element === "id_obra") {
+       sql_array.push("o.id = :" + element);
+       param[element] = Number(parametros[element]);
+     }
+   }
+ }
+
+ if (sql_array.length === 0) {
+   res.status(403).send("Debe incluir el parametro de id de obra");
+ }else {
+   try {
+     let b = sql_array.reduce((total, num) => total + " AND " + num);
+     if (b){
+      
+      const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
+      row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
+      entregado_por_persona, revisado_por_persona, sector, alimentador, row_to_json(c) as comuna, num_documento, \
+      flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
+      on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
+      jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE "+b+" order by fecha_reporte desc limit 1;";
+
+       console.log("sql: "+sql);
+       const { QueryTypes } = require('sequelize'); 
+       const sequelize = db.sequelize;
+       const encabezadoReporte = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
+       let salida = [];
+       if (encabezadoReporte) {
+        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const fecha_hoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
+
+         for (const element of encabezadoReporte) {
+           
+
+           const detalle_salida = {
+             id: Number(element.id),
+             id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
+             fecha_reporte: String(fecha_hoy),
+             jefe_faena: element.jefe_faena,
+             sdi: String(element.sdi),
+             supervisor: String(element.revisado_por_persona),
+             ito_mandante: String(element.gestor_cliente),
+             area: element.id_area, //json {"id": id, "descripcion": descripcion}
+             brigada_pesada: element.brigada_pesada?{ id: 2, descripcion: 'PESADA' }:{ id: 1, descripcion: 'LIVIANA'},
+             observaciones: String(element.observaciones),
+             entregado_por_persona: String(element.entregado_por_persona),
+             fecha_entregado: String(fecha_hoy),
+             revisado_por_persona: String(element.revisado_por_persona),
+             fecha_revisado: String(fecha_hoy),
+             sector: String(element.sector),
+             //hora_salida_base: String(element.hora_salida_base),
+             //hora_llegada_terreno: String(element.hora_llegada_terreno),
+             //hora_salida_terreno: String(element.hora_salida_terreno),
+             //hora_llegada_base: String(element.hora_llegada_base),
+             alimentador: String(element.alimentador),
+             comuna: element.comuna,
+             num_documento: String(element.num_documento),
+             flexiapp: element.flexiapp,
+             //recargo_hora: element.recargo,
+             //det_actividad: element.detalle_actividad,
+             //det_otros: element.detalle_otros
+
+
+           }
+               salida.push(detalle_salida);
+         };
+       }
+       if (salida===undefined){
+         res.status(500).send("Error en la consulta (servidor backend)");
+       }else{
+         res.status(200).send(salida);
+       }
+     }else {
+       res.status(500).send("Error en la consulta (servidor backend)");
+     }
+   }catch (error) {
+     res.status(500).send(error);
+   }
+ }
+}
+/*********************************************************************************** */
 /* Crea un reporte diario
 ;
 */
@@ -884,6 +977,7 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
     const id = req.params.id;
 
     //Primer debe eliminar el detalle actividad por id de encabezado, luego borrar el detalle otros y por ultimo el encabezado
+    const sequelize = db.sequelize;
     const result = await sequelize.transaction(async () => {
         let salida = {};
         await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
@@ -905,6 +999,7 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
       res.status(400).send(result);
     }
   }catch (error) {
+    console.log('error 500 ', error);
     res.status(500).send(error);
   }
 

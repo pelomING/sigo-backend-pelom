@@ -129,6 +129,11 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllEncabezadoReporteDiarioByParametros);
 
+    /*********************************************************************************** */
+/* Consulta el ultimo de encabezado de reporte diario
+*/
+    app.get("/api/obras/backoffice/repodiario/v1/ultimoreportediario", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findUltimoEncabezadoReporteDiarioByIdObra);
+
     app.post("/api/obras/backoffice/repodiario/v1/creareportediario", [authJwt.verifyToken, authJwt.createObrasBackofficeRepodiario], backofficeRepodiarioController.createEncabezadoReporteDiario_V2);
 
     app.put("/api/obras/backoffice/repodiario/v1/actualizareportediario/:id", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.updateEncabezadoReporteDiario_V2);
