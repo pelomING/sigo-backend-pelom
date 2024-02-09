@@ -99,32 +99,32 @@ module.exports = function(app) {
 /******* BOM ******************************************************************** */    
 
 { /*** BOM ** */
-    app.get("/api/obras/backoffice/v1/allbom", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeBomController.findAllBom);
+    app.get("/api/obras/backoffice/v1/allbom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findAllBom);
 
 
-    app.get("/api/obras/backoffice/v1/bomporparametros", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeBomController.findBomByParametros);
+    app.get("/api/obras/backoffice/v1/bomporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findBomByParametros);
 
 
-    app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeBomController.createBomMasivo);
+    app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo);
 
 
-    app.post("/api/obras/backoffice/v1/creabomindividual", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeBomController.createBomIndividual);
+    app.post("/api/obras/backoffice/v1/creabomindividual", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomIndividual);
 
 
-    app.delete("/api/obras/backoffice/v1/eliminabomporreserva/:reserva", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeBomController.deleteBomByReserva);
+    app.delete("/api/obras/backoffice/v1/eliminabomporreserva/:reserva", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByReserva);
 
 
-    app.delete("/api/obras/backoffice/v1/eliminamaterialbom/:reserva/:cod_sap", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeBomController.deleteBomByMaterial);
+    app.delete("/api/obras/backoffice/v1/eliminamaterialbom/:reserva/:cod_sap", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByMaterial);
 }
 
 { /*** VISITA TERRENOS ** */
   app.get("/api/obras/backoffice/v1/allvisitaterreno", [authJwt.verifyToken, authJwt.readObrasBackofficeTerreno], backofficeTerrenoController.findAllVisitaTerreno);
 
-  app.get("/api/obras/backoffice/v1/visitaterreno", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeTerrenoController.findVisitaTerrenoByIdObra);
+  app.get("/api/obras/backoffice/v1/visitaterreno", [authJwt.verifyToken, authJwt.readObrasBackofficeTerreno], backofficeTerrenoController.findVisitaTerrenoByIdObra);
 
-  app.post("/api/obras/backoffice/v1/creavisitaterreno", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeTerrenoController.createVisitaTerreno);
+  app.post("/api/obras/backoffice/v1/creavisitaterreno", [authJwt.verifyToken, authJwt.createObrasBackofficeTerreno], backofficeTerrenoController.createVisitaTerreno);
 
-  app.put("/api/obras/backoffice/v1/actualizavisitaterreno/:id", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeTerrenoController.updateVisitaTerreno);
+  app.put("/api/obras/backoffice/v1/actualizavisitaterreno/:id", [authJwt.verifyToken, authJwt.updateObrasBackofficeTerreno], backofficeTerrenoController.updateVisitaTerreno);
 }
 
 {/*** REPORTES DIARIOS ** */
@@ -151,8 +151,6 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosactividadporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findDetalleReporteDiarioActividadPorParametros);
 
     app.get("/api/obras/backoffice/repodiario/v1/reportesdiariosotrosporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findDetalleReporteDiarioOtrasPorParametros);
-
-    //app.post("/api/obras/backoffice/repodiario/v1/creardetalleactividad", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], backofficeRepodiarioController.createOneDetalleReporteDiarioActividad);
 
     app.get("/api/obras/backoffice/repodiario/v1/alljefesfaena", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllJefesFaena);
 
