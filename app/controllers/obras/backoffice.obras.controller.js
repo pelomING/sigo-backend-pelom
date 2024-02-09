@@ -284,7 +284,7 @@ exports.updateObra = async (req, res) => {
       where: { id: id }
     }).then(data => {
       if (data[0] === 1) {
-        res.status(200).send( "Obra actualizada" );
+        res.status(200).send( { message:"Obra actualizada"} );
       } else {
         res.status(400).send( `No existe una obra con el id ${id}` );
       }
