@@ -742,7 +742,7 @@ exports.updateEncabezadoReporteDiario = async (req, res) => {
       where: { id: id }
     }).then(data => {
       if (data[0] === 1) {
-        res.status(400).send("Obra actualizada" );
+        res.status(200).send({ message: "Obra actualizada" } );
       } else {
         res.status(400).send(`No existe una obra con el id ${id}` );
       }
@@ -909,7 +909,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       return salida;
     });
     if (result.message==="Obra actualizada") {
-      res.status(200).send(result.message);
+      res.status(200).send(result);
     }else {
       if (result.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
         res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
@@ -950,7 +950,7 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
         return salida;
       });
     if (result.message==="Reporte eliminado") {
-      res.status(200).send(result.message);
+      res.status(200).send(result);
     }else {
       res.status(400).send(result.message);
     }

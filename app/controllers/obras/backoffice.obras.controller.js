@@ -313,7 +313,7 @@ exports.deleteObra = async (req, res) => {
       where: { id: id }
     }).then(data => {
       if (data[0] === 1) {
-        res.status(200).send( "Obra eliminada" );
+        res.status(200).send( { message: "Obra eliminada" } );
       }
     }).catch(err => {
       res.status(500).send(err.message );
