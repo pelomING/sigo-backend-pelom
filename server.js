@@ -23,7 +23,9 @@ app.use(
     "http://186.11.3.23", 
     "https://siscop.up.railway.app", 
     "https://pelom-ing.up.railway.app",
-    "https://pelom-ing-dev.up.railway.app"
+    "https://pelom-ing-dev.up.railway.app",
+    "https://pelom-ing-testobras.up.railway.app",
+    "https://pelom-ing-test.up.railway.app"
   ],
   })
 );
