@@ -15,7 +15,7 @@ exports.findAllTipoRecargo = async (req, res) => {
         await TipoRecargo.findAll().then(data => {
             res.status(200).send(data);
           }).catch(err => {
-              res.status(500).send({ message: err.message });
+              res.status(500).send(err.message);
           })
     } catch (error) {
         res.status(500).send(error);
@@ -74,9 +74,9 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
       ];
       for (const element of campos) {
         if (!req.query[element]) {
-          res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-          });
+          res.status(400).send(
+            "No puede estar nulo el campo " + element
+          );
           return;
         }
       };
@@ -160,6 +160,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
     res.status(500).send(error);
   }
 }
+
 /*********************************************************************************** */
 /* Obtiene todas las actividades no adicionales para un estado de pago
     GET /api/obras/backoffice/estadopago/v1/allactividades
@@ -175,9 +176,9 @@ exports.getAllActividadesByIdObra = async (req, res) => {
           ];
           for (const element of campos) {
             if (!req.query[element]) {
-              res.status(400).send({
-                message: "No puede estar nulo el campo " + element
-              });
+              res.status(400).send(
+                "No puede estar nulo el campo " + element
+              );
               return;
             }
           };
@@ -208,9 +209,9 @@ exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
           ];
           for (const element of campos) {
             if (!req.query[element]) {
-              res.status(400).send({
-                message: "No puede estar nulo el campo " + element
-              });
+              res.status(400).send(
+                "No puede estar nulo el campo " + element
+              );
               return;
             }
           };
@@ -240,9 +241,9 @@ exports.getAllActividadesHoraExtraByIdObra = async (req, res) => {
           ];
           for (const element of campos) {
             if (!req.query[element]) {
-              res.status(400).send({
-                message: "No puede estar nulo el campo " + element
-              });
+              res.status(400).send(
+                "No puede estar nulo el campo " + element
+              );
               return;
             }
           };
@@ -271,9 +272,9 @@ exports.totalesEstadoPago = async (req, res) => {
     const campos = ['id_obra'];
       for (const element of campos) {
         if (!req.query[element]) {
-          res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-          });
+          res.status(400).send(
+            "No puede estar nulo el campo " + element
+          );
           return;
         }
       };
@@ -332,9 +333,9 @@ exports.avancesEstadoPago = async (req, res) => {
     const campos = ['id_obra'];
       for (const element of campos) {
         if (!req.query[element]) {
-          res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-          });
+          res.status(400).send(
+            "No puede estar nulo el campo " + element
+          );
           return;
         }
       };
@@ -367,9 +368,9 @@ exports.creaEstadoPago = async (req, res) => {
     ];
     for (const element of campos) {
       if (!req.body[element]) {
-        res.status(400).send({
-          message: "No puede estar nulo el campo " + element
-        });
+        res.status(400).send(
+          "No puede estar nulo el campo " + element
+        );
         return;
       }
     };
@@ -407,7 +408,7 @@ exports.creaEstadoPago = async (req, res) => {
         }).then(data => {
           encabezado_estado_pago_id = data[0].valor;
         }).catch(err => {
-          res.status(500).send({ message: err.message });
+          res.status(500).send(err.message );
         })
 
         /*
@@ -508,9 +509,9 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
           ];
           for (const element of campos) {
             if (!req.query[element]) {
-              res.status(400).send({
-                message: "No puede estar nulo el campo " + element
-              });
+              res.status(400).send(
+                "No puede estar nulo el campo " + element
+              );
               return;
             }
           };
@@ -584,9 +585,9 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
           ];
           for (const element of campos) {
             if (!req.query[element]) {
-              res.status(400).send({
-                message: "No puede estar nulo el campo " + element
-              });
+              res.status(400).send(
+                "No puede estar nulo el campo " + element
+              );
               return;
             }
           };

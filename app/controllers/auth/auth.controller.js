@@ -2,6 +2,7 @@ const db = require("../../models");
 const config = require("../../config/auth.config");
 const User = db.user;
 const Role = db.role;
+const UsuariosFunciones = db.usuariosFunciones;
 const LoginHistorial = db.loginHistorial;
 
 const Op = db.Sequelize.Op;
@@ -28,11 +29,11 @@ exports.signup = async (req, res) => {
         },
       });
       const result = user.setRoles(roles);
-      if (result) res.send({ message: "User registered successfully!" });
+      if (result) res.status(200).send({ message: "User registered successfully!" });
     } else {
       // user has role = 1
       const result = user.setRoles([1]);
-      if (result) res.send({ message: "User registered successfully!" });
+      if (result) res.status(200).send({ message: "User registered successfully!" });
     }
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -48,28 +49,27 @@ exports.signin = async (req, res) => {
     const fechoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12)
   
 
-    const user = await User.findOne({
+    const userFuncion = await UsuariosFunciones.findOne({
       where: {
         username: req.body.username,
       },
     });
 
-    if (!user) {
-      return res.status(404).send({ message: "User Not found." });
+    if (!userFuncion) {
+      return res.status(401).send("User Not found." );
     }
 
     const passwordIsValid = bcrypt.compareSync(
       req.body.password,
-      user.password
+      userFuncion.password
     );
 
     if (!passwordIsValid) {
-      return res.status(401).send({
-        message: "Invalid Password!",
-      });
+      return res.status(401).send("Invalid Password!",
+      );
     }
 
-    const token = jwt.sign({ id: user.id },
+    const token = jwt.sign({ id: userFuncion.id },
                            config.secret,
                            {
                             algorithm: 'HS256',
@@ -77,9 +77,17 @@ exports.signin = async (req, res) => {
                             expiresIn: 86400, // 24 hours
                            });
 
+    const user = await User.findOne({
+      where: {
+        username: req.body.username
+      }
+    })
+
     let authorities = [];
+    let idRole = [];
     const roles = await user.getRoles();
     for (const element of roles) {
+      idRole.push(element.id);
       authorities.push("ROLE_" + element.name.toUpperCase());
     }
 
@@ -96,21 +104,37 @@ exports.signin = async (req, res) => {
     }).catch(err => {
       console.log('err', err);
     })
+    const rol_consulta = idRole[0]?idRole[0]:0;
 
+    const sql = "select menu from _frontend.ver_menu where rol_id = " + rol_consulta + ";";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const menu = await sequelize.query(sql, { type: QueryTypes.SELECT });
+
+    //determina el menu de salida
+    let menu_salida = [];
+    if (menu) {
+        for (const element of menu) {
+          menu_salida.push(element.menu);
+        }
+      }
+    /////////////////////////////////
     return res.status(200).send({
       id: user.id,
       username: user.username,
+      nombre: userFuncion.nombres,
+      funcion: userFuncion.funcion,
       email: user.email,
       roles: authorities,
-      accessToken: token
+      accessToken: token,
+      menu: menu_salida
     });
   } catch (error) {
     if (error.message === "connect ECONNREFUSED ::1:5432") {
-      return res.status(400).send({
-        message: "No hay conexión a la base de datos",
-      });
+      return res.status(400).send( "No hay conexión a la base de datos",
+      );
     } else {
-      return res.status(500).send({ message: error.message });
+      return res.status(500).send( error.message );
     }
   }
 };

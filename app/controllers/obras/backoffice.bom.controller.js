@@ -126,9 +126,8 @@ exports.findAllBom = async (req, res) => {
     ];
     for (const element of campos) {
       if (!req.body[element]) {
-        res.status(400).send({
-          message: "No puede estar nulo el campo " + element
-        });
+        res.status(400).send("No puede estar nulo el campo " + element
+        );
         return;
       }
     };
@@ -247,9 +246,8 @@ exports.findAllBom = async (req, res) => {
     ];
     for (const element of campos) {
       if (!req.body[element]) {
-        res.status(400).send({
-          message: "No puede estar nulo el campo " + element
-        });
+        res.status(400).send("No puede estar nulo el campo " + element
+        );
         return;
       }
     };
@@ -356,12 +354,12 @@ exports.findAllBom = async (req, res) => {
     }).then(data => {
       console.log('data', data);
       if (data > 0) {
-        res.send({ message: `Reserva eliminada del Bom. Cantidad de registros eliminados: ${data}`});
+        res.status(400).send(`Reserva eliminada del Bom. Cantidad de registros eliminados: ${data}`);
       } else {
-        res.send({ message: `No existe la reserva ${reserva}` });
+        res.status(400).send(`No existe la reserva ${reserva}` );
       }
     }).catch(err => {
-      res.status(500).send({ message: err.message });
+      res.status(500).send(err.message );
     })
   
   }
@@ -375,19 +373,19 @@ exports.findAllBom = async (req, res) => {
     const reserva = req.params.reserva;
     const cod_sap = req.params.cod_sap;
     if (!cod_sap || !reserva){
-      res.status(400).send({message: "Debe especificar el código de material y la reserva a borrar"});
+      res.status(400).send("Debe especificar el código de material y la reserva a borrar");
     } else {
         Bom.destroy({
           where: { reserva: reserva, codigo_sap_material: cod_sap }
         }).then(data => {
           console.log('data', data);
           if (data > 0) {
-            res.send({ message: "Material eliminado del Bom" });
+            res.status(400).send("Material eliminado del Bom" );
           } else {
-            res.send({ message: `No existe el codigo material ${cod_sap} para la reserva ${reserva}` });
+            res.status(400).send(`No existe el codigo material ${cod_sap} para la reserva ${reserva}`);
           }
         }).catch(err => {
-          res.status(500).send({ message: err.message });
+          res.status(500).send(err.message );
         })
     }
   }

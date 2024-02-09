@@ -237,6 +237,99 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+/* Consulta el ultimo de encabezado de reporte diario
+*/
+exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+     #swagger.description = 'Consulta el ultimo de encabezado de reporte diario por id de obra' */
+ const parametros = {
+   id_obra: req.query.id_obra,
+ }
+ const keys = Object.keys(parametros)
+ let sql_array = [];
+ let param = {};
+ for (element of keys) {
+   if (parametros[element]){
+     if (element === "id_obra") {
+       sql_array.push("o.id = :" + element);
+       param[element] = Number(parametros[element]);
+     }
+   }
+ }
+
+ if (sql_array.length === 0) {
+   res.status(400).send("Debe incluir el parametro de id de obra");
+ }else {
+   try {
+     let b = sql_array.reduce((total, num) => total + " AND " + num);
+     if (b){
+      
+      const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
+      row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
+      entregado_por_persona, revisado_por_persona, sector, alimentador, row_to_json(c) as comuna, num_documento, \
+      flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
+      on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
+      jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE "+b+" order by fecha_reporte desc limit 1;";
+
+       console.log("sql: "+sql);
+       const { QueryTypes } = require('sequelize'); 
+       const sequelize = db.sequelize;
+       const encabezadoReporte = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
+       let salida = [];
+       if (encabezadoReporte) {
+        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const fecha_hoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
+
+         for (const element of encabezadoReporte) {
+           
+
+           const detalle_salida = {
+             id: Number(element.id),
+             id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
+             fecha_reporte: String(fecha_hoy),
+             jefe_faena: element.jefe_faena,
+             sdi: String(element.sdi),
+             supervisor: String(element.revisado_por_persona),
+             ito_mandante: String(element.gestor_cliente),
+             area: element.id_area, //json {"id": id, "descripcion": descripcion}
+             brigada_pesada: element.brigada_pesada?{ id: 2, descripcion: 'PESADA' }:{ id: 1, descripcion: 'LIVIANA'},
+             observaciones: String(element.observaciones),
+             entregado_por_persona: String(element.entregado_por_persona),
+             fecha_entregado: String(fecha_hoy),
+             revisado_por_persona: String(element.revisado_por_persona),
+             fecha_revisado: String(fecha_hoy),
+             sector: String(element.sector),
+             //hora_salida_base: String(element.hora_salida_base),
+             //hora_llegada_terreno: String(element.hora_llegada_terreno),
+             //hora_salida_terreno: String(element.hora_salida_terreno),
+             //hora_llegada_base: String(element.hora_llegada_base),
+             alimentador: String(element.alimentador),
+             comuna: element.comuna,
+             num_documento: String(element.num_documento),
+             flexiapp: element.flexiapp,
+             //recargo_hora: element.recargo,
+             //det_actividad: element.detalle_actividad,
+             //det_otros: element.detalle_otros
+
+
+           }
+               salida.push(detalle_salida);
+         };
+       }
+       if (salida===undefined){
+         res.status(500).send("Error en la consulta (servidor backend)");
+       }else{
+         res.status(200).send(salida);
+       }
+     }else {
+       res.status(500).send("Error en la consulta (servidor backend)");
+     }
+   }catch (error) {
+     res.status(500).send(error);
+   }
+ }
+}
+/*********************************************************************************** */
 /* Crea un reporte diario
 ;
 */
@@ -309,9 +402,9 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
       ];
       for (const element of campos) {
         if (!req.body[element]) {
-          res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-          });
+          res.status(400).send(
+            "No puede estar nulo el campo " + element
+          );
           return;
         }
       };
@@ -321,11 +414,11 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
           //el rut ya existe
           if (data.length > 0) {
             salir = true;
-            res.status(403).send({ message: 'El Codigo de Obra ya se encuentra ingresado en la base' });
+            res.status(400).send('El Codigo de Obra ya se encuentra ingresado en la base' );
           }
         }).catch(err => {
             salir = true;
-            res.status(500).send({ message: err.message });
+            res.status(500).send(err.message );
         })
       
         if (salir) {
@@ -344,9 +437,8 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
         // procesa detalle de actividad
         for (const element of req.body.det_actividad) {
           if (!element.clase || !element.actividad || !element.cantidad) {
-            res.status(400).send({
-              message: "No puede estar nulo el campo " + element
-            });
+            res.status(400).send("No puede estar nulo el campo " + element
+            );
             return;
           }
         };
@@ -361,7 +453,7 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
         }).then(data => {
           encabezado_reporte_diario_id = data[0].valor;
         }).catch(err => {
-          res.status(500).send({ message: err.message });
+          res.status(500).send(err.message );
         })
 
         const encabezado_reporte_diario = {
@@ -396,9 +488,9 @@ exports.createEncabezadoReporteDiario = async (req, res) => {
 */
         await EncabezadoReporteDiario.create(encabezado_reporte_diario)
           .then(data => {
-              res.send(data);
+              res.status(200).send(data);
           }).catch(err => {
-              res.status(500).send({ message: err.message });
+              res.status(500).send(err.message );
           })
   }catch (error) {
     res.status(500).send(error);
@@ -478,9 +570,8 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
       ];
       for (const element of campos) {
         if (!req.body[element]) {
-          res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-          });
+          res.status(400).send("No puede estar nulo el campo " + element
+          );
           return;
         }
       };
@@ -489,11 +580,11 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
       await EncabezadoReporteDiario.findAll({where: {id_obra: req.body.id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
           if (data.length > 0) {
             salir = true;
-            res.status(403).send(`La fecha de reporte '${req.body.fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`);
+            res.status(400).send(`La fecha de reporte '${req.body.fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`);
           }
         }).catch(err => {
             salir = true;
-            res.status(500).send({ message: err.message });
+            res.status(500).send(err.message );
         })
       
         if (salir) {
@@ -512,9 +603,8 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         // procesa detalle de actividad
         for (const element of req.body.det_actividad) {
           if (!element.clase || !element.actividad || !element.cantidad) {
-            res.status(400).send({
-              message: "No puede estar nulo el campo " + element
-            });
+            res.status(400).send("No puede estar nulo el campo " + element
+            );
             return;
           }
         };
@@ -526,33 +616,33 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             //revisar arreglo de otras actividades
             if (Array.isArray(detalle_otros)) {
               if (detalle_otros.length==0) {
-                res.status(400).send({message: "Debe especificar al menos una actividad"});
+                res.status(400).send("Debe especificar al menos una actividad");
                 return;
               }
             }
           }else {
             if (!detalle_actividad[0]) {
-              res.status(400).send({message: "El detalle debe tener al menos una actividad"});
+              res.status(400).send("El detalle debe tener al menos una actividad");
               return;
             }
             if (!detalle_actividad[0].clase) {
               salir = true;
-              res.status(400).send({message: "El campo clase en el detalle debe tener valor"});
+              res.status(400).send("El campo clase en el detalle debe tener valor");
               return;
             }
             if (!detalle_actividad[0].tipo) {
               console.log('a4')
-              res.status(400).send({message: "El campo tipo en el detalle debe tener valor"});
+              res.status(400).send("El campo tipo en el detalle debe tener valor");
               return;
             }
             if (!detalle_actividad[0].actividad) {
               console.log('a5')
-              res.status(400).send({message: "El campo actividad en el detalle debe tener valor"});
+              res.status(400).send("El campo actividad en el detalle debe tener valor");
               return;
             }
             if (!detalle_actividad[0].cantidad) {
               console.log('a6')
-              res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
+              res.status(400).send("El campo cantidad en el detalle debe tener valor");
               return;
             }
           }
@@ -560,11 +650,11 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           //revisar arreglo de otras actividades
           if (Array.isArray(detalle_otros)) {
             if (detalle_otros.length==0) {
-              res.status(400).send({message: "Debe especificar al menos una actividad"});
+              res.status(400).send("Debe especificar al menos una actividad");
               return;
             }
           }else {
-            res.status(400).send({message: "Debe especificar al menos una actividad"});
+            res.status(400).send("Debe especificar al menos una actividad");
             return;
           }
         }
@@ -579,7 +669,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         }).then(data => {
           encabezado_reporte_diario_id = data[0].valor;
         }).catch(err => {
-          res.status(500).send({ message: err.message });
+          res.status(500).send(err.message );
         })
         const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
         const encabezado_reporte_diario = {
@@ -652,12 +742,12 @@ exports.updateEncabezadoReporteDiario = async (req, res) => {
       where: { id: id }
     }).then(data => {
       if (data[0] === 1) {
-        res.send({ message: "Obra actualizada" });
+        res.status(200).send({ message: "Obra actualizada" } );
       } else {
-        res.send({ message: `No existe una obra con el id ${id}` });
+        res.status(400).send(`No existe una obra con el id ${id}` );
       }
     }).catch(err => {
-      res.status(500).send({ message: err.message });
+      res.status(500).send(err.message );
     })
   }catch (error) {
     res.status(500).send(error);
@@ -741,50 +831,10 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
     };
     
     let detalle_actividad = req.body.det_actividad;
-    /*
-    if (detalle_actividad){
-      if (!detalle_actividad[0]) {
-        res.status(400).send({message: "El detalle debe tener al menos una actividad"});
-        return;
-      }
-      if (!detalle_actividad[0].clase) {
-        res.status(400).send({message: "El campo clase en el detalle debe tener valor"});
-        return;
-      }
-      if (!detalle_actividad[0].tipo) {
-        res.status(400).send({message: "El campo tipo en el detalle debe tener valor"});
-        return;
-      }
-      if (!detalle_actividad[0].actividad) {
-        res.status(400).send({message: "El campo actividad en el detalle debe tener valor"});
-        return;
-      }
-      if (!detalle_actividad[0].cantidad) {
-        res.status(400).send({message: "El campo cantidad en el detalle debe tener valor"});
-        return;
-      }
-    }*/
+ 
     let detalle_otros = req.body.det_otros;
-    /*
-    if (detalle_otros){
-      if (!detalle_otros[0]) {
-        res.status(400).send({message: "El detalle otros debe tener al menos una actividad"});
-      }
-      if (!detalle_otros[0].glosa) {
-        res.status(400).send({message: "El campo glosa en el detalle otros debe tener valor"});
-      }
-      if (!detalle_otros[0].uc_unitaria) {
-        res.status(400).send({message: "El campo uc_unitaria en el detalle otros debe tener valor"});
-      }
-      if (!detalle_otros[0].uc_total) {
-        res.status(400).send({message: "El campo uc_total en el detalle otros debe tener valor"});
-      }
-      if (!detalle_otros[0].cantidad) {
-        res.status(400).send({message: "El campo cantidad en el detalle otros debe tener valor"});
-      }
-    }
-    */
-   console.log('req.body', req.body);
+
+
    const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
     const encabezadoReporteDiario = {
       fecha_reporte: req.body.fecha_reporte?String(req.body.fecha_reporte):undefined,
@@ -861,11 +911,10 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
     if (result.message==="Obra actualizada") {
       res.status(200).send(result);
     }else {
-      console.log(result.message.parent.detail);
       if (result.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
-        res.status(403).send('Ya existe un reporte diario para esta fecha en esta obra');
+        res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
       }else{
-        res.status(400).send(result);
+        res.status(400).send(result.message);
       }
       
     }
@@ -884,6 +933,7 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
     const id = req.params.id;
 
     //Primer debe eliminar el detalle actividad por id de encabezado, luego borrar el detalle otros y por ultimo el encabezado
+    const sequelize = db.sequelize;
     const result = await sequelize.transaction(async () => {
         let salida = {};
         await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
@@ -902,7 +952,7 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
     if (result.message==="Reporte eliminado") {
       res.status(200).send(result);
     }else {
-      res.status(400).send(result);
+      res.status(400).send(result.message);
     }
   }catch (error) {
     res.status(500).send(error);
@@ -971,9 +1021,8 @@ exports.findOneDetalleReporteDiarioActividad = async (req, res) => {
     ];
     for (const element of campos) {
       if (!req.query[element]) {
-        res.status(400).send({
-          message: "No puede estar nulo el campo " + element
-        });
+        res.status(400).send("No puede estar nulo el campo " + element
+        );
         return;
       }
     };
@@ -1022,7 +1071,7 @@ exports.findOneDetalleReporteDiarioActividad = async (req, res) => {
       res.status(200).send(salida);
     }
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send(err.message );
   }
 }
 /*********************************************************************************** */
@@ -1212,9 +1261,8 @@ exports.createOneDetalleReporteDiarioActividad = async (req, res) => {
     ];
     for (const element of campos) {
       if (!req.body[element]) {
-        res.status(400).send({
-          message: "No puede estar nulo el campo " + element
-        });
+        res.status(400).send("No puede estar nulo el campo " + element
+        );
         return;
       }
     };
@@ -1241,19 +1289,19 @@ exports.createOneDetalleReporteDiarioActividad = async (req, res) => {
     });
     if (!actividadExists) {
       // La actividad no existe en la tabla maestro_actividad
-      res.status(400).send({message: "No existe la actividad con Id " + req.body.id_actividad});
+      res.status(400).send("No existe la actividad con Id " + req.body.id_actividad);
       return;
     }
 
     if (!tipoOperacionExists) {
       // El tipo de operación no existe en la tabla tipo_operacion
-      res.status(400).send({message: "No el tipo de operación con Id " + req.body.tipo_operacion});
+      res.status(400).send("No el tipo de operación con Id " + req.body.tipo_operacion);
       return;
     }
 
     if (!encabezado_reporte_diarioExists) {
       // El encabezado de reporte diario no existe
-      res.status(400).send({message: "No existe un encabezado reporte diario con Id " + req.body.id_encabezado_rep});
+      res.status(400).send("No existe un encabezado reporte diario con Id " + req.body.id_encabezado_rep);
       return;
     }
 
@@ -1265,9 +1313,9 @@ exports.createOneDetalleReporteDiarioActividad = async (req, res) => {
     }
     await DetalleReporteDiarioActividad.create(detalleReporteDiarioActividad)
           .then(data => {
-              res.send(data);
+              res.status(200).send(data);
           }).catch(err => {
-              res.status(500).send({ message: err.message });
+              res.status(500).send( err.message );
           })
   }catch (error) {
     res.status(500).send(error);
@@ -1287,9 +1335,9 @@ exports.findAllJefesFaena = async (req, res) => {
         ['nombre', 'ASC']
       ]
     }).then(data => {
-      res.send(data);
+      res.status(200).send(data);
     }).catch(err => {
-        res.status(500).send({ message: err.message });
+        res.status(500).send(err.message );
     })
   }catch (error) {
     res.status(500).send(error);
@@ -1304,9 +1352,9 @@ exports.findAllTipoOperacion = async (req, res) => {
       #swagger.description = 'Devuelve todos los tipo de operación' */
   try {
     await tipoOperacion.findAll().then(data => {
-      res.send(data);
+      res.status(200).send(data);
     }).catch(err => {
-        res.status(500).send({ message: err.message });
+        res.status(500).send(err.message );
     })
   }catch (error) {
     res.status(500).send(error);
@@ -1413,12 +1461,12 @@ exports.findAllTipoTrabajo = async (req, res) => {
           }
           salida.push(detalle_salida);
         }
-        res.send(salida);
+        res.status(200).send(salida);
     }).catch(err => {
-        res.status(500).send({ message: err.message });
+        res.status(500).send(err.message );
     })
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send( err.message );
   }
 }
 /*********************************************************************************** */

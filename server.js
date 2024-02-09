@@ -23,7 +23,9 @@ app.use(
     "http://186.11.3.23", 
     "https://siscop.up.railway.app", 
     "https://pelom-ing.up.railway.app",
-    "https://pelom-ing-dev.up.railway.app"
+    "https://pelom-ing-dev.up.railway.app",
+    "https://pelom-ing-testobras.up.railway.app",
+    "https://pelom-ing-test.up.railway.app"
   ],
   })
 );
@@ -93,10 +95,11 @@ app.use(bodyParser.json())
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 // simple route
+/*
 app.get("/", (req, res) => {
   res.json({ message: "App de ejemplo Authentication" });
 });
-
+*/
 // routes
 
 require('./app/routes/auth.routes')(app);

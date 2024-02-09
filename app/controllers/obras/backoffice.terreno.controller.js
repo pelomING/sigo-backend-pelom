@@ -12,25 +12,7 @@ exports.findAllVisitaTerreno = async (req, res) => {
       #swagger.description = 'Devuelve todas las visitas a terreno' */
     try {
 
-      /*
-      console.log('findAllVisitaTerreno');
-        let id_user = req.userId;
-        let codigo_api = 'obras.backoffice.terreno';
-        let crud = 'leer';
-        const verificaAuth = await VerificaAuth.findOne({
-          where: {
-            user_id: id_user,
-            codigo: codigo_api,
-            [crud]: true
-          }
-        });
-        if (!verificaAuth) {
-          return res.status(403).send({
-            error: true,
-            message: "No tiene permiso para realizar esta operación"
-          })
-        }*/
-
+  
 
         const sql = "SELECT vt.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
         fecha_visita::text, direccion, persona_mandante, cargo_mandante, persona_contratista, cargo_contratista, \
@@ -76,34 +58,15 @@ exports.findVisitaTerrenoByIdObra = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
       #swagger.description = 'Devuelve las visitas a terreno por ID de obra (id_obra)' */
       try {
-        /// Revisa los permisos //////
-        let id_user = req.userId;
-        let codigo_api = 'obras.backoffice.terreno';
-        let crud = 'leer';
-        const verificaAuth = await VerificaAuth.findOne({
-          where: {
-            user_id: id_user,
-            codigo: codigo_api,
-            [crud]: true
-          }
-        });
-        if (!verificaAuth) {
-          return res.status(403).send({
-            error: true,
-            message: "No tiene permiso para realizar esta operación"
-          })
-        }
-        /////////////////////////////////////////////
-
+      
 
         const campos = [
             'id_obra'
           ];
           for (const element of campos) {
             if (!req.query[element]) {
-              res.status(400).send({
-                message: "No puede estar nulo el campo " + element
-              });
+              res.status(400).send("No puede estar nulo el campo " + element
+              );
               return;
             }
           };
@@ -154,33 +117,15 @@ exports.createVisitaTerreno = async (req, res) => {
 
     try {
 
-        /// Revisa los permisos //////
-        let id_user = req.userId;
-        let codigo_api = 'obras.backoffice.terreno';
-        let crud = 'crear';
-        const verificaAuth = await VerificaAuth.findOne({
-          where: {
-            user_id: id_user,
-            codigo: codigo_api,
-            [crud]: true
-          }
-        });
-        if (!verificaAuth) {
-          return res.status(403).send({
-            error: true,
-            message: "No tiene permiso para realizar esta operación"
-          })
-        }
-        /////////////////////////////////////////////
+        
 
         const campos = [
         'id_obra', 'fecha_visita', 'direccion', 'persona_mandante', 'cargo_mandante', 'persona_contratista', 'cargo_contratista'
         ];
         for (const element of campos) {
         if (!req.body[element]) {
-            res.status(400).send({
-            message: "No puede estar nulo el campo " + element
-            });
+            res.status(400).send( "No puede estar nulo el campo " + element
+            );
             return;
         }
         };
@@ -194,7 +139,7 @@ exports.createVisitaTerreno = async (req, res) => {
         await VisitaTerreno.findAll({where: {id_obra: req.body.id_obra, fecha_visita: fecha_visita}}).then(async data => {
             //La obra ya tiene una visita agendada para esa fecha
             if (data.length > 0) {
-                res.status(403).send({ message: 'La Visita ya se encuentra agendada' });
+                res.status(400).send( 'La Visita ya se encuentra agendada' );
             }else {
                 const visita = {
 
@@ -213,13 +158,13 @@ exports.createVisitaTerreno = async (req, res) => {
         
                 await VisitaTerreno.create(visita)
                     .then(data => {
-                        res.send(data);
+                        res.status(200).send(data);
                     }).catch(err => {
-                        res.status(500).send({ message: err.message });
+                        res.status(500).send( err.message );
                     })
             }
         }).catch(err => {
-            res.status(500).send({ message: err.message });
+            res.status(500).send( err.message );
         })
     }catch (error) {
         res.status(500).send(error);
@@ -233,24 +178,7 @@ exports.updateVisitaTerreno = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
       #swagger.description = 'Actualiza una visita a terreno' */
     try{
-        /// Revisa los permisos //////
-        let id_user = req.userId;
-        let codigo_api = 'obras.backoffice.terreno';
-        let crud = 'actualizar';
-        const verificaAuth = await VerificaAuth.findOne({
-          where: {
-            user_id: id_user,
-            codigo: codigo_api,
-            [crud]: true
-          }
-        });
-        if (!verificaAuth) {
-          return res.status(403).send({
-            error: true,
-            message: "No tiene permiso para realizar esta operación"
-          })
-        }
-        /////////////////////////////////////////////
+        
 
         const id = req.params.id;
 
@@ -286,7 +214,7 @@ exports.updateVisitaTerreno = async (req, res) => {
         
         if (id_obra) {
             //El id de obra no se puede cambiar para una visita una vez asignado
-            res.status(500).send({ message: 'El id de obra no se puede cambiar' });
+            res.status(500).send( 'El id de obra no se puede cambiar' );
 
         }else {
             //Si viene la fecha de visita verificar que sea mayor o igual al día de hoy
@@ -297,7 +225,7 @@ exports.updateVisitaTerreno = async (req, res) => {
 
                 if (fechaVisita < today) {
                     // La fecha de visita es menor a la fecha actual 
-                    res.status(500).send({ message: 'La fecha de la visita no puede ser menor a la fecha actual' });
+                    res.status(500).send( 'La fecha de la visita no puede ser menor a la fecha actual' );
                 }else {
                     visita = {
 
@@ -333,12 +261,12 @@ exports.updateVisitaTerreno = async (req, res) => {
                 await VisitaTerreno.update(visita, { where: { id: id } })
                     .then(data => {
                         if (data == 1) {
-                            res.send({ message: "Visita actualizada" });
+                            res.status(200).send( "Visita actualizada" );
                         }else {
-                            res.status(500).send({ message: "No se pudo actualizar la Visita 246" });
+                            res.status(500).send( "No se pudo actualizar la Visita 246");
                         }
                     }).catch(err => {
-                        res.status(500).send({ message: err.message + " Visita no actualizada" });
+                        res.status(500).send( err.message );
                     })
                 }
         }
