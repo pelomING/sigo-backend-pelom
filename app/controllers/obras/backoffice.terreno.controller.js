@@ -117,7 +117,7 @@ exports.createVisitaTerreno = async (req, res) => {
 
     try {
 
-        
+
 
         const campos = [
         'id_obra', 'fecha_visita', 'direccion', 'persona_mandante', 'cargo_mandante', 'persona_contratista', 'cargo_contratista'
@@ -261,7 +261,7 @@ exports.updateVisitaTerreno = async (req, res) => {
                 await VisitaTerreno.update(visita, { where: { id: id } })
                     .then(data => {
                         if (data == 1) {
-                            res.status(200).send( "Visita actualizada" );
+                            res.status(200).send( { message:"Visita actualizada"} );
                         }else {
                             res.status(500).send( "No se pudo actualizar la Visita 246");
                         }
@@ -273,5 +273,33 @@ exports.updateVisitaTerreno = async (req, res) => {
 
     }catch (error) {
         res.status(500).send('ERROR:'+error);
+    }
+}
+/*********************************************************************************** */
+/* Elimina una visita terreno
+;
+*/
+
+exports.deleteVisitaTerreno = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
+      #swagger.description = 'Elimina una visita a terreno' */
+    try{
+
+        const id = req.params.id;
+        await VisitaTerreno.destroy({
+          where: { id: id }
+        }).then(data => {
+          if (data === 1) {
+            res.send({ message: "Visita terreno eliminada" });
+          } else {
+            res.send({ message: `No existe una visita terreno con el id ${id}` });
+          }
+        }).catch(err => {
+          res.status(500).send( err.message );
+        })
+
+
+    }catch (error) {
+        res.status(500).send(error);
     }
 }

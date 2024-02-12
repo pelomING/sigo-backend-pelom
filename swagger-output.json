@@ -1795,6 +1795,36 @@
         }
       }
     },
+    "/api/obras/backoffice/v1/eliminavisitaterreno/{id}": {
+      "delete": {
+        "tags": [
+          "Obras - Backoffice - Visita Terreno"
+        ],
+        "description": "Elimina una visita a terreno",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/repodiario/v1/allreportesdiarios": {
       "get": {
         "tags": [
