@@ -959,7 +959,7 @@
               "properties": {
                 "codigo_obra": {
                   "type": "string",
-                  "example": "CGE-123456"
+                  "example": "CGED-123456"
                 },
                 "nombre_obra": {
                   "type": "string",
@@ -1031,7 +1031,7 @@
                 },
                 "comuna": {
                   "type": "string",
-                  "example": "07234"
+                  "example": "07201"
                 },
                 "ubicacion": {
                   "type": "string",
@@ -1127,7 +1127,7 @@
             "name": "body",
             "in": "body",
             "description": "Datos básicos de una obra",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "object",
               "properties": {
@@ -1268,9 +1268,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"

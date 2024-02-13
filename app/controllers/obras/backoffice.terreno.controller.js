@@ -1,6 +1,7 @@
 const db = require("../../models");
 const VisitaTerreno = db.visitaTerreno;
-const VerificaAuth = db.verificaAuth;
+const Obra = db.obra;
+const ObrasHistorialCambios = db.obrasHistorialCambios;
 
 
 /*********************************************************************************** */
@@ -140,7 +141,20 @@ exports.createVisitaTerreno = async (req, res) => {
             //La obra ya tiene una visita agendada para esa fecha
             if (data.length > 0) {
                 res.status(400).send( 'La Visita ya se encuentra agendada' );
+                return
             }else {
+                let id_usuario = req.userId;
+                let user_name;
+                sql = "select username from _auth.users where id = " + id_usuario;
+                await sequelize.query(sql, {
+                  type: QueryTypes.SELECT
+                }).then(data => {
+                  user_name = data[0].username;
+                }).catch(err => {
+                  res.status(500).send(err.message );
+                  return;
+                })
+
                 const visita = {
 
                     id_obra: req.body.id_obra,
@@ -155,13 +169,44 @@ exports.createVisitaTerreno = async (req, res) => {
                     fecha_modificacion: fecha_hoy
         
                 }
+                const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+                const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+                //estado visita agendada = 2
+                const obra = {"estado": 2};
+
+                const obra_historial = {
+                  id_obra: id_obra,
+                  fecha_hora: fechahoy,
+                  usuario_rut: user_name,
+                  estado_obra: 2,
+                  datos: obra
+                }
+
+                let salida = {};
+                const t = await sequelize.transaction();
+
+                try {
+
+                  salida = {"error": false, "message": "Visita agendada ok"};
+                  const visita_creada = await VisitaTerreno.create(visita, { transaction: t });
+
+                  const obra_creada = await Obra.update(obra, { where: { id: id_obra }, transaction: t });
+            
+                  const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
+            
+                  await t.commit();
+            
+                } catch (error) {
+                  salida = { error: true, message: error }
+                  await t.rollback();
+                }
+                if (salida.error) {
+                  res.status(500).send(salida.message.parent.detail);
+                }else {
+                  res.status(200).send(salida);
+                }
         
-                await VisitaTerreno.create(visita)
-                    .then(data => {
-                        res.status(200).send(data);
-                    }).catch(err => {
-                        res.status(500).send( err.message );
-                    })
             }
         }).catch(err => {
             res.status(500).send( err.message );
@@ -186,14 +231,14 @@ exports.updateVisitaTerreno = async (req, res) => {
        
         fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
 
-        id_obra = req.body.id_obra;
+        const id_obra = req.body.id_obra;
         
-        fecha_visita = req.body.fecha_visita;
+        let fecha_visita = req.body.fecha_visita;
 
         fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
 
 
-        let visita = undefined;
+        let visita;
 
 
         console.log("=================================");
@@ -201,15 +246,6 @@ exports.updateVisitaTerreno = async (req, res) => {
         console.log('fecha_hoy' + fecha_hoy);
         console.log('fecha visita' + fecha_visita);
         console.log("=================================");
-
-        
-        try {
-          let today = new Date(fecha_hoy).toISOString();
-        } catch (error) {
-          console.log('196 : '+error);
-        }
-
-
 
         
         if (id_obra) {
@@ -230,13 +266,13 @@ exports.updateVisitaTerreno = async (req, res) => {
                     visita = {
 
                         fecha_visita: fechaVisita,
-                        direccion: req.body.direccion,
-                        persona_mandante: req.body.persona_mandante,
-                        cargo_mandante: req.body.cargo_mandante,
-                        persona_contratista: req.body.persona_contratista,
-                        cargo_contratista: req.body.cargo_contratista,
-                        observacion: req.body.observacion,
-                        estado: req.body.estado,
+                        direccion: req.body.direccion?req.body.direccion:undefined,
+                        persona_mandante: req.body.persona_mandante?req.body.persona_mandante:undefined,
+                        cargo_mandante: req.body.cargo_mandante?req.body.cargo_mandante:undefined,
+                        persona_contratista: req.body.persona_contratista?req.body.persona_contratista:undefined,
+                        cargo_contratista: req.body.cargo_contratista?req.body.cargo_contratista:undefined,
+                        observacion: req.body.observacion?req.body.observacion:undefined,
+                        estado: req.body.estado?req.body.estado:undefined,
                         fecha_modificacion: today
                 
                     }
@@ -245,19 +281,58 @@ exports.updateVisitaTerreno = async (req, res) => {
                 //No viene la fecha de visita
                 visita = {
 
-                    direccion: req.body.direccion,
-                    persona_mandante: req.body.persona_mandante,
-                    cargo_mandante: req.body.cargo_mandante,
-                    persona_contratista: req.body.persona_contratista,
-                    cargo_contratista: req.body.cargo_contratista,
-                    observacion: req.body.observacion,
-                    estado: req.body.estado,
+                    direccion: req.body.direccion?req.body.direccion:undefined,
+                    persona_mandante: req.body.persona_mandante?req.body.persona_mandante:undefined,
+                    cargo_mandante: req.body.cargo_mandante?req.body.cargo_mandante:undefined,
+                    persona_contratista: req.body.persona_contratista?req.body.persona_contratista:undefined,
+                    cargo_contratista: req.body.cargo_contratista?req.body.cargo_contratista:undefined,
+                    observacion: req.body.observacion?req.body.observacion:undefined,
+                    estado: req.body.estado?req.body.estado:undefined,
                     fecha_modificacion: today
             
                 }
             }
 
             if (visita != undefined) {
+
+                const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+                const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+                //estado visita agendada = 2
+                const obra = {"estado": 2};
+
+                const obra_historial = {
+                  id_obra: id_obra,
+                  fecha_hora: fechahoy,
+                  usuario_rut: user_name,
+                  estado_obra: 2,
+                  datos: obra
+                }
+
+                let salida = {};
+                const t = await sequelize.transaction();
+
+                try {
+
+                  salida = {"error": false, "message": "Visita agendada ok"};
+                  const visita_creada = await VisitaTerreno.create(visita, { where: { id: id }, transaction: t });
+
+                  const obra_creada = await Obra.update(obra, { where: { id: id_obra }, transaction: t });
+            
+                  const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
+            
+                  await t.commit();
+            
+                } catch (error) {
+                  salida = { error: true, message: error }
+                  await t.rollback();
+                }
+                if (salida.error) {
+                  res.status(500).send(salida.message.parent.detail);
+                }else {
+                  res.status(200).send(salida);
+                }
+
                 await VisitaTerreno.update(visita, { where: { id: id } })
                     .then(data => {
                         if (data == 1) {
