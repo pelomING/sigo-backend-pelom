@@ -2927,8 +2927,8 @@ exports.detallePxQ = async (req, res) => {
         }
         
         const sql = "SELECT re.id, to_char(re.fecha_hora::timestamp with time zone, 'DD-MM-YYYY'::text) AS fecha, hora_termino::text, \
-        numero_ot as centrality, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro from _auth.personas \
-        where rut = re.rut_maestro) as maestro, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro \
+        numero_ot as centrality, (select trim(nombres || ' ' || apellido_1 || ' ' || case when apellido_2 is null then '' else ' ' || apellido_2 end) as maestro from _auth.personas \
+        where rut = re.rut_maestro) as maestro, (select trim(nombres || ' ' || apellido_1 || ' ' || case when apellido_2 is null then '' else ' ' || apellido_2 end) as maestro \
         from _auth.personas where rut = re.rut_ayudante) as ayudante, despachador, c.nombre as comuna, direccion, \
         requerimiento as aviso, re.trabajo_solicitado, re.trabajo_realizado, et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base where \
           id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) as \
@@ -3875,8 +3875,8 @@ exports.detallePxQHistorial = async (req, res) => {
         };
         
         const sql = "SELECT re.id, to_char(re.fecha_hora::timestamp with time zone, 'DD-MM-YYYY'::text) AS fecha, hora_termino::text, \
-        numero_ot as centrality, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro from _auth.personas \
-        where rut = re.rut_maestro) as maestro, (select trim(nombres || ' ' || apellido_1 || ' ' || apellido_2) as maestro \
+        numero_ot as centrality, (select trim(nombres || ' ' || apellido_1 || ' ' || case when apellido_2 is null then '' else ' ' || apellido_2 end) as maestro from _auth.personas \
+        where rut = re.rut_maestro) as maestro, (select trim(nombres || ' ' || apellido_1 || ' ' || case when apellido_2 is null then '' else ' ' || apellido_2 end) as maestro \
         from _auth.personas where rut = re.rut_ayudante) as ayudante, despachador, c.nombre as comuna, direccion, \
         requerimiento as aviso, re.trabajo_solicitado, re.trabajo_realizado, et.descripcion as descripcion, (select valor from sae.cargo_variable_x_base where \
           id_cliente = 1 and id_base = br.id_base and id_evento_tipo = et.id and id_turno = br.id_turno) as \

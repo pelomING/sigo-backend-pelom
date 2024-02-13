@@ -489,7 +489,7 @@ exports.creaEstadoPago = async (req, res) => {
     if (result.error) {
       res.status(500).send(result.message);
     }else {
-      res.status(200).send(result.message);
+      res.status(200).send(result);
     }
   } catch (error) {
     res.status(500).send(error);
