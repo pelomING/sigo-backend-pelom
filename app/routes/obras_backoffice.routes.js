@@ -125,6 +125,8 @@ module.exports = function(app) {
   app.post("/api/obras/backoffice/v1/creavisitaterreno", [authJwt.verifyToken, authJwt.createObrasBackofficeTerreno], backofficeTerrenoController.createVisitaTerreno);
 
   app.put("/api/obras/backoffice/v1/actualizavisitaterreno/:id", [authJwt.verifyToken, authJwt.updateObrasBackofficeTerreno], backofficeTerrenoController.updateVisitaTerreno);
+
+  app.delete("/api/obras/backoffice/v1/eliminavisitaterreno/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeTerreno], backofficeTerrenoController.deleteVisitaTerreno)
 }
 
 {/*** REPORTES DIARIOS ** */
