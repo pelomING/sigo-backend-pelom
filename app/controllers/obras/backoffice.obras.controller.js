@@ -30,10 +30,12 @@ exports.findAllObra = async (req, res) => {
       case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, (select count(id) as \
       cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
       row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as fecha_estado, row_to_json(op) as \
-      obra_paralizada FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
+      obra_paralizada, row_to_json(oc) as obras_cierres FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
       obras.obras_historial_cambios order by id_obra, fecha_hora desc) ohc on o.id = ohc.id_obra left join \
       (SELECT distinct on (id_obra) id_obra, fecha_hora::text, responsable, motivo, observacion FROM obras.obras_paralizacion \
-      order by id_obra, fecha_hora desc) as op on o.id = op.id_obra left join _comun.zonal z on o.zona = z.id left join \
+      order by id_obra, fecha_hora desc) as op on o.id = op.id_obra left join (SELECT distinct on (id_obra) id_obra, fecha_hora::text, \
+      supervisor_responsable, coordinador_responsable, ito_mandante, observacion FROM obras.obras_cierres order by id_obra, \
+      fecha_hora desc) as oc on o.id = oc.id_obra left join _comun.zonal z on o.zona = z.id left join \
       obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join \
       obras.empresas_contratista ec on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on \
       o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on \
@@ -82,7 +84,8 @@ exports.findAllObra = async (req, res) => {
                 oficina: element.oficina, //json
                 recargo_distancia: element.recargo_distancia, //json
                 fecha_estado: String(element.fecha_estado),
-                obra_paralizada: element.obra_paralizada?element.obra_paralizada:null
+                obra_paralizada: element.obra_paralizada?element.obra_paralizada:null,
+                obras_cierres: element.obras_cierres?element.obras_cierres:null
               }
               salida.push(detalle_salida);
         };
@@ -707,10 +710,12 @@ exports.findObraById = async (req, res) => {
     case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, (select count(id) as \
     cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
     row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as fecha_estado, row_to_json(op) as \
-    obra_paralizada FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
+    obra_paralizada, row_to_json(oc) as obras_cierres FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
     obras.obras_historial_cambios order by id_obra, fecha_hora desc) ohc on o.id = ohc.id_obra left join \
     (SELECT distinct on (id_obra) id_obra, fecha_hora::text, responsable, motivo, observacion FROM obras.obras_paralizacion \
-    order by id_obra, fecha_hora desc) as op on o.id = op.id_obra left join _comun.zonal z on o.zona = z.id left join \
+    order by id_obra, fecha_hora desc) as op on o.id = op.id_obra left join (SELECT distinct on (id_obra) id_obra, fecha_hora::text, \
+    supervisor_responsable, coordinador_responsable, ito_mandante, observacion FROM obras.obras_cierres order by id_obra, \
+    fecha_hora desc) as oc on o.id = oc.id_obra left join _comun.zonal z on o.zona = z.id left join \
     obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join \
     obras.empresas_contratista ec on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on \
     o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on \
@@ -759,7 +764,8 @@ exports.findObraById = async (req, res) => {
               oficina: element.oficina, //json
               recargo_distancia: element.recargo_distancia, //json
               fecha_estado: String(element.fecha_estado),
-              obra_paralizada: element.obra_paralizada?element.obra_paralizada:null
+              obra_paralizada: element.obra_paralizada?element.obra_paralizada:null,
+              obras_cierres: element.obras_cierres?element.obras_cierres:null
             }
             salida.push(detalle_salida);
       };
@@ -796,10 +802,12 @@ exports.findObraByCodigo = async (req, res) => {
         case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, (select count(id) as \
         cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
         row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as fecha_estado, row_to_json(op) as \
-        obra_paralizada FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
+        obra_paralizada, row_to_json(oc) as obras_cierres FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
         obras.obras_historial_cambios order by id_obra, fecha_hora desc) ohc on o.id = ohc.id_obra left join \
         (SELECT distinct on (id_obra) id_obra, fecha_hora::text, responsable, motivo, observacion FROM obras.obras_paralizacion \
-        order by id_obra, fecha_hora desc) as op on o.id = op.id_obra left join _comun.zonal z on o.zona = z.id left join \
+        order by id_obra, fecha_hora desc) as op on o.id = op.id_obra left join (SELECT distinct on (id_obra) id_obra, fecha_hora::text, \
+        supervisor_responsable, coordinador_responsable, ito_mandante, observacion FROM obras.obras_cierres order by id_obra, \
+        fecha_hora desc) as oc on o.id = oc.id_obra left join _comun.zonal z on o.zona = z.id left join \
         obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join \
         obras.empresas_contratista ec on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on \
         o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on \
@@ -849,7 +857,8 @@ exports.findObraByCodigo = async (req, res) => {
               oficina: element.oficina, //json
               recargo_distancia: element.recargo_distancia, //json
               fecha_estado: String(element.fecha_estado),
-              obra_paralizada: element.obra_paralizada?element.obra_paralizada:null
+              obra_paralizada: element.obra_paralizada?element.obra_paralizada:null,
+              obras_cierres: element.obras_cierres?element.obras_cierres:null
             }
             salida.push(detalle_salida);
       };
