@@ -490,7 +490,7 @@ exports.paralizaObra = async (req, res) => {
             }
         } */
       try{
-        let salir = false;
+
         const campos = [
           'id_obra', 'fecha_hora', 'responsable', 'motivo', 'observacion'
         ];
@@ -504,15 +504,10 @@ exports.paralizaObra = async (req, res) => {
 
         const id_obra = req.body.id_obra;
 
-        const obra_paralizada = {
-          "id_obra": id_obra, 
-          "fecha_hora": req.body.fecha_hora,
-          "responsable": "responsable", 
-          "motivo": "motivo", 
-          "observacion": "observacion"
-        };
+        
 
-        const borrar = {"eliminada": true, "estado": 9};
+        // obra paralizada = 6
+        const obra_cambio = {"estado": 6};
     
         let id_usuario = req.userId;
         let user_name;
@@ -531,13 +526,22 @@ exports.paralizaObra = async (req, res) => {
     
         const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
         const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
         const obra_historial = {
-          id_obra: id,
+          id_obra: id_obra,
           fecha_hora: fechahoy,
           usuario_rut: user_name,
-          estado_obra: 9,
-          datos: borrar
+          estado_obra: 6,
+          datos: obra_cambio
         }
+        const obra_paralizada = {
+          id_obra: id_obra, 
+          fecha_hora: req.body.fecha_hora,
+          responsable: req.body.responsable, 
+          motivo: req.body.motivo, 
+          observacion: req.body.observacion,
+          usuario_rut: user_name
+        };
     
         let salida = {};
         const t = await sequelize.transaction();
@@ -545,8 +549,11 @@ exports.paralizaObra = async (req, res) => {
         try {
     
     
-          salida = {"error": false, "message": "obra eliminada"};
-          const obra_creada = await Obra.update(borrar, { where: { id: id }, transaction: t });
+          salida = {"error": false, "message": "obra paralizada ok"};
+
+          const obra_paralizada_ingresada = await ObrasParalizacion.create(obra_paralizada, { transaction: t });
+
+          const obra_creada = await Obra.update(obra_cambio, { where: { id: id_obra }, transaction: t });
     
           const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
     
@@ -557,7 +564,7 @@ exports.paralizaObra = async (req, res) => {
           await t.rollback();
         }
         if (salida.error) {
-          res.status(500).send(salida.message.parent.detail);
+          res.status(500).send(salida.message);
         }else {
           res.status(200).send(salida);
         }

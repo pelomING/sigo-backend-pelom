@@ -1303,6 +1303,64 @@
         }
       }
     },
+    "/api/obras/backoffice/v1/paralizaobra": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Paraliza una obra, pasando el campo paralizada a true",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para paralizar una obra",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_obra": {
+                  "type": "number",
+                  "example": 45
+                },
+                "fecha_hora": {
+                  "type": "string",
+                  "example": "2024-01-05 15:30:00"
+                },
+                "responsable": {
+                  "type": "string",
+                  "example": "Juan Perez"
+                },
+                "motivo": {
+                  "type": "string",
+                  "example": "Motivo de la paralización (descripción corta)"
+                },
+                "observacion": {
+                  "type": "string",
+                  "example": "Observaciones detalladas de la paralización"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/obras/{id}": {
       "get": {
         "tags": [

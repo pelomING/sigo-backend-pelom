@@ -84,6 +84,8 @@ module.exports = function(app) {
 
     app.delete("/api/obras/backoffice/v1/eliminaobra/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeObras], backofficeObrasController.deleteObra);
 
+    app.post("/api/obras/backoffice/v1/paralizaobra", [authJwt.verifyToken, authJwt.createObrasBackofficeObras], backofficeObrasController.paralizaObra);
+
 
     app.get("/api/obras/backoffice/v1/obras/:id", [authJwt.verifyToken, authJwt.readObrasBackofficeObras], backofficeObrasController.findObraById);
 
