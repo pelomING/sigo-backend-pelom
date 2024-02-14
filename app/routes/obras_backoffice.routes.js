@@ -86,6 +86,8 @@ module.exports = function(app) {
 
     app.post("/api/obras/backoffice/v1/paralizaobra", [authJwt.verifyToken, authJwt.createObrasBackofficeObras], backofficeObrasController.paralizaObra);
 
+    app.post("/api/obras/backoffice/v1/cierraobra", [authJwt.verifyToken, authJwt.createObrasBackofficeObras], backofficeObrasController.cierreObra);
+
 
     app.get("/api/obras/backoffice/v1/obras/:id", [authJwt.verifyToken, authJwt.readObrasBackofficeObras], backofficeObrasController.findObraById);
 

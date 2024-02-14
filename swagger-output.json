@@ -1361,6 +1361,68 @@
         }
       }
     },
+    "/api/obras/backoffice/v1/cierraobra": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Cierre de una obra",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos para cerrar una obra",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_obra": {
+                  "type": "number",
+                  "example": 45
+                },
+                "fecha_hora": {
+                  "type": "string",
+                  "example": "2024-01-05 15:30:00"
+                },
+                "supervisor_responsable": {
+                  "type": "string",
+                  "example": "Juan Perez"
+                },
+                "coordinador_responsable": {
+                  "type": "string",
+                  "example": "Juan Perez"
+                },
+                "ito_mandante": {
+                  "type": "string",
+                  "example": "Juan Perez"
+                },
+                "observacion": {
+                  "type": "string",
+                  "example": "Observaciones detalladas del cierre de obra"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/obras/{id}": {
       "get": {
         "tags": [

@@ -438,7 +438,7 @@ exports.deleteObra = async (req, res) => {
       id_obra: id,
       fecha_hora: fechahoy,
       usuario_rut: user_name,
-      estado_obra: 9,
+      estado_obra: 8,     // 8 es eliminada
       datos: borrar
     }
 
@@ -552,6 +552,114 @@ exports.paralizaObra = async (req, res) => {
           salida = {"error": false, "message": "obra paralizada ok"};
 
           const obra_paralizada_ingresada = await ObrasParalizacion.create(obra_paralizada, { transaction: t });
+
+          const obra_creada = await Obra.update(obra_cambio, { where: { id: id_obra }, transaction: t });
+    
+          const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
+    
+          await t.commit();
+    
+        } catch (error) {
+          salida = { error: true, message: error }
+          await t.rollback();
+        }
+        if (salida.error) {
+          res.status(500).send(salida.message);
+        }else {
+          res.status(200).send(salida);
+        }
+    
+      }catch (error) {
+        res.status(500).send(error);
+      }
+
+}
+/*********************************************************************************** */
+/* Cierre de una obra
+;
+*/
+exports.cierreObra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Cierre de una obra'
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para cerrar una obra',
+            required: false,
+            schema: {
+                id_obra: 45,
+                fecha_hora: "2024-01-05 15:30:00",
+                supervisor_responsable: "Juan Perez",
+                coordinador_responsable: "Juan Perez",
+                ito_mandante: "Juan Perez",
+                observacion: "Observaciones detalladas del cierre de obra"
+            }
+        }*/
+
+      try{
+
+        const campos = [
+          'id_obra', 'fecha_hora', 'supervisor_responsable', 'coordinador_responsable', 'ito_mandante', 'observacion'
+        ];
+        for (const element of campos) {
+          if (!req.body[element]) {
+            res.status(400).send( "No puede estar nulo el campo " + element
+            );
+            return;
+          }
+        };
+
+        const id_obra = req.body.id_obra;
+        const estado_cierre = 7;
+
+        
+
+        // obra cerrada 
+        const obra_cambio = {"estado": estado_cierre};
+    
+        let id_usuario = req.userId;
+        let user_name;
+    
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        let sql = "select username from _auth.users where id = " + id_usuario;
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          user_name = data[0].username;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+    
+        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+        const obra_historial = {
+          id_obra: id_obra,
+          fecha_hora: fechahoy,
+          usuario_rut: user_name,
+          estado_obra: estado_cierre,
+          datos: obra_cambio
+        }
+        const obra_finalizada = {
+          id_obra: id_obra, 
+          fecha_hora: req.body.fecha_hora,
+          supervisor_responsable: req.body.supervisor_responsable,
+          coordinador_responsable: req.body.coordinador_responsable,
+          ito_mandante: req.body.ito_mandante,
+          observacion: req.body.observacion,
+          usuario_rut: user_name
+        };
+    
+        let salida = {};
+        const t = await sequelize.transaction();
+    
+        try {
+    
+    
+          salida = {"error": false, "message": "obra finalizada ok"};
+
+          const obra_cerrada = await ObrasCierres.create(obra_finalizada, { transaction: t });
 
           const obra_creada = await Obra.update(obra_cambio, { where: { id: id_obra }, transaction: t });
     
