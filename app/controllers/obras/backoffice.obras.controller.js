@@ -1,6 +1,8 @@
 const db = require("../../models");
 const Obra = db.obra;
 const ObrasHistorialCambios = db.obrasHistorialCambios;
+const ObrasCierres = db.obrasCierres;
+const ObrasParalizacion = db.obrasParalizacion;
 
 /***********************************************************************************/
 /*                                                                                 */
@@ -321,7 +323,7 @@ exports.updateObra = async (req, res) => {
       })
 
       let ultimo_estado;
-      sql = "SELECT estado_obra FROM obras.obras_historial_cambios WHERE id_obra = 35 order by fecha_hora desc limit 1;"
+      sql = "select max(a.estado_obra) as estado_obra from (SELECT estado_obra FROM obras.obras_historial_cambios WHERE id_obra = " + id + " order by fecha_hora desc limit 1) as a;"
       await sequelize.query(sql, {
         type: QueryTypes.SELECT
       }).then(data => {
@@ -392,7 +394,7 @@ exports.updateObra = async (req, res) => {
           await t.rollback();
         }
         if (salida.error) {
-          res.status(500).send(salida.message.parent.detail);
+          res.status(500).send(salida.message);
         }else {
           res.status(200).send(salida);
         }
@@ -469,7 +471,102 @@ exports.deleteObra = async (req, res) => {
 
 }
   /*********************************************************************************** */
+/* Paraliza una obra
+;
+*/
+exports.paralizaObra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Paraliza una obra, pasando el campo paralizada a true'
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para paralizar una obra',
+            required: false,
+            schema: {
+                id_obra: 45,
+                fecha_hora: "2024-01-05 15:30:00",
+                responsable: "Juan Perez",
+                motivo: "Motivo de la paralización (descripción corta)",
+                observacion: "Observaciones detalladas de la paralización"
+            }
+        } */
+      try{
+        let salir = false;
+        const campos = [
+          'id_obra', 'fecha_hora', 'responsable', 'motivo', 'observacion'
+        ];
+        for (const element of campos) {
+          if (!req.body[element]) {
+            res.status(400).send( "No puede estar nulo el campo " + element
+            );
+            return;
+          }
+        };
 
+        const id_obra = req.body.id_obra;
+
+        const obra_paralizada = {
+          "id_obra": id_obra, 
+          "fecha_hora": req.body.fecha_hora,
+          "responsable": "responsable", 
+          "motivo": "motivo", 
+          "observacion": "observacion"
+        };
+
+        const borrar = {"eliminada": true, "estado": 9};
+    
+        let id_usuario = req.userId;
+        let user_name;
+    
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        let sql = "select username from _auth.users where id = " + id_usuario;
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          user_name = data[0].username;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+    
+        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+        const obra_historial = {
+          id_obra: id,
+          fecha_hora: fechahoy,
+          usuario_rut: user_name,
+          estado_obra: 9,
+          datos: borrar
+        }
+    
+        let salida = {};
+        const t = await sequelize.transaction();
+    
+        try {
+    
+    
+          salida = {"error": false, "message": "obra eliminada"};
+          const obra_creada = await Obra.update(borrar, { where: { id: id }, transaction: t });
+    
+          const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
+    
+          await t.commit();
+    
+        } catch (error) {
+          salida = { error: true, message: error }
+          await t.rollback();
+        }
+        if (salida.error) {
+          res.status(500).send(salida.message.parent.detail);
+        }else {
+          res.status(200).send(salida);
+        }
+    
+      }catch (error) {
+        res.status(500).send(error);
+      }
+
+}
 
 /*********************************************************************************** */
 /* Encuentra una obra por id
