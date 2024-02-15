@@ -22,29 +22,42 @@ exports.findAllObra = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Obras']
       #swagger.description = 'Devuelve todas las obras de la tabla de obras' */
     try {
+      const vista = req.query.vista;
+      let where = " and 111 = ANY (vistas)";
+      if (vista) {
+        where = " and " + vista + " = ANY (vistas)";
+      }
+
       const sql = "SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, \
       o.gestor_cliente, numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, \
-      fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, \
-      row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
-      ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
-      case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, (select count(id) as \
-      cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
-      row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as fecha_estado, row_to_json(op) as \
-      obra_paralizada, row_to_json(oc) as obras_cierres FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
+      fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, row_to_json(ec) \
+      as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, ubicacion, row_to_json(eo) \
+      as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, case when erd.cuenta is null then 0 \
+      else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, case when cep.cuenta is null then 0 else cep.cuenta end as \
+      cantidad_estados_pago, row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as \
+      fecha_estado, row_to_json(op) as obra_paralizada, row_to_json(oc) as obras_cierres, evm.vistas, cep.hay_dato as hay_ep, \
+      erd.hay_dato as hay_rd  FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
       obras.obras_historial_cambios order by id_obra, fecha_hora desc) ohc on o.id = ohc.id_obra left join \
       (SELECT distinct on (id_obra) id_obra, fecha_hora::text, responsable, motivo, observacion FROM obras.obras_paralizacion \
       order by id_obra, fecha_hora desc) as op on o.id = op.id_obra left join (SELECT distinct on (id_obra) id_obra, fecha_hora::text, \
       supervisor_responsable, coordinador_responsable, ito_mandante, observacion FROM obras.obras_cierres order by id_obra, \
-      fecha_hora desc) as oc on o.id = oc.id_obra left join _comun.zonal z on o.zona = z.id left join \
-      obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join \
-      obras.empresas_contratista ec on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on \
-      o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on \
-      o.estado = eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id \
-      left join (select id_obra, count(id) as cuenta from obras.encabezado_reporte_diario group by id_obra) as erd on \
-      o.id = erd.id_obra left join (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor \
-        os join _comun.oficinas o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) ofi \
-        on o.oficina = ofi.id left join (SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 2) \
-        rec on o.recargo_distancia = rec.id WHERE not o.eliminada";
+      fecha_hora desc) as oc on o.id = oc.id_obra left join _comun.zonal z on o.zona = z.id left join obras.delegaciones d \
+      on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.empresas_contratista ec \
+      on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id \
+      left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on o.estado = eo.id left join \
+      obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id left join \
+      (select id_obra, count(id) as cuenta, case when count(id) > 0 then true else false end as hay_dato from \
+      obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra left join \
+      (select id_obra, count(id) as cuenta, case when count(id) > 0 then true else false end as hay_dato \
+      FROM obras.encabezado_estado_pago group by id_obra) as cep on o.id = cep.id_obra left join \
+      (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor os join _comun.oficinas o \
+        on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) ofi on o.oficina = ofi.id \
+        inner join (SELECT estado_obra_id, requiere_rep_dia, requiere_est_pago, array_agg(vista) as vistas \
+        FROM obras.vista_estado_muestra	group by estado_obra_id, requiere_rep_dia, requiere_est_pago) as evm on \
+        o.estado = evm.estado_obra_id left join (SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 2) \
+        rec on o.recargo_distancia = rec.id WHERE case when evm.requiere_rep_dia then case when erd.hay_dato \
+        then true else false end else true end AND case when evm.requiere_est_pago then case when cep.hay_dato \
+        then true else false end else true end and not o.eliminada" + where + " order by o.id desc;";
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const obras = await sequelize.query(sql, { type: QueryTypes.SELECT });

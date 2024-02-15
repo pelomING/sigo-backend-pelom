@@ -926,6 +926,13 @@
           "Obras - Backoffice - Obras"
         ],
         "description": "Devuelve todas las obras de la tabla de obras",
+        "parameters": [
+          {
+            "name": "vista",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
