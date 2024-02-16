@@ -208,7 +208,7 @@ exports.createVisitaTerreno = async (req, res) => {
                   await t.rollback();
                 }
                 if (salida.error) {
-                  res.status(500).send(salida.message.parent.detail);
+                  res.status(500).send(salida.message);
                 }else {
                   res.status(200).send(salida);
                 }
@@ -265,11 +265,11 @@ exports.updateVisitaTerreno = async (req, res) => {
                 id: id
             }
         }).then(data => {
-            id_obra = data.id_obra
+          id_obra = data?data.id_obra:undefined;
         }).catch(err => {
-            res.status(500).send(err.message);
-            return;
+            console.log('error id_obra --> ', err)
         })
+    
         if (!id_obra) {
             res.status(500).send( 'La visita terreno no existe');
             return;
@@ -373,7 +373,7 @@ exports.updateVisitaTerreno = async (req, res) => {
 
                 try {
 
-                  salida = {"error": false, "message": "Visita agendada ok"};
+                  salida = {"error": false, "message": "Visita actualizada ok"};
                   const visita_creada = await VisitaTerreno.update(visita, { where: { id: id }, transaction: t });
 
                   
@@ -388,7 +388,7 @@ exports.updateVisitaTerreno = async (req, res) => {
                   await t.rollback();
                 }
                 if (salida.error) {
-                  res.status(500).send(salida.message.parent.detail);
+                  res.status(500).send(salida.message);
                 }else {
                   res.status(200).send(salida);
                 }

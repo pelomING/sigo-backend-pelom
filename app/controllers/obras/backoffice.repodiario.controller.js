@@ -4,6 +4,8 @@ const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
 const DetalleRporteDiarioOtrasActividades = db.detalleReporteDiarioOtrasActividades; 
 const tipoOperacion = db.tipoOperacion;
 const maestroActividad = db.maestroActividad;
+const Obra = db.obra;
+const ObrasHistorialCambios = db.obrasHistorialCambios;
 //const encabezado_reporte_diario = db.encabezadoReporteDiario;
 const JefesFaena = db.jefesFaena;
 const TipoActividad = db.tipoActividad;
@@ -575,9 +577,10 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           return;
         }
       };
+      const id_obra = req.body.id_obra;
 
       //Verifica que la fecha de reporte no este asignada a una obra
-      await EncabezadoReporteDiario.findAll({where: {id_obra: req.body.id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
+      await EncabezadoReporteDiario.findAll({where: {id_obra: id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
           if (data.length > 0) {
             salir = true;
             res.status(400).send(`La fecha de reporte '${req.body.fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`);
@@ -608,7 +611,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             return;
           }
         };
-        //const detalle_actividad = JSON.stringify(req.body.det_actividad);
+
         const detalle_actividad = req.body.det_actividad;
         const detalle_otros = req.body.det_otros;
         if (Array.isArray(detalle_actividad)) {
@@ -660,7 +663,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         }
 
         // Busca el ID de encabezado disponible
-        const sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
+        let sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         let encabezado_reporte_diario_id = 0;
@@ -671,10 +674,44 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         }).catch(err => {
           res.status(500).send(err.message );
         })
+
+        //determina el usario que está modificando
+        let id_usuario = req.userId;
+        let user_name;
+        sql = "select username from _auth.users where id = " + id_usuario;
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          user_name = data[0].username;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+
+        //determina fecha actual
+        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+        const estado_obra = 5;  //En faena
+
+
+        //estado visita agendada = 2
+        const obra = {estado: estado_obra};
+
+        //Guarda historial
+        const obra_historial = {
+          id_obra: id_obra,
+          fecha_hora: fechahoy,
+          usuario_rut: user_name,
+          estado_obra: estado_obra,  //Estado 5 es en faena
+          datos: obra,
+          observacion: "Ingreso de reporte diario"
+        }
+
         const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
         const encabezado_reporte_diario = {
             id: encabezado_reporte_diario_id,
-            id_obra: Number(req.body.id_obra),
+            id_obra: Number(id_obra),
             fecha_reporte: String(req.body.fecha_reporte),
             jefe_faena: Number(req.body.jefe_faena),
             sdi: String(req.body.sdi),
@@ -698,9 +735,12 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             recargo_hora: recargo_aplicar?Number(req.body.recargo_hora.id):null
         }
 
-        const result = await sequelize.transaction(async () => {
-          // both of these queries will run in the transaction
-          const encabezadoReporteDiario = await EncabezadoReporteDiario.create(encabezado_reporte_diario);
+        let salida = {};
+        const t = await sequelize.transaction();
+        try {
+
+          salida = {"error": false, "message": "Reporte diario ingresado ok"};
+          const encabezadoReporteDiario = await EncabezadoReporteDiario.create(encabezado_reporte_diario, { transaction: t });
       
           for (const element of req.body.det_actividad) {
             const det_actividad = {
@@ -709,7 +749,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
               id_actividad: Number(element.actividad),
               cantidad: Number(element.cantidad)
             }
-            await DetalleReporteDiarioActividad.create(det_actividad);
+            await DetalleReporteDiarioActividad.create(det_actividad, { transaction: t });
           }
 
           for (const element of req.body.det_otros) {
@@ -720,11 +760,23 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
               total_uc: Number(element.uc_total),
               cantidad: Number(element.cantidad)
             }
-            await DetalleRporteDiarioOtrasActividades.create(det_otros);
+            await DetalleRporteDiarioOtrasActividades.create(det_otros, { transaction: t });
           }
-          return encabezadoReporteDiario;
-        });
-        res.status(200).send(result);
+          const obra_creada = obra?await Obra.update(obra, { where: { id: id_obra }, transaction: t }):null;
+            
+          const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
+    
+          await t.commit();
+        } catch (error) {
+          salida = { error: true, message: error }
+          console.log('Error Result ---> ', error);
+          await t.rollback();
+        }
+        if (salida.error) {
+          res.status(500).send(salida.message);
+        }else {
+          res.status(200).send(salida);
+        }
   }catch (error) {
     res.status(500).send(error);
   }
@@ -817,7 +869,8 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         } */
   try{
     const id = req.params.id;
-    let flexiapp = undefined;
+
+    let flexiapp;
     if (req.body.flexiapp){
         flexiapp = "{";
         for (const b of req.body.flexiapp){
@@ -833,6 +886,58 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
     let detalle_actividad = req.body.det_actividad;
  
     let detalle_otros = req.body.det_otros;
+
+    //determina el usario que está modificando
+    let id_usuario = req.userId;
+    let user_name;
+    let sql = "select username from _auth.users where id = " + id_usuario;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      user_name = data[0].username;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
+
+    //Encuentra el id de la obra segun el reporte diario
+    let id_obra;
+    await EncabezadoReporteDiario.findOne({
+        where: {
+            id: id
+        }
+    }).then(data => {
+        id_obra = data?data.id_obra:undefined;
+    }).catch(err => {
+        console.log('error id_obra --> ', err)
+    })
+
+    if (!id_obra) {
+        res.status(500).send( 'El reporte diario no existe');
+        return;
+    }
+
+    //determina fecha actual
+    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+    const estado_obra = 5;  //En faena
+
+
+    //estado visita agendada = 2
+    const obra = {estado: estado_obra};
+
+    //Guarda historial
+    const obra_historial = {
+      id_obra: id_obra,
+      fecha_hora: fechahoy,
+      usuario_rut: user_name,
+      estado_obra: estado_obra,  //Estado 5 es en faena
+      datos: obra,
+      observacion: "Actualizacion de reporte diario"
+    }
 
 
    const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
@@ -861,64 +966,64 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
 
   }
 
-    console.log('encabezado_reporte_diario', encabezadoReporteDiario);
-      const sequelize = db.sequelize;
-      const result = await sequelize.transaction(async () => {
+        let salida = {};
+        const t = await sequelize.transaction();
+        try {
+          salida = {"error": false, "message": "Reporte diario actualizado ok"};
 
-      let salida = {};
-      
-      // realizar la actualizacion del encabezado por id
-      await EncabezadoReporteDiario.update(encabezadoReporteDiario, {
-        where: { id: id }
-      }).then(async data => {
-          salida = { message: "Obra actualizada" }
+          // realizar la actualizacion del encabezado por id
+          await EncabezadoReporteDiario.update(encabezadoReporteDiario, { where: { id: id }, transaction: t });
           //actualizar detalles
-            if (detalle_actividad){
-              //primer debe borrar los regisatros que tenga asociado el encabezado
-              await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
-              //luego volver a insertar los registros
-              for (const element of detalle_actividad) {
-                const det_actividad = {
-                  id_encabezado_rep: Number(id),
-                  tipo_operacion: Number(element.clase),
-                  id_actividad: Number(element.actividad),
-                  cantidad: Number(element.cantidad)
-                }
-                await DetalleReporteDiarioActividad.create(det_actividad);
+          if (detalle_actividad){
+            //primer debe borrar los regisatros que tenga asociado el encabezado
+            await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id }, transaction: t } );
+            //luego volver a insertar los registros
+            for (const element of detalle_actividad) {
+              const det_actividad = {
+                id_encabezado_rep: Number(id),
+                tipo_operacion: Number(element.clase),
+                id_actividad: Number(element.actividad),
+                cantidad: Number(element.cantidad)
               }
+              await DetalleReporteDiarioActividad.create(det_actividad, { transaction: t });
             }
-            if (detalle_otros){
-              //primer debe borrar los regisatros que tenga asociado el encabezado
-              await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id } } );
-              //luego volver a insertar los registros
-              for (const element of detalle_otros) {
-                const det_otros = {
-                  id_encabezado_rep: Number(id),
-                  glosa: String(element.glosa),
-                  uc_unitaria: Number(element.uc_unitaria),
-                  total_uc: Number(element.uc_total),
-                  cantidad: Number(element.cantidad)
-                }
-                await DetalleRporteDiarioOtrasActividades.create(det_otros);
+          };
+          if (detalle_otros){
+            //primer debe borrar los regisatros que tenga asociado el encabezado
+            await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id }, transaction: t } );
+            //luego volver a insertar los registros
+            for (const element of detalle_otros) {
+              const det_otros = {
+                id_encabezado_rep: Number(id),
+                glosa: String(element.glosa),
+                uc_unitaria: Number(element.uc_unitaria),
+                total_uc: Number(element.uc_total),
+                cantidad: Number(element.cantidad)
               }
+              await DetalleRporteDiarioOtrasActividades.create(det_otros, { transaction: t });
             }
-      }).catch(err => {
-        //return { message: err }
-        salida = { message: err }
-      });
-      return salida;
-    });
-    if (result.message==="Obra actualizada") {
-      res.status(200).send(result);
-    }else {
-      if (result.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
-        res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
-      }else{
-        res.status(400).send(result.message);
-      }
-      
-    }
+          }
+
+          const obra_creada = obra?await Obra.update(obra, { where: { id: id_obra }, transaction: t }):null;
+            
+          const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
+    
+          await t.commit();
+        } catch (error) {
+          salida = { error: true, message: error }
+          await t.rollback();
+        }
+        if (salida.error) {
+          if (salida.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
+            res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
+          }else{
+            res.status(400).send(salida.message);
+          }
+        }else {
+          res.status(200).send(salida);
+        }
   }catch (error) {
+    console.log('error general --> ', error);
     res.status(500).send(error);
   }
 }
