@@ -2,6 +2,7 @@ const db = require("../../models");
 const VisitaTerreno = db.visitaTerreno;
 const Obra = db.obra;
 const ObrasHistorialCambios = db.obrasHistorialCambios;
+const EstadoVisita = db.estadoVisita;
 
 
 /*********************************************************************************** */
@@ -130,6 +131,8 @@ exports.createVisitaTerreno = async (req, res) => {
             return;
         }
         };
+        const id_obra = req.body.id_obra;
+
         let fecha_visita = new Date(req.body.fecha_visita).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
         fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
         let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
@@ -137,7 +140,7 @@ exports.createVisitaTerreno = async (req, res) => {
 
     
         //Verifica que la visita a terreno no se encuentra ya agendada
-        await VisitaTerreno.findAll({where: {id_obra: req.body.id_obra, fecha_visita: fecha_visita}}).then(async data => {
+        await VisitaTerreno.findAll({where: {id_obra: id_obra, fecha_visita: fecha_visita}}).then(async data => {
             //La obra ya tiene una visita agendada para esa fecha
             if (data.length > 0) {
                 res.status(400).send( 'La Visita ya se encuentra agendada' );
@@ -145,7 +148,9 @@ exports.createVisitaTerreno = async (req, res) => {
             }else {
                 let id_usuario = req.userId;
                 let user_name;
-                sql = "select username from _auth.users where id = " + id_usuario;
+                const { QueryTypes } = require('sequelize');
+                const sequelize = db.sequelize;
+                let sql = "select username from _auth.users where id = " + id_usuario;
                 await sequelize.query(sql, {
                   type: QueryTypes.SELECT
                 }).then(data => {
@@ -157,7 +162,7 @@ exports.createVisitaTerreno = async (req, res) => {
 
                 const visita = {
 
-                    id_obra: req.body.id_obra,
+                    id_obra: id_obra,
                     fecha_visita: req.body.fecha_visita,
                     direccion: req.body.direccion,
                     persona_mandante: req.body.persona_mandante,
@@ -173,14 +178,15 @@ exports.createVisitaTerreno = async (req, res) => {
                 const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
                 //estado visita agendada = 2
-                const obra = {"estado": 2};
+                const obra = {estado: 2};
 
                 const obra_historial = {
                   id_obra: id_obra,
                   fecha_hora: fechahoy,
                   usuario_rut: user_name,
                   estado_obra: 2,
-                  datos: obra
+                  datos: obra,
+                  observacion: "Visita agendada"
                 }
 
                 let salida = {};
@@ -225,17 +231,49 @@ exports.updateVisitaTerreno = async (req, res) => {
     try{
         
 
+      /*
+        const campos = [
+          'fecha_visita', 'direccion', 'persona_mandante', 'cargo_mandante', 
+          'persona_contratista', 'cargo_contratista', 'observacion', 'estado'
+        ];
+        for (const element of campos) {
+          if (!req.query[element]) {
+            res.status(400).send("No puede estar nulo el campo " + element
+            );
+            return;
+          }
+        };*/
         const id = req.params.id;
-
+/*
         let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
        
         fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
-
-        const id_obra = req.body.id_obra;
         
         let fecha_visita = req.body.fecha_visita;
 
         fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
+*/
+
+        let fecha_visita = new Date(req.body.fecha_visita).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
+        let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
+
+        let id_obra;
+        await VisitaTerreno.findOne({
+            where: {
+                id: id
+            }
+        }).then(data => {
+            id_obra = data.id_obra
+        }).catch(err => {
+            res.status(500).send(err.message);
+            return;
+        })
+        if (!id_obra) {
+            res.status(500).send( 'La visita terreno no existe');
+            return;
+        }
 
 
         let visita;
@@ -247,12 +285,7 @@ exports.updateVisitaTerreno = async (req, res) => {
         console.log('fecha visita' + fecha_visita);
         console.log("=================================");
 
-        
-        if (id_obra) {
-            //El id de obra no se puede cambiar para una visita una vez asignado
-            res.status(500).send( 'El id de obra no se puede cambiar' );
 
-        }else {
             //Si viene la fecha de visita verificar que sea mayor o igual al día de hoy
             if (fecha_visita) {
 
@@ -262,6 +295,7 @@ exports.updateVisitaTerreno = async (req, res) => {
                 if (fechaVisita < today) {
                     // La fecha de visita es menor a la fecha actual 
                     res.status(500).send( 'La fecha de la visita no puede ser menor a la fecha actual' );
+                    return;
                 }else {
                     visita = {
 
@@ -281,16 +315,17 @@ exports.updateVisitaTerreno = async (req, res) => {
                 //No viene la fecha de visita
                 visita = {
 
-                    direccion: req.body.direccion?req.body.direccion:undefined,
-                    persona_mandante: req.body.persona_mandante?req.body.persona_mandante:undefined,
-                    cargo_mandante: req.body.cargo_mandante?req.body.cargo_mandante:undefined,
-                    persona_contratista: req.body.persona_contratista?req.body.persona_contratista:undefined,
-                    cargo_contratista: req.body.cargo_contratista?req.body.cargo_contratista:undefined,
-                    observacion: req.body.observacion?req.body.observacion:undefined,
-                    estado: req.body.estado?req.body.estado:undefined,
-                    fecha_modificacion: today
-            
-                }
+                  fecha_visita: undefined,
+                  direccion: req.body.direccion?req.body.direccion:undefined,
+                  persona_mandante: req.body.persona_mandante?req.body.persona_mandante:undefined,
+                  cargo_mandante: req.body.cargo_mandante?req.body.cargo_mandante:undefined,
+                  persona_contratista: req.body.persona_contratista?req.body.persona_contratista:undefined,
+                  cargo_contratista: req.body.cargo_contratista?req.body.cargo_contratista:undefined,
+                  observacion: req.body.observacion?req.body.observacion:undefined,
+                  estado: req.body.estado?req.body.estado:undefined,
+                  fecha_modificacion: today
+          
+              }
             }
 
             if (visita != undefined) {
@@ -298,28 +333,53 @@ exports.updateVisitaTerreno = async (req, res) => {
                 const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
                 const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
-                //estado visita agendada = 2
-                const obra = {"estado": 2};
+                //Determinar el estado al que debe cambiar la obra
+                let id_usuario = req.userId;
+                let user_name;
+                let sql = "select username from _auth.users where id = " + id_usuario;
+                const { QueryTypes } = require('sequelize');
+                const sequelize = db.sequelize;
+                await sequelize.query(sql, {
+                  type: QueryTypes.SELECT
+                }).then(data => {
+                  user_name = data[0].username;
+                }).catch(err => {
+                  res.status(500).send(err.message );
+                  return;
+                })
+                let estado_de_obra;
+                if (req.body.estado) {
+                  await EstadoVisita.findOne({ where: { id: req.body.estado } }).then(data => {
+                    estado_de_obra = data.estado_obra_resultante;
+                  })
+                }
+                
 
-                const obra_historial = {
+                //estado visita agendada = 2
+                const obra = estado_de_obra?{"estado": estado_de_obra}:null;
+
+                const obra_historial = estado_de_obra?{
                   id_obra: id_obra,
                   fecha_hora: fechahoy,
                   usuario_rut: user_name,
                   estado_obra: 2,
-                  datos: obra
-                }
+                  datos: obra,
+                  observacion: "Modificación visita terreno"
+                }:null;
 
                 let salida = {};
+                
                 const t = await sequelize.transaction();
 
                 try {
 
                   salida = {"error": false, "message": "Visita agendada ok"};
-                  const visita_creada = await VisitaTerreno.create(visita, { where: { id: id }, transaction: t });
+                  const visita_creada = await VisitaTerreno.update(visita, { where: { id: id }, transaction: t });
 
-                  const obra_creada = await Obra.update(obra, { where: { id: id_obra }, transaction: t });
+                  
+                  const obra_creada = obra?await Obra.update(obra, { where: { id: id_obra }, transaction: t }):null;
             
-                  const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
+                  const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
             
                   await t.commit();
             
@@ -332,20 +392,11 @@ exports.updateVisitaTerreno = async (req, res) => {
                 }else {
                   res.status(200).send(salida);
                 }
-
-                await VisitaTerreno.update(visita, { where: { id: id } })
-                    .then(data => {
-                        if (data == 1) {
-                            res.status(200).send( { message:"Visita actualizada"} );
-                        }else {
-                            res.status(500).send( "No se pudo actualizar la Visita 246");
-                        }
-                    }).catch(err => {
-                        res.status(500).send( err.message );
-                    })
-                }
-        }
-
+              
+            } else {
+                res.status(500).send('ERROR: falta completar campos');
+                return;
+            }
     }catch (error) {
         res.status(500).send('ERROR:'+error);
     }
