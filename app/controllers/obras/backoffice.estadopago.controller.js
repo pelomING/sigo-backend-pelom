@@ -363,7 +363,7 @@ exports.creaEstadoPago = async (req, res) => {
     const campos = [
       'id_obra', 'cliente', 'fecha_asignacion', 'tipo_trabajo',
       'segmento', 'solicitado_por', 'supervisor_pelom', 'coordinador', 'comuna',
-      'direccion', 'flexiapp', 'fecha_ejecucion', 'jefe_delegacion', 'jefe_faena',
+      'direccion', 'fecha_ejecucion', 'jefe_delegacion', 'jefe_faena',
       'codigo_pelom', 'valor_uc'
     ];
     for (const element of campos) {
