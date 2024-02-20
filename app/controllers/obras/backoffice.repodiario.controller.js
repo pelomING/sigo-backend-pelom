@@ -586,6 +586,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             res.status(400).send(`La fecha de reporte '${req.body.fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`);
           }
         }).catch(err => {
+            console.log('error: ' + err.message);
             salir = true;
             res.status(500).send(err.message );
         })
@@ -593,16 +594,28 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         if (salir) {
           return;
         }
+
+        let flexiapp;
         //const flexiapp = req.body.flexiapp;
-        let flexiapp = "{";
-        for (const b of req.body.flexiapp){
-          if (flexiapp.length==1) {
-            flexiapp = flexiapp + b
-          }else {
-            flexiapp = flexiapp + ", " + b
+        if (req.body.flexiapp === null || req.body.flexiapp === undefined) {
+          flexiapp = "{}";
+        } else {
+          if (typeof req.body.flexiapp[Symbol.iterator] === 'function') {
+            flexiapp = "{";
+            for (const b of req.body.flexiapp){
+              if (flexiapp.length==1) {
+                flexiapp = flexiapp + b
+              }else {
+                flexiapp = flexiapp + ", " + b
+              }
+            }
+            flexiapp = flexiapp + "}"
+          } else {
+            flexiapp = "{}";
           }
         }
-        flexiapp = flexiapp + "}"
+
+        console.log('flexiapp: ' + flexiapp)
         // procesa detalle de actividad
         for (const element of req.body.det_actividad) {
           if (!element.clase || !element.actividad || !element.cantidad) {
@@ -778,6 +791,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           res.status(200).send(salida);
         }
   }catch (error) {
+    console.log('error general 500 --> ', error);
     res.status(500).send(error);
   }
 }
@@ -871,7 +885,11 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
     const id = req.params.id;
 
     let flexiapp;
-    if (req.body.flexiapp){
+    //const flexiapp = req.body.flexiapp;
+    if (req.body.flexiapp === null || req.body.flexiapp === undefined) {
+      flexiapp = "{}";
+    } else {
+      if (typeof req.body.flexiapp[Symbol.iterator] === 'function') {
         flexiapp = "{";
         for (const b of req.body.flexiapp){
           if (flexiapp.length==1) {
@@ -881,11 +899,16 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
           }
         }
         flexiapp = flexiapp + "}"
-    };
+      } else {
+        flexiapp = "{}";
+      }
+    }
     
     let detalle_actividad = req.body.det_actividad;
+    console.log('detalle_actividad --> ', detalle_actividad)
  
     let detalle_otros = req.body.det_otros;
+    console.log('detalle_otros --> ', detalle_otros)
 
     //determina el usario que está modificando
     let id_usuario = req.userId;
@@ -901,6 +924,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       res.status(500).send(err.message );
       return;
     })
+    console.log('user_name --> ', user_name);
 
     //Encuentra el id de la obra segun el reporte diario
     let id_obra;
@@ -939,6 +963,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       observacion: "Actualizacion de reporte diario"
     }
 
+    console.log('obra_historial --> ', obra_historial);
 
    const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
     const encabezadoReporteDiario = {
@@ -966,17 +991,23 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
 
   }
 
+      console.log('encabezadoReporteDiario --> ', encabezadoReporteDiario);
+
         let salida = {};
         const t = await sequelize.transaction();
         try {
           salida = {"error": false, "message": "Reporte diario actualizado ok"};
+          console.log('paso 1 --> ');
 
           // realizar la actualizacion del encabezado por id
           await EncabezadoReporteDiario.update(encabezadoReporteDiario, { where: { id: id }, transaction: t });
+          console.log('paso 2 --> ');
           //actualizar detalles
           if (detalle_actividad){
+            console.log('paso 3 --> ');
             //primer debe borrar los regisatros que tenga asociado el encabezado
             await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id }, transaction: t } );
+            console.log('paso 4 --> ');
             //luego volver a insertar los registros
             for (const element of detalle_actividad) {
               const det_actividad = {
@@ -988,10 +1019,13 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
               await DetalleReporteDiarioActividad.create(det_actividad, { transaction: t });
             }
           };
+          console.log('paso 5 --> ');
           if (detalle_otros){
+            console.log('paso 6 --> ');
             //primer debe borrar los regisatros que tenga asociado el encabezado
             await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id }, transaction: t } );
             //luego volver a insertar los registros
+            console.log('paso 7 --> ');
             for (const element of detalle_otros) {
               const det_otros = {
                 id_encabezado_rep: Number(id),
@@ -1003,20 +1037,28 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
               await DetalleRporteDiarioOtrasActividades.create(det_otros, { transaction: t });
             }
           }
+          console.log('paso 8 --> ');
 
           const obra_creada = obra?await Obra.update(obra, { where: { id: id_obra }, transaction: t }):null;
+          console.log('paso 9 --> ');
             
           const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
+          console.log('paso 10 --> ');
     
           await t.commit();
+          console.log('paso 11 --> ');
         } catch (error) {
           salida = { error: true, message: error }
+          console.log('paso 12 --> ', error.message);
           await t.rollback();
         }
         if (salida.error) {
+          console.log('salida --> ', salida);
           if (salida.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
+            console.log('Ya existe un reporte diario para esta fecha en esta obra');
             res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
           }else{
+            console.log('error 400 --> ', salida.message);
             res.status(400).send(salida.message);
           }
         }else {
