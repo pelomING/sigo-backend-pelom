@@ -33,7 +33,8 @@ exports.findAllObra = async (req, res) => {
       fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, row_to_json(ec) \
       as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, ubicacion, row_to_json(eo) \
       as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, case when erd.cuenta is null then 0 \
-      else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, case when cep.cuenta is null then 0 else cep.cuenta end as \
+      else erd.cuenta end as cantidad_reportes, case when erd.pendiente is null then 0 else erd.pendiente end as reportes_pendientes, \
+      o.jefe_delegacion, case when cep.cuenta is null then 0 else cep.cuenta end as \
       cantidad_estados_pago, row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as \
       fecha_estado, row_to_json(op) as obra_paralizada, row_to_json(oc) as obras_cierres, evm.vistas, cep.hay_dato as hay_ep, \
       erd.hay_dato as hay_rd  FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
@@ -46,7 +47,7 @@ exports.findAllObra = async (req, res) => {
       on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id \
       left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on o.estado = eo.id left join \
       obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id left join \
-      (select id_obra, count(id) as cuenta, case when count(id) > 0 then true else false end as hay_dato from \
+      (select id_obra, count(id) as cuenta, sum(case when id_estado_pago is null then 1 else 0 end) as pendiente, case when count(id) > 0 then true else false end as hay_dato from \
       obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra left join \
       (select id_obra, count(id) as cuenta, case when count(id) > 0 then true else false end as hay_dato \
       FROM obras.encabezado_estado_pago group by id_obra) as cep on o.id = cep.id_obra left join \
@@ -92,6 +93,7 @@ exports.findAllObra = async (req, res) => {
                 segmento: element.segmento, //json
                 eliminada: element.eliminada,
                 cantidad_reportes: Number(element.cantidad_reportes),
+                reportes_pendientes: Number(element.reportes_pendientes),
                 jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
                 cantidad_estados_pago: Number(element.cantidad_estados_pago),
                 oficina: element.oficina, //json
@@ -720,7 +722,8 @@ exports.findObraById = async (req, res) => {
     fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, \
     row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
     ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
-    case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, (select count(id) as \
+    case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, case when erd.pendiente \
+    is null then 0 else erd.pendiente end as reportes_pendientes, o.jefe_delegacion, (select count(id) as \
     cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
     row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as fecha_estado, row_to_json(op) as \
     obra_paralizada, row_to_json(oc) as obras_cierres FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
@@ -733,7 +736,7 @@ exports.findObraById = async (req, res) => {
     obras.empresas_contratista ec on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on \
     o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on \
     o.estado = eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id \
-    left join (select id_obra, count(id) as cuenta from obras.encabezado_reporte_diario group by id_obra) as erd on \
+    left join (select id_obra, count(id) as cuenta, sum(case when id_estado_pago is null then 1 else 0 end) as pendiente from obras.encabezado_reporte_diario group by id_obra) as erd on \
     o.id = erd.id_obra left join (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor \
       os join _comun.oficinas o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) ofi \
       on o.oficina = ofi.id left join (SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 2) \
@@ -772,6 +775,7 @@ exports.findObraById = async (req, res) => {
               segmento: element.segmento, //json
               eliminada: element.eliminada,
               cantidad_reportes: Number(element.cantidad_reportes),
+              reportes_pendientes: Number(element.reportes_pendientes),
               jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
               cantidad_estados_pago: Number(element.cantidad_estados_pago),
               oficina: element.oficina, //json
@@ -812,7 +816,8 @@ exports.findObraByCodigo = async (req, res) => {
         fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, \
         row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
         ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
-        case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, o.jefe_delegacion, (select count(id) as \
+        case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, case when erd.pendiente \
+        is null then 0 else erd.pendiente end as reportes_pendientes, o.jefe_delegacion, (select count(id) as \
         cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
         row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as fecha_estado, row_to_json(op) as \
         obra_paralizada, row_to_json(oc) as obras_cierres FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
@@ -825,7 +830,7 @@ exports.findObraByCodigo = async (req, res) => {
         obras.empresas_contratista ec on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on \
         o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on \
         o.estado = eo.id left join obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id \
-        left join (select id_obra, count(id) as cuenta from obras.encabezado_reporte_diario group by id_obra) as erd on \
+        left join (select id_obra, count(id) as cuenta, sum(case when id_estado_pago is null then 1 else 0 end) as pendiente from obras.encabezado_reporte_diario group by id_obra) as erd on \
         o.id = erd.id_obra left join (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor \
           os join _comun.oficinas o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) ofi \
           on o.oficina = ofi.id left join (SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 2) \
@@ -865,6 +870,7 @@ exports.findObraByCodigo = async (req, res) => {
               segmento: element.segmento, //json
               eliminada: element.eliminada,
               cantidad_reportes: Number(element.cantidad_reportes),
+              reportes_pendientes: Number(element.reportes_pendientes),
               jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
               cantidad_estados_pago: Number(element.cantidad_estados_pago),
               oficina: element.oficina, //json
