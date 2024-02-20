@@ -468,6 +468,9 @@ exports.creaEstadoPago = async (req, res) => {
       detalle_horaextra: !actividadesHoraExtra.error?actividadesHoraExtra.detalle:undefined,
 
     }
+    if (!datos.flexiapp) {
+      throw new Error('No puede estar vacio el campo flexiapp. Por favor ingrese al menos un flexiapp en algún reporte diario');
+    }
     
     const result = await sequelize.transaction(async () => {
 
