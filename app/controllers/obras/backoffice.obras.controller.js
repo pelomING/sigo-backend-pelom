@@ -47,7 +47,7 @@ exports.findAllObra = async (req, res) => {
       left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on o.estado = eo.id left join \
       obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id left join \
       (select id_obra, count(id) as cuenta, case when count(id) > 0 then true else false end as hay_dato from \
-      obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra left join \
+      obras.encabezado_reporte_diario where id_estado_pago is null group by id_obra) as erd on o.id = erd.id_obra left join \
       (select id_obra, count(id) as cuenta, case when count(id) > 0 then true else false end as hay_dato \
       FROM obras.encabezado_estado_pago group by id_obra) as cep on o.id = cep.id_obra left join \
       (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor os join _comun.oficinas o \
@@ -436,7 +436,7 @@ exports.deleteObra = async (req, res) => {
       #swagger.description = 'Borra una obra, pasando el campo eliminado a true' */
   try{
     const id = req.params.id;
-    const borrar = {"eliminada": true, "estado": 9};
+    const borrar = {"eliminada": true, "estado": 8};
 
     let id_usuario = req.userId;
     let user_name;

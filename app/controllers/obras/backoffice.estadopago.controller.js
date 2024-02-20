@@ -470,7 +470,7 @@ exports.creaEstadoPago = async (req, res) => {
 
     }
     if (!datos.flexiapp) {
-      res.status(500).send("No puede estar vacio el campo flexiapp. Por favor ingrese al menos un flexiapp en algún reporte diario");
+      res.status(400).send("No puede estar vacio el campo flexiapp. Por favor ingrese al menos un flexiapp en algún reporte diario");
       return
     }
     
