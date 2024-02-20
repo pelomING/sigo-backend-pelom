@@ -36,7 +36,7 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
         num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join \
         obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = jf.id";
         */
-       const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
+       const sql = "SELECT rd.id, id_estado_pago, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
@@ -67,6 +67,7 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
     
                 const detalle_salida = {
                   id: Number(element.id),
+                  id_estado_pago: element.id_estado_pago?Number(element.id_estado_pago):null,
                   id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
                   fecha_reporte: String(element.fecha_reporte),
                   jefe_faena: element.jefe_faena,
@@ -161,7 +162,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
         num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join \
         obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = jf.id WHERE "+b;
         */
-       const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
+       const sql = "SELECT rd.id, id_estado_pago, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
@@ -194,6 +195,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
 
             const detalle_salida = {
               id: Number(element.id),
+              id_estado_pago: element.id_estado_pago?Number(element.id_estado_pago):null,
               id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
               fecha_reporte: String(element.fecha_reporte),
               jefe_faena: element.jefe_faena,
@@ -266,7 +268,7 @@ exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
      let b = sql_array.reduce((total, num) => total + " AND " + num);
      if (b){
       
-      const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
+      const sql = "SELECT rd.id, id_estado_pago, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
       row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
       entregado_por_persona, revisado_por_persona, sector, alimentador, row_to_json(c) as comuna, num_documento, \
       flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
@@ -287,6 +289,7 @@ exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
 
            const detalle_salida = {
              id: Number(element.id),
+             id_estado_pago: element.id_estado_pago?Number(element.id_estado_pago):null,
              id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
              fecha_reporte: String(fecha_hoy),
              jefe_faena: element.jefe_faena,
