@@ -411,6 +411,7 @@ exports.creaEstadoPago = async (req, res) => {
           res.status(500).send(err.message );
         })
 
+
         /*
         let flexiapp = "{";
         for (const b of req.body.flexiapp){
@@ -469,7 +470,8 @@ exports.creaEstadoPago = async (req, res) => {
 
     }
     if (!datos.flexiapp) {
-      throw new Error('No puede estar vacio el campo flexiapp. Por favor ingrese al menos un flexiapp en algún reporte diario');
+      res.status(500).send("No puede estar vacio el campo flexiapp. Por favor ingrese al menos un flexiapp en algún reporte diario");
+      return
     }
     
     const result = await sequelize.transaction(async () => {
