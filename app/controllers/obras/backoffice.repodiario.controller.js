@@ -927,7 +927,6 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       res.status(500).send(err.message );
       return;
     })
-    console.log('user_name --> ', user_name);
 
     //Encuentra el id de la obra segun el reporte diario
     let id_obra;
@@ -945,13 +944,34 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         res.status(500).send( 'El reporte diario no existe');
         return;
     }
+    let estado_obra_actual;
+    //busca el estado de la obra dentro de la tabla obras por ID de obra
+    await Obra.findOne({
+        where: {
+            id: id_obra
+        }
+    }).then (data => {
+        estado_obra_actual = data?data.estado_obra:undefined;
+    }).catch(err => {
+        console.log('error estado_obra_actual --> ', err)
+    })
+
+    if (!estado_obra_actual) {
+        res.status(500).send( 'No hay una opbra asociada al reporte diario');
+    }
+    if (estado_obra_actual === 8) {
+        res.status(500).send( 'La obra fue eliminada');
+        return;
+    }
+
+    // Si el estado actual de la obra es 7 (finalizada) se mantiene en el mismo estado, si es otro estado
+    // cambia a 5 (en faena)
+    const estado_obra = estado_obra_actual === 7 ? 7 : 5;
+
 
     //determina fecha actual
     const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
-
-    const estado_obra = 5;  //En faena
-
 
     //estado visita agendada = 2
     const obra = {estado: estado_obra};
@@ -966,7 +986,6 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       observacion: "Actualizacion de reporte diario"
     }
 
-    console.log('obra_historial --> ', obra_historial);
 
    const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
     const encabezadoReporteDiario = {
@@ -1000,17 +1019,17 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         const t = await sequelize.transaction();
         try {
           salida = {"error": false, "message": "Reporte diario actualizado ok"};
-          console.log('paso 1 --> ');
+          
 
           // realizar la actualizacion del encabezado por id
           await EncabezadoReporteDiario.update(encabezadoReporteDiario, { where: { id: id }, transaction: t });
-          console.log('paso 2 --> ');
+          
           //actualizar detalles
           if (detalle_actividad){
-            console.log('paso 3 --> ');
+            
             //primer debe borrar los regisatros que tenga asociado el encabezado
             await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id }, transaction: t } );
-            console.log('paso 4 --> ');
+            ;
             //luego volver a insertar los registros
             for (const element of detalle_actividad) {
               const det_actividad = {
@@ -1022,13 +1041,13 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
               await DetalleReporteDiarioActividad.create(det_actividad, { transaction: t });
             }
           };
-          console.log('paso 5 --> ');
+          
           if (detalle_otros){
-            console.log('paso 6 --> ');
+            
             //primer debe borrar los regisatros que tenga asociado el encabezado
             await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id }, transaction: t } );
             //luego volver a insertar los registros
-            console.log('paso 7 --> ');
+            
             for (const element of detalle_otros) {
               const det_otros = {
                 id_encabezado_rep: Number(id),
@@ -1040,35 +1059,29 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
               await DetalleRporteDiarioOtrasActividades.create(det_otros, { transaction: t });
             }
           }
-          console.log('paso 8 --> ');
 
           const obra_creada = obra?await Obra.update(obra, { where: { id: id_obra }, transaction: t }):null;
-          console.log('paso 9 --> ');
             
           const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
-          console.log('paso 10 --> ');
+          
     
           await t.commit();
-          console.log('paso 11 --> ');
+          
         } catch (error) {
           salida = { error: true, message: error }
-          console.log('paso 12 --> ', error.message);
           await t.rollback();
         }
         if (salida.error) {
-          console.log('salida --> ', salida);
+          
           if (salida.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
-            console.log('Ya existe un reporte diario para esta fecha en esta obra');
             res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
           }else{
-            console.log('error 400 --> ', salida.message);
             res.status(400).send(salida.message);
           }
         }else {
           res.status(200).send(salida);
         }
   }catch (error) {
-    console.log('error general --> ', error);
     res.status(500).send(error);
   }
 }
