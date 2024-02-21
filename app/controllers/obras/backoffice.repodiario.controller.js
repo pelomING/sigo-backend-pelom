@@ -678,6 +678,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           }
         }
 
+        console.log('id_obra (1) --> ', id_obra)
         let estado_obra_actual;
         //busca el estado de la obra dentro de la tabla obras por ID de obra
         await Obra.findOne({
@@ -685,13 +686,15 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                 id: id_obra
             }
         }).then (data => {
-            estado_obra_actual = data?data.estado_obra:undefined;
+            estado_obra_actual = data?data.estado:undefined;
         }).catch(err => {
             console.log('error estado_obra_actual --> ', err)
         })
 
+        console.log('estado_obra_actual (1) --> ', estado_obra_actual)
         if (!estado_obra_actual) {
             res.status(500).send( 'No hay una obra para asociar al reporte diario');
+            return;
         }
         if (estado_obra_actual === 8) {
             res.status(500).send( 'La obra se encuentra en estado eliminada');
@@ -974,13 +977,14 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
             id: id_obra
         }
     }).then (data => {
-        estado_obra_actual = data?data.estado_obra:undefined;
+        estado_obra_actual = data?data.estado:undefined;
     }).catch(err => {
         console.log('error estado_obra_actual --> ', err)
     })
 
     if (!estado_obra_actual) {
         res.status(500).send( 'No hay una opbra asociada al reporte diario');
+        return;
     }
     if (estado_obra_actual === 8) {
         res.status(500).send( 'La obra fue eliminada');
