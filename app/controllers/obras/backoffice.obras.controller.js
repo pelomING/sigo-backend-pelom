@@ -177,7 +177,8 @@ exports.createObra = async (req, res) => {
         return;
       }
       */
-      if (!/^CGED-\d+$/.test(req.body.codigo_obra) || !/^E-\d{10}$/.test(req.body.codigo_obra)) {
+      if (!/^CGED-\d+$/.test(req.body.codigo_obra) && !/^E-\d{10}$/.test(req.body.codigo_obra)) {
+        
         res.status(400).send('El Codigo de Obra tiene un formato incorrecto: debe ser CGED-XXXXXXX o E-XXXXXXXX');
         return;
       }
