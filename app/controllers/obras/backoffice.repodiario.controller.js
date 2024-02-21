@@ -678,6 +678,30 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           }
         }
 
+        let estado_obra_actual;
+        //busca el estado de la obra dentro de la tabla obras por ID de obra
+        await Obra.findOne({
+            where: {
+                id: id_obra
+            }
+        }).then (data => {
+            estado_obra_actual = data?data.estado_obra:undefined;
+        }).catch(err => {
+            console.log('error estado_obra_actual --> ', err)
+        })
+
+        if (!estado_obra_actual) {
+            res.status(500).send( 'No hay una obra para asociar al reporte diario');
+        }
+        if (estado_obra_actual === 8) {
+            res.status(500).send( 'La obra se encuentra en estado eliminada');
+            return;
+        }
+
+        // Si el estado actual de la obra es 7 (finalizada) se mantiene en el mismo estado, si es otro estado
+        // cambia a 5 (en faena)
+        const estado_obra = estado_obra_actual === 7 ? 7 : 5;
+
         // Busca el ID de encabezado disponible
         let sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
         const { QueryTypes } = require('sequelize');
@@ -708,7 +732,6 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
         const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
-        const estado_obra = 5;  //En faena
 
 
         //estado visita agendada = 2
