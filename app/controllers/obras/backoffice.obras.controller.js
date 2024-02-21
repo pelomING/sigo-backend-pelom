@@ -507,7 +507,6 @@ exports.paralizaObra = async (req, res) => {
             schema: {
                 id_obra: 45,
                 fecha_hora: "2024-01-05 15:30:00",
-                responsable: "Juan Perez",
                 motivo: "Motivo de la paralización (descripción corta)",
                 observacion: "Observaciones detalladas de la paralización"
             }
@@ -515,7 +514,7 @@ exports.paralizaObra = async (req, res) => {
       try{
 
         const campos = [
-          'id_obra', 'fecha_hora', 'responsable', 'motivo', 'observacion'
+          'id_obra', 'fecha_hora', 'motivo', 'observacion'
         ];
         for (const element of campos) {
           if (!req.body[element]) {
@@ -526,22 +525,26 @@ exports.paralizaObra = async (req, res) => {
         };
 
         const id_obra = req.body.id_obra;
+        const estado_obra = 6;    //Paralizada
 
         
 
         // obra paralizada = 6
-        const obra_cambio = {"estado": 6};
+        const obra_cambio = {"estado": estado_obra};
     
         let id_usuario = req.userId;
         let user_name;
+        let responsable;
     
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
-        let sql = "select username from _auth.users where id = " + id_usuario;
+        let sql = "select u.username::text, (u.username || ' ' || p.apellido_1 || ' ' || p.nombres) as responsable \
+        from _auth.users u join _auth.personas p on u.username = p.rut  where u.id = " + id_usuario;
         await sequelize.query(sql, {
           type: QueryTypes.SELECT
         }).then(data => {
           user_name = data[0].username;
+          responsable = data[0].responsable;
         }).catch(err => {
           res.status(500).send(err.message );
           return;
@@ -554,13 +557,13 @@ exports.paralizaObra = async (req, res) => {
           id_obra: id_obra,
           fecha_hora: fechahoy,
           usuario_rut: user_name,
-          estado_obra: 6,
+          estado_obra: estado_obra,
           datos: obra_cambio
         }
         const obra_paralizada = {
           id_obra: id_obra, 
           fecha_hora: req.body.fecha_hora,
-          responsable: req.body.responsable, 
+          responsable: responsable, 
           motivo: req.body.motivo, 
           observacion: req.body.observacion,
           usuario_rut: user_name
