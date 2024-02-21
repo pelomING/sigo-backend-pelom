@@ -119,8 +119,6 @@ exports.createVisitaTerreno = async (req, res) => {
 
     try {
 
-
-
         const campos = [
         'id_obra', 'fecha_visita', 'direccion', 'persona_mandante', 'cargo_mandante', 'persona_contratista', 'cargo_contratista'
         ];
@@ -132,9 +130,14 @@ exports.createVisitaTerreno = async (req, res) => {
         }
         };
         const id_obra = req.body.id_obra;
+        const fecha_visita = req.body.fecha_visita;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha_visita)) {
+          res.status(400).send( 'La fecha de visita no tiene el formato correcto (AAAA-MM-DD)' );
+          return;
+        }
 
-        let fecha_visita = new Date(req.body.fecha_visita).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-        fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
+        //let fecha_visita = new Date(req.body.fecha_visita).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        //fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
         let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
         fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
 
@@ -143,7 +146,7 @@ exports.createVisitaTerreno = async (req, res) => {
         await VisitaTerreno.findAll({where: {id_obra: id_obra, fecha_visita: fecha_visita}}).then(async data => {
             //La obra ya tiene una visita agendada para esa fecha
             if (data.length > 0) {
-                res.status(400).send( 'La Visita ya se encuentra agendada' );
+                res.status(400).send( 'La Visita ya se encuentra ingresada para esa fecha' );
                 return
             }else {
                 let id_usuario = req.userId;
@@ -163,30 +166,30 @@ exports.createVisitaTerreno = async (req, res) => {
                 const visita = {
 
                     id_obra: id_obra,
-                    fecha_visita: req.body.fecha_visita,
+                    fecha_visita: fecha_visita,
                     direccion: req.body.direccion,
                     persona_mandante: req.body.persona_mandante,
                     cargo_mandante: req.body.cargo_mandante,
                     persona_contratista: req.body.persona_contratista,
                     cargo_contratista: req.body.cargo_contratista,
                     observacion: req.body.observacion,
-                    estado: 1,
+                    estado: 6,    //Dejar de inmediato como efectuada ok
                     fecha_modificacion: fecha_hoy
         
                 }
                 const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
                 const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
-                //estado visita agendada = 2
-                const obra = {estado: 2};
+                //estado visita agendada = 4  Estado de Obra: visita reportada exitosa (4)
+                const obra = {estado: 4};
 
                 const obra_historial = {
                   id_obra: id_obra,
                   fecha_hora: fechahoy,
                   usuario_rut: user_name,
-                  estado_obra: 2,
+                  estado_obra: 4,
                   datos: obra,
-                  observacion: "Visita agendada"
+                  observacion: "Visita Reportada exitosa"
                 }
 
                 let salida = {};
@@ -194,7 +197,7 @@ exports.createVisitaTerreno = async (req, res) => {
 
                 try {
 
-                  salida = {"error": false, "message": "Visita agendada ok"};
+                  salida = {"error": false, "message": "Visita reportada ok"};
                   const visita_creada = await VisitaTerreno.create(visita, { transaction: t });
 
                   const obra_creada = await Obra.update(obra, { where: { id: id_obra }, transaction: t });
@@ -230,32 +233,15 @@ exports.updateVisitaTerreno = async (req, res) => {
       #swagger.description = 'Actualiza una visita a terreno' */
     try{
         
-
-      /*
-        const campos = [
-          'fecha_visita', 'direccion', 'persona_mandante', 'cargo_mandante', 
-          'persona_contratista', 'cargo_contratista', 'observacion', 'estado'
-        ];
-        for (const element of campos) {
-          if (!req.query[element]) {
-            res.status(400).send("No puede estar nulo el campo " + element
-            );
-            return;
-          }
-        };*/
         const id = req.params.id;
-/*
-        let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-       
-        fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
-        
-        let fecha_visita = req.body.fecha_visita;
 
-        fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
-*/
-
-        let fecha_visita = new Date(req.body.fecha_visita).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
-        fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
+        const fecha_visita = req.body.fecha_visita;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha_visita)) {
+          res.status(400).send( 'La fecha de visita no tiene el formato correcto (AAAA-MM-DD)' );
+          return;
+        }
+        //let fecha_visita = new Date(req.body.fecha_visita).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        //fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
         let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
         fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
 
@@ -289,17 +275,11 @@ exports.updateVisitaTerreno = async (req, res) => {
             //Si viene la fecha de visita verificar que sea mayor o igual al día de hoy
             if (fecha_visita) {
 
-                let today = new Date(fecha_hoy).toISOString();
-                let fechaVisita = new Date(fecha_visita).toISOString();
-
-                if (fechaVisita < today) {
-                    // La fecha de visita es menor a la fecha actual 
-                    res.status(500).send( 'La fecha de la visita no puede ser menor a la fecha actual' );
-                    return;
-                }else {
+                //let today = new Date(fecha_hoy).toISOString();
+                //let fechaVisita = new Date(fecha_visita).toISOString();
                     visita = {
 
-                        fecha_visita: fechaVisita,
+                        fecha_visita: fecha_visita,
                         direccion: req.body.direccion?req.body.direccion:undefined,
                         persona_mandante: req.body.persona_mandante?req.body.persona_mandante:undefined,
                         cargo_mandante: req.body.cargo_mandante?req.body.cargo_mandante:undefined,
@@ -310,7 +290,7 @@ exports.updateVisitaTerreno = async (req, res) => {
                         fecha_modificacion: today
                 
                     }
-                }
+                
             }else {
                 //No viene la fecha de visita
                 visita = {
@@ -354,7 +334,7 @@ exports.updateVisitaTerreno = async (req, res) => {
                   })
                 }
                 
-
+                estado_de_obra = 4  //forzar visita ok
                 //estado visita agendada = 2
                 const obra = estado_de_obra?{"estado": estado_de_obra}:null;
 
@@ -362,7 +342,7 @@ exports.updateVisitaTerreno = async (req, res) => {
                   id_obra: id_obra,
                   fecha_hora: fechahoy,
                   usuario_rut: user_name,
-                  estado_obra: 2,
+                  estado_obra: estado_de_obra,
                   datos: obra,
                   observacion: "Modificación visita terreno"
                 }:null;

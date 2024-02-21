@@ -3,6 +3,10 @@ const Recargo = db.recargo;
 const TipoRecargo = db.tipoRecargo;
 const EncabezadoEstadoPago = db.encabezadoEstadoPago;
 const EncabezadoReporteDiario = db.encabezadoReporteDiario;
+const EstadoPagoGestion = db.estadoPagoGestion;
+const EstadoPagoHistorial = db.estadoPagoHistorial;
+const Obra = db.obra;
+
 
 /*********************************************************************************** */
 /* Obtiene todos los tipos de recargo
@@ -377,8 +381,17 @@ exports.creaEstadoPago = async (req, res) => {
 
     const id_obra = req.body.id_obra;
 
+    //Consultar nombre de la obra y OC
+    const obraInfo = await Obra.findOne({
+          where: { id: id_obra },
+          attributes: ['nombre_obra', 'numero_oc']
+    });
+    const nombreObra = obraInfo.nombre_obra?obraInfo.nombre_obra:undefined;
+    const numeroOc = obraInfo.numero_oc?obraInfo.numero_oc:undefined;
+
     const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
     const fecha_estado_pago = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
+    const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
 
     const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
@@ -399,7 +412,7 @@ exports.creaEstadoPago = async (req, res) => {
       return;
     }
 
-    const sql = "select nextval('obras.encabezado_estado_pago_id_seq'::regclass) as valor";
+    let sql = "select nextval('obras.encabezado_estado_pago_id_seq'::regclass) as valor";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         let encabezado_estado_pago_id = 0;
@@ -473,30 +486,67 @@ exports.creaEstadoPago = async (req, res) => {
       res.status(400).send("No puede estar vacio el campo flexiapp. Por favor ingrese al menos un flexiapp en algún reporte diario");
       return
     }
-    
-    const result = await sequelize.transaction(async () => {
+    /*
+      Se debe ingresar los datos de la creación de un estado de pago en la tabla estado_pago_gestion
+      y también en la de estado_pago_historial
+      Si tiene OC se ingresa con estado emitido con OC si no tiene, se ingresa con estado emitido pendiente OC
+    */
 
-      let salida = {};
-      await EncabezadoEstadoPago.create(datos)
-          .then(async data => {
-            salida = { error: false, message: data }
-            await EncabezadoReporteDiario.update({id_estado_pago: encabezado_estado_pago_id}, {
-              where: {
-                id_estado_pago: null,
-                id_obra: req.body.id_obra
-              }
-            })
-          }).catch(err => {
-            salida = { error: true, message: err }
-          })
-      return salida;
-    });
-    if (result.error) {
-      res.status(500).send(result.message);
-    }else {
-      res.status(200).send(result);
-    }
-  } catch (error) {
+    let id_usuario = req.userId;
+    let user_name;
+    sql = "select username from _auth.users where id = " + id_usuario;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      user_name = data[0].username;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
+
+   const estadoPagoGestion = {
+      codigo_pelom: req.body.codigo_pelom,
+      detalle: nombreObra,
+      numero_oc: numeroOc,
+      estado: numeroOc?2:1, //Si tiene OC pasa a estado emitido con OC (1), si no tiene, pasa a estado pendiente OC (2)
+   }
+
+   const estadoPagoHistorial = {
+      codigo_pelom: req.body.codigo_pelom,
+      fecha_hora: fechahoy,
+      usuario_rut: user_name,
+      estado_edp: numeroOc?2:1,
+      datos: datos,
+      observacion: "Se crea el estado de pago de la obra <" + nombreObra + ">"
+   }
+        let salida = {};
+        const t = await sequelize.transaction();
+
+        try {
+
+          salida = {"error": false, "message": "obra ingresada"};
+          await EncabezadoEstadoPago.create(datos, { transaction: t });
+
+          await EncabezadoReporteDiario.update(
+            {id_estado_pago: encabezado_estado_pago_id}, 
+            {where: { id_estado_pago: null, id_obra: req.body.id_obra}, transaction: t});
+
+          await EstadoPagoGestion.create(estadoPagoGestion, { transaction: t });
+
+          await EstadoPagoHistorial.create(estadoPagoHistorial, { transaction: t });
+          
+          await t.commit();
+        } catch (error) {
+          salida = { error: true, message: error }
+          await t.rollback();
+        }
+        if (salida.error) {
+          res.status(500).send(salida.message);
+        }else {
+          res.status(200).send(salida);
+        }
+  }catch(error){
+    console.log(error);
     res.status(500).send(error);
   }
 }

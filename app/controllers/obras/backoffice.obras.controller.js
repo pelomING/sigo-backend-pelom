@@ -169,6 +169,19 @@ exports.createObra = async (req, res) => {
           return;
         }
       };
+
+      //Verificar el formato del Codigo de Obra
+      /*
+      if (!/^[a-zA-Z0-9-]+$/.test(req.body.codigo_obra)) {
+        res.status(400).send('El Codigo de Obra solo puede contener letras y numeros' );
+        return;
+      }
+      */
+      if (!/^CGED-\d+$/.test(req.body.codigo_obra) || !/^E-\d{10}$/.test(req.body.codigo_obra)) {
+        res.status(400).send('El Codigo de Obra tiene un formato incorrecto: debe ser CGED-XXXXXXX o E-XXXXXXXX');
+        return;
+      }
+
     
       //Verifica que el codigo obra no se encuentre
       await Obra.findAll({where: {codigo_obra: req.body.codigo_obra}}).then(data => {

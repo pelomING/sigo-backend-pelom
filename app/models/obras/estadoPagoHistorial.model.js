@@ -17,7 +17,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
-        estado_obra: {
+        estado_edp: {
             type: Sequelize.INTEGER,
             allowNull: false
         },

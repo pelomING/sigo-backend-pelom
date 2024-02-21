@@ -1333,10 +1333,6 @@
                   "type": "string",
                   "example": "2024-01-05 15:30:00"
                 },
-                "responsable": {
-                  "type": "string",
-                  "example": "Juan Perez"
-                },
                 "motivo": {
                   "type": "string",
                   "example": "Motivo de la paralización (descripción corta)"
@@ -1895,6 +1891,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
