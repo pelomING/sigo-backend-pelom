@@ -440,19 +440,19 @@ exports.getResumenGeneral = async (req, res) => {
         resumen_servicios: [
           {
             "servicio": "SAE",
-            "produccion": "45.784.234"
+            "produccion": "$ 45.784.234"
           },
           {
             "servicio": "OBRAS",
-            "produccion": "120.784.234"
+            "produccion": "$ 120.784.234"
           },
           {
             "servicio": "PODA",
-            "produccion": "12.784.234"
+            "produccion": "$ 12.784.234"
           },
           {
             "servicio": "TLD",
-            "produccion": "23.784.234"
+            "produccion": "$ 23.784.234"
           }
         ]
       }
