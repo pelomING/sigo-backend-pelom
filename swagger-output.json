@@ -920,6 +920,28 @@
         }
       }
     },
+    "/api/obras/backoffice/general/v1/resumengeneral": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve el resumen general de las operaciones Pelom",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/allobras": {
       "get": {
         "tags": [
@@ -5865,6 +5887,28 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/reportes/v1/resumensae": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Reportes"
+        ],
+        "description": "Devuelve el resumen de las operaciones de SAE",
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "401": {
             "description": "Unauthorized"
