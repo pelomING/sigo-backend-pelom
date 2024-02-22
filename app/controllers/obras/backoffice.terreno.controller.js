@@ -115,7 +115,25 @@ exports.findVisitaTerrenoByIdObra = async (req, res) => {
 */
 exports.createVisitaTerreno = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
-      #swagger.description = 'Crea una visita a terreno' */
+      #swagger.description = 'Crea una visita a terreno' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para crear la visita a terreno',
+            required: false,
+            schema: {
+                id_obra: 1,
+                fecha_visita: "2023-10-25",
+                direccion: "direccion",
+                persona_mandante: "persona mandante",
+                cargo_mandante: "cargo mandante",
+                persona_contratista: "persona contratista",
+                cargo_contratista: "cargo contratista",
+                observacion: "observacion"
+              }
+        }
+      
+      
+      */
 
     try {
 
@@ -230,7 +248,24 @@ exports.createVisitaTerreno = async (req, res) => {
 */
 exports.updateVisitaTerreno = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Visita Terreno']
-      #swagger.description = 'Actualiza una visita a terreno' */
+      #swagger.description = 'Actualiza una visita a terreno' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para actualizar visita terreno',
+            required: false,
+            schema: {
+                fecha_visita: "2023-10-25",
+                direccion: "direccion",
+                persona_mandante: "persona mandante",
+                cargo_mandante: "cargo mandante",
+                persona_contratista: "persona contratista",
+                cargo_contratista: "cargo contratista",
+                observacion: "observacion"
+              }
+        }
+      
+      
+      */
     try{
         
         const id = req.params.id;
@@ -392,18 +427,99 @@ exports.deleteVisitaTerreno = async (req, res) => {
     try{
 
         const id = req.params.id;
-        await VisitaTerreno.destroy({
-          where: { id: id }
+
+        //Determinar el id de obra que está asociado a la visita terreno
+        let id_obra;
+        await VisitaTerreno.findOne({
+          where: { id: id },
+          attributes: ['id_obra']
         }).then(data => {
-          if (data === 1) {
-            res.send({ message: "Visita terreno eliminada" });
-          } else {
-            res.send({ message: `No existe una visita terreno con el id ${id}` });
-          }
+          id_obra = data.id_obra;
         }).catch(err => {
-          res.status(500).send( err.message );
+          res.status(500).send(err.message );
+          return;
+        })
+        if (!id_obra) {
+          res.status(500).send('La visita terreno no tiene una obra asociada');
+          return;
+        }
+        // Determinar cuantas visitas terreno están asociadas a ese id de obra
+        const countVisitasTerreno = await VisitaTerreno.count({
+            where: { id_obra: id_obra }
+        });
+        console.log('countVisitasTerreno --> ', countVisitasTerreno);
+        // consultar el estado de la obra con el ID de obra
+        const estadoActualObra = await Obra.findOne({
+            where: { id: id_obra },
+            attributes: ['estado']
+        });
+
+        console.log('estadoActualObra --> ', estadoActualObra);
+        if (estadoActualObra.estado !== 1 && estadoActualObra.estado !== 2 && estadoActualObra.estado !== 3 && estadoActualObra.estado !== 4) {
+            res.status(500).send('La obra no se encuentra en un estado que permita borrar visitas terreno');
+            return;
+        }
+
+        let id_usuario = req.userId;
+        let user_name;
+        let sql = "select username from _auth.users where id = " + id_usuario;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          user_name = data[0].username;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
         })
 
+        //determina fecha actual
+        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+        const estado_obra = 1  //forzar estado de obra a ingresada (1)
+        //estado visita agendada = 2
+        const obra = {estado: estado_obra};
+
+        //Guarda historial
+        const obra_historial = {
+          id_obra: id_obra,
+          fecha_hora: fechahoy,
+          usuario_rut: user_name,
+          estado_obra: estado_obra,  //Estado 1 ingresada
+          datos: obra,
+          observacion: "Borrado de visita terreno"
+        };
+
+        let salida = {};
+        const t = await sequelize.transaction();
+
+        try {
+
+            salida = {"error": false, "message": "visita terreno eliminada"};
+
+            await VisitaTerreno.destroy({where: { id: id }, transaction: t});
+
+            if (countVisitasTerreno === 1) {
+              const obra_creada = await Obra.update(obra, { where: { id: id_obra }, transaction: t });
+            }
+
+            const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
+
+            await t.commit();
+
+        } catch (error) {
+            salida = { error: true, message: error }
+            await t.rollback();
+        }
+
+        if (salida.error) {
+          console.log('Error Result ---> ', salida.message);
+          res.status(500).send(salida.message.parent.detail);
+        }else {
+          res.status(200).send(salida);
+        }
 
     }catch (error) {
         res.status(500).send(error);

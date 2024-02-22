@@ -1507,6 +1507,28 @@
         }
       }
     },
+    "/api/obras/backoffice/v1/resumenobras": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Obras"
+        ],
+        "description": "Obtiene el resumen informartivo de obras",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/allbom": {
       "get": {
         "tags": [
@@ -1791,32 +1813,42 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Datos para crear la visita a terreno",
+            "required": false,
             "schema": {
               "type": "object",
               "properties": {
                 "id_obra": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 },
                 "fecha_visita": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "direccion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "direccion"
                 },
                 "persona_mandante": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "persona mandante"
                 },
                 "cargo_mandante": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "cargo mandante"
                 },
                 "persona_contratista": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "persona contratista"
                 },
                 "cargo_contratista": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "cargo contratista"
                 },
                 "observacion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "observacion"
                 }
               }
             }
@@ -1857,32 +1889,38 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Datos para actualizar visita terreno",
+            "required": false,
             "schema": {
               "type": "object",
               "properties": {
                 "fecha_visita": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2023-10-25"
                 },
                 "direccion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "direccion"
                 },
                 "persona_mandante": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "persona mandante"
                 },
                 "cargo_mandante": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "cargo mandante"
                 },
                 "persona_contratista": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "persona contratista"
                 },
                 "cargo_contratista": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "cargo contratista"
                 },
                 "observacion": {
-                  "example": "any"
-                },
-                "estado": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "observacion"
                 }
               }
             }
