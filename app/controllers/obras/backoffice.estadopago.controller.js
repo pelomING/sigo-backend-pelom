@@ -509,6 +509,7 @@ exports.creaEstadoPago = async (req, res) => {
       detalle: nombreObra,
       numero_oc: numeroOc,
       estado: numeroOc?2:1, //Si tiene OC pasa a estado emitido con OC (1), si no tiene, pasa a estado pendiente OC (2)
+      fecha_entrega_oc: numeroOc?fecha_estado_pago:undefined
    }
 
    const estadoPagoHistorial = {
@@ -731,6 +732,178 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
           res.status(500).send(error);
       }
 }
+
+// Actualiza los datos de un estado de pago gestionado para facturación
+// GET /api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado
+exports.updateEstadoPagoGestionado = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Actualiza los datos de un estado de pago gestionado para facturación' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos básicos de una obra',
+            required: false,
+            schema: {
+              fecha_presentacion: "2023-10-25",
+              semana: 1,
+              numero_oc: "123456",
+              fecha_entrega_oc: "2023-10-25",
+              fecha_subido_portal: "2023-10-25",
+              folio_portal: "123456",
+              fecha_hes: "2023-10-25",
+              numero_hes: "123456",
+              fecha_solicita_factura: "2023-10-25",
+              responsable_solicitud : "responsable solicitud",
+              numero_factura: "123456",
+              fecha_factura: "2023-10-25",
+              rango_dias: "30-60"
+            }
+        }
+      */
+  try {
+    const datos_ingresados = {
+      fecha_presentacion: req.body.fecha_presentacion?req.body.fecha_presentacion:undefined,
+      semana: req.body.semana?req.body.semana:undefined,
+      numero_oc: req.body.numero_oc?req.body.numero_oc:undefined,
+      fecha_entrega_oc: req.body.fecha_entrega_oc?req.body.fecha_entrega_oc:undefined,
+      fecha_subido_portal: req.body.fecha_subido_portal?req.body.fecha_subido_portal:undefined,
+      folio_portal: req.body.folio_portal?req.body.folio_portal:undefined,
+      fecha_hes: req.body.fecha_hes?req.body.fecha_hes:undefined,
+      numero_hes: req.body.numero_hes?req.body.numero_hes:undefined,
+      fecha_solicita_factura: req.body.fecha_solicita_factura?req.body.fecha_solicita_factura:undefined,
+      responsable_solicitud : req.body.responsable_solicitud?req.body.responsable_solicitud:undefined,
+      numero_factura: req.body.numero_factura?req.body.numero_factura:undefined,
+      fecha_factura: req.body.fecha_factura?req.body.fecha_factura:undefined,
+      rango_dias: req.body.rango_dias?req.body.rango_dias:undefined,
+      estado: undefined
+    }
+    
+
+    const id = req.params.id;
+    // Buscar el estado de pago gestionado por id
+    const estadoPagoGestion = await EstadoPagoGestion.findByPk(id);
+    if (!estadoPagoGestion) {
+      res.status(404).send('No se encontro el estado de pago gestionado para el id ' + id);
+      return;
+    }
+    let estado_edp_nuevo;
+    let revisar = true;
+    console.log("uno")
+    console.log((datos_ingresados.fecha_factura || datos_ingresados.numero_factura) && revisar);
+    console.log("dos")
+    if ((datos_ingresados.fecha_factura || datos_ingresados.numero_factura) && revisar) {
+      console.log("entro a revisar fecha_factura");
+      // Pasar a estado factura emitida (6), primero chequear los campos necesarios esten completos
+          const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc', 'fecha_subido_portal',
+            'folio_portal', 'fecha_hes', 'numero_hes', 'fecha_solicita_factura', 'responsable_solicitud', 'numero_factura',
+            'fecha_factura'];
+            for (const element of campos) {
+              if (!datos_ingresados[element] && !estadoPagoGestion[element]) {
+                res.status(400).send("Debe ingresar el dato para el campo " + element );
+                return;
+              }
+            };
+            if (estadoPagoGestion.estado && estadoPagoGestion.estado <= 6) {
+              estado_edp_nuevo = 6;
+            }
+            revisar = false;
+    }
+    if ((datos_ingresados.fecha_solicita_factura || datos_ingresados.responsable_solicitud) && revisar) {
+      console.log("entro a revisar fecha_solicita_factura");
+      // Pasar a estado factura solicitada (5), primero chequear los campos necesarios esten completos
+          const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc', 'fecha_subido_portal',
+            'folio_portal', 'fecha_hes', 'numero_hes', 'fecha_solicita_factura', 'responsable_solicitud'];
+            for (const element of campos) {
+              if (!datos_ingresados[element] && !estadoPagoGestion[element]) {
+                res.status(400).send("Debe ingresar el dato para el campo " + element );
+                return;
+              }
+            };
+            if (estadoPagoGestion.estado && estadoPagoGestion.estado <= 5) {
+              estado_edp_nuevo = 5;
+            }
+            revisar = false;
+    }
+    if ((datos_ingresados.fecha_hes || datos_ingresados.numero_hes) && revisar) {
+      console.log("entro a revisar fecha_hes");
+      // Pasar a estado hes registrada (4), primero chequear los campos necesarios esten completos
+          const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc', 'fecha_subido_portal',
+            'folio_portal', 'fecha_hes', 'numero_hes'];
+            for (const element of campos) {
+              if (!datos_ingresados[element] && !estadoPagoGestion[element]) {
+                res.status(400).send("Debe ingresar el dato para el campo " + element );
+                return;
+              }
+            };
+            if (estadoPagoGestion.estado && estadoPagoGestion.estado <= 4) {
+              estado_edp_nuevo = 4;
+            }
+            revisar = false;
+    }
+    if ((datos_ingresados.fecha_subido_portal || datos_ingresados.folio_portal) && revisar) {
+      console.log("entro a revisar fecha_subido_portal");
+      // Pasar a estado subido a portal (3), primero chequear los campos necesarios esten completos
+          const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc', 'fecha_subido_portal', 'folio_portal'];
+            for (const element of campos) {
+              if (!datos_ingresados[element] && !estadoPagoGestion[element]) {
+                res.status(400).send("Debe ingresar el dato para el campo " + element );
+                return;
+              }
+            };
+            if (estadoPagoGestion.estado && estadoPagoGestion.estado <= 3) {
+              estado_edp_nuevo = 3;
+            }
+            revisar = false;
+    }
+    if ((datos_ingresados.numero_oc || datos_ingresados.fecha_entrega_oc) && revisar) {
+      console.log("entro a revisar numero_oc");
+      // Pasar a estado emitido con oc (2), primero chequear los campos necesarios esten completos
+          const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc'];
+            for (const element of campos) {
+              if (!datos_ingresados[element] && !estadoPagoGestion[element]) {
+                res.status(400).send("Debe ingresar el dato para el campo " + element );
+                return;
+              }
+            };
+            if (estadoPagoGestion.estado && estadoPagoGestion.estado <= 2) {
+              estado_edp_nuevo = 2;
+            }
+    }
+    datos_ingresados.estado = estado_edp_nuevo;
+
+      let id_usuario = req.userId;
+      let user_name;
+      let sql = "select username from _auth.users where id = " + id_usuario;
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      await sequelize.query(sql, {
+        type: QueryTypes.SELECT
+      }).then(data => {
+        user_name = data[0].username;
+      }).catch(err => {
+        res.status(500).send(err.message );
+        return;
+      })
+
+      const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+      const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+    const estadoPagoHistorial = {
+      codigo_pelom: estadoPagoGestion.codigo_pelom,
+      fecha_hora: fechahoy,
+      usuario_rut: user_name,
+      estado_edp: datos_ingresados.estado,
+      datos: datos_ingresados,
+      observacion: "Modificación de datos de estado pago gestionado"
+    }
+    console.log('datos_ingresados --> ', datos_ingresados);
+    console.log('estadoPagoHistorial --> ', estadoPagoHistorial);
+    res.status(200).send(estadoPagoGestion);
+  }catch (error) {
+    console.log('error general --> ', error);
+    res.status(500).send(error);
+  }
+}
+
 let listadoActividadesByIdObra = async (id_obra) => {
   try {
     const sql = "select top.clase, ta.descripcion tipo, (case when e.porcentaje is null or e.porcentaje = 0 then '' else e.nombre_corto end || ma.actividad) as actividad, \

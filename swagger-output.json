@@ -3134,6 +3134,105 @@
         }
       }
     },
+    "/api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado/{id}": {
+      "put": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Actualiza los datos de un estado de pago gestionado para facturación",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos básicos de una obra",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fecha_presentacion": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "semana": {
+                  "type": "number",
+                  "example": 1
+                },
+                "numero_oc": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "fecha_entrega_oc": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "fecha_subido_portal": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "folio_portal": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "fecha_hes": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "numero_hes": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "fecha_solicita_factura": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "responsable_solicitud": {
+                  "type": "string",
+                  "example": "responsable solicitud"
+                },
+                "numero_factura": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "fecha_factura": {
+                  "type": "string",
+                  "example": "2023-10-25"
+                },
+                "rango_dias": {
+                  "type": "string",
+                  "example": "30-60"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/movil/v1/paquete": {
       "get": {
         "tags": [
