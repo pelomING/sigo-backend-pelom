@@ -106,16 +106,41 @@ exports.signin = async (req, res) => {
     })
     const rol_consulta = idRole[0]?idRole[0]:0;
 
-    const sql = "select menu from _frontend.ver_menu where rol_id = " + rol_consulta + ";";
+    const sql = "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const menu = await sequelize.query(sql, { type: QueryTypes.SELECT });
+
+    function compararPorCampo(a, b) {
+      if (a.orden < b.orden) {
+        return -1;
+      }
+      if (a.orden > b.orden) {
+        return 1;
+      }
+      return 0;
+    }
 
     //determina el menu de salida
     let menu_salida = [];
     if (menu) {
         for (const element of menu) {
-          menu_salida.push(element.menu);
+          console.log(element.items);
+          element.items.sort(compararPorCampo);
+          let items = [];
+          for (const item of element.items) {
+            items.push({
+              "label": item.label,
+              "icon": item.icon,
+              "routerLink": item.routerLink
+            })
+          }
+          const salida = {
+            "label": element.label,
+            "items": items
+          }
+          menu_salida.push(salida);
+          //menu_salida.push(element.menu);
         }
       }
     /////////////////////////////////
