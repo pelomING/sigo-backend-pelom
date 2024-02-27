@@ -953,7 +953,9 @@ exports.getResumenObras = async (req, res) => {
       resumen_tipos_obra: [],
       resumen_zonales: [],
       resumen_maule_norte: [],
-      resumen_maule_sur: []
+      resumen_maule_sur: [],
+      resumen_mnorte_tipo_obra: [],
+      resumen_msur_tipo_obra: [],
     }
 
     const { QueryTypes } = require('sequelize');
@@ -1028,6 +1030,36 @@ exports.getResumenObras = async (req, res) => {
     const resumenMauleSur = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenMauleSur) {
       respuesta.resumen_maule_sur = resumenMauleSur;
+    } else {
+      res.status(500).send("Error en la consulta (servidor backend)");
+      return;
+    }
+    sql = "SELECT tipo_obra, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    (SELECT tob.id as id, tob.descripcion as tipo_obra, count(tob.id) as cantidad, \
+    (SELECT count(id) as total from obras.obras WHERE zona = 1) as total FROM obras.tipo_obra tob \
+    LEFT JOIN obras.obras o on o.tipo_obra = tob.id WHERE zona = 1 group by tob.id, tob.descripcion \
+    UNION \
+    SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, \
+    (SELECT count(id) as total from obras.obras WHERE zona = 1) as cantidad, \
+    (SELECT count(id) as total from obras.obras WHERE zona = 1) as total) as a order by a.id";
+    const resumenMnorteTipoObra = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    if (resumenMnorteTipoObra) {
+      respuesta.resumen_mnorte_tipo_obra = resumenMnorteTipoObra;
+    } else {
+      res.status(500).send("Error en la consulta (servidor backend)");
+      return;
+    }
+    sql = "SELECT tipo_obra, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    (SELECT tob.id as id, tob.descripcion as tipo_obra, count(tob.id) as cantidad, \
+    (SELECT count(id) as total from obras.obras WHERE zona = 2) as total FROM obras.tipo_obra tob \
+    LEFT JOIN obras.obras o on o.tipo_obra = tob.id WHERE zona = 2 group by tob.id, tob.descripcion \
+    UNION \
+    SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, \
+    (SELECT count(id) as total from obras.obras WHERE zona = 2) as cantidad, \
+    (SELECT count(id) as total from obras.obras WHERE zona = 2) as total) as a order by a.id";
+    const resumenMsurTipoObra = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    if (resumenMsurTipoObra) {
+      respuesta.resumen_msur_tipo_obra = resumenMsurTipoObra;
     } else {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
