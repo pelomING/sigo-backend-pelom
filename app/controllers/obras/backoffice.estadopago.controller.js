@@ -734,7 +734,7 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
 }
 
 // Actualiza los datos de un estado de pago gestionado para facturación
-// GET /api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado
+// PUT /api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado
 exports.updateEstadoPagoGestionado = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
       #swagger.description = 'Actualiza los datos de un estado de pago gestionado para facturación' 
@@ -901,6 +901,57 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
   }catch (error) {
     console.log('error general --> ', error);
     res.status(500).send(error);
+  }
+}
+
+// Lista todos los estados de pago gestionados
+// GET /api/obras/backoffice/estadopago/v1/allestadospagogestion
+exports.allestadospagogestion = async (req, res) => {
+   /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Lista todos los estados de pago gestionados' */
+  try {
+    const sql = "SELECT epg.id, codigo_pelom, fecha_presentacion::text, semana, detalle, numero_oc, \
+    fecha_entrega_oc::text, fecha_subido_portal::text, folio_portal, fecha_hes::text, numero_hes, \
+    fecha_solicita_factura::text, responsable_solicitud, numero_factura, fecha_factura::text, rango_dias, \
+    row_to_json(epe) as estado FROM obras.estado_pago_gestion epg join obras.estado_pago_estados \
+    epe on epg.estado = epe.id";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const estadosPagoGes = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    if (estadosPagoGes) {
+        
+        for (const element of estadosPagoGes) {
+  
+              const detalle_salida = {
+                id: Number(element.id),
+                codigo_pelom: element.codigo_pelom?String(element.codigo_pelom):null,
+                fecha_presentacion: element.fecha_presentacion?String(element.fecha_presentacion):null,
+                semana: element.semana?Number(element.semana):null,
+                detalle: element.detalle?String(element.detalle):null,
+                numero_oc: element.numero_oc?String(element.numero_oc):null,
+                fecha_entrega_oc: element.fecha_entrega_oc?String(element.fecha_entrega_oc):null,
+                fecha_subido_portal: element.fecha_subido_portal?String(element.fecha_subido_portal):null,
+                folio_portal: element.folio_portal?String(element.folio_portal):null,
+                fecha_hes: element.fecha_hes?String(element.fecha_hes):null,
+                numero_hes: element.numero_hes?String(element.numero_hes):null,
+                fecha_solicita_factura: element.fecha_solicita_factura?String(element.fecha_solicita_factura):null,
+                responsable_solicitud: element.responsable_solicitud?String(element.responsable_solicitud):null,
+                numero_factura: element.numero_factura?String(element.numero_factura):null,
+                fecha_factura: element.fecha_factura?String(element.fecha_factura):null,
+                rango_dias: element.rango_dias?String(element.rango_dias):null,
+                estado: element.estado
+              }
+              salida.push(detalle_salida);
+        };
+      }
+      if (salida===undefined){
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }else{
+        res.status(200).send(salida);
+      }
+  } catch (error) {
+      res.status(500).send(error);
   }
 }
 

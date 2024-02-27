@@ -950,17 +950,19 @@ exports.getResumenObras = async (req, res) => {
 
     const respuesta = {
       resumen_estados: [],
-      resumen_tipos_obra: []
+      resumen_tipos_obra: [],
+      resumen_zonales: []
     }
 
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
 
-    let sql = "select estado, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
-    (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras) \
-    as total FROM obras.estado_obra eo left join obras.obras o on o.estado = eo.id group by eo.id, eo.nombre UNION \
-    select 999::bigint as id, 'TOTAL'::varchar as estado, (select count(id) as total from obras.obras) as cantidad, \
-    (select count(id) as total from obras.obras) as total) as a order by a.id";
+    let sql = "SELECT estado, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    (SELECT eo.id as id, eo.nombre as estado, count(eo.id) as cantidad, (SELECT count(id) as total from obras.obras) \
+    as total FROM obras.estado_obra eo LEFT JOIN obras.obras o on o.estado = eo.id group by eo.id, eo.nombre \
+    UNION \
+    SELECT 999::bigint as id, 'TOTAL'::varchar as estado, (SELECT count(id) as total from obras.obras) as cantidad, \
+    (SELECT count(id) as total from obras.obras) as total) as a order by a.id";
     
     const resumenObrasEstados = await sequelize.query(sql, { type: QueryTypes.SELECT });
 
@@ -971,15 +973,30 @@ exports.getResumenObras = async (req, res) => {
       return;
     }
 
-    sql = "select tipo_obra, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
-    (SELECT tob.id as id, tob.descripcion as tipo_obra, count(o.id) as cantidad, (select count(id) as total from obras.obras) \
-    as total FROM obras.tipo_obra tob left join obras.obras o on o.tipo_obra = tob.id group by tob.id, tob.descripcion \
-    UNION select 999::bigint as id, 'TOTAL'::varchar as tipo_obra, (select count(id) as total from obras.obras) as cantidad, \
-    (select count(id) as total from obras.obras) as total) as a order by a.id";
+    sql = "SELECT tipo_obra, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    (SELECT tob.id as id, tob.descripcion as tipo_obra, count(tob.id) as cantidad, (SELECT count(id) as total from obras.obras) \
+    as total FROM obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id group by tob.id, tob.descripcion \
+    UNION \
+    SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, (SELECT count(id) as total from obras.obras) as cantidad, \
+    (SELECT count(id) as total from obras.obras) as total) as a order by a.id";
     const resumenObrasTipoEstados = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenObrasTipoEstados) {
       respuesta.resumen_tipos_obra = resumenObrasTipoEstados;
     }else{
+      res.status(500).send("Error en la consulta (servidor backend)");
+      return;
+    }
+
+    sql = "SELECT zonal, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    (SELECT c.id as id, c.nombre as zonal, count(c.id) as cantidad, (SELECT count(id) as total from obras.obras) \
+    as total FROM _comun.zonal c LEFT JOIN obras.obras o on o.estado = c.id	group by c.id, c.nombre \
+    UNION \
+    SELECT 999::bigint as id, 'TOTAL'::varchar as estado, (SELECT count(id) as total from obras.obras) as cantidad, \
+    (SELECT count(id) as total from obras.obras) as total) as a ORDER by a.id";
+    const resumenObrasZonales = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    if (resumenObrasZonales) {
+      respuesta.resumen_zonales = resumenObrasZonales;
+    } else {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
