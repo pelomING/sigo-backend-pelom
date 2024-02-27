@@ -945,7 +945,8 @@ exports.getResumenObras = async (req, res) => {
 
     const respuesta = {
       resumen_estados: [],
-      resumen_tipos_obra: []
+      resumen_tipos_obra: [],
+      resumen_zonales: []
     }
 
     const { QueryTypes } = require('sequelize');
@@ -975,6 +976,20 @@ exports.getResumenObras = async (req, res) => {
     if (resumenObrasTipoEstados) {
       respuesta.resumen_tipos_obra = resumenObrasTipoEstados;
     }else{
+      res.status(500).send("Error en la consulta (servidor backend)");
+      return;
+    }
+
+    sql = "SELECT zonal, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    (SELECT c.id as id, c.nombre as zonal, count(c.id) as cantidad, (SELECT count(id) as total from obras.obras) \
+    as total FROM _comun.zonal c LEFT JOIN obras.obras o on o.estado = c.id	group by c.id, c.nombre \
+    UNION \
+    SELECT 999::bigint as id, 'TOTAL'::varchar as estado, (SELECT count(id) as total from obras.obras) as cantidad, \
+    (SELECT count(id) as total from obras.obras) as total) as a ORDER by a.id";
+    const resumenObrasZonales = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    if (resumenObrasZonales) {
+      respuesta.resumen_zonales = resumenObrasZonales;
+    } else {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
