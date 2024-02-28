@@ -218,9 +218,12 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/estadopago/v1/historicoestadopagoporid", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getHistoricoEstadosPagoByIdEstadoPago);
 
     // Actualiza los datos de un estado de pago gestionado para facturación
-    // GET /api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado
+    // PUT /api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado
     app.put("/api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado/:id", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.updateEstadoPagoGestionado);
 
+    // Lista todos los estados de pago gestionados
+    // GET /api/obras/backoffice/estadopago/v1/allestadospagogestion
+    app.get("/api/obras/backoffice/estadopago/v1/allestadospagogestion", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.allestadospagogestion);
 
 
 

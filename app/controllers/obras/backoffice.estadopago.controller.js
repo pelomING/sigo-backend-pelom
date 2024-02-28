@@ -734,7 +734,7 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
 }
 
 // Actualiza los datos de un estado de pago gestionado para facturación
-// GET /api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado
+// PUT /api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado
 exports.updateEstadoPagoGestionado = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
       #swagger.description = 'Actualiza los datos de un estado de pago gestionado para facturación' 
@@ -785,6 +785,7 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
       res.status(404).send('No se encontro el estado de pago gestionado para el id ' + id);
       return;
     }
+
     let estado_edp_nuevo;
     let revisar = true;
     console.log("uno")
@@ -887,20 +888,94 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
       const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
       const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
-    const estadoPagoHistorial = {
-      codigo_pelom: estadoPagoGestion.codigo_pelom,
-      fecha_hora: fechahoy,
-      usuario_rut: user_name,
-      estado_edp: datos_ingresados.estado,
-      datos: datos_ingresados,
-      observacion: "Modificación de datos de estado pago gestionado"
-    }
-    console.log('datos_ingresados --> ', datos_ingresados);
-    console.log('estadoPagoHistorial --> ', estadoPagoHistorial);
-    res.status(200).send(estadoPagoGestion);
+      const estadoPagoHistorial = {
+        codigo_pelom: estadoPagoGestion.codigo_pelom,
+        fecha_hora: fechahoy,
+        usuario_rut: user_name,
+        estado_edp: datos_ingresados.estado,
+        datos: datos_ingresados,
+        observacion: "Modificación de datos de estado pago gestionado"
+      }
+      console.log('datos_ingresados --> ', datos_ingresados);
+      console.log('estadoPagoHistorial --> ', estadoPagoHistorial);
+
+
+        let salida = {};
+        const t = await sequelize.transaction();
+        try {
+    
+    
+          salida = {"error": false, "message": "Estado de pago actualizado ok"};
+
+          await EstadoPagoGestion.update(datos_ingresados, { where: { id: id }, transaction: t });
+    
+          await EstadoPagoHistorial.create(estadoPagoHistorial, { transaction: t });
+    
+          await t.commit();
+    
+        } catch (error) {
+          salida = { error: true, message: error }
+          await t.rollback();
+        }
+        if (salida.error) {
+          res.status(500).send(salida.message);
+        }else {
+          res.status(200).send(salida);
+        }
   }catch (error) {
-    console.log('error general --> ', error);
     res.status(500).send(error);
+  }
+}
+
+// Lista todos los estados de pago gestionados
+// GET /api/obras/backoffice/estadopago/v1/allestadospagogestion
+exports.allestadospagogestion = async (req, res) => {
+   /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Lista todos los estados de pago gestionados' */
+  try {
+    const sql = "SELECT epg.id, epg.codigo_pelom, fecha_presentacion::text, semana, detalle, numero_oc, \
+    fecha_entrega_oc::text, fecha_subido_portal::text, folio_portal, fecha_hes::text, numero_hes, \
+    fecha_solicita_factura::text, responsable_solicitud, numero_factura, fecha_factura::text, rango_dias, \
+    row_to_json(epe) as estado, eep.id_obra FROM obras.estado_pago_gestion epg join obras.estado_pago_estados \
+    epe on epg.estado = epe.id JOIN obras.encabezado_estado_pago eep on epg.codigo_pelom = eep.codigo_pelom";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const estadosPagoGes = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    if (estadosPagoGes) {
+        
+        for (const element of estadosPagoGes) {
+  
+              const detalle_salida = {
+                id: Number(element.id),
+                codigo_pelom: element.codigo_pelom?String(element.codigo_pelom):null,
+                fecha_presentacion: element.fecha_presentacion?String(element.fecha_presentacion):null,
+                semana: element.semana?Number(element.semana):null,
+                detalle: element.detalle?String(element.detalle):null,
+                numero_oc: element.numero_oc?String(element.numero_oc):null,
+                fecha_entrega_oc: element.fecha_entrega_oc?String(element.fecha_entrega_oc):null,
+                fecha_subido_portal: element.fecha_subido_portal?String(element.fecha_subido_portal):null,
+                folio_portal: element.folio_portal?String(element.folio_portal):null,
+                fecha_hes: element.fecha_hes?String(element.fecha_hes):null,
+                numero_hes: element.numero_hes?String(element.numero_hes):null,
+                fecha_solicita_factura: element.fecha_solicita_factura?String(element.fecha_solicita_factura):null,
+                responsable_solicitud: element.responsable_solicitud?String(element.responsable_solicitud):null,
+                numero_factura: element.numero_factura?String(element.numero_factura):null,
+                fecha_factura: element.fecha_factura?String(element.fecha_factura):null,
+                rango_dias: element.rango_dias?String(element.rango_dias):null,
+                estado: element.estado,
+                id_obra: element.id_obra?Number(element.id_obra):null
+              }
+              salida.push(detalle_salida);
+        };
+      }
+      if (salida===undefined){
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }else{
+        res.status(200).send(salida);
+      }
+  } catch (error) {
+      res.status(500).send(error);
   }
 }
 

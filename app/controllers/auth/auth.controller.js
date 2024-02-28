@@ -91,7 +91,9 @@ exports.signin = async (req, res) => {
       authorities.push("ROLE_" + element.name.toUpperCase());
     }
 
+    // Esta línea es la que envía las cookies al cliente
     req.session.token = token;
+    // *******************************************
 
     //* almacenar el log *//
     const loginHistorial = await LoginHistorial.create({
@@ -125,15 +127,11 @@ exports.signin = async (req, res) => {
     let menu_salida = [];
     if (menu) {
         for (const element of menu) {
-          console.log(element.items);
           element.items.sort(compararPorCampo);
           let items = [];
           for (const item of element.items) {
-            items.push({
-              "label": item.label,
-              "icon": item.icon,
-              "routerLink": item.routerLink
-            })
+            delete item.orden;
+            items.push(item);
           }
           const salida = {
             "label": element.label,
