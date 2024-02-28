@@ -965,7 +965,9 @@ exports.allestadospagogestion = async (req, res) => {
                 fecha_factura: element.fecha_factura?String(element.fecha_factura):null,
                 rango_dias: element.rango_dias?String(element.rango_dias):null,
                 estado: element.estado,
-                id_obra: element.id_obra?Number(element.id_obra):null
+                id_obra: element.id_obra?Number(element.id_obra):null,
+                codigo_obra: element.codigo_obra?String(element.codigo_obra):null,
+                nombre_obra: element.nombre_obra?String(element.nombre_obra):null
               }
               salida.push(detalle_salida);
         };
