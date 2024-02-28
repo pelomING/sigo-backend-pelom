@@ -961,7 +961,7 @@ exports.getResumenObras = async (req, res) => {
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
 
-    let sql = "SELECT estado, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    let sql = "SELECT estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
     (SELECT eo.id as id, eo.nombre as estado, count(eo.id) as cantidad, (SELECT count(id) as total from obras.obras) \
     as total FROM obras.estado_obra eo LEFT JOIN obras.obras o on o.estado = eo.id group by eo.id, eo.nombre \
     UNION \
@@ -977,7 +977,7 @@ exports.getResumenObras = async (req, res) => {
       return;
     }
 
-    sql = `SELECT tipo_obra, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje, bg_color \
+    sql = `SELECT tipo_obra, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, bg_color \
     as "bg-color", txt_color as "text-color"  from (SELECT tob.id as id, tob.descripcion as tipo_obra, tob.bg_color, \
       tob.txt_color, count(tob.id) as cantidad, (SELECT count(id) as total from obras.obras) as total FROM \
       obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id group by tob.id, tob.descripcion, \
@@ -994,7 +994,7 @@ exports.getResumenObras = async (req, res) => {
       return;
     }
 
-    sql = "SELECT zonal, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    sql = "SELECT zonal, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
     (SELECT c.id as id, c.nombre as zonal, count(c.id) as cantidad, (SELECT count(id) as total from obras.obras) \
     as total FROM _comun.zonal c LEFT JOIN obras.obras o on o.estado = c.id	group by c.id, c.nombre \
     UNION \
@@ -1007,8 +1007,7 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
-
-    sql = "select estado, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    sql = "select estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
     (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras \
     WHERE zona = 1) as total FROM obras.estado_obra eo left join obras.obras o on o.estado = eo.id \
     WHERE zona = 1 group by eo.id, eo.nombre \
@@ -1022,7 +1021,7 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
-    sql = "select estado, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
+    sql = "select estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
     (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras \
     WHERE zona = 2) as total FROM obras.estado_obra eo left join obras.obras o on o.estado = eo.id \
     WHERE zona = 2 group by eo.id, eo.nombre \
@@ -1038,7 +1037,7 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
-    sql = `SELECT tipo_obra, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje, bg_color \
+    sql = `SELECT tipo_obra, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, bg_color \
     as "bg-color", txt_color as "text-color"  from (SELECT tob.id as id, tob.descripcion as tipo_obra, tob.bg_color, \
       tob.txt_color, count(tob.id) as cantidad, (SELECT count(id) as total from obras.obras WHERE zona = 1) as total FROM \
       obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id WHERE zona = 1 group by tob.id, tob.descripcion, \
@@ -1054,7 +1053,7 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
-    sql = `SELECT tipo_obra, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje, bg_color \
+    sql = `SELECT tipo_obra, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, bg_color \
     as "bg-color", txt_color as "text-color"  from (SELECT tob.id as id, tob.descripcion as tipo_obra, tob.bg_color, \
       tob.txt_color, count(tob.id) as cantidad, (SELECT count(id) as total from obras.obras WHERE zona = 2) as total FROM \
       obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id WHERE zona = 2 group by tob.id, tob.descripcion, \
