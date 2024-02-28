@@ -1007,6 +1007,7 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
+
     sql = "select estado, cantidad, ((cantidad::numeric/total::numeric)*100)::numeric(5,2) as porcentaje from \
     (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras \
     WHERE zona = 1) as total FROM obras.estado_obra eo left join obras.obras o on o.estado = eo.id \
