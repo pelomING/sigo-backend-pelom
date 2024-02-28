@@ -983,8 +983,8 @@ exports.getResumenObras = async (req, res) => {
       obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id group by tob.id, tob.descripcion, \
       tob.bg_color, tob.txt_color \
       UNION \
-      SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, 'bg-color-500'::varchar as bg_color, \
-      'text-color-500'::varchar as txt_color,  (SELECT count(id) as total from obras.obras) as cantidad, \
+      SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, 'bg-purple-500'::varchar as bg_color, \
+      'text-purple-500'::varchar as txt_color,  (SELECT count(id) as total from obras.obras) as cantidad, \
       (SELECT count(id) as total from obras.obras) as total) as a order by a.id`;
     const resumenObrasTipoEstados = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenObrasTipoEstados) {
@@ -1043,8 +1043,8 @@ exports.getResumenObras = async (req, res) => {
       obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id WHERE zona = 1 group by tob.id, tob.descripcion, \
       tob.bg_color, tob.txt_color \
       UNION \
-      SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, 'bg-color-500'::varchar as bg_color, \
-      'text-color-500'::varchar as txt_color,  (SELECT count(id) as total from obras.obras WHERE zona = 1) as cantidad, \
+      SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, 'bg-purple-500'::varchar as bg_color, \
+      'text-purple-500'::varchar as txt_color,  (SELECT count(id) as total from obras.obras WHERE zona = 1) as cantidad, \
       (SELECT count(id) as total from obras.obras WHERE zona = 1) as total) as a order by a.id`;
     const resumenMnorteTipoObra = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenMnorteTipoObra) {
@@ -1059,8 +1059,8 @@ exports.getResumenObras = async (req, res) => {
       obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id WHERE zona = 2 group by tob.id, tob.descripcion, \
       tob.bg_color, tob.txt_color \
       UNION \
-      SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, 'bg-color-500'::varchar as bg_color, \
-      'text-color-500'::varchar as txt_color,  (SELECT count(id) as total from obras.obras WHERE zona = 2) as cantidad, \
+      SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, 'bg-purple-500'::varchar as bg_color, \
+      'text-purple-500'::varchar as txt_color,  (SELECT count(id) as total from obras.obras WHERE zona = 2) as cantidad, \
       (SELECT count(id) as total from obras.obras WHERE zona = 2) as total) as a order by a.id`;
     const resumenMsurTipoObra = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenMsurTipoObra) {
