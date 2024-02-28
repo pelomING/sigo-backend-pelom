@@ -933,11 +933,12 @@ exports.allestadospagogestion = async (req, res) => {
    /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
       #swagger.description = 'Lista todos los estados de pago gestionados' */
   try {
-    const sql = "SELECT epg.id, epg.codigo_pelom, fecha_presentacion::text, semana, detalle, numero_oc, \
+    const sql = "SELECT epg.id, epg.codigo_pelom, fecha_presentacion::text, semana, detalle, epg.numero_oc, \
     fecha_entrega_oc::text, fecha_subido_portal::text, folio_portal, fecha_hes::text, numero_hes, \
     fecha_solicita_factura::text, responsable_solicitud, numero_factura, fecha_factura::text, rango_dias, \
-    row_to_json(epe) as estado, eep.id_obra FROM obras.estado_pago_gestion epg join obras.estado_pago_estados \
-    epe on epg.estado = epe.id JOIN obras.encabezado_estado_pago eep on epg.codigo_pelom = eep.codigo_pelom";
+    row_to_json(epe) as estado, eep.id_obra, o.codigo_obra, o.nombre_obra FROM obras.estado_pago_gestion epg \
+    join obras.estado_pago_estados epe on epg.estado = epe.id JOIN obras.encabezado_estado_pago eep on \
+    epg.codigo_pelom = eep.codigo_pelom	JOIN obras.obras o on eep.id_obra = o.id";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const estadosPagoGes = await sequelize.query(sql, { type: QueryTypes.SELECT });
