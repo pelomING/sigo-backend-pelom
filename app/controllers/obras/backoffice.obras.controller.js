@@ -962,7 +962,7 @@ exports.getResumenObras = async (req, res) => {
     const sequelize = db.sequelize;
 
     let sql = "SELECT estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
-    (SELECT eo.id as id, eo.nombre as estado, count(eo.id) as cantidad, (SELECT count(id) as total from obras.obras) \
+    (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras) \
     as total FROM obras.estado_obra eo LEFT JOIN obras.obras o on o.estado = eo.id group by eo.id, eo.nombre \
     UNION \
     SELECT 999::bigint as id, 'TOTAL'::varchar as estado, (SELECT count(id) as total from obras.obras) as cantidad, \
@@ -979,7 +979,7 @@ exports.getResumenObras = async (req, res) => {
 
     sql = `SELECT tipo_obra, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, bg_color \
     as "bg-color", txt_color as "text-color"  from (SELECT tob.id as id, tob.descripcion as tipo_obra, tob.bg_color, \
-      tob.txt_color, count(tob.id) as cantidad, (SELECT count(id) as total from obras.obras) as total FROM \
+      tob.txt_color, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras) as total FROM \
       obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id group by tob.id, tob.descripcion, \
       tob.bg_color, tob.txt_color \
       UNION \
@@ -995,8 +995,8 @@ exports.getResumenObras = async (req, res) => {
     }
 
     sql = "SELECT zonal, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
-    (SELECT c.id as id, c.nombre as zonal, count(c.id) as cantidad, (SELECT count(id) as total from obras.obras) \
-    as total FROM _comun.zonal c LEFT JOIN obras.obras o on o.estado = c.id	group by c.id, c.nombre \
+    (SELECT c.id as id, c.nombre as zonal, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras) \
+    as total FROM _comun.zonal c LEFT JOIN obras.obras o on o.zona = c.id	group by c.id, c.nombre \
     UNION \
     SELECT 999::bigint as id, 'TOTAL'::varchar as estado, (SELECT count(id) as total from obras.obras) as cantidad, \
     (SELECT count(id) as total from obras.obras) as total) as a ORDER by a.id";
@@ -1039,7 +1039,7 @@ exports.getResumenObras = async (req, res) => {
     }
     sql = `SELECT tipo_obra, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, bg_color \
     as "bg-color", txt_color as "text-color"  from (SELECT tob.id as id, tob.descripcion as tipo_obra, tob.bg_color, \
-      tob.txt_color, count(tob.id) as cantidad, (SELECT count(id) as total from obras.obras WHERE zona = 1) as total FROM \
+      tob.txt_color, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras WHERE zona = 1) as total FROM \
       obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id WHERE zona = 1 group by tob.id, tob.descripcion, \
       tob.bg_color, tob.txt_color \
       UNION \
@@ -1055,7 +1055,7 @@ exports.getResumenObras = async (req, res) => {
     }
     sql = `SELECT tipo_obra, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, bg_color \
     as "bg-color", txt_color as "text-color"  from (SELECT tob.id as id, tob.descripcion as tipo_obra, tob.bg_color, \
-      tob.txt_color, count(tob.id) as cantidad, (SELECT count(id) as total from obras.obras WHERE zona = 2) as total FROM \
+      tob.txt_color, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras WHERE zona = 2) as total FROM \
       obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id WHERE zona = 2 group by tob.id, tob.descripcion, \
       tob.bg_color, tob.txt_color \
       UNION \
