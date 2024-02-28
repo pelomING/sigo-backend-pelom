@@ -37,7 +37,7 @@ exports.findAllObra = async (req, res) => {
       o.jefe_delegacion, case when cep.cuenta is null then 0 else cep.cuenta end as \
       cantidad_estados_pago, row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as \
       fecha_estado, row_to_json(op) as obra_paralizada, row_to_json(oc) as obras_cierres, evm.vistas, cep.hay_dato as hay_ep, \
-      erd.hay_dato as hay_rd  FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
+      erd.hay_dato as hay_rd,vt.hay_dato_vt as hay_vt FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
       obras.obras_historial_cambios order by id_obra, fecha_hora desc) ohc on o.id = ohc.id_obra left join \
       (SELECT distinct on (id_obra) id_obra, fecha_hora::text, responsable, motivo, observacion FROM obras.obras_paralizacion \
       order by id_obra, fecha_hora desc) as op on o.id = op.id_obra left join (SELECT distinct on (id_obra) id_obra, fecha_hora::text, \
@@ -50,7 +50,10 @@ exports.findAllObra = async (req, res) => {
       (select id_obra, count(id) as cuenta, sum(case when id_estado_pago is null then 1 else 0 end) as pendiente, case when count(id) > 0 then true else false end as hay_dato from \
       obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra left join \
       (select id_obra, count(id) as cuenta, case when count(id) > 0 then true else false end as hay_dato \
-      FROM obras.encabezado_estado_pago group by id_obra) as cep on o.id = cep.id_obra left join \
+      FROM obras.encabezado_estado_pago group by id_obra) as cep on o.id = cep.id_obra \
+      LEFT JOIN   \
+      (SELECT id_obra,case when count(id_obra) > 0 then true else false end as hay_dato_vt FROM obras.visitas_terreno group by id_obra) as vt on o.id = vt.id_obra \
+      left join \
       (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor os join _comun.oficinas o \
         on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) ofi on o.oficina = ofi.id \
         inner join (SELECT estado_obra_id, requiere_rep_dia, requiere_est_pago, array_agg(vista) as vistas \
@@ -59,6 +62,7 @@ exports.findAllObra = async (req, res) => {
         rec on o.recargo_distancia = rec.id WHERE case when evm.requiere_rep_dia then case when erd.hay_dato \
         then true else false end else true end AND case when evm.requiere_est_pago then case when cep.hay_dato \
         then true else false end else true end and not o.eliminada" + where + " order by o.id desc;";
+
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const obras = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -100,7 +104,8 @@ exports.findAllObra = async (req, res) => {
                 recargo_distancia: element.recargo_distancia, //json
                 fecha_estado: String(element.fecha_estado),
                 obra_paralizada: element.obra_paralizada?element.obra_paralizada:null,
-                obras_cierres: element.obras_cierres?element.obras_cierres:null
+                obras_cierres: element.obras_cierres?element.obras_cierres:null,
+                hay_vt: element.hay_vt?element.hay_vt:null
               }
               salida.push(detalle_salida);
         };
