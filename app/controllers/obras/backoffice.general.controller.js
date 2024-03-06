@@ -22,7 +22,9 @@ exports.findAllTipoObra = async (req, res) => {
           for (element of data) {
             const detalle_salida = {
               id: Number(element.id),
-              descripcion: String(element.descripcion)
+              descripcion: String(element.descripcion),
+              bg_color: String(element.bg_color),
+              txt_color: String(element.txt_color)
             }
             salida.push(detalle_salida);
           }
