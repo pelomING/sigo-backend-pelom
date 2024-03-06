@@ -181,10 +181,11 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
        erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades \
        drd join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) \
        a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
-       on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
+       on rd.id_obra = o.id left join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
        jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE "+b;
 
-        console.log("sql: "+sql);
+        console.log("sql findAllEncabezadoReporteDiarioByParametros : "+sql);
+
         const { QueryTypes } = require('sequelize'); 
         const sequelize = db.sequelize;
         const encabezadoReporte = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
