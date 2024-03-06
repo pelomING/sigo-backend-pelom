@@ -1053,15 +1053,32 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
-    sql = `SELECT tipo_obra, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, bg_color \
-    as "bg-color", txt_color as "text-color"  from (SELECT tob.id as id, tob.descripcion as tipo_obra, tob.bg_color, \
-      tob.txt_color, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras WHERE zona = 2) as total FROM \
-      obras.tipo_obra tob LEFT JOIN (select * from obras.obras WHERE zona = 2) o on o.tipo_obra = tob.id group by tob.id, tob.descripcion, \
-      tob.bg_color, tob.txt_color \
-      UNION \
-      SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, 'bg-purple-500'::varchar as bg_color, \
-      'text-purple-500'::varchar as txt_color,  (SELECT count(id) as total from obras.obras WHERE zona = 2) as cantidad, \
-      (SELECT count(id) as total from obras.obras WHERE zona = 2) as total) as a order by a.id`;
+    sql = `SELECT tipo_obra, 
+                  cantidad, 
+                  case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, 
+                  bg_color as "bg-color", 
+                  txt_color as "text-color"  
+            FROM 
+              (
+                SELECT tob.id as id, 
+                      tob.descripcion as tipo_obra, 
+                      tob.bg_color, 
+                      tob.txt_color, 
+                      count(o.id) as cantidad, 
+                      (SELECT count(id) as total FROM obras.obras WHERE zona = 2) as total 
+                FROM obras.tipo_obra tob 
+                      LEFT JOIN 
+                        (select * from obras.obras WHERE zona = 2) o 
+                      ON o.tipo_obra = tob.id 
+                GROUP BY tob.id, tob.descripcion, tob.bg_color, tob.txt_color 
+              UNION 
+                SELECT 999::bigint as id, 
+                'TOTAL'::varchar as tipo_obra, 
+                'bg-purple-500'::varchar as bg_color,
+                'text-purple-500'::varchar as txt_color, 
+                (SELECT count(id) as total from obras.obras WHERE zona = 2) as cantidad, 
+                (SELECT count(id) as total from obras.obras WHERE zona = 2) as total
+              ) as a order by a.id`;
     const resumenMsurTipoObra = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenMsurTipoObra) {
       respuesta.resumen_msur_tipo_obra = resumenMsurTipoObra;

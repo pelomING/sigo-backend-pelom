@@ -28,14 +28,7 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
       #swagger.description = 'Devuelve todos los ancabezados de reporte diario' */
     try {
-      /*
-        const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
-        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
-        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
-        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-        num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join \
-        obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = jf.id";
-        */
+
        const sql = "SELECT rd.id, id_estado_pago, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
@@ -146,43 +139,28 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
     try {
       let b = sql_array.reduce((total, num) => total + " AND " + num);
       if (b){
-        /*
-        const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
-        fecha_reporte::text, jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, \
-        observaciones, entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, \
-        sector, hora_salida_base::text, hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, \
-        alimentador, row_to_json(c) as comuna, num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo \
-        tt on rd.id_area = tt.id join obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo WHERE "+b;*/
-
-        /*
-        const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
-        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
-        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
-        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-        num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join \
-        obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = jf.id WHERE "+b;
-        */
-       const sql = "SELECT rd.id, id_estado_pago, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
-       row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
-       entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
-       hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-       num_documento, flexiapp, row_to_json(rec) as recargo, (select array_agg(detalle) as detalle_actividad from (select row_to_json(a) as detalle from \
-       (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, \
-       json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
-       case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 \
-       end as unitario, case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then \
-       uc_traslado else 0 end * cantidad as total FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion \
-       top on dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, \
-       uc_retiro, uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM obras.maestro_actividades ma join \
-       obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) \
-       ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id \
-       WHERE dra.id_encabezado_rep = rd.id) a) b), (select array_agg(detalle) as detalle_otros from (select row_to_json(a) \
-       as detalle from (SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, json_build_object('id', erd.id, 'id_obra', \
-       erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades \
-       drd join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) \
-       a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
-       on rd.id_obra = o.id left join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
-       jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE "+b;
+      
+       const sql = `SELECT rd.id, id_estado_pago, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, 
+       row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, 
+       entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, 
+       hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, 
+       num_documento, flexiapp, row_to_json(rec) as recargo, (select array_agg(detalle) as detalle_actividad from (select row_to_json(a) as detalle from 
+       (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, 
+       json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, 
+       case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 
+       end as unitario, case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then 
+       uc_traslado else 0 end * cantidad as total FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion 
+       top on dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, 
+       uc_retiro, uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM obras.maestro_actividades ma join 
+       obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) 
+       ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id 
+       WHERE dra.id_encabezado_rep = rd.id) a) b), (select array_agg(detalle) as detalle_otros from (select row_to_json(a) 
+       as detalle from (SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, json_build_object('id', erd.id, 'id_obra', 
+       erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades 
+       drd join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) 
+       a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o 
+       on rd.id_obra = o.id left join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = 
+       jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE ${b}`;
 
         console.log("sql findAllEncabezadoReporteDiarioByParametros : "+sql);
 
