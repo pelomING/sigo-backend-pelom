@@ -1386,6 +1386,7 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
                 LEFT JOIN obras.recargos rec1 
                     ON o.recargo_distancia = rec1.id 
                 WHERE erd.id_obra = ${id_obra} 
+                ${condicion_reporte}
                 AND (rec.porcentaje is null or rec.porcentaje = 0) 
                 ORDER BY 1,2,3;`;
 
@@ -1510,6 +1511,7 @@ let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
                 LEFT JOIN obras.recargos rec1 
                     ON o.recargo_distancia = rec1.id 
                 WHERE erd.id_obra = ${id_obra} 
+                ${condicion_reporte}
                 AND (rec.porcentaje is not null and rec.porcentaje > 0) 
                 ORDER BY 1,2,3;`;
 
