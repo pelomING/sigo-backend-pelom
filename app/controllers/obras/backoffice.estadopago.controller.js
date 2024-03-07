@@ -34,8 +34,15 @@ exports.findAllRecargo = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
       #swagger.description = 'Devuelve todos los Recargos' */
     try {
-        const sql = "SELECT r.id, nombre, row_to_json(tr) as tipo_recargo, porcentaje \
-        FROM obras.recargos r join obras.tipo_recargo tr on r.id_tipo_recargo = tr.id";
+        const sql = `SELECT 
+                        r.id, 
+                        nombre, 
+                        row_to_json(tr) as tipo_recargo, 
+                        porcentaje 
+                    FROM obras.recargos r 
+                    JOIN obras.tipo_recargo tr 
+                    ON r.id_tipo_recargo = tr.id`;
+
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const recargo = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -699,16 +706,51 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
               return;
             }
           };
-        const sql = "SELECT eep.id, eep.id_obra, eep.fecha_estado_pago, row_to_json(d) as cliente, \
-        eep.fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, eep.solicitado_por, \
-        row_to_json(c) as comuna, eep.direccion, eep.fecha_ejecucion, eep.jefe_delegacion, eep.codigo_pelom, \
-        row_to_json(sc) as supervisor, row_to_json(jf) as jefe_faena, eep.estado, eep.ot, eep.sdi, \
-        row_to_json(cc) as coordinador, eep.recargo_nombre, eep.recargo_porcentaje, eep.flexiapp, o.codigo_obra, o.nombre_obra, \
-        eep.valor_uc FROM obras.encabezado_estado_pago eep LEFT JOIN obras.delegaciones d on eep.cliente = d.id LEFT JOIN \
-        obras.tipo_trabajo tt on eep.tipo_trabajo = tt.id LEFT JOIN obras.segmento s on eep.segmento = s.id \
-        LEFT JOIN _comun.comunas c on eep.comuna = c.codigo LEFT JOIN obras.supervisores_contratista sc on \
-        eep.supervisor = sc.id LEFT JOIN obras.jefes_faena jf on eep.jefe_faena = jf.id LEFT JOIN \
-        obras.coordinadores_contratista cc on eep.coordinador = cc.id JOIN obras.obras o on eep.id_obra = o.id WHERE id_obra = " + id_obra + ";";
+        const sql = `SELECT 
+                        eep.id, 
+                        eep.id_obra, 
+                        eep.fecha_estado_pago, 
+                        row_to_json(d) as cliente, 
+                        eep.fecha_asignacion, 
+                        row_to_json(tt) as tipo_trabajo, 
+                        row_to_json(s) as segmento, 
+                        eep.solicitado_por, 
+                        row_to_json(c) as comuna, 
+                        eep.direccion, 
+                        eep.fecha_ejecucion, 
+                        eep.jefe_delegacion, 
+                        eep.codigo_pelom, 
+                        row_to_json(sc) as supervisor, 
+                        row_to_json(jf) as jefe_faena, 
+                        eep.estado, eep.ot, eep.sdi, 
+                        row_to_json(cc) as coordinador, 
+                        eep.recargo_nombre, 
+                        eep.recargo_porcentaje, 
+                        eep.flexiapp, 
+                        o.codigo_obra, 
+                        o.nombre_obra, 
+                        eep.valor_uc 
+                    FROM 
+                        obras.encabezado_estado_pago eep 
+                    LEFT JOIN obras.delegaciones d 
+                        ON eep.cliente = d.id 
+                    LEFT JOIN obras.tipo_trabajo tt 
+                        ON eep.tipo_trabajo = tt.id 
+                    LEFT JOIN obras.segmento s 
+                        ON eep.segmento = s.id 
+                    LEFT JOIN _comun.comunas c 
+                        ON eep.comuna = c.codigo 
+                    LEFT JOIN obras.supervisores_contratista sc 
+                        ON eep.supervisor = sc.id 
+                    LEFT JOIN obras.jefes_faena jf 
+                        ON eep.jefe_faena = jf.id 
+                    LEFT JOIN obras.coordinadores_contratista cc 
+                        ON eep.coordinador = cc.id 
+                    JOIN obras.obras o 
+                        ON eep.id_obra = o.id 
+                    WHERE 
+                        id_obra = ${id_obra} ;`;
+
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
             const lstEstadosPagos = await sequelize.query(sql, { type: QueryTypes.SELECT });
