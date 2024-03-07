@@ -11,25 +11,7 @@ const JefesFaena = db.jefesFaena;
 const TipoActividad = db.tipoActividad;
 const TipoTrabajo = db.tipoTrabajo;
 
-/***********************************************************************************/
-/*                                                                                 */
-/*                                                                                 */
-/*                                 REPORTE DIARIO                                  */
-/*                                                                                 */
-/*                                                                                 */
-/***********************************************************************************/
-
-
-/*********************************************************************************** */
-/* Consulta todos los encabezados reportes diarios
-;
-*/
-exports.findAllEncabezadoReporteDiario = async (req, res) => {
-  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
-      #swagger.description = 'Devuelve todos los ancabezados de reporte diario' */
-    try {
-
-       const sql = `SELECT 
+const sql_all_reportes_diarios = `SELECT 
                         rd.id, 
                         id_estado_pago,
                         eep.codigo_pelom, 
@@ -129,6 +111,26 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
                     LEFT JOIN obras.encabezado_estado_pago eep
 						            ON rd.id = eep.id`;
 
+/***********************************************************************************/
+/*                                                                                 */
+/*                                                                                 */
+/*                                 REPORTE DIARIO                                  */
+/*                                                                                 */
+/*                                                                                 */
+/***********************************************************************************/
+
+
+/*********************************************************************************** */
+/* Consulta todos los encabezados reportes diarios
+;
+*/
+exports.findAllEncabezadoReporteDiario = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los ancabezados de reporte diario' */
+    try {
+
+        const sql = sql_all_reportes_diarios;
+
 
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
@@ -218,7 +220,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
     try {
       let b = sql_array.reduce((total, num) => total + " AND " + num);
       if (b){
-      
+      /*
        const sql = `SELECT rd.id, id_estado_pago, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, 
        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, 
        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, 
@@ -240,8 +242,9 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
        a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o 
        on rd.id_obra = o.id left join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = 
        jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE ${b}`;
+       */
 
-        console.log("sql findAllEncabezadoReporteDiarioByParametros : "+sql);
+        const sql = sql_all_reportes_diarios + ` WHERE ${b}`;
 
         const { QueryTypes } = require('sequelize'); 
         const sequelize = db.sequelize;
@@ -326,12 +329,38 @@ exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
      let b = sql_array.reduce((total, num) => total + " AND " + num);
      if (b){
       
-      const sql = "SELECT rd.id, id_estado_pago, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
-      row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
-      entregado_por_persona, revisado_por_persona, sector, alimentador, row_to_json(c) as comuna, num_documento, \
-      flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
-      on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
-      jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE "+b+" order by fecha_reporte desc limit 1;";
+      const sql = `SELECT 
+                      rd.id, 
+                      id_estado_pago, 
+                      json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, 
+                      row_to_json(jf) as jefe_faena, 
+                      sdi, 
+                      rd.gestor_cliente, 
+                      row_to_json(tt) as id_area, 
+                      brigada_pesada, 
+                      observaciones, 
+                      entregado_por_persona, 
+                      revisado_por_persona, 
+                      sector, 
+                      alimentador, 
+                      row_to_json(c) as comuna, 
+                      num_documento, 
+                      flexiapp 
+                  FROM 
+                      obras.encabezado_reporte_diario rd 
+                  JOIN obras.tipo_trabajo tt 
+                      ON rd.id_area = tt.id 
+                  JOIN obras.obras o 
+                      ON rd.id_obra = o.id 
+                  JOIN _comun.comunas c 
+                      ON rd.comuna = c.codigo 
+                  LEFT JOIN obras.jefes_faena jf 
+                      ON rd.jefe_faena = jf.id 
+                  LEFT JOIN obras.recargos rec 
+                      ON rd.recargo_hora = rec.id 
+                  WHERE ${b} 
+                  ORDER BY fecha_reporte DESC 
+                  LIMIT 1;`;
 
        console.log("sql: "+sql);
        const { QueryTypes } = require('sequelize'); 
