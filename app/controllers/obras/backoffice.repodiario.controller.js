@@ -220,7 +220,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
     try {
       let b = sql_array.reduce((total, num) => total + " AND " + num);
       if (b){
-      /*
+      
        const sql = `SELECT rd.id, id_estado_pago, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, 
        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, 
        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, 
@@ -242,9 +242,9 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
        a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o 
        on rd.id_obra = o.id left join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = 
        jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE ${b}`;
-       */
+       
 
-        const sql = sql_all_reportes_diarios + ` WHERE ${b}`;
+        //const sql = sql_all_reportes_diarios + ` WHERE ${b}`;
 
         const { QueryTypes } = require('sequelize'); 
         const sequelize = db.sequelize;
