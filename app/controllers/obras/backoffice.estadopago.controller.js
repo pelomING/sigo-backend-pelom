@@ -877,7 +877,7 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                           ON o.oficina = ofi.id 
                       LEFT JOIN obras.jefes_faena jf 
                           ON eep.jefe_faena = jf.id 
-                      WHERE eep.id = id_estado_pago`;
+                      WHERE eep.id = ${id_estado_pago}`;
 
             const historiaEstadoPago = await sequelize.query(sql, { type: QueryTypes.SELECT });
             let salida = [];
