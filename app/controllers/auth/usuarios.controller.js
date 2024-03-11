@@ -197,3 +197,33 @@ exports.createUser = async (req, res) => {
           
         }
 }
+/*********************************************************************************** */
+/* Resetea password para un usuario
+  app.post("/api/usuarios/v1/resetpassword", usuariosController.resetPassword);
+*/
+exports.resetPassword = async (req, res) => {
+    /*  #swagger.tags = ['Autenticación']
+        #swagger.description = 'Resetea password para un usuario'
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Resetea password para un usuario',
+            required: true,
+            schema: {
+                username: "rut del usuario, sin puntos"
+            }
+        }
+        */
+        try {
+          const user = await User.findOne({where: {username: req.body.username}});
+          if (!user) {
+            res.status(404).send( 'Usuario no encontrado' );
+          } else {
+            //Para resetear la password se usará el mismo nombre de usuario como password
+            user.password = bcrypt.hashSync(req.body.username, 8);
+            await user.save();
+            res.status(200).send( 'Reset de password OK!' );
+          }
+        } catch (error) {
+          res.status(500).send( error.message );
+        }
+}
