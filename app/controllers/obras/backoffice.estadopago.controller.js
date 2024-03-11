@@ -501,7 +501,7 @@ exports.creaEstadoPago = async (req, res) => {
     };
 
     const id_obra = req.body.id_obra;
-    const ids_reporte = req.body.ids_reporte?req.query.ids_reporte:null;
+    const ids_reporte = req.body.ids_reporte?req.body.ids_reporte:null;
     const array_id_reporte = ids_reporte?ids_reporte.split(",").map((e) => Number(e)):undefined;
     if (array_id_reporte) {
       for (const e of array_id_reporte){
@@ -1217,6 +1217,7 @@ exports.allestadospagogestion = async (req, res) => {
 
 let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
   try {
+    console.log('listadoActividadesByIdObra - ids_reporte -> ',ids_reporte);
     const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
 
     const sql = `SELECT 
@@ -1310,6 +1311,7 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
 let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
   try {
 
+    console.log('listadoActividadesAdicionalesByIdObra - ids_reporte -> ',ids_reporte);
     const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
 
     const sql = `SELECT 
@@ -1437,6 +1439,7 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
 let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
   try 
   {
+    console.log('listadoActividadesHoraExtraByIdObra - ids_reporte -> ',ids_reporte);
     const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
 
     const sql = `SELECT 

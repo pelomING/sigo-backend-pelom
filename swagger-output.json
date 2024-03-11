@@ -3158,11 +3158,6 @@
                 }
               }
             }
-          },
-          {
-            "name": "ids_reporte",
-            "in": "query",
-            "type": "string"
           }
         ],
         "responses": {
