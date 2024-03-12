@@ -240,9 +240,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "username": {
-                  "example": "any"
-                },
                 "password": {
                   "example": "any"
                 },
@@ -259,6 +256,48 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/ajustes/v1/resetpassword": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Resetea password para un usuario",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Resetea password para un usuario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "example": "rut del usuario, sin puntos"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "401": {
             "description": "Unauthorized"
@@ -2825,6 +2864,11 @@
             "name": "id_obra",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "ids_reporte",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -2857,6 +2901,11 @@
             "name": "id_obra",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "ids_reporte",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -2887,6 +2936,11 @@
         "parameters": [
           {
             "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "ids_reporte",
             "in": "query",
             "type": "string"
           }
@@ -2953,6 +3007,11 @@
             "name": "id_obra",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "ids_reporte",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -2979,73 +3038,162 @@
         "tags": [
           "Obras - Backoffice - Estado de Pago"
         ],
-        "description": "Lista los estados de pago por id_obra",
+        "description": "Crea un estado de pago",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "description": "Datos para el crear estado de pago",
+            "required": false,
             "schema": {
               "type": "object",
               "properties": {
                 "id_obra": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 39
                 },
                 "cliente": {
-                  "example": "any"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 2
+                    },
+                    "nombre": {
+                      "type": "string",
+                      "example": "CGE Distribución Curicó"
+                    }
+                  }
                 },
                 "fecha_asignacion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2024-02-21"
                 },
                 "tipo_trabajo": {
-                  "example": "any"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "descripcion": {
+                      "type": "string",
+                      "example": "CONSTRUCCIÓN"
+                    }
+                  }
                 },
                 "segmento": {
-                  "example": "any"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "nombre": {
+                      "type": "string",
+                      "example": "INVERSIÓN"
+                    },
+                    "descripcion": {
+                      "type": "string",
+                      "example": ""
+                    }
+                  }
                 },
                 "solicitado_por": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Luis Pino"
                 },
                 "supervisor_pelom": {
-                  "example": "any"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "oficina": {
+                      "type": "string",
+                      "example": "Curicó"
+                    },
+                    "supervisor": {
+                      "type": "string",
+                      "example": "Eduardo Soto"
+                    }
+                  }
                 },
                 "coordinador": {
-                  "example": "any"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 4
+                    },
+                    "nombre": {
+                      "type": "string",
+                      "example": "ALEXIS NICOLAS TAPIA GONZALEZ"
+                    },
+                    "id_empresa": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "rut": {
+                      "type": "string",
+                      "example": "18983279-6"
+                    }
+                  }
                 },
                 "comuna": {
-                  "example": "any"
+                  "type": "object",
+                  "properties": {
+                    "codigo": {
+                      "type": "string",
+                      "example": "07301"
+                    },
+                    "nombre": {
+                      "type": "string",
+                      "example": "Curicó"
+                    },
+                    "provincia": {
+                      "type": "string",
+                      "example": "073"
+                    }
+                  }
                 },
                 "direccion": {
-                  "example": "any"
-                },
-                "flexiapp": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Sector la herradura"
                 },
                 "fecha_ejecucion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "2024-02-28"
                 },
                 "jefe_delegacion": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Jorge Castro"
                 },
                 "jefe_faena": {
-                  "example": "any"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 4
+                    },
+                    "nombre": {
+                      "type": "string",
+                      "example": "AYRTON ALEXANDER YEVENES HINOJOSA"
+                    }
+                  }
                 },
                 "codigo_pelom": {
-                  "example": "any"
-                },
-                "ot": {
-                  "example": "any"
-                },
-                "sdi": {
-                  "example": "any"
-                },
-                "recargo_nombre": {
-                  "example": "any"
-                },
-                "recargo_porcentaje": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "EDP-10000051-2024"
                 },
                 "valor_uc": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 10302
+                },
+                "ids_reporte": {
+                  "type": "string",
+                  "example": "1,2,3,4,5"
                 }
               }
             }

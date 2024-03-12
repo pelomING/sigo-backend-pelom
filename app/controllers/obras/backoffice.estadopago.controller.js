@@ -34,8 +34,15 @@ exports.findAllRecargo = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
       #swagger.description = 'Devuelve todos los Recargos' */
     try {
-        const sql = "SELECT r.id, nombre, row_to_json(tr) as tipo_recargo, porcentaje \
-        FROM obras.recargos r join obras.tipo_recargo tr on r.id_tipo_recargo = tr.id";
+        const sql = `SELECT 
+                        r.id, 
+                        nombre, 
+                        row_to_json(tr) as tipo_recargo, 
+                        porcentaje 
+                    FROM obras.recargos r 
+                    JOIN obras.tipo_recargo tr 
+                    ON r.id_tipo_recargo = tr.id`;
+
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const recargo = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -84,40 +91,61 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
           return;
         }
       };
-      /*
-    const sql = "select o.id as id_obra, o.codigo_obra as codigo_obra, o.nombre_obra as nombre_obra, row_to_json(d) \
-    as cliente, fecha_llegada::text as fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, \
-    gestor_cliente as solicitado_por, string_to_array(numero_ot || ',' || (select string_agg(sdi, ',') as sdi from \
-    (SELECT distinct on (sdi, id_obra) id_obra, sdi	FROM obras.encabezado_reporte_diario WHERE sdi is not null and \
-    id_obra = 1	order by sdi, id_obra) a group by id_obra), ',') as ot_sdi, row_to_json(cc) as supervisor_pelom, \
-    row_to_json(c) as comuna, ubicacion as direccion, (SELECT string_to_array(string_agg(array_to_string(\
-      flexiapp, ','::text), ','), ',') as datos	FROM obras.encabezado_reporte_diario WHERE id_obra = o.id and \
-      flexiapp is not null group by id_obra) as flexiapp, fecha_termino as fecha_ejecucion, null as jefe_delegacion, \
-      (SELECT row_to_json(jf) as jefe_faena FROM obras.encabezado_reporte_diario erd join obras.jefes_faena jf \
-      on erd.jefe_faena = jf.id	where id_obra = 1 order by fecha_reporte desc  limit 1) as jefe_faena, null as \
-      codigo_pelom from obras.obras o left join obras.delegaciones d on o.delegacion = d.id left join \
-      obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.segmento s on o.segmento = s.id left \
-      join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id left join _comun.comunas c \
-      on o.comuna = c.codigo WHERE o.id = " + id_obra;
-      */
-     const sql = "select o.id as id_obra, o.codigo_obra as codigo_obra, o.nombre_obra as nombre_obra, row_to_json(d) \
-     as cliente, fecha_llegada::text as fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, \
-     gestor_cliente as solicitado_por, repo.sdi as sdi, row_to_json(ofi) as supervisor_pelom, row_to_json(cc) as \
-     coordinador, row_to_json(c) as comuna, ubicacion as direccion, repo.flexiapp as flexiapp, fecha_termino::text as \
-     fecha_ejecucion, o.jefe_delegacion as jefe_delegacion, json_build_object('id', repo.id_jefe, 'nombre', \
-     repo.jefe_faena) as jefe_faena, repo.num_documento as numero_documento, rec.nombre as recargo_nombre, \
-     rec.porcentaje as recargo_porcentaje, (SELECT 'EDP-' || (case when max(id) is null then 0 else max(id) end + 10000001)::text || \
-     '-' || substring(current_timestamp::text,1,4) FROM obras.encabezado_estado_pago) as codigo_pelom, \
-     (SELECT precio FROM obras.valor_uc where oficina = o.oficina order by oficina, fecha desc limit 1) as valor_uc \
-     from obras.obras o left join obras.delegaciones d on o.delegacion = d.id left join obras.tipo_trabajo tt on \
-     o.tipo_trabajo = tt.id left join obras.segmento s on o.segmento = s.id left join obras.coordinadores_contratista \
-     cc on     o.coordinador_contratista = cc.id left join _comun.comunas c on o.comuna = c.codigo left join \
-     (SELECT os.id, o.nombre as oficina, so.nombre as supervisor FROM obras.oficina_supervisor os join \
-      _comun.oficinas o on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) \
-      ofi on o.oficina = ofi.id left join (SELECT id_obra, jf.nombre as jefe_faena, jf.id as id_jefe, sdi, \
-        num_documento, flexiapp[1]  FROM obras.encabezado_reporte_diario erd join obras.jefes_faena jf on \
-        erd.jefe_faena = jf.id	where id_obra = " + id_obra + " order by fecha_reporte desc limit 1) as repo on o.id = \
-        repo.id_obra left join obras.recargos rec on o.recargo_distancia = rec.id WHERE o.id = " + id_obra;
+      
+     const sql = `SELECT 
+                  o.id as id_obra, 
+                  o.codigo_obra as codigo_obra, 
+                  o.nombre_obra as nombre_obra, 
+                  row_to_json(d) as cliente, 
+                  fecha_llegada::text as fecha_asignacion, 
+                  row_to_json(tt) as tipo_trabajo, 
+                  row_to_json(s) as segmento, 
+                  gestor_cliente as solicitado_por, 
+                  repo.sdi as sdi, 
+                  row_to_json(ofi) as supervisor_pelom, 
+                  row_to_json(cc) as coordinador, 
+                  row_to_json(c) as comuna, 
+                  ubicacion as direccion, 
+                  repo.flexiapp as flexiapp, 
+                  fecha_termino::text as fecha_ejecucion, 
+                  o.jefe_delegacion as jefe_delegacion, 
+                  json_build_object('id', repo.id_jefe, 'nombre', repo.jefe_faena) as jefe_faena, 
+                  repo.num_documento as numero_documento, 
+                  rec.nombre as recargo_nombre, 
+                  rec.porcentaje as recargo_porcentaje, 
+                  (SELECT 'EDP-' || (case when max(id) is null then 0 else max(id) end + 10000001)::text || 
+                  '-' || substring(current_timestamp::text,1,4) 
+                    FROM obras.encabezado_estado_pago) as codigo_pelom, 
+                  (SELECT precio 
+                    FROM obras.valor_uc 
+                    WHERE oficina = o.oficina 
+                    ORDER BY oficina, fecha desc 
+                    LIMIT 1) as valor_uc 
+                FROM obras.obras o 
+                      LEFT JOIN obras.delegaciones d 
+                            ON o.delegacion = d.id 
+                      LEFT JOIN obras.tipo_trabajo tt 
+                            ON o.tipo_trabajo = tt.id 
+                      LEFT JOIN obras.segmento s 
+                            ON o.segmento = s.id 
+                      LEFT JOIN obras.coordinadores_contratista cc 
+                            ON o.coordinador_contratista = cc.id 
+                      LEFT JOIN _comun.comunas c 
+                            ON o.comuna = c.codigo 
+                      LEFT JOIN (SELECT os.id, o.nombre as oficina, so.nombre as supervisor 
+                                  FROM obras.oficina_supervisor os 
+                                  JOIN _comun.oficinas o ON os.oficina = o.id 
+                                  JOIN obras.supervisores_contratista so ON os.supervisor = so.id) ofi 
+                            ON o.oficina = ofi.id 
+                      LEFT JOIN (SELECT id_obra, jf.nombre as jefe_faena, jf.id as id_jefe, sdi, num_documento, flexiapp[1] 
+                                FROM obras.encabezado_reporte_diario erd join obras.jefes_faena jf 
+                                ON erd.jefe_faena = jf.id	
+                                WHERE id_obra = ${id_obra} 
+                                ORDER BY fecha_reporte desc LIMIT 1) as repo 
+                            ON o.id = repo.id_obra 
+                      LEFT JOIN obras.recargos rec 
+                            ON o.recargo_distancia = rec.id 
+                      WHERE o.id = ${id_obra}`;
           
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
@@ -187,8 +215,18 @@ exports.getAllActividadesByIdObra = async (req, res) => {
             }
           };
 
+          const ids_reporte = req.query.ids_reporte?req.query.ids_reporte:null;
+          const array_id_reporte = ids_reporte?ids_reporte.split(",").map((e) => Number(e)):undefined;
+          if (array_id_reporte) {
+            for (const e of array_id_reporte){
+              if (Number.isNaN(e)){
+                res.status(400).send("Hay un problema con el formato de ids_reporte");
+                return
+              }
+            }
+          };
           //Va a consultar a la funcion listadoActividadesByIdObra definida mas abajo
-          const consulta = await listadoActividadesByIdObra(id_obra);
+          const consulta = await listadoActividadesByIdObra(id_obra, ids_reporte);
           if (consulta.error === false) {
             res.status(200).send(consulta.detalle);
           } else {
@@ -219,8 +257,19 @@ exports.getAllActividadesAdicionalesByIdObra = async (req, res) => {
               return;
             }
           };
+          const ids_reporte = req.query.ids_reporte?req.query.ids_reporte:null;
+          const array_id_reporte = ids_reporte?ids_reporte.split(",").map((e) => Number(e)):undefined;
+          if (array_id_reporte) {
+            for (const e of array_id_reporte){
+              if (Number.isNaN(e)){
+                res.status(400).send("Hay un problema con el formato de ids_reporte");
+                return
+              }
+            }
+          };
+          
           //Va a consultar a la funcion listadoActividadesByIdObra definida mas abajo
-          const consulta = await listadoActividadesAdicionalesByIdObra(id_obra);
+          const consulta = await listadoActividadesAdicionalesByIdObra(id_obra, ids_reporte);
           if (consulta.error === false) {
             res.status(200).send(consulta.detalle);
           } else {
@@ -251,8 +300,18 @@ exports.getAllActividadesHoraExtraByIdObra = async (req, res) => {
               return;
             }
           };
+          const ids_reporte = req.query.ids_reporte?req.query.ids_reporte:null;
+          const array_id_reporte = ids_reporte?ids_reporte.split(",").map((e) => Number(e)):undefined;
+          if (array_id_reporte) {
+            for (const e of array_id_reporte){
+              if (Number.isNaN(e)){
+                res.status(400).send("Hay un problema con el formato de ids_reporte");
+                return
+              }
+            }
+          };
           //Va a consultar a la funcion listadoActividadesByIdObra definida mas abajo
-          const consulta = await listadoActividadesHoraExtraByIdObra(id_obra);
+          const consulta = await listadoActividadesHoraExtraByIdObra(id_obra, ids_reporte);
           if (consulta.error === false) {
             res.status(200).send(consulta.detalle);
           } else {
@@ -283,13 +342,24 @@ exports.totalesEstadoPago = async (req, res) => {
         }
       };
 
-    const actividadesNormales = await listadoActividadesByIdObra(id_obra);
+    const ids_reporte = req.query.ids_reporte?req.query.ids_reporte:null;
+    const array_id_reporte = ids_reporte?ids_reporte.split(",").map((e) => Number(e)):undefined;
+    if (array_id_reporte) {
+      for (const e of array_id_reporte){
+        if (Number.isNaN(e)){
+          res.status(400).send("Hay un problema con el formato de ids_reporte");
+          return
+        }
+      }
+    };
+
+    const actividadesNormales = await listadoActividadesByIdObra(id_obra, ids_reporte);
     let totalActividadesNormales = !actividadesNormales.error?actividadesNormales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
    
-    const actividadesAdicionales = await listadoActividadesAdicionalesByIdObra(id_obra);
+    const actividadesAdicionales = await listadoActividadesAdicionalesByIdObra(id_obra, ids_reporte);
     let totalActividadesAdicionales = !actividadesAdicionales.error?actividadesAdicionales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
-    const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra);
+    const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra, ids_reporte);
     let totalActividadesHoraExtra = !actividadesHoraExtra.error?actividadesHoraExtra.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
     const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
@@ -362,7 +432,58 @@ exports.avancesEstadoPago = async (req, res) => {
 */
 exports.creaEstadoPago = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
-      #swagger.description = 'Lista los estados de pago por id_obra' */
+      #swagger.description = 'Crea un estado de pago' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para el crear estado de pago',
+            required: false,
+            schema: {
+                "id_obra": 39,
+                "cliente": {
+                  "id": 2,
+                  "nombre": "CGE Distribución Curicó"
+                },
+                "fecha_asignacion": "2024-02-21",
+                "tipo_trabajo": {
+                  "id": 1,
+                  "descripcion": "CONSTRUCCIÓN"
+                },
+                "segmento": {
+                  "id": 3,
+                  "nombre": "INVERSIÓN",
+                  "descripcion": ""
+                },
+                "solicitado_por": "Luis Pino",
+                "supervisor_pelom": {
+                  "id": 1,
+                  "oficina": "Curicó",
+                  "supervisor": "Eduardo Soto"
+                },
+                "coordinador": {
+                  "id": 4,
+                  "nombre": "ALEXIS NICOLAS TAPIA GONZALEZ",
+                  "id_empresa": 1,
+                  "rut": "18983279-6"
+                },
+                "comuna": {
+                  "codigo": "07301",
+                  "nombre": "Curicó",
+                  "provincia": "073"
+                },
+                "direccion": "Sector la herradura",
+                "fecha_ejecucion": "2024-02-28",
+                "jefe_delegacion": "Jorge Castro",
+                "jefe_faena": {
+                  "id": 4,
+                  "nombre": "AYRTON ALEXANDER YEVENES HINOJOSA"
+                },
+                "codigo_pelom": "EDP-10000051-2024",
+                "valor_uc": 10302,
+                "ids_reporte": "1,2,3,4,5"
+                
+            }
+        }
+      */
   try {
     const campos = [
       'id_obra', 'cliente', 'fecha_asignacion', 'tipo_trabajo',
@@ -380,6 +501,16 @@ exports.creaEstadoPago = async (req, res) => {
     };
 
     const id_obra = req.body.id_obra;
+    const ids_reporte = req.body.ids_reporte?req.body.ids_reporte:null;
+    const array_id_reporte = ids_reporte?ids_reporte.split(",").map((e) => Number(e)):undefined;
+    if (array_id_reporte) {
+      for (const e of array_id_reporte){
+        if (Number.isNaN(e)){
+          res.status(400).send("Hay un problema con el formato de ids_reporte");
+          return
+        }
+      }
+    };
 
     //Consultar nombre de la obra y OC
     const obraInfo = await Obra.findOne({
@@ -397,13 +528,13 @@ exports.creaEstadoPago = async (req, res) => {
     const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
     let totalAvances = !detalle_avances.error?detalle_avances.detalle.reduce(((total, num) => total + num.monto), 0):undefined;
 
-    const actividadesNormales = await listadoActividadesByIdObra(id_obra);
+    const actividadesNormales = await listadoActividadesByIdObra(id_obra, ids_reporte);
     let totalActividadesNormales = !actividadesNormales.error?actividadesNormales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
    
-    const actividadesAdicionales = await listadoActividadesAdicionalesByIdObra(id_obra);
+    const actividadesAdicionales = await listadoActividadesAdicionalesByIdObra(id_obra, ids_reporte);
     let totalActividadesAdicionales = !actividadesAdicionales.error?actividadesAdicionales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
-    const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra);
+    const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra, ids_reporte);
     let totalActividadesHoraExtra = !actividadesHoraExtra.error?actividadesHoraExtra.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
     //Chequear si que el total del estado paga sea mayor a cero, si no es así se debe devolver un error
@@ -450,7 +581,7 @@ exports.creaEstadoPago = async (req, res) => {
 
     const datos = {
       id: encabezado_estado_pago_id,
-      id_obra: req.body.id_obra,
+      id_obra: id_obra,
       fecha_estado_pago: fecha_estado_pago,
       cliente: req.body.cliente.id,
       fecha_asignacion: req.body.fecha_asignacion,
@@ -520,6 +651,10 @@ exports.creaEstadoPago = async (req, res) => {
       datos: datos,
       observacion: "Se crea el estado de pago de la obra <" + nombreObra + ">"
    }
+
+   const Op = db.Sequelize.Op;
+   const where = array_id_reporte?{ id_estado_pago: null, id_obra: id_obra, id: { [Op.in]: array_id_reporte } }:{ id_estado_pago: null, id_obra: id_obra};
+
         let salida = {};
         const t = await sequelize.transaction();
 
@@ -530,7 +665,7 @@ exports.creaEstadoPago = async (req, res) => {
 
           await EncabezadoReporteDiario.update(
             {id_estado_pago: encabezado_estado_pago_id}, 
-            {where: { id_estado_pago: null, id_obra: req.body.id_obra}, transaction: t});
+            {where: where, transaction: t});
 
           await EstadoPagoGestion.create(estadoPagoGestion, { transaction: t });
 
@@ -571,16 +706,51 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
               return;
             }
           };
-        const sql = "SELECT eep.id, eep.id_obra, eep.fecha_estado_pago, row_to_json(d) as cliente, \
-        eep.fecha_asignacion, row_to_json(tt) as tipo_trabajo, row_to_json(s) as segmento, eep.solicitado_por, \
-        row_to_json(c) as comuna, eep.direccion, eep.fecha_ejecucion, eep.jefe_delegacion, eep.codigo_pelom, \
-        row_to_json(sc) as supervisor, row_to_json(jf) as jefe_faena, eep.estado, eep.ot, eep.sdi, \
-        row_to_json(cc) as coordinador, eep.recargo_nombre, eep.recargo_porcentaje, eep.flexiapp, o.codigo_obra, o.nombre_obra, \
-        eep.valor_uc FROM obras.encabezado_estado_pago eep LEFT JOIN obras.delegaciones d on eep.cliente = d.id LEFT JOIN \
-        obras.tipo_trabajo tt on eep.tipo_trabajo = tt.id LEFT JOIN obras.segmento s on eep.segmento = s.id \
-        LEFT JOIN _comun.comunas c on eep.comuna = c.codigo LEFT JOIN obras.supervisores_contratista sc on \
-        eep.supervisor = sc.id LEFT JOIN obras.jefes_faena jf on eep.jefe_faena = jf.id LEFT JOIN \
-        obras.coordinadores_contratista cc on eep.coordinador = cc.id JOIN obras.obras o on eep.id_obra = o.id WHERE id_obra = " + id_obra + ";";
+        const sql = `SELECT 
+                        eep.id, 
+                        eep.id_obra, 
+                        eep.fecha_estado_pago, 
+                        row_to_json(d) as cliente, 
+                        eep.fecha_asignacion, 
+                        row_to_json(tt) as tipo_trabajo, 
+                        row_to_json(s) as segmento, 
+                        eep.solicitado_por, 
+                        row_to_json(c) as comuna, 
+                        eep.direccion, 
+                        eep.fecha_ejecucion, 
+                        eep.jefe_delegacion, 
+                        eep.codigo_pelom, 
+                        row_to_json(sc) as supervisor, 
+                        row_to_json(jf) as jefe_faena, 
+                        eep.estado, eep.ot, eep.sdi, 
+                        row_to_json(cc) as coordinador, 
+                        eep.recargo_nombre, 
+                        eep.recargo_porcentaje, 
+                        eep.flexiapp, 
+                        o.codigo_obra, 
+                        o.nombre_obra, 
+                        eep.valor_uc 
+                    FROM 
+                        obras.encabezado_estado_pago eep 
+                    LEFT JOIN obras.delegaciones d 
+                        ON eep.cliente = d.id 
+                    LEFT JOIN obras.tipo_trabajo tt 
+                        ON eep.tipo_trabajo = tt.id 
+                    LEFT JOIN obras.segmento s 
+                        ON eep.segmento = s.id 
+                    LEFT JOIN _comun.comunas c 
+                        ON eep.comuna = c.codigo 
+                    LEFT JOIN obras.supervisores_contratista sc 
+                        ON eep.supervisor = sc.id 
+                    LEFT JOIN obras.jefes_faena jf 
+                        ON eep.jefe_faena = jf.id 
+                    LEFT JOIN obras.coordinadores_contratista cc 
+                        ON eep.coordinador = cc.id 
+                    JOIN obras.obras o 
+                        ON eep.id_obra = o.id 
+                    WHERE 
+                        id_obra = ${id_obra} ;`;
+
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
             const lstEstadosPagos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -650,20 +820,65 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
 
           const { QueryTypes } = require('sequelize');
           const sequelize = db.sequelize;
-          const sql = "SELECT eep.id, eep.fecha_estado_pago, eep.id_obra, o.codigo_obra, o.nombre_obra, \
-          row_to_json(d) as cliente, eep.fecha_asignacion::text, row_to_json(tt) as tipo_trabajo, row_to_json(s) as \
-          segmento, eep.solicitado_por::varchar,  eep.sdi::text, row_to_json(ofi) as supervisor_pelom, row_to_json(cc) \
-          as coordinador, row_to_json(c) as comuna, eep.direccion, eep.flexiapp, eep.fecha_ejecucion::text, \
-          eep.jefe_delegacion::varchar, row_to_json(jf) as jefe_faena, eep.ot as numero_documento, eep.recargo_nombre, \
-          eep.recargo_porcentaje, eep.codigo_pelom, eep.valor_uc, eep.estado, eep.subtotal1, eep.subtotal2, eep.subtotal3, \
-          eep.descuento_avance, eep.detalle_avances, eep.detalle_actividades, eep.detalle_otros, eep.detalle_horaextra \
-          FROM obras.encabezado_estado_pago eep LEFT JOIN obras.obras o on eep.id_obra = o.id LEFT JOIN obras.delegaciones \
-          d on o.delegacion = d.id LEFT JOIN obras.tipo_trabajo tt on o.tipo_trabajo = tt.id LEFT JOIN obras.segmento s \
-          on o.segmento = s.id LEFT JOIN _comun.comunas c on o.comuna = c.codigo LEFT JOIN obras.coordinadores_contratista \
-          cc on o.coordinador_contratista = cc.id LEFT JOIN (SELECT os.id, o.nombre as oficina, so.nombre as supervisor \
-            FROM obras.oficina_supervisor os join _comun.oficinas o on os.oficina = o.id join obras.supervisores_contratista \
-            so on os.supervisor = so.id) ofi on o.oficina = ofi.id LEFT JOIN obras.jefes_faena jf on \
-            eep.jefe_faena = jf.id WHERE eep.id = " + id_estado_pago;
+          const sql = `SELECT 
+                          eep.id, 
+                          eep.fecha_estado_pago, 
+                          eep.id_obra, 
+                          o.codigo_obra, 
+                          o.nombre_obra, 
+                          row_to_json(d) as cliente, 
+                          eep.fecha_asignacion::text, 
+                          row_to_json(tt) as tipo_trabajo, 
+                          row_to_json(s) as segmento, 
+                          eep.solicitado_por::varchar, 
+                          eep.sdi::text, 
+                          row_to_json(ofi) as supervisor_pelom, 
+                          row_to_json(cc) as coordinador, 
+                          row_to_json(c) as comuna, 
+                          eep.direccion, 
+                          eep.flexiapp, 
+                          eep.fecha_ejecucion::text, 
+                          eep.jefe_delegacion::varchar, 
+                          row_to_json(jf) as jefe_faena, 
+                          eep.ot as numero_documento, 
+                          eep.recargo_nombre, 
+                          eep.recargo_porcentaje, 
+                          eep.codigo_pelom, 
+                          eep.valor_uc, 
+                          eep.estado, 
+                          eep.subtotal1, 
+                          eep.subtotal2, 
+                          eep.subtotal3, 
+                          eep.descuento_avance, 
+                          eep.detalle_avances, 
+                          eep.detalle_actividades, 
+                          eep.detalle_otros, 
+                          eep.detalle_horaextra 
+                      FROM obras.encabezado_estado_pago eep 
+                      LEFT JOIN obras.obras o 
+                          ON eep.id_obra = o.id 
+                      LEFT JOIN obras.delegaciones d 
+                          ON o.delegacion = d.id 
+                      LEFT JOIN obras.tipo_trabajo tt 
+                          ON o.tipo_trabajo = tt.id 
+                      LEFT JOIN obras.segmento s 
+                          ON o.segmento = s.id 
+                      LEFT JOIN _comun.comunas c 
+                          ON o.comuna = c.codigo 
+                      LEFT JOIN obras.coordinadores_contratista cc 
+                          ON o.coordinador_contratista = cc.id 
+                      LEFT JOIN 
+                          (SELECT os.id, o.nombre as oficina, so.nombre as supervisor 
+                              FROM obras.oficina_supervisor os 
+                              JOIN _comun.oficinas o 
+                                ON os.oficina = o.id 
+                              JOIN obras.supervisores_contratista so 
+                                ON os.supervisor = so.id) ofi 
+                          ON o.oficina = ofi.id 
+                      LEFT JOIN obras.jefes_faena jf 
+                          ON eep.jefe_faena = jf.id 
+                      WHERE eep.id = ${id_estado_pago}`;
+
             const historiaEstadoPago = await sequelize.query(sql, { type: QueryTypes.SELECT });
             let salida = [];
             if (historiaEstadoPago) {
@@ -788,11 +1003,7 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
 
     let estado_edp_nuevo;
     let revisar = true;
-    console.log("uno")
-    console.log((datos_ingresados.fecha_factura || datos_ingresados.numero_factura) && revisar);
-    console.log("dos")
     if ((datos_ingresados.fecha_factura || datos_ingresados.numero_factura) && revisar) {
-      console.log("entro a revisar fecha_factura");
       // Pasar a estado factura emitida (6), primero chequear los campos necesarios esten completos
           const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc', 'fecha_subido_portal',
             'folio_portal', 'fecha_hes', 'numero_hes', 'fecha_solicita_factura', 'responsable_solicitud', 'numero_factura',
@@ -808,8 +1019,9 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
             }
             revisar = false;
     }
-    if ((datos_ingresados.fecha_solicita_factura || datos_ingresados.responsable_solicitud) && revisar) {
-      console.log("entro a revisar fecha_solicita_factura");
+    if ((datos_ingresados.fecha_solicita_factura || datos_ingresados.responsable_solicitud) && revisar) 
+    {
+
       // Pasar a estado factura solicitada (5), primero chequear los campos necesarios esten completos
           const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc', 'fecha_subido_portal',
             'folio_portal', 'fecha_hes', 'numero_hes', 'fecha_solicita_factura', 'responsable_solicitud'];
@@ -824,8 +1036,9 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
             }
             revisar = false;
     }
-    if ((datos_ingresados.fecha_hes || datos_ingresados.numero_hes) && revisar) {
-      console.log("entro a revisar fecha_hes");
+    if ((datos_ingresados.fecha_hes || datos_ingresados.numero_hes) && revisar) 
+    {
+
       // Pasar a estado hes registrada (4), primero chequear los campos necesarios esten completos
           const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc', 'fecha_subido_portal',
             'folio_portal', 'fecha_hes', 'numero_hes'];
@@ -840,8 +1053,9 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
             }
             revisar = false;
     }
-    if ((datos_ingresados.fecha_subido_portal || datos_ingresados.folio_portal) && revisar) {
-      console.log("entro a revisar fecha_subido_portal");
+    if ((datos_ingresados.fecha_subido_portal || datos_ingresados.folio_portal) && revisar) 
+    {
+
       // Pasar a estado subido a portal (3), primero chequear los campos necesarios esten completos
           const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc', 'fecha_subido_portal', 'folio_portal'];
             for (const element of campos) {
@@ -855,8 +1069,9 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
             }
             revisar = false;
     }
-    if ((datos_ingresados.numero_oc || datos_ingresados.fecha_entrega_oc) && revisar) {
-      console.log("entro a revisar numero_oc");
+    if ((datos_ingresados.numero_oc || datos_ingresados.fecha_entrega_oc) && revisar) 
+    {
+
       // Pasar a estado emitido con oc (2), primero chequear los campos necesarios esten completos
           const campos = ['fecha_presentacion', 'numero_oc', 'fecha_entrega_oc'];
             for (const element of campos) {
@@ -871,57 +1086,53 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
     }
     datos_ingresados.estado = estado_edp_nuevo;
 
-      let id_usuario = req.userId;
-      let user_name;
-      let sql = "select username from _auth.users where id = " + id_usuario;
-      const { QueryTypes } = require('sequelize');
-      const sequelize = db.sequelize;
-      await sequelize.query(sql, {
-        type: QueryTypes.SELECT
-      }).then(data => {
-        user_name = data[0].username;
-      }).catch(err => {
-        res.status(500).send(err.message );
-        return;
-      })
+    let id_usuario = req.userId;
+    let user_name;
+    let sql = "select username from _auth.users where id = " + id_usuario;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      user_name = data[0].username;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
 
-      const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
-      const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
-      const estadoPagoHistorial = {
-        codigo_pelom: estadoPagoGestion.codigo_pelom,
-        fecha_hora: fechahoy,
-        usuario_rut: user_name,
-        estado_edp: datos_ingresados.estado,
-        datos: datos_ingresados,
-        observacion: "Modificación de datos de estado pago gestionado"
-      }
-      console.log('datos_ingresados --> ', datos_ingresados);
-      console.log('estadoPagoHistorial --> ', estadoPagoHistorial);
+    const estadoPagoHistorial = {
+      codigo_pelom: estadoPagoGestion.codigo_pelom,
+      fecha_hora: fechahoy,
+      usuario_rut: user_name,
+      estado_edp: datos_ingresados.estado,
+      datos: datos_ingresados,
+      observacion: "Modificación de datos de estado pago gestionado"
+    }
 
+    let salida = {};
+    const t = await sequelize.transaction();
+    try {
 
-        let salida = {};
-        const t = await sequelize.transaction();
-        try {
-    
-    
-          salida = {"error": false, "message": "Estado de pago actualizado ok"};
+      salida = {"error": false, "message": "Estado de pago actualizado ok"};
 
-          await EstadoPagoGestion.update(datos_ingresados, { where: { id: id }, transaction: t });
-    
-          await EstadoPagoHistorial.create(estadoPagoHistorial, { transaction: t });
-    
-          await t.commit();
-    
-        } catch (error) {
-          salida = { error: true, message: error }
-          await t.rollback();
-        }
-        if (salida.error) {
-          res.status(500).send(salida.message);
-        }else {
-          res.status(200).send(salida);
-        }
+      await EstadoPagoGestion.update(datos_ingresados, { where: { id: id }, transaction: t });
+
+      await EstadoPagoHistorial.create(estadoPagoHistorial, { transaction: t });
+
+      await t.commit();
+
+    } catch (error) {
+      salida = { error: true, message: error }
+      await t.rollback();
+    }
+    if (salida.error) {
+      res.status(500).send(salida.message);
+    }else {
+      res.status(200).send(salida);
+    }
   }catch (error) {
     res.status(500).send(error);
   }
@@ -933,12 +1144,34 @@ exports.allestadospagogestion = async (req, res) => {
    /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
       #swagger.description = 'Lista todos los estados de pago gestionados' */
   try {
-    const sql = "SELECT epg.id, epg.codigo_pelom, fecha_presentacion::text, semana, detalle, epg.numero_oc, \
-    fecha_entrega_oc::text, fecha_subido_portal::text, folio_portal, fecha_hes::text, numero_hes, \
-    fecha_solicita_factura::text, responsable_solicitud, numero_factura, fecha_factura::text, rango_dias, \
-    row_to_json(epe) as estado, eep.id_obra, o.codigo_obra, o.nombre_obra FROM obras.estado_pago_gestion epg \
-    join obras.estado_pago_estados epe on epg.estado = epe.id JOIN obras.encabezado_estado_pago eep on \
-    epg.codigo_pelom = eep.codigo_pelom	JOIN obras.obras o on eep.id_obra = o.id";
+    const sql = `SELECT 
+                    epg.id, 
+                    epg.codigo_pelom, 
+                    fecha_presentacion::text, 
+                    semana, 
+                    detalle, 
+                    epg.numero_oc, 
+                    fecha_entrega_oc::text, 
+                    fecha_subido_portal::text, 
+                    folio_portal, 
+                    fecha_hes::text, 
+                    numero_hes, 
+                    fecha_solicita_factura::text, 
+                    responsable_solicitud, 
+                    numero_factura, 
+                    fecha_factura::text, 
+                    rango_dias, 
+                    row_to_json(epe) as estado, 
+                    eep.id_obra, 
+                    o.codigo_obra, 
+                    o.nombre_obra 
+                FROM obras.estado_pago_gestion epg 
+                JOIN obras.estado_pago_estados epe 
+                    ON epg.estado = epe.id 
+                JOIN obras.encabezado_estado_pago eep 
+                    ON epg.codigo_pelom = eep.codigo_pelom 
+                JOIN obras.obras o on eep.id_obra = o.id`;
+
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const estadosPagoGes = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -982,24 +1215,60 @@ exports.allestadospagogestion = async (req, res) => {
   }
 }
 
-let listadoActividadesByIdObra = async (id_obra) => {
+let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
   try {
-    const sql = "select top.clase, ta.descripcion tipo, (case when e.porcentaje is null or e.porcentaje = 0 then '' else e.nombre_corto end || ma.actividad) as actividad, \
-        mu.codigo_corto as unidad, e.cantidad, case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' \
-        then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, \
-        (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, \
-        e.porcentaje as porcentaje, e.recargo_distancia from (SELECT drda.tipo_operacion, drda.id_actividad, \
-          sum(drda.cantidad) as cantidad, case when rec.nombre_corto is null then ''::varchar \
-          else ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto, rec1.porcentaje as recargo_distancia, \
-          case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, o.oficina FROM \
-          obras.encabezado_reporte_diario erd join obras.detalle_reporte_diario_actividad drda on erd.id = \
-          drda.id_encabezado_rep left join obras.recargos rec on erd.recargo_hora = rec.id join obras.obras o on \
-          erd.id_obra = o.id left join obras.recargos rec1 on o.recargo_distancia = rec1.id \
-          WHERE id_obra = " + id_obra + " group by drda.tipo_operacion, drda.id_actividad, rec.nombre_corto, rec.porcentaje, \
-          rec1.porcentaje, o.oficina) e join obras.maestro_actividades ma on e.id_actividad = ma.id \
-          join obras.tipo_operacion top on e.tipo_operacion = top.id join obras.tipo_actividad ta on \
-          ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id WHERE \
-          e.porcentaje = 0 AND ta.id <> 9";
+    console.log('listadoActividadesByIdObra - ids_reporte -> ',ids_reporte);
+    const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
+
+    const sql = `SELECT 
+                    top.clase, 
+                    ta.descripcion tipo, 
+                    (case when e.porcentaje is null or e.porcentaje = 0 then '' else e.nombre_corto end || ma.actividad) as actividad, 
+                    mu.codigo_corto as unidad, 
+                    e.cantidad, 
+                    case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' 
+                    then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, 
+                    (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    e.porcentaje as porcentaje, 
+                    e.recargo_distancia 
+                FROM 
+                  (SELECT drda.tipo_operacion, 
+                          drda.id_actividad, 
+                          sum(drda.cantidad) as cantidad, 
+                          case when rec.nombre_corto is null then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto, 
+                          rec1.porcentaje as recargo_distancia, 
+                          case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
+                          o.oficina 
+                    FROM obras.encabezado_reporte_diario erd 
+                      JOIN obras.detalle_reporte_diario_actividad drda 
+                            ON erd.id = drda.id_encabezado_rep 
+                      LEFT JOIN obras.recargos rec 
+                            ON erd.recargo_hora = rec.id 
+                      JOIN obras.obras o 
+                            ON erd.id_obra = o.id 
+                      LEFT JOIN obras.recargos rec1 
+                            ON o.recargo_distancia = rec1.id 
+                    WHERE id_obra = ${id_obra} 
+                    ${condicion_reporte}
+                    GROUP BY 
+                        drda.tipo_operacion, 
+                        drda.id_actividad, 
+                        rec.nombre_corto, 
+                        rec.porcentaje, 
+                        rec1.porcentaje, 
+                        o.oficina
+                  ) e 
+                JOIN obras.maestro_actividades ma 
+                    ON e.id_actividad = ma.id 
+                JOIN obras.tipo_operacion top 
+                    ON e.tipo_operacion = top.id 
+                JOIN obras.tipo_actividad ta 
+                    ON ma.id_tipo_actividad = ta.id 
+                JOIN obras.maestro_unidades mu 
+                    ON ma.id_unidad = mu.id 
+                WHERE 
+                    e.porcentaje = 0 
+                    AND ta.id <> 9`;
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
             const actividades = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1039,178 +1308,311 @@ let listadoActividadesByIdObra = async (id_obra) => {
   
 }
 
-let listadoActividadesAdicionalesByIdObra = async (id_obra) => {
+let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
   try {
-    const sql = "select top.clase, ta.descripcion tipo, (case when e.porcentaje is null or e.porcentaje = 0 then '' else e.nombre_corto end || ma.actividad) as actividad, \
-        mu.codigo_corto as unidad, e.cantidad, case when top.clase = 'I' then ma.uc_instalacion \
-        when top.clase = 'R' then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision \
-        end as unitario, (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) \
-        as valor_uc, e.porcentaje as porcentaje, e.recargo_distancia from (SELECT drda.tipo_operacion, \
-          drda.id_actividad, sum(drda.cantidad) as cantidad, case when rec.nombre_corto is null then ''::varchar else \
-          ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto, rec1.porcentaje as recargo_distancia, \
-          case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, o.oficina FROM \
-          obras.encabezado_reporte_diario erd join obras.detalle_reporte_diario_actividad \
-          drda on erd.id = drda.id_encabezado_rep left join obras.recargos rec on erd.recargo_hora = rec.id \
-          join obras.obras o on erd.id_obra = o.id left join obras.recargos rec1 on o.recargo_distancia = rec1.id \
-          WHERE id_obra = " + id_obra + " group by drda.tipo_operacion, drda.id_actividad, rec.nombre_corto, rec.porcentaje, \
-          rec1.porcentaje, o.oficina) e join obras.maestro_actividades ma on e.id_actividad = ma.id join \
-          obras.tipo_operacion top on e.tipo_operacion = top.id join obras.tipo_actividad ta on \
-          ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id WHERE \
-          e.porcentaje = 0 AND ta.id = 9 \
-          UNION \
-          select 'I'::char as clase, 'Adicionales'::varchar as tipo, (case when rec.porcentaje is null or rec.porcentaje = 0 \
-            then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end || glosa) as actividad, 'CU'::varchar, cantidad, \
-            uc_unitaria::double precision as unitario, (SELECT precio FROM obras.valor_uc where oficina = o.oficina \
-              order by oficina, fecha desc limit 1) as valor_uc, case when rec.porcentaje is null then 0 else \
-              rec.porcentaje end as porcentaje, rec1.porcentaje as recargo_distancia from \
-              obras.detalle_reporte_diario_otras_actividades drdoa join obras.encabezado_reporte_diario erd on \
-              drdoa.id_encabezado_rep = erd.id join obras.obras o on erd.id_obra = o.id left join obras.recargos rec \
-              on erd.recargo_hora = rec.id left join obras.recargos rec1 on o.recargo_distancia = rec1.id \
-              WHERE erd.id_obra = " + id_obra + " and (rec.porcentaje is null or rec.porcentaje = 0) order by 1,2,3;";
-            const { QueryTypes } = require('sequelize');
-            const sequelize = db.sequelize;
-            const actividades = await sequelize.query(sql, { type: QueryTypes.SELECT });
-            let salida = [];
-            if (actividades) {
-                
-                for (const element of actividades) {
-          
-                      const detalle_salida = {
-                        clase: String(element.clase),
-                        tipo: String(element.tipo),
-                        actividad: String(element.actividad),
-                        unidad: String(element.unidad),
-                        cantidad: Number(element.cantidad),
-                        unitario: Number(element.unitario),
-                        unitario_pesos: Number(element.unitario * element.valor_uc),
-                        total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
-                        recargos: element.recargo_distancia?element.recargo_distancia.toString()+'%':'0%',
-                        total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+element.recargo_distancia/100)).toFixed(0))
-                        
-                      }
-                      salida.push(detalle_salida);
-                };
+
+    console.log('listadoActividadesAdicionalesByIdObra - ids_reporte -> ',ids_reporte);
+    const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
+
+    const sql = `SELECT 
+                    top.clase, 
+                    ta.descripcion tipo, 
+                    (case when e.porcentaje is null or e.porcentaje = 0 
+                          then '' else e.nombre_corto end || ma.actividad) as actividad, 
+                    mu.codigo_corto as unidad, 
+                    e.cantidad, 
+                    case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' 
+                          then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, 
+                    (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    e.porcentaje as porcentaje, 
+                    e.recargo_distancia 
+                FROM 
+                    (SELECT 
+                        drda.tipo_operacion, 
+                        drda.id_actividad, 
+                        sum(drda.cantidad) as cantidad, 
+                        case when rec.nombre_corto is null then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto, 
+                        rec1.porcentaje as recargo_distancia, 
+                        case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
+                        o.oficina 
+                            FROM 
+                                obras.encabezado_reporte_diario erd 
+                            JOIN obras.detalle_reporte_diario_actividad drda 
+                                ON erd.id = drda.id_encabezado_rep 
+                            LEFT JOIN obras.recargos rec 
+                                ON erd.recargo_hora = rec.id 
+                            JOIN obras.obras o 
+                                ON erd.id_obra = o.id 
+                            LEFT JOIN obras.recargos rec1 
+                                ON o.recargo_distancia = rec1.id 
+                            WHERE id_obra = ${id_obra} 
+                            ${condicion_reporte}
+                            GROUP BY 
+                                drda.tipo_operacion, 
+                                drda.id_actividad, 
+                                rec.nombre_corto, 
+                                rec.porcentaje, 
+                                rec1.porcentaje, 
+                                o.oficina
+                    ) e 
+                JOIN obras.maestro_actividades ma 
+                      ON e.id_actividad = ma.id 
+                JOIN obras.tipo_operacion top 
+                      ON e.tipo_operacion = top.id 
+                JOIN obras.tipo_actividad ta 
+                      ON ma.id_tipo_actividad = ta.id 
+                JOIN obras.maestro_unidades mu 
+                      ON ma.id_unidad = mu.id 
+                WHERE e.porcentaje = 0 
+                AND ta.id = 9 
+            UNION 
+                SELECT 
+                    'I'::char as clase, 
+                    'Adicionales'::varchar as tipo, 
+                    (case when rec.porcentaje is null or rec.porcentaje = 0 then ''::varchar 
+                        else ('(' || rec.nombre_corto || ') ')::varchar end || glosa) as actividad, 
+                    'CU'::varchar, 
+                    cantidad, 
+                    uc_unitaria::double precision as unitario, 
+                    (SELECT precio FROM obras.valor_uc where oficina = o.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
+                    rec1.porcentaje as recargo_distancia 
+                FROM 
+                    obras.detalle_reporte_diario_otras_actividades drdoa 
+                JOIN obras.encabezado_reporte_diario erd 
+                    ON drdoa.id_encabezado_rep = erd.id
+                JOIN obras.obras o 
+                    ON erd.id_obra = o.id 
+                LEFT JOIN obras.recargos rec 
+                    ON erd.recargo_hora = rec.id 
+                LEFT JOIN obras.recargos rec1 
+                    ON o.recargo_distancia = rec1.id 
+                WHERE erd.id_obra = ${id_obra} 
+                ${condicion_reporte}
+                AND (rec.porcentaje is null or rec.porcentaje = 0) 
+                ORDER BY 1,2,3;`;
+
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const actividades = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    if (actividades) 
+    {    
+        for (const element of actividades) 
+        {
+  
+              const detalle_salida = 
+              {
+                  clase: String(element.clase),
+                  tipo: String(element.tipo),
+                  actividad: String(element.actividad),
+                  unidad: String(element.unidad),
+                  cantidad: Number(element.cantidad),
+                  unitario: Number(element.unitario),
+                  unitario_pesos: Number(element.unitario * element.valor_uc),
+                  total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
+                  recargos: element.recargo_distancia?element.recargo_distancia.toString()+'%':'0%',
+                  total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+element.recargo_distancia/100)).toFixed(0))
+                  
               }
-              const retorna = {
-                error: false,
-                detalle: salida
-              }
-              return retorna;
-    
-  } catch (error) {
-    const retorna = {
-      error: true,
-      detalle: error
+              salida.push(detalle_salida);
+        };
+    }
+    const retorna = 
+    {
+        error: false,
+        detalle: salida
+    }
+    return retorna;
+  } 
+    catch (error) 
+  {
+    const retorna = 
+    {
+        error: true,
+        detalle: error
     }
     return retorna;
   }
 }
 
-let listadoActividadesHoraExtraByIdObra = async (id_obra) => {
-  try {
-    const sql = "select top.clase, ta.descripcion tipo, (e.nombre_corto || ma.actividad) as actividad, \
-        mu.codigo_corto as unidad, e.cantidad, case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' \
-        then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, \
-        (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, \
-        e.porcentaje as porcentaje, e.recargo_distancia from (SELECT drda.tipo_operacion, drda.id_actividad, \
-          sum(drda.cantidad) as cantidad, case when rec.nombre_corto is null then ''::varchar else \
-          ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto, rec1.porcentaje as recargo_distancia, \
-          case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, o.oficina FROM \
-          obras.encabezado_reporte_diario erd join obras.detalle_reporte_diario_actividad drda on \
-          erd.id = drda.id_encabezado_rep left join obras.recargos rec on erd.recargo_hora = rec.id join obras.obras o \
-          on erd.id_obra = o.id left join obras.recargos rec1 on o.recargo_distancia = rec1.id \
-          WHERE id_obra = " + id_obra + " group by drda.tipo_operacion, drda.id_actividad, rec.nombre_corto, rec.porcentaje, rec1.porcentaje, o.oficina) \
-          e join obras.maestro_actividades ma on e.id_actividad = ma.id join obras.tipo_operacion top on \
-          e.tipo_operacion = top.id join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades \
-          mu on ma.id_unidad = mu.id WHERE e.porcentaje > 0 \
-          UNION \
-          select 'I'::char as clase, 'Adicionales'::varchar as tipo, (case when rec.nombre_corto is null \
-            then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end || glosa) as actividad, 'CU'::varchar, cantidad, \
-            uc_unitaria::double precision as unitario, (SELECT precio FROM obras.valor_uc where oficina = o.oficina order \
-              by oficina, fecha desc limit 1) as valor_uc, case when rec.porcentaje is null then 0 else rec.porcentaje end \
-              as porcentaje, rec1.porcentaje as recargo_distancia from obras.detalle_reporte_diario_otras_actividades \
-              drdoa join obras.encabezado_reporte_diario erd on drdoa.id_encabezado_rep = erd.id join obras.obras o \
-              on erd.id_obra = o.id left join obras.recargos rec on erd.recargo_hora = rec.id left join obras.recargos \
-              rec1 on o.recargo_distancia = rec1.id WHERE erd.id_obra = " + id_obra + " and (rec.porcentaje is not null and rec.porcentaje > 0) \
-              order by 1,2,3;";
-            const { QueryTypes } = require('sequelize');
-            const sequelize = db.sequelize;
-            const actividades = await sequelize.query(sql, { type: QueryTypes.SELECT });
-            let salida = [];
-            if (actividades) {
+let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
+  try 
+  {
+    console.log('listadoActividadesHoraExtraByIdObra - ids_reporte -> ',ids_reporte);
+    const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
+
+    const sql = `SELECT 
+                    top.clase, 
+                    ta.descripcion tipo, 
+                    (e.nombre_corto || ma.actividad) as actividad, 
+                    mu.codigo_corto as unidad, 
+                    e.cantidad, 
+                    case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' 
+                        then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, 
+                    (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    e.porcentaje as porcentaje, 
+                    e.recargo_distancia 
+                FROM 
+                    (SELECT 
+                        drda.tipo_operacion, 
+                        drda.id_actividad, 
+                        sum(drda.cantidad) as cantidad, 
+                        case when rec.nombre_corto is null then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto, 
+                        rec1.porcentaje as recargo_distancia, 
+                        case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
+                        o.oficina 
+                            FROM 
+                                obras.encabezado_reporte_diario erd 
+                            JOIN obras.detalle_reporte_diario_actividad drda 
+                                ON erd.id = drda.id_encabezado_rep 
+                            LEFT JOIN obras.recargos rec 
+                                ON erd.recargo_hora = rec.id 
+                            JOIN obras.obras o 
+                                ON erd.id_obra = o.id 
+                            LEFT JOIN obras.recargos rec1 
+                                ON o.recargo_distancia = rec1.id 
+                            WHERE id_obra = ${id_obra} 
+                            ${condicion_reporte}
+                            GROUP BY 
+                                drda.tipo_operacion, 
+                                drda.id_actividad, 
+                                rec.nombre_corto, 
+                                rec.porcentaje, 
+                                rec1.porcentaje, 
+                                o.oficina
+                    ) e 
+                JOIN obras.maestro_actividades ma 
+                    ON e.id_actividad = ma.id 
+                JOIN obras.tipo_operacion top 
+                    ON e.tipo_operacion = top.id 
+                JOIN obras.tipo_actividad ta 
+                    ON ma.id_tipo_actividad = ta.id 
+                JOIN obras.maestro_unidades mu 
+                    ON ma.id_unidad = mu.id 
+                WHERE e.porcentaje > 0 
+            UNION 
+                SELECT 
+                    'I'::char as clase, 
+                    'Adicionales'::varchar as tipo, 
+                    (case when rec.nombre_corto is null then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar 
+                        end || glosa) as actividad, 
+                    'CU'::varchar, 
+                    cantidad, 
+                    uc_unitaria::double precision as unitario, 
+                    (SELECT precio FROM obras.valor_uc where oficina = o.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
+                    rec1.porcentaje as recargo_distancia 
+                FROM 
+                    obras.detalle_reporte_diario_otras_actividades drdoa 
+                JOIN obras.encabezado_reporte_diario erd 
+                    ON drdoa.id_encabezado_rep = erd.id 
+                JOIN obras.obras o 
+                    ON erd.id_obra = o.id 
+                LEFT JOIN obras.recargos rec 
+                    ON erd.recargo_hora = rec.id 
+                LEFT JOIN obras.recargos rec1 
+                    ON o.recargo_distancia = rec1.id 
+                WHERE erd.id_obra = ${id_obra} 
+                ${condicion_reporte}
+                AND (rec.porcentaje is not null and rec.porcentaje > 0) 
+                ORDER BY 1,2,3;`;
+
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const actividades = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    let salida = [];
+    if (actividades) 
+    {
                 
-                for (const element of actividades) {
+        for (const element of actividades) 
+        {
 
-                      const recargo_hora = element.porcentaje?Number(element.porcentaje):0;
-                      const recargo_distancia = element.recargo_distancia?Number(element.recargo_distancia):0;
-                      const recargo_total = Number(recargo_hora+recargo_distancia);
+            const recargo_hora = element.porcentaje?Number(element.porcentaje):0;
+            const recargo_distancia = element.recargo_distancia?Number(element.recargo_distancia):0;
+            const recargo_total = Number(recargo_hora+recargo_distancia);
 
-                      const detalle_salida = {
-                        clase: String(element.clase),
-                        tipo: String(element.tipo),
-                        actividad: String(element.actividad),
-                        unidad: String(element.unidad),
-                        cantidad: Number(element.cantidad),
-                        unitario: Number(element.unitario),
-                        unitario_pesos: Number(element.unitario * element.valor_uc),
-                        total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
-                        recargos: recargo_total.toString()+'%',
-                        total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+recargo_total/100)).toFixed(0))
-                        
-                      }
-                      salida.push(detalle_salida);
-                };
-              }
-              const retorna = {
-                error: false,
-                detalle: salida
-              }
-              return retorna;
-
-  } catch (error) {
-    const retorna = {
-      error: true,
-      detalle: error
+            const detalle_salida = 
+            {
+                clase: String(element.clase),
+                tipo: String(element.tipo),
+                actividad: String(element.actividad),
+                unidad: String(element.unidad),
+                cantidad: Number(element.cantidad),
+                unitario: Number(element.unitario),
+                unitario_pesos: Number(element.unitario * element.valor_uc),
+                total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
+                recargos: recargo_total.toString()+'%',
+                total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+recargo_total/100)).toFixed(0))
+            }
+            salida.push(detalle_salida);
+        };
+    }
+    const retorna = 
+    {
+        error: false,
+        detalle: salida
+    }
+    return retorna;
+  } 
+    catch (error) 
+  {
+    const retorna = 
+    {
+        error: true,
+        detalle: error
     }
     return retorna;
   }
-  
 }
 
 let listadoAvancesEstadoPagoIdObra = async (id_obra) => {
-  try {
-      const sql = "SELECT codigo_pelom, fecha_estado_pago::text, (subtotal1 + subtotal2 + subtotal3 - descuento_avance) \
-      as monto FROM obras.encabezado_estado_pago WHERE id_obra = " + id_obra + " order by fecha_estado_pago desc, id desc";
-            console.log('sql', sql);
-            const { QueryTypes } = require('sequelize');
-            const sequelize = db.sequelize;
-            const avances = await sequelize.query(sql, { type: QueryTypes.SELECT });
-            let salida = [];
-            if (avances) {
-                
-                for (const element of avances) {
+  try 
+  {
+      const sql = `SELECT 
+                      codigo_pelom, 
+                      fecha_estado_pago::text, 
+                      (subtotal1 + subtotal2 + subtotal3 - descuento_avance) as monto 
+                  FROM obras.encabezado_estado_pago 
+                  WHERE id_obra = ${id_obra} 
+                  ORDER BY 
+                      fecha_estado_pago DESC, 
+                      id desc`;
 
-                      const detalle_salida = {
-                        codigo_pelom: String(element.codigo_pelom),
-                        fecha_avance: String(element.fecha_estado_pago),
-                        monto: Number(element.monto)
-                                                
-                      }
-                      salida.push(detalle_salida);
-                };
-              }
-              const retorna = {
-                error: false,
-                detalle: salida
-              }
-              return retorna;
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      const avances = await sequelize.query(sql, { type: QueryTypes.SELECT });
+      let salida = [];
 
-  } catch (error) {
-    const retorna = {
-      error: true,
-      detalle: error
-    }
-    return retorna;
+      if (avances) 
+      {  
+          for (const element of avances) 
+          {
+
+              const detalle_salida = 
+              {
+                  codigo_pelom: String(element.codigo_pelom),
+                  fecha_avance: String(element.fecha_estado_pago),
+                  monto: Number(element.monto)                                
+              }
+              salida.push(detalle_salida);
+          };
+      }
+      const retorna = 
+      {
+          error: false,
+          detalle: salida
+      }
+      return retorna;
+
+  } 
+    catch (error) 
+  {
+      const retorna = 
+      {
+          error: true,
+          detalle: error
+      }
+      return retorna;
   }
-  
 }

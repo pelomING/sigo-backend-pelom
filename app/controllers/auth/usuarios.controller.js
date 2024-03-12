@@ -2,8 +2,10 @@ const db = require("../../models");
 const Persona = db.personas;
 const User = db.user;
 const Role = db.role;
+const LoginHistorial = db.loginHistorial;
 const Op = db.Sequelize.Op;
 const bcrypt = require("bcryptjs");
+const sequelize = db.sequelize;
 
 
 /*********************************************************************************** */
@@ -195,5 +197,62 @@ exports.createUser = async (req, res) => {
         } catch (error) {
           res.status(500).send( error.message );
           
+        }
+}
+/*********************************************************************************** */
+/* Resetea password para un usuario
+  app.post("/api/usuarios/v1/resetpassword", usuariosController.resetPassword);
+*/
+exports.resetPassword = async (req, res) => { 
+    /*  #swagger.tags = ['Autenticación']
+        #swagger.description = 'Resetea password para un usuario'
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Resetea password para un usuario',
+            required: true,
+            schema: {
+                username: "rut del usuario, sin puntos"
+            }
+        }
+        */
+        try {
+          const user = await User.findOne({where: {username: req.body.username}});
+          if (!user) {
+            res.status(404).send( 'Usuario no encontrado' );
+          } else {
+            let salida = {};
+            const t = await sequelize.transaction();
+            try 
+            {
+                salida = {"error": false, "message": "Reset de password OK!"};
+                //Para resetear la password se usará el mismo nombre de usuario como password
+                const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+                const fecha_hoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
+                const password = bcrypt.hashSync(req.body.username, 8);
+                await user.update({ password: password, fecha_password: fecha_hoy }, { where: { id: user.id }, transaction: t });
+                //* almacenar el log *//
+                await LoginHistorial.create({
+                    username: user.username,
+                    email: user.email,
+                    accion: 'Reset Password',
+                    fecha_hora: fecha_hoy, 
+                    comentario: 'Password reseteada para el usuario ' + user.username,
+                }, { transaction: t })
+                await t.commit();
+            } 
+            catch (error) {
+              console.log("error rest password -> ", error);
+                salida = { error: true, message: error }
+                await t.rollback();
+              
+            }
+            if (salida.error) {
+              res.status(500).send(salida.message);
+            }else {
+              res.status(200).send(salida);
+            }
+          }
+        } catch (error) {
+          res.status(500).send( error.message );
         }
 }
