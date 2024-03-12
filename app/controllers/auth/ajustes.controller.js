@@ -1,5 +1,8 @@
 const db = require("../../models");
 const User = db.user;
+const LoginHistorial = db.loginHistorial;
+const bcrypt = require("bcryptjs");
+const sequelize = db.sequelize;
 
 exports.cambioPassword = async (req, res) => {
     /*  #swagger.tags = ['Autenticación']
@@ -7,7 +10,7 @@ exports.cambioPassword = async (req, res) => {
     try {
 
         const campos = [
-            'username', 'password', 'newpassword'
+            'password', 'newpassword'
           ];
           for (const element of campos) {
             if (!req.body[element]) {
@@ -18,11 +21,8 @@ exports.cambioPassword = async (req, res) => {
             }
           };
 
-        const user = await User.findOne({
-            where: {
-                username: req.body.username,
-            },
-        });
+        const id_user = req.userId;
+        const user = await User.findByPk(id_user);
 
         if (!user) {
             return res.status(404).send({ message: "Usuario no existe." });
@@ -45,18 +45,39 @@ exports.cambioPassword = async (req, res) => {
             });
           };
 
+          const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+          const fecha_hoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
+
           const password = bcrypt.hashSync(req.body.newpassword, 8);
 
-          const result = await User.update(
-            { password: password },
-          );
 
-          if (result) {
-            res.send({ message: "Contraseña cambiada correctamente!" });
-          }else {
-            res.status(500).send({ message: error.message });
+          
+          let salida = {};
+          const t = await sequelize.transaction();
+          try 
+          {
+              salida = {"error": false, "message": "Contraseña cambiada correctamente!"};
+              await User.update({ password: password, fecha_password: fecha_hoy }, { where: { id: req.userId }, transaction: t });
+              //* almacenar el log *//
+              await LoginHistorial.create({
+                username: user.username,
+                email: user.email,
+                accion: 'Cambio Password',
+                fecha_hora: fecha_hoy, 
+                comentario: 'Password actualizada para el usuario ' + user.username}, { transaction: t })
+              await t.commit();
           }
-
+          catch (error) {
+              salida = { error: true, message: error }
+              await t.rollback();
+          }
+          if (salida.error) {
+            res.status(500).send(salida.message);
+          }else {
+            //Hacer el logout para que el usuario entre nuevamente con la password nueva
+            req.session = null;
+            res.status(200).send(salida);
+          }
     }catch (error) {
         res.status(500).send({ message: error.message });
     }
