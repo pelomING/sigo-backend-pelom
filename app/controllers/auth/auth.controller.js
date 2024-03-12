@@ -106,9 +106,24 @@ exports.signin = async (req, res) => {
     }).catch(err => {
       console.log('err', err);
     })
-    const rol_consulta = idRole[0]?idRole[0]:0;
+    
 
-    const sql = "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
+    //Chequear que la la password no sea igual al nombre de usuario
+    //if (req.body.username === req.body.password) {
+
+    // Aqui se debe hacer la consulta del menu, pero con id_servicio = 0 para que entregue sólo el menu de gestion de usuario
+    //  return res.status(401).send( "Debe cambiar la password de inmediato para utilizar el sistema" );
+    //}
+    
+
+    const rol_consulta = idRole[0]?idRole[0]:0;
+    const sql = req.body.username===req.body.password?
+    "select * from _frontend.ver_menu_new where id_servicio=0 and rol_id = " + rol_consulta + ";":
+    "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
+
+    const mensaje = req.body.username===req.body.password?"Debe cambiar la password de inmediato para utilizar el sistema":null;
+
+    //const sql = "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const menu = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -141,6 +156,10 @@ exports.signin = async (req, res) => {
           //menu_salida.push(element.menu);
         }
       }
+
+      
+
+    
     /////////////////////////////////
     return res.status(200).send({
       id: user.id,
@@ -149,6 +168,7 @@ exports.signin = async (req, res) => {
       funcion: userFuncion.funcion,
       email: user.email,
       roles: authorities,
+      mensaje: mensaje,
       accessToken: token,
       menu: menu_salida
     });

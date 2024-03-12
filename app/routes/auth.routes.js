@@ -36,4 +36,7 @@ module.exports = function(app) {
   // cambio de password, debe ingresar la password actual y la nueva
   app.post("/api/ajustes/v1/cambiapassword", [authJwt.verifyToken], ajustesController.cambioPassword);
 
+  //Resetea password para un usuario
+  app.post("/api/ajustes/v1/resetpassword", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], usuariosController.resetPassword);
+
 };
