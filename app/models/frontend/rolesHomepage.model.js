@@ -7,7 +7,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       roleId: {
         type: Sequelize.INTEGER,
-        field: 'role_id',
+        field: 'rol_id',
         allowNull: false
       },
       homepage: {
