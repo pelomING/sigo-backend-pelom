@@ -78,6 +78,9 @@ db.zonal = require("./comun/zonal.model.js")(sequelize, Sequelize);
 /***********DEPLOY ********* */
 db.backendCors = require("./deploy/backendCors.model.js")(sequelize, Sequelize);
 
+/***********FRONTEND ********* */
+db.rolesHomepage = require("./frontend/rolesHomepage.model.js")(sequelize, Sequelize);
+
 /*****  OBRAS */
 db.bom = require("./obras/bom.model.js")(sequelize, Sequelize);
 db.coordinadorContratista = require("./obras/coordinadorContratista.model.js")(sequelize, Sequelize);
