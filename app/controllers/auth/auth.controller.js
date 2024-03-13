@@ -5,6 +5,7 @@ const Role = db.role;
 const UsuariosFunciones = db.usuariosFunciones;
 const LoginHistorial = db.loginHistorial;
 const RolesHomepage = db.rolesHomepage;
+const Mensaje = db.mensaje;
 
 const Op = db.Sequelize.Op;
 
@@ -118,18 +119,25 @@ exports.signin = async (req, res) => {
     
 
     const rol_consulta = idRole[0]?idRole[0]:0;
-/*
+
     const homepage = await RolesHomepage.findOne({where: {roleId: rol_consulta}});
 
     const sql = req.body.username===req.body.password?
     "select * from _frontend.ver_menu_new where id_servicio=0 and rol_id = " + rol_consulta + ";":
     "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
 
-    const mensaje = req.body.username===req.body.password?"Debe cambiar la password de inmediato para utilizar el sistema":null;
-*/
-    const sql = "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
+    let mensajeMenu = null;
+    //const mensaje = req.body.username===req.body.password?"Debe cambiar la password de inmediato para utilizar el sistema":null;
+
+    //const sql = "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
+    if (req.body.username===req.body.password) {
+      const mensaje = await Mensaje.findOne({ where: { id: 2 } });  //cambiar la password
+      if (mensaje) {
+        mensajeMenu = mensaje;
+      }
+    }
     const menu = await sequelize.query(sql, { type: QueryTypes.SELECT });
 
     function compararPorCampo(a, b) {
@@ -168,7 +176,8 @@ exports.signin = async (req, res) => {
       funcion: userFuncion.funcion,
       email: user.email,
       roles: authorities,
-      //mensaje: mensaje,
+      mensaje: mensajeMenu,
+      homepage: homepage,
       accessToken: token,
       menu: menu_salida
     });
