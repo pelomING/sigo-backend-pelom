@@ -12,6 +12,7 @@ const Segmento = db.segmento;
 const TipoOperacion = db.tipoOperacion;
 const TipoActividad = db.tipoActividad;
 const MaestroActividad = db.maestroActividad;
+const UsuariosFunciones = db.usuariosFunciones;
 
 exports.findAllTipoObra = async (req, res) => {
     //metodo GET
@@ -465,3 +466,40 @@ exports.getResumenGeneral = async (req, res) => {
       res.status(500).send(error);
     }
 }
+
+ /*********************************************************************************** */
+
+ exports.findAllUsuariosFunciones = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Obras - General']
+    #swagger.description = 'Devuelve todos los usuarios' */
+  try {
+    const data = await UsuariosFunciones.findAll({
+      order: [['username', 'ASC']],
+    });
+    let salida;
+    if (data) {
+      salida = [];
+      for (const element of data) {
+
+            const detalle_salida = {
+              id: Number(element.id),
+              username: String(element.username),
+              email: String(element.email),
+              funcion: String(element.funcion),
+              nombres: String(element.nombres),
+              fecha_password: String(element.fecha_password)
+            }
+            salida.push(detalle_salida);
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (err) {
+    res.status(500).send( err.message );
+  }
+}
+/*********************************************************************************** */

@@ -68,6 +68,8 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/general/v1/resumengeneral", [authJwt.verifyToken], backofficeGeneralController.getResumenGeneral);
 
+    app.get("/api/obras/backoffice/general/v1/allusuarios", [authJwt.verifyToken], backofficeGeneralController.findAllUsuariosFunciones);
+
     
 
 }

@@ -981,6 +981,28 @@
         }
       }
     },
+    "/api/obras/backoffice/general/v1/allusuarios": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los usuarios",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/allobras": {
       "get": {
         "tags": [
