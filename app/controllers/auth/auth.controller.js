@@ -5,6 +5,7 @@ const Role = db.role;
 const UsuariosFunciones = db.usuariosFunciones;
 const LoginHistorial = db.loginHistorial;
 const VerHomepage = db.verHomepage;
+const ParametrosConfig = db.parametrosConfig;
 
 const Op = db.Sequelize.Op;
 
@@ -118,7 +119,7 @@ exports.signin = async (req, res) => {
     
 
     const rol_consulta = idRole[0]?idRole[0]:0;
-    const mensaje_id = req.body.username===req.body.password?2:1; //Si usuario = password debe cambiar la password de inmediato para utilizar el sistema
+    const mensaje_id = req.body.username===req.body.password?2:userFuncion.cod_mensaje; //Si usuario = password debe cambiar la password de inmediato para utilizar el sistema
 
     const verHomepage = await VerHomepage.findOne({ attributes: ['mensaje', 'homepage'], where: { mensajeId: mensaje_id, rolId: rol_consulta}});
     
