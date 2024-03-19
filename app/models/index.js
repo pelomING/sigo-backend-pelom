@@ -70,6 +70,7 @@ db.cliente = require("./comun/cliente.model.js")(sequelize, Sequelize);
 db.comuna = require("./comun/comuna.model.js")(sequelize, Sequelize);
 db.eventosTipo = require("./comun/eventosTipo.model.js")(sequelize, Sequelize);
 db.paquete = require("./comun/paquete.model.js")(sequelize, Sequelize);
+db.parametrosConfig = require("./comun/parametrosConfig.model.js")(sequelize, Sequelize);
 db.tipoFuncionPersonal = require("./comun/tipoFuncionPersonal.model.js")(sequelize, Sequelize);
 db.tipoTurno = require("./comun/tipoTurno.model.js")(sequelize, Sequelize);
 db.turnos = require("./comun/turnos.model.js")(sequelize, Sequelize);
@@ -79,7 +80,7 @@ db.zonal = require("./comun/zonal.model.js")(sequelize, Sequelize);
 db.backendCors = require("./deploy/backendCors.model.js")(sequelize, Sequelize);
 
 /***********FRONTEND ********* */
-db.rolesHomepage = require("./frontend/rolesHomepage.model.js")(sequelize, Sequelize);
+db.verHomepage = require("./frontend/verHomepage.model.js")(sequelize, Sequelize);
 
 /*****  OBRAS */
 db.bom = require("./obras/bom.model.js")(sequelize, Sequelize);

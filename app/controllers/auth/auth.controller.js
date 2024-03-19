@@ -4,7 +4,8 @@ const User = db.user;
 const Role = db.role;
 const UsuariosFunciones = db.usuariosFunciones;
 const LoginHistorial = db.loginHistorial;
-const RolesHomepage = db.rolesHomepage;
+const VerHomepage = db.verHomepage;
+const ParametrosConfig = db.parametrosConfig;
 
 const Op = db.Sequelize.Op;
 
@@ -118,16 +119,17 @@ exports.signin = async (req, res) => {
     
 
     const rol_consulta = idRole[0]?idRole[0]:0;
-/*
-    const homepage = await RolesHomepage.findOne({where: {roleId: rol_consulta}});
+    const mensaje_id = req.body.username===req.body.password?2:userFuncion.cod_mensaje; //Si usuario = password debe cambiar la password de inmediato para utilizar el sistema
+
+    const verHomepage = await VerHomepage.findOne({ attributes: ['mensaje', 'homepage'], where: { mensajeId: mensaje_id, rolId: rol_consulta}});
+    
+    const mensajeMenu = verHomepage.mensaje?verHomepage.mensaje:null;
+    const homepage = verHomepage.homepage?verHomepage.homepage:null;
 
     const sql = req.body.username===req.body.password?
     "select * from _frontend.ver_menu_new where id_servicio=0 and rol_id = " + rol_consulta + ";":
     "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
 
-    const mensaje = req.body.username===req.body.password?"Debe cambiar la password de inmediato para utilizar el sistema":null;
-*/
-    const sql = "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const menu = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -168,7 +170,8 @@ exports.signin = async (req, res) => {
       funcion: userFuncion.funcion,
       email: user.email,
       roles: authorities,
-      //mensaje: mensaje,
+      mensaje: mensajeMenu,
+      homepage: homepage,
       accessToken: token,
       menu: menu_salida
     });

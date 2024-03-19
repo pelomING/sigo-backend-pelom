@@ -121,6 +121,8 @@ exports.findAllBom = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
       #swagger.description = 'Ingresa un grupo de materiales en el bom de una sola vez' */
   
+
+        //ejemplo: { "materiales": "1219_3-1220_2", "id_obra": 22, "reserva": 3456}
     const campos = [
       'id_obra', 'reserva', 'materiales'
     ];
@@ -135,13 +137,29 @@ exports.findAllBom = async (req, res) => {
     try {
       let todoOk = false;
       let materiales = req.body.materiales;
+      //reemplaza las comas por puntos, por si hay alguna cantidad decimal
       materiales = materiales.replace(",", ".");
       let id_obra = req.body.id_obra;
       let reserva = req.body.reserva;
-      let arreglo_materiales = materiales.split("-");
+      //el simblo guion separa la información de materiales
+      let materiales_input = materiales.split("-");
       let sql = "";
       let sql_chek = "";
       let inicia = false;
+
+      //Verifica que no repitan los código sap
+      let materiales_repetidos = []
+      for (const element of materiales_input) {
+        if (!element) {
+          const valores = element.split("_")
+          const valor = {"cod_sap": valores[0], "cantidad": valores[1]}
+          materiales_repetidos.push(valor);
+        }
+      };
+
+      const arreglo_materiales = obtenerValoresUnicosConSuma(materiales_repetidos);
+
+
       for ( const element of arreglo_materiales)
         {
           const valores = element.split("_")
@@ -163,6 +181,8 @@ exports.findAllBom = async (req, res) => {
         }
         if (sql_chek){
           sql_chek = sql_chek + "]) as sap_material) as m left join obras.maestro_materiales mm on m.sap_material = mm.codigo_sap where mm.codigo_sap is null;";
+
+          console.log('sql_chek', sql_chek);
           const { QueryTypes } = require('sequelize');
           const sequelize = db.sequelize;
           const bom = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
@@ -179,7 +199,7 @@ exports.findAllBom = async (req, res) => {
                     //Chequear si la reserva existe en la tabla reservas_obras
                     //Si existe, chequear que el id_obra sea el mismo que se está ingresando
                     //Si no es el mismo quiere decir que la reserva ya está asignada a otra obra, por lo que debe arrojar error
-                    //Si la reserva no se encuentra se debe crear en la tabal reservas_obras y asignarla al codigo de obra
+                    //Si la reserva no se encuentra se debe crear en la tabla reservas_obras y asignarla al codigo de obra
                     sql_chek = "select * from obras.reservas_obras where reserva = " + reserva;
                     const { QueryTypes } = require('sequelize');
                     const sequelize = db.sequelize;
@@ -194,9 +214,24 @@ exports.findAllBom = async (req, res) => {
                         const bom = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
                         if (bom){
                           if (bom.length > 0){
-                          //El id_obra se encuentra en la tabla de reservas_obras
-                          //No hay errores, proceder a ingresar el bom
-                          todoOk = true;
+                              //El id_obra se encuentra en la tabla de reservas_obras
+                              //No hay errores, proceder a ingresar el bom
+                              //Revisar si la combinacion de id_obra y reserva ya existe en la tabla bom_zero
+                              sql = sql + ";";
+                              const { QueryTypes } = require('sequelize');
+                              const sequelize = db.sequelize;
+                              const bom = await sequelize.query(sql, { type: QueryTypes.SELECT });
+                              if (bom){
+                                  //La combinacion de id_obra y reserva ya existe en la tabla bom_zero
+                                  //No hay errores, no hacer nada
+                                  todoOk = true;
+                              }else {
+                                  //La combinacion de id_obra y reserva no existe en la tabla bom_zero
+                                  //Insertar la combinacion de id_obra y reserva en la tabla bom_zero
+                                  const sql_insert = "INSERT INTO obras.bom_zero (id_obra, reserva) VALUES (" + id_obra + ", " + reserva + ");";
+                                  sql = sql_insert + sql;
+                                  todoOk = true;
+                              }
                           }else {
                           //El id_obra no se encuentra en la tabla de reservas_obras 
                           //La reserva está asignada a otro id_de obra, arrojar un error
@@ -220,20 +255,234 @@ exports.findAllBom = async (req, res) => {
                                     if (bom) {
                                       res.status(200).send(bom);
                                     }else{res.status(500).send("Error en la consulta (servidor backend)");}
-  
                         } else {res.status(500).send("Consulta vacía (error servidor backend)");}
   
                     }else{res.status(500).send("Error en la consulta (servidor backend)");}
-  
                   }
           }else{res.status(500).send("Error en la consulta (servidor backend)");}
-  
         }else{res.status(500).send("Error en la consulta (servidor backend)");}
-      
     }catch (error) {
       res.status(500).send(error);
     }   
   }
+  /***********************************************************************************/
+  /* Crea un nuevo bom de forma masiva, Version 2
+  ;
+  */
+  exports.createBomMasivo_v2 = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Ingresa un grupo de materiales en el bom de una sola vez Version 2' */
+  
+
+        //ejemplo: { "materiales": "1219_3-1220_2", "id_obra": 22, "reserva": 3456}
+        const campos = [
+          'id_obra', 'reserva', 'materiales'
+        ];
+        for (const element of campos) {
+          if (!req.body[element]) {
+            res.status(400).send("No puede estar nulo el campo " + element
+            );
+            return;
+          }
+        };
+
+        try {
+            const { QueryTypes } = require('sequelize');
+            const sequelize = db.sequelize;
+
+            let todoOk = false;
+            let materiales = req.body.materiales;
+            //reemplaza las comas por puntos, por si hay alguna cantidad decimal
+            materiales = materiales.replace(",", ".");
+            console.log('materiales -> ',materiales);
+            let id_obra = req.body.id_obra;
+            let reserva = req.body.reserva;
+            //el simblo guion separa la información de materiales
+            let materiales_input = materiales.split("-");
+            console.log('materiales_input -> ',materiales_input);
+
+            let sql = "";
+            let sql_chek = "";
+            let sql_reservas = "";
+            let sql_bom_movimientos = "";
+
+            let id_usuario = req.userId;
+            let rut_usuario;
+            sql = "select username from _auth.users where id = " + id_usuario;
+            await sequelize.query(sql, {
+              type: QueryTypes.SELECT
+            }).then(data => {
+              rut_usuario = data[0].username;
+            }).catch(err => {
+              res.status(500).send(err.message );
+              return;
+            })
+
+            //Verifica que no repitan los código sap
+            let materiales_repetidos = []
+            for (const element of materiales_input) {
+              if (element) {
+                const valores = element.split("_")
+                const valor = {"codigo_sap": valores[0], "cantidad": Number(valores[1])}
+                materiales_repetidos.push(valor);
+              }
+            };
+
+            const arreglo_materiales = obtenerValoresUnicosConSuma(materiales_repetidos);
+            console.log('materiales_repetidos',materiales_repetidos);
+            console.log('arreglo_materiales',arreglo_materiales);
+
+            const codigos_sap = arreglo_materiales.reduce((acumulador, elemento, indice) => {
+                // Agregar coma si no es el primer elemento
+                if (indice !== 0) {
+                    acumulador += ', ';
+                }
+                // Concatenar el elemento actual al acumulador
+                return acumulador + elemento.codigo_sap;
+            }, '');
+            const cantidades = arreglo_materiales.reduce((acumulador, elemento, indice) => {
+                // Agregar coma si no es el primer elemento
+                if (indice !== 0) {
+                    acumulador += ', ';
+                }
+                // Concatenar el elemento actual al acumulador
+                return acumulador + elemento.cantidad;
+            }, '');
+
+            if (codigos_sap) {
+              sql_chek = "select m.sap_material from (select unnest(array[" + codigos_sap + "]) as sap_material) as m left join obras.maestro_materiales mm on m.sap_material = mm.codigo_sap where mm.codigo_sap is null;";
+
+              sql_bom_movimientos = `INSERT INTO obras.bom_movimientos (
+                                            id_obra, 
+                                            cod_reserva, 
+                                            codigo_sap_material, 
+                                            cantidad_requerida_old, 
+                                            cantidad_requerida_new, 
+                                            tipo_movimiento, 
+                                            fecha_movimiento, 
+                                            rut_usuario
+                                          )
+                                    SELECT 
+                                        m.id_obra, 
+                                        m.cod_reserva, 
+                                        m.sap_material, 
+                                        case when bm.cantidad_requerida_new is null then 0::bigint else bm.cantidad_requerida_new end 
+                                          as cantidad_requerida_old, 
+                                        case when m.cant_material <= 0 then 0::numeric else  m.cant_material end 
+                                          as cantidad_requerida_new, 
+                                        case when m.cant_material <= 0 then 'ELIMINADO' else case when bm.cantidad_requerida_new 
+                                          is null then 'INGRESADO' else 'MODIFICADO' end end as tipo_movimiento, 
+                                          substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp as fecha_movimiento, 
+                                        '${rut_usuario}'::varchar as rut_usuario 
+                                    FROM 
+                                      (SELECT ${id_obra}::bigint as id_obra, 
+                                            ${reserva}::bigint as cod_reserva, 
+                                            unnest(array[${codigos_sap}]) as sap_material, 
+                                            unnest(array[${cantidades}]) as cant_material) as m 
+                                    LEFT JOIN 
+                                      (SELECT DISTINCT ON (id_obra, codigo_sap_material) 
+                                          id_obra, 
+                                          codigo_sap_material, 
+                                          cantidad_requerida_new, 
+                                          fecha_movimiento 
+                                      FROM obras.bom_movimientos 
+                                      ORDER BY 
+                                          id_obra, 
+                                          codigo_sap_material, 
+                                          fecha_movimiento desc
+                                      ) bm 
+                                    ON bm.id_obra = m.id_obra 
+                                    AND bm.codigo_sap_material = m.sap_material`;
+            }
+        
+            /******************** Chequea materiales no existentes */
+            if (sql_chek){
+
+              console.log('sql_chek -> ', sql_chek);
+
+              const check_mat = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
+              if (check_mat) {
+                  if (check_mat.length > 0){
+                    res.status(500).send("Hay códigos de material no definidos en la base de datos");
+                    return;
+                  } else {
+                    todoOk = true;
+                  }
+              } else {
+                res.status(500).send("Error en la consulta (servidor backend)");
+                return;
+              }
+            } else {
+              res.status(500).send("Error en la consulta (servidor backend)");
+              return;
+            }
+
+            /******************** Chequea si la reserva existe */
+            sql_chek = "select * from obras.reservas_obras where reserva = " + reserva;
+            
+            const check_reserva = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
+            if (check_reserva){
+              if (check_reserva.length > 0){
+                //la reserva existe, verificar que este asociada al mismo id_obra
+                sql_chek = sql_chek + " and id_obra = " + id_obra;
+              } else {
+                //la reserva no existe, se debe insertar en la tabla reservas_obras
+                sql_chek = null;
+                sql_reservas = "insert into obras.reservas_obras (id_obra, reserva) values (" + id_obra + ", " + reserva + ");";
+              }
+            } else {
+              res.status(500).send("Error en la consulta (servidor backend)");
+              return;
+            }
+
+            /******************** Chequea si la reserva está asociada al mismo id_obra */
+            if (sql_chek){
+              const check_asociada = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
+              if (check_asociada){
+                if (check_asociada.length > 0){
+                  //La reserva está asociada al mismo id_obra, todo ok
+                  todoOk = true;
+                } else {
+                  //La reserva está asociada a otro id_obra, error
+                  res.status(500).send("La reserva está asignada a otro id_obra");
+                  return;
+                }
+              } else {
+                res.status(500).send("Error en la consulta (servidor backend)");
+                return;
+              }
+            }
+
+            /******************** Genera la consulta total 
+            */
+            if (todoOk){
+              if (sql_reservas){
+                sql = sql_reservas + sql_bom_movimientos;
+              } else {
+                sql = sql_bom_movimientos;
+              }
+            }
+            if (sql){
+                const crea_bom = await sequelize.query(sql, { type: QueryTypes.INSERT });
+                if (crea_bom) {
+                  res.status(200).send(crea_bom);
+                  return;
+                }else
+                {
+                  res.status(500).send("Error en la consulta (servidor backend)");
+                  return;
+                }
+            } else {
+              res.status(500).send("Error en la consulta (servidor backend)");
+              return;
+            }
+        } catch (error) {
+          console.log('error -> ', error);
+          res.status(500).send(error);
+        }
+
+  }
+
   /***********************************************************************************/
   /* Crea un nuevo bom de forma masiva
   ;
@@ -389,3 +638,29 @@ exports.findAllBom = async (req, res) => {
         })
     }
   }
+
+  function obtenerValoresUnicosConSuma(arreglo) {
+    const objetoResultante = {};
+
+    // Iterar sobre el arreglo
+    arreglo.forEach((elemento) => {
+        const codigo_sap = elemento.codigo_sap;
+        const cantidad = elemento.cantidad;
+
+        // Si el código ya existe en el objeto, suma el valor al valor existente
+        if (objetoResultante[codigo_sap]) {
+            objetoResultante[codigo_sap] += cantidad;
+        } else {
+            // Si el código no existe en el objeto, simplemente agrega el código y el valor
+            objetoResultante[codigo_sap] = cantidad;
+        }
+    });
+
+    // Convertir el objeto en un arreglo de objetos si es necesario
+    const resultado = Object.keys(objetoResultante).map((codigo_sap) => ({
+        codigo_sap: codigo_sap,
+        cantidad: objetoResultante[codigo_sap]
+    }));
+
+    return resultado;
+}
