@@ -5,6 +5,7 @@ const backofficeBomController = require("../controllers/obras/backoffice.bom.con
 const backofficeTerrenoController = require("../controllers/obras/backoffice.terreno.controller");
 const backofficeRepodiarioController = require("../controllers/obras/backoffice.repodiario.controller");
 const backofficeEstadopagoController = require("../controllers/obras/backoffice.estadopago.controller");
+const backofficeUsoController = require("../controllers/obras/backoffice.usosistema.controller");
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -230,5 +231,19 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/estadopago/v1/allestadospagogestion", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.allestadospagogestion);
 
 
+///****************************************** Uso del Sistema ***********************      */
+
+    // Lista un resumen de los login hechos en el sistema dentro de un período
+    // GET /api/obras/backoffice/usosistema/v1/alllogin
+    app.get("/api/obras/backoffice/usosistema/v1/alllogin", [authJwt.verifyToken], backofficeUsoController.getAllLoginSistema);
+
+
+    // Lista un resumen del ingreso de obras en el sistema en los dias recientes
+    // GET /api/obras/backoffice/usosistema/v1/resumenobrasrecientes
+    app.get("/api/obras/backoffice/usosistema/v1/resumenobrasrecientes", [authJwt.verifyToken], backofficeUsoController.getObrasIngresadasResumen);
+
+    // Lista cantidad de obras sin reporte recietes
+    // GET /api/obras/backoffice/usosistema/v1/resumenobrasinreportes
+    app.get("/api/obras/backoffice/usosistema/v1/resumenobrasinreportes", [authJwt.verifyToken], backofficeUsoController.getObrasSinRepDiario);
 
 }
