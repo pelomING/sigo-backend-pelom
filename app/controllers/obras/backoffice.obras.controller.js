@@ -961,7 +961,7 @@ exports.getResumenObras = async (req, res) => {
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
 
-    let sql = "SELECT case when estado = 'TOTAL' then 'TOTAL' else (estado || '(' || cantidad || ')')::varchar end as estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
+    let sql = "SELECT estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
     (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras) \
     as total FROM obras.estado_obra eo LEFT JOIN obras.obras o on o.estado = eo.id group by eo.id, eo.nombre \
     UNION \
@@ -1007,7 +1007,7 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
-    sql = "select case when estado = 'TOTAL' then 'TOTAL' else (estado || '(' || cantidad || ')')::varchar end as estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
+    sql = "select estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
     (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras \
     WHERE zona = 1) as total FROM obras.estado_obra eo left join (select * from obras.obras WHERE zona = 1) o on o.estado = eo.id \
     group by eo.id, eo.nombre \
@@ -1021,7 +1021,7 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
-    sql = "select case when estado = 'TOTAL' then 'TOTAL' else (estado || '(' || cantidad || ')')::varchar end as estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
+    sql = "select estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
     (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras \
     WHERE zona = 2) as total FROM obras.estado_obra eo left join (select * from obras.obras WHERE zona = 2) o on o.estado = eo.id \
     group by eo.id, eo.nombre \
