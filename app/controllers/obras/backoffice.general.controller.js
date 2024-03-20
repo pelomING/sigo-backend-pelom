@@ -1,4 +1,5 @@
 const db = require("../../models");
+const bcrypt = require("bcryptjs");
 const TipoObra = db.tipoObra;
 const Zonal = db.zonal;
 const Delegacion = db.delegacion;
@@ -482,13 +483,18 @@ exports.getResumenGeneral = async (req, res) => {
       salida = [];
       for (const element of data) {
 
+            const password_defecto = bcrypt.compareSync(
+              element.username,
+              element.password
+            );
             const detalle_salida = {
               id: Number(element.id),
               username: String(element.username),
               email: String(element.email),
               funcion: String(element.funcion),
               nombres: String(element.nombres),
-              fecha_password: String(element.fecha_password)
+              fecha_password: String(element.fecha_password),
+              password_defecto: password_defecto
             }
             salida.push(detalle_salida);
       };

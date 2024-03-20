@@ -961,12 +961,31 @@ exports.getResumenObras = async (req, res) => {
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
 
-    let sql = "SELECT estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
-    (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras) \
-    as total FROM obras.estado_obra eo LEFT JOIN obras.obras o on o.estado = eo.id group by eo.id, eo.nombre \
-    UNION \
-    SELECT 999::bigint as id, 'TOTAL'::varchar as estado, (SELECT count(id) as total from obras.obras) as cantidad, \
-    (SELECT count(id) as total from obras.obras) as total) as a order by a.id";
+    let sql = `
+    SELECT 
+    a.id,
+    a.estado,
+    a.cantidad,
+        CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+        END AS porcentaje
+    FROM ( SELECT eo.id,
+            eo.nombre AS estado,
+            count(o.id) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras) AS total
+           FROM obras.estado_obra eo
+             LEFT JOIN obras.obras o ON o.estado = eo.id
+          GROUP BY eo.id, eo.nombre
+        UNION
+         SELECT 999::bigint AS id,
+            'TOTAL'::character varying AS estado,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras) AS total) a
+    ORDER BY a.id;`;
     
     const resumenObrasEstados = await sequelize.query(sql, { type: QueryTypes.SELECT });
 
@@ -1007,7 +1026,7 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
-    sql = "select estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
+    sql = "select a.id, estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
     (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras \
     WHERE zona = 1) as total FROM obras.estado_obra eo left join (select * from obras.obras WHERE zona = 1) o on o.estado = eo.id \
     group by eo.id, eo.nombre \
@@ -1021,7 +1040,7 @@ exports.getResumenObras = async (req, res) => {
       res.status(500).send("Error en la consulta (servidor backend)");
       return;
     }
-    sql = "select estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
+    sql = "select a.id, estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
     (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras \
     WHERE zona = 2) as total FROM obras.estado_obra eo left join (select * from obras.obras WHERE zona = 2) o on o.estado = eo.id \
     group by eo.id, eo.nombre \
