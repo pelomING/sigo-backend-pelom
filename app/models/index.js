@@ -97,6 +97,7 @@ db.estadoPagoGestion = require("./obras/estadoPagoGestion.model.js")(sequelize, 
 db.estadoPagoHistorial = require("./obras/estadoPagoHistorial.model.js")(sequelize, Sequelize);
 db.estadoVisita = require("./obras/estadoVisita.model.js")(sequelize, Sequelize);
 db.jefesFaena = require("./obras/jefesFaena.model.js")(sequelize, Sequelize);
+db.logMovimiento = require("./obras/logMovimiento.model.js")(sequelize, Sequelize);
 db.maestroActividad = require("./obras/maestroActividad.model.js")(sequelize, Sequelize);
 db.obra = require("./obras/obra.model.js")(sequelize, Sequelize);
 db.obrasCierres = require("./obras/obrasCierres.model.js")(sequelize, Sequelize);

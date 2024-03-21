@@ -3,6 +3,9 @@ const Obra = db.obra;
 const ObrasHistorialCambios = db.obrasHistorialCambios;
 const ObrasCierres = db.obrasCierres;
 const ObrasParalizacion = db.obrasParalizacion;
+const logMovimiento = db.logMovimiento;
+const accion = require("../../data/accion.data");
+const modulo = "OBRAS";
 
 /***********************************************************************************/
 /*                                                                                 */
@@ -283,6 +286,14 @@ exports.createObra = async (req, res) => {
 
           const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
 
+          const creaLogMovimiento = await logMovimiento.create({
+            usuario_rut: user_name, 
+            fecha_hora: fechahoy,
+            modulo: modulo, 
+            accion: accion.crear,
+            comentario: 'Obra creada ' + req.body.codigo_obra,
+            datos: obra }, { transaction: t });
+
           await t.commit();
 
         } catch (error) {
@@ -429,6 +440,14 @@ exports.updateObra = async (req, res) => {
 
           const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
 
+          const creaLogMovimiento = await logMovimiento.create({
+            usuario_rut: user_name, 
+            fecha_hora: fechahoy,
+            modulo: modulo, 
+            accion: accion.actualizar,
+            comentario: 'Obra actualizada con id: ' + id,
+            datos: obra }, { transaction: t });
+
           await t.commit();
 
         } catch (error) {
@@ -494,6 +513,14 @@ exports.deleteObra = async (req, res) => {
       const obra_creada = await Obra.update(borrar, { where: { id: id }, transaction: t });
 
       const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
+
+      const creaLogMovimiento = await logMovimiento.create({
+        usuario_rut: user_name, 
+        fecha_hora: fechahoy,
+        modulo: modulo, 
+        accion: accion.borrar,
+        comentario: 'Obra borrada con id: ' + id,
+        datos: borrar }, { transaction: t });
 
       await t.commit();
 
@@ -601,6 +628,14 @@ exports.paralizaObra = async (req, res) => {
           const obra_creada = await Obra.update(obra_cambio, { where: { id: id_obra }, transaction: t });
     
           const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
+
+          const creaLogMovimiento = await logMovimiento.create({
+            usuario_rut: user_name, 
+            fecha_hora: fechahoy,
+            modulo: modulo, 
+            accion: accion.actualizar,
+            comentario: 'Obra paralizada con id: ' + id,
+            datos: obra_paralizada }, { transaction: t });
     
           await t.commit();
     
@@ -709,6 +744,14 @@ exports.cierreObra = async (req, res) => {
           const obra_creada = await Obra.update(obra_cambio, { where: { id: id_obra }, transaction: t });
     
           const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
+
+          const creaLogMovimiento = await logMovimiento.create({
+            usuario_rut: user_name, 
+            fecha_hora: fechahoy,
+            modulo: modulo, 
+            accion: accion.actualizar,
+            comentario: 'Obra cerrada con id: ' + id,
+            datos: obra_finalizada }, { transaction: t });
     
           await t.commit();
     
