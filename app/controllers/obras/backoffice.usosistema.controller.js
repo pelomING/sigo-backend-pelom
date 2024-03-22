@@ -13,8 +13,28 @@ exports.getAllLoginSistema = async (req, res) => {
 /*  #swagger.tags = ['Obras - Backoffice - Uso del Sistema']
       #swagger.description = 'Lista un resumen de los login hechos en el sistema dentro de un período' */
 
-      /*
-    const salida = [
+      
+    const maule_norte = [
+        {id: 1, fecha: '2024-03-20', cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', cantidad: 3, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', cantidad: 9, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', cantidad: 3, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', cantidad: 8, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];
+
+    const maule_sur = [
+        {id: 1, fecha: '2024-03-20', cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', cantidad: 10, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', cantidad: 6, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', cantidad: 4, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];
+
+    const total = [
         {id: 1, fecha: '2024-03-20', cantidad: 10, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 2, fecha: '2024-03-19', cantidad: 13, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 3, fecha: '2024-03-18', cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
@@ -22,8 +42,17 @@ exports.getAllLoginSistema = async (req, res) => {
         {id: 5, fecha: '2024-03-16', cantidad: 15, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 6, fecha: '2024-03-15', cantidad: 7, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 7, fecha: '2024-03-14', cantidad: 9, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
-    ]
-*/
+    ];
+
+    salida = {
+        maule_norte: maule_norte,
+        maule_sur: maule_sur,
+        total: total
+    }
+    res.status(200).send(salida);
+
+
+/*
     try {
         const sql = `
         SELECT row_number() OVER (ORDER BY resumen_login.fecha DESC) AS id,
@@ -73,7 +102,7 @@ exports.getAllLoginSistema = async (req, res) => {
     }
     catch (error) {
         res.status(500).send(error);
-    }
+    }*/
 }
 
 // Lista un resumen del ingreso de obras en el sistema en los dias recientes
@@ -81,8 +110,26 @@ exports.getAllLoginSistema = async (req, res) => {
 exports.getObrasIngresadasResumen = async (req, res) => {
 /*  #swagger.tags = ['Obras - Backoffice - Uso del Sistema']
       #swagger.description = 'Lista un resumen del ingreso de obras en el sistema en los dias recientes' */
-      /*
-    const salida = [
+      
+    const maule_norte = [
+        {id: 1, fecha: '2024-03-20', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', cantidad: 3, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', cantidad: 2, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];
+    const maule_sur = [
+        {id: 1, fecha: '2024-03-20', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', cantidad: 3, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];
+    const total = [
         {id: 1, fecha: '2024-03-20', cantidad: 2, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 2, fecha: '2024-03-19', cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 3, fecha: '2024-03-18', cantidad: 4, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
@@ -90,8 +137,16 @@ exports.getObrasIngresadasResumen = async (req, res) => {
         {id: 5, fecha: '2024-03-16', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 6, fecha: '2024-03-15', cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 7, fecha: '2024-03-14', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
-    ]
-*/
+    ];
+
+    salida = {
+        maule_norte: maule_norte,
+        maule_sur: maule_sur,
+        total: total
+    }
+    res.status(200).send(salida);
+
+/*
     try {
         const sql = `
         SELECT row_number() OVER (ORDER BY resumen_log.fecha DESC) AS id,
@@ -146,6 +201,8 @@ exports.getObrasIngresadasResumen = async (req, res) => {
     catch (error) {
         res.status(500).send(error);
     }
+    */
+
 }
 
 // Lista cantidad de obras sin reporte recietes
