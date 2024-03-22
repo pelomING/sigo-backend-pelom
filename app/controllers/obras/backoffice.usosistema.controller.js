@@ -81,6 +81,7 @@ exports.getAllLoginSistema = async (req, res) => {
 exports.getObrasIngresadasResumen = async (req, res) => {
 /*  #swagger.tags = ['Obras - Backoffice - Uso del Sistema']
       #swagger.description = 'Lista un resumen del ingreso de obras en el sistema en los dias recientes' */
+      /*
     const salida = [
         {id: 1, fecha: '2024-03-20', cantidad: 2, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 2, fecha: '2024-03-19', cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
@@ -90,7 +91,7 @@ exports.getObrasIngresadasResumen = async (req, res) => {
         {id: 6, fecha: '2024-03-15', cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
         {id: 7, fecha: '2024-03-14', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
     ]
-
+*/
     try {
         const sql = `
         SELECT row_number() OVER (ORDER BY resumen_log.fecha DESC) AS id,
