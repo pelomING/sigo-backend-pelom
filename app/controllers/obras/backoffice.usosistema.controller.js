@@ -14,65 +14,61 @@ exports.getAllLoginSistema = async (req, res) => {
       #swagger.description = 'Lista un resumen de los login hechos en el sistema dentro de un período' */
 
       /*
-    const salida = [
-        {id: 1, fecha: '2024-03-20', cantidad: 10, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 2, fecha: '2024-03-19', cantidad: 13, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 3, fecha: '2024-03-18', cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 4, fecha: '2024-03-17', cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
-        {id: 5, fecha: '2024-03-16', cantidad: 15, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 6, fecha: '2024-03-15', cantidad: 7, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 7, fecha: '2024-03-14', cantidad: 9, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
-    ]
-*/
-    try {
-        const sql = `
-        SELECT row_number() OVER (ORDER BY resumen_login.fecha DESC) AS id,
-            resumen_login.fecha,
-            resumen_login.cuenta,
-            CASE
-                WHEN EXTRACT(dow FROM resumen_login.fecha) = 0::numeric THEN 'bg-pink-500'::character varying
-                ELSE 'bg-cyan-500'::character varying
-            END AS "bg-color",
-            CASE
-                WHEN EXTRACT(dow FROM resumen_login.fecha) = 0::numeric THEN 'text-pink-500'::character varying
-                ELSE 'text-cyan-500'::character varying
-            END AS "text-color"
-        FROM ( SELECT serie.fecha,
-                count(lh.username) AS cuenta
-            FROM ( SELECT (now()::timestamp without time zone AT TIME ZONE 'america/santiago'::text)::date - a.num AS fecha
-                    FROM ( SELECT generate_series(0, b.valor)::integer AS num from 
-                    (select case when a.valor is null then 7 else a.valor end as valor
-                    from (select sum(valor::integer) as valor 
-                        from _comun.parametros_config where clave = 'dias_reporte_login') a) b) a) serie
-                                    LEFT JOIN _auth.login_historial lh ON serie.fecha = lh.fecha_hora::date
-                                GROUP BY serie.fecha) resumen_login
-        ORDER BY resumen_login.fecha DESC;`;
+    const maule_norte = [
+        {id: 1, fecha: '2024-03-20', dia: "Miércoles", cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', dia: "Martes", cantidad: 3, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', dia: "Lunes", cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', dia: "Domingo", cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', dia: "Sábado", cantidad: 9, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', dia: "Viernes", cantidad: 3, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', dia: "Jueves", cantidad: 8, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];
 
+    const maule_sur = [
+        {id: 1, fecha: '2024-03-20', dia: "Miércoles", cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', dia: "Martes", cantidad: 10, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', dia: "Lunes", cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', dia: "Domingo", cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', dia: "Sábado", cantidad: 6, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', dia: "Viernes", cantidad: 4, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', dia: "Jueves", cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];
+
+    const total = [
+        {id: 1, fecha: '2024-03-20', dia: "Miércoles", cantidad: 10, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', dia: "Martes", cantidad: 13, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', dia: "Lunes", cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', dia: "Domingo", cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', dia: "Sábado", cantidad: 15, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', dia: "Viernes", cantidad: 7, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', dia: "Jueves", cantidad: 9, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];
+    */
+
+    try {
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
-        const resumen = await sequelize.query(sql, { type: QueryTypes.SELECT });
-        let salida = [];
-        if (resumen) {
-        for (const element of resumen) {
 
-                const detalle_salida = {
-                id: Number(element.id),
-                fecha: String(element.fecha),
-                cantidad: Number(element.cuenta),
-                "bg-color": String(element["bg-color"]),
-                "text-color": String(element["text-color"])
+        //consulta una vista en la base de datos
+        let sql = `SELECT * FROM _auth.resumen_login_sistema`;
+        const resumen = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida = {};
+
+        if (resumen) {
+                salida = {
+                    maule_norte: resumen[0].maule_norte,
+                    maule_sur: resumen[0].maule_sur,
+                    total: resumen[0].total
                 }
-                salida.push(detalle_salida);
-        };
         }
         if (salida===undefined){
-        res.status(500).send("Error en la consulta (servidor backend)");
+            res.status(500).send("Error en la consulta (servidor backend)");
         }else{
-        res.status(200).send(salida);
+            res.status(200).send(salida);
         }
-    }
-    catch (error) {
-        res.status(500).send(error);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error en la consulta (servidor backend)");
     }
 }
 
@@ -82,69 +78,58 @@ exports.getObrasIngresadasResumen = async (req, res) => {
 /*  #swagger.tags = ['Obras - Backoffice - Uso del Sistema']
       #swagger.description = 'Lista un resumen del ingreso de obras en el sistema en los dias recientes' */
       /*
-    const salida = [
-        {id: 1, fecha: '2024-03-20', cantidad: 2, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 2, fecha: '2024-03-19', cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 3, fecha: '2024-03-18', cantidad: 4, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 4, fecha: '2024-03-17', cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
-        {id: 5, fecha: '2024-03-16', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 6, fecha: '2024-03-15', cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
-        {id: 7, fecha: '2024-03-14', cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
-    ]
-*/
-    try {
-        const sql = `
-        SELECT row_number() OVER (ORDER BY resumen_log.fecha DESC) AS id,
-            resumen_log.fecha,
-            resumen_log.cuenta,
-                CASE
-                    WHEN EXTRACT(dow FROM resumen_log.fecha) = 0::numeric THEN 'bg-pink-500'::character varying
-                    ELSE 'bg-cyan-500'::character varying
-                END AS "bg-color",
-                CASE
-                    WHEN EXTRACT(dow FROM resumen_log.fecha) = 0::numeric THEN 'text-pink-500'::character varying
-                    ELSE 'text-cyan-500'::character varying
-                END AS "text-color"
-        FROM ( SELECT serie.fecha,
-            count(lm.fecha_hora::date) AS cuenta
-           FROM ( SELECT (now()::timestamp without time zone AT TIME ZONE 'america/santiago'::text)::date - a.num AS fecha
-                   FROM ( SELECT generate_series(0::bigint, b.valor)::integer AS num
-                           FROM ( SELECT
-                                    CASE
-                                    WHEN a_1.valor IS NULL THEN 7::bigint
-                                    ELSE a_1.valor
-                                    END AS valor
-                                   FROM ( SELECT sum(parametros_config.valor::integer) AS valor
-                                            FROM _comun.parametros_config
-                                            WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
-        LEFT JOIN obras.log_movimientos lm ON serie.fecha = lm.fecha_hora::date
-        GROUP BY serie.fecha) resumen_log;`;
+    const maule_norte = [
+        {id: 1, fecha: '2024-03-20', dia: "Miércoles", cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', dia: "Martes", cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', dia: "Lunes", cantidad: 3, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', dia: "Domingo", cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', dia: "Sábado", cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', dia: "Viernes", cantidad: 2, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', dia: "Jueves", cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];
+    const maule_sur = [
+        {id: 1, fecha: '2024-03-20', dia: "Miércoles", cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', dia: "Martes", cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', dia: "Lunes", cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', dia: "Domingo", cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', dia: "Sábado", cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', dia: "Viernes", cantidad: 3, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', dia: "Jueves", cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];
+    const total = [
+        {id: 1, fecha: '2024-03-20', dia: "Miércoles", cantidad: 2, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 2, fecha: '2024-03-19', dia: "Martes", cantidad: 0, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 3, fecha: '2024-03-18', dia: "Lunes", cantidad: 4, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 4, fecha: '2024-03-17', dia: "Domingo", cantidad: 0, "bg-color": 'bg-pink-500', "text-color": 'text-pink-500'},
+        {id: 5, fecha: '2024-03-16', dia: "Sábado", cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 6, fecha: '2024-03-15', dia: "Viernes", cantidad: 5, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'},
+        {id: 7, fecha: '2024-03-14', dia: "Jueves", cantidad: 1, "bg-color": 'bg-cyan-500', "text-color": 'text-cyan-500'}
+    ];*/
 
+    try {
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
-        const resumen = await sequelize.query(sql, { type: QueryTypes.SELECT });
-        let salida = [];
-        if (resumen) {
-        for (const element of resumen) {
 
-                const detalle_salida = {
-                id: Number(element.id),
-                fecha: String(element.fecha),
-                cantidad: Number(element.cuenta),
-                "bg-color": String(element["bg-color"]),
-                "text-color": String(element["text-color"])
+        //consulta una vista en la base de datos
+        let sql = `SELECT * FROM _auth.resumen_obras_ingresadas`;
+        const resumen = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        let salida = {};
+
+        if (resumen) {
+                salida = {
+                    maule_norte: resumen[0].maule_norte,
+                    maule_sur: resumen[0].maule_sur,
+                    total: resumen[0].total
                 }
-                salida.push(detalle_salida);
-        };
         }
         if (salida===undefined){
-        res.status(500).send("Error en la consulta (servidor backend)");
+            res.status(500).send("Error en la consulta (servidor backend)");
         }else{
-        res.status(200).send(salida);
+            res.status(200).send(salida);
         }
-    }
-    catch (error) {
-        res.status(500).send(error);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error en la consulta (servidor backend)");
     }
 }
 
