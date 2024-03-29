@@ -6323,6 +6323,28 @@
           }
         }
       }
+    },
+    "/api/paneldecontrol/v1/getcantidadeventossaeporzonal": {
+      "get": {
+        "tags": [
+          "SAE - Backoffice - Panel de Control"
+        ],
+        "description": "Devuelve la cantidad de eventos por zonal maule norte y sur",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
     }
   }
 }
