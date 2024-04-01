@@ -13,4 +13,8 @@ module.exports = function(app) {
 
     app.get("/api/paneldecontrol/v1/getcantidadeventossaeporzonal", [authJwt.verifyToken], paneldeControlController.getCantidadEventosSaePorZonal);
 
+
+    app.get("/api/paneldecontrol/v1/getcanteventsaeorganizadomes", [authJwt.verifyToken], paneldeControlController.getCantidadEventosSaePorZonalOrganizadoPorMes);
+    
+
 }
