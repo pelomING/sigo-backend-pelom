@@ -109,6 +109,8 @@ require('./app/routes/sae_movil.routes')(app);
 require('./app/routes/mantenedor.routes')(app);
 require('./app/routes/sae_reportes.routes')(app);
 require('./app/routes/obras_backoffice.routes')(app);
+require('./app/routes/sae_paneldecontrol.routes')(app);
+
 
 const Tiempo = process.env.CRON_TIEMPO || 4;
 //Se propgrama el cron
