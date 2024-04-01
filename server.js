@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
+const nodeCron = require('node-cron');
 //const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require('./swagger-output.json')
@@ -108,7 +109,15 @@ require('./app/routes/sae_movil.routes')(app);
 require('./app/routes/mantenedor.routes')(app);
 require('./app/routes/sae_reportes.routes')(app);
 require('./app/routes/obras_backoffice.routes')(app);
+require('./app/routes/sae_paneldecontrol.routes')(app);
 
+
+const Tiempo = process.env.CRON_TIEMPO || 4;
+//Se propgrama el cron
+const job = nodeCron.schedule('*/' + Tiempo + ' * * * *', () => {
+  console.log('se ejecuta la funcion por cron ' + '*/' + Tiempo + ' * * * *');
+})
+job.start();
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 const NodeEnv = process.env.PUBLIC_DOMAIN || "local";

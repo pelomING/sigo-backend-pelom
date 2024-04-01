@@ -475,9 +475,9 @@ exports.getResumenGeneral = async (req, res) => {
   /*  #swagger.tags = ['Obras - General']
     #swagger.description = 'Devuelve todos los usuarios' */
   try {
-    const data = await UsuariosFunciones.findAll({
-      order: [['username', 'ASC']],
-    });
+    const Op = db.Sequelize.Op;
+    const data = await UsuariosFunciones.findAll(
+      { where:  { funcion: { [Op.ne]: 'sistema' } } , order: [['username', 'ASC']] });
     let salida;
     if (data) {
       salida = [];
