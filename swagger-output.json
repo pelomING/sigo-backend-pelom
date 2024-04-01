@@ -1673,30 +1673,49 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/creabom": {
-      "post": {
+    "/api/obras/backoffice/v1/bom_inicial_por_obra": {
+      "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
         ],
-        "description": "Ingresa un grupo de materiales en el bom de una sola vez",
+        "description": "Devuelve todos los registros del Bom inicial de acuerdo al id de obra",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "materiales": {
-                  "example": "any"
-                },
-                "id_obra": {
-                  "example": "any"
-                },
-                "reserva": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/bom_actual_por_obra": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve todos los registros del Bom final de acuerdo al id de obra",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1738,6 +1757,51 @@
                   "example": "any"
                 },
                 "reserva": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/creapedidomaterial": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Ingresa un grupo de materiales para generan un pedido de material",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "materiales": {
+                  "example": "any"
+                },
+                "id_obra": {
+                  "example": "any"
+                },
+                "pedido": {
                   "example": "any"
                 }
               }

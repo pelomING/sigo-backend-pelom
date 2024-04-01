@@ -111,6 +111,8 @@ db.tipoOperacion = require("./obras/tipoOperacion.model.js")(sequelize, Sequeliz
 db.tipoRecargo = require("./obras/tipoRecargo.model.js")(sequelize, Sequelize);
 db.tipoTrabajo = require("./obras/tipoTrabajo.model.js")(sequelize, Sequelize);
 db.visitaTerreno = require("./obras/visitaTerreno.model.js")(sequelize, Sequelize);
+db.vwBomFinal = require("./obras/vwBomFinal.model.js")(sequelize, Sequelize);
+db.vwBomZero = require("./obras/vwBomZero.model.js")(sequelize, Sequelize);
 
 
 /*****  SAE */
