@@ -6,6 +6,7 @@ const ObrasParalizacion = db.obrasParalizacion;
 const logMovimiento = db.logMovimiento;
 const accion = require("../../data/accion.data");
 const modulo = "OBRAS";
+const { v4: uuidv4 } = require('uuid');
 
 /***********************************************************************************/
 /*                                                                                 */
@@ -991,6 +992,56 @@ exports.getResumenObras = async (req, res) => {
       #swagger.description = 'Obtiene el resumen informartivo de obras' */
   try {
 
+    const respuesta = await this.genera_resumen(false);
+    if (!respuesta) {
+      res.status(500).send("Error en la consulta (servidor backend)");
+      return;
+    }
+    if (respuesta.error) {
+      res.status(500).send(respuesta.message);
+      return;
+    }
+
+    res.status(200).send(respuesta);
+
+  } catch (error) {
+    console.log('error en getResumenObras: ', error);
+    res.status(500).send(error);
+  }
+}
+
+exports.genera_resumen = async function genera_resumen(cron=false) {
+
+  try {
+
+    console.log('genera_resumen -> ', cron);
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+
+    let generarLogResumen = false;
+
+    if (cron) {
+      const sql_resumen = `SELECT * FROM obras."EsHoraDeResumenObras"`;
+
+        const check_log = await sequelize.query(sql_resumen, { type: QueryTypes.SELECT });
+        if (check_log) {
+            if (check_log.length > 0){
+              if (check_log[0].valor){
+                console.log("Ya es momento de generar el resumen");
+                generarLogResumen = true;
+              } else {
+                console.log("No es momento de generar el resumen");
+                return;
+              }
+            }else {
+              return {error: true, message: "Error en la consulta (servidor backend)"};
+            }
+        } else {
+          //res.status(500).send("Error en la consulta (servidor backend)");
+          return {error: true, message: "Error en la consulta (servidor backend)"};
+        }
+    }
+
     const respuesta = {
       resumen_estados: [],
       resumen_tipos_obra: [],
@@ -1001,8 +1052,6 @@ exports.getResumenObras = async (req, res) => {
       resumen_msur_tipo_obra: [],
     }
 
-    const { QueryTypes } = require('sequelize');
-    const sequelize = db.sequelize;
 
     let sql = `
     SELECT 
@@ -1035,122 +1084,373 @@ exports.getResumenObras = async (req, res) => {
     if (resumenObrasEstados) {
       respuesta.resumen_estados = resumenObrasEstados;
     }else{
-      res.status(500).send("Error en la consulta (servidor backend)");
-      return;
+      //res.status(500).send("Error en la consulta (servidor backend)");
+      return {error: true, message: "Error en la consulta (servidor backend)"};
     }
 
-    sql = `SELECT tipo_obra, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, bg_color \
-    as "bg-color", txt_color as "text-color"  from (SELECT tob.id as id, tob.descripcion as tipo_obra, tob.bg_color, \
-      tob.txt_color, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras) as total FROM \
-      obras.tipo_obra tob LEFT JOIN obras.obras o on o.tipo_obra = tob.id group by tob.id, tob.descripcion, \
-      tob.bg_color, tob.txt_color \
-      UNION \
-      SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, 'bg-purple-500'::varchar as bg_color, \
-      'text-purple-500'::varchar as txt_color,  (SELECT count(id) as total from obras.obras) as cantidad, \
-      (SELECT count(id) as total from obras.obras) as total) as a order by a.id`;
+    sql = `
+    SELECT a.tipo_obra,
+    a.cantidad,
+        CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+        END AS porcentaje,
+    a.bg_color AS "bg-color",
+    a.txt_color AS "text-color"
+   FROM ( SELECT tob.id,
+            tob.descripcion AS tipo_obra,
+            tob.bg_color,
+            tob.txt_color,
+            count(o.id) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras) AS total
+           FROM obras.tipo_obra tob
+             LEFT JOIN obras.obras o ON o.tipo_obra = tob.id
+          GROUP BY tob.id, tob.descripcion, tob.bg_color, tob.txt_color
+        UNION
+         SELECT 999::bigint AS id,
+            'TOTAL'::character varying AS tipo_obra,
+            'bg-purple-500'::character varying AS bg_color,
+            'text-purple-500'::character varying AS txt_color,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras) AS total) a
+      ORDER BY a.id;`;
     const resumenObrasTipoEstados = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenObrasTipoEstados) {
       respuesta.resumen_tipos_obra = resumenObrasTipoEstados;
     }else{
-      res.status(500).send("Error en la consulta (servidor backend)");
-      return;
+      //res.status(500).send("Error en la consulta (servidor backend)");
+      return {error: true, message: "Error en la consulta (servidor backend)"};
     }
 
-    sql = "SELECT zonal, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
-    (SELECT c.id as id, c.nombre as zonal, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras) \
-    as total FROM _comun.zonal c LEFT JOIN obras.obras o on o.zona = c.id	group by c.id, c.nombre \
-    UNION \
-    SELECT 999::bigint as id, 'TOTAL'::varchar as estado, (SELECT count(id) as total from obras.obras) as cantidad, \
-    (SELECT count(id) as total from obras.obras) as total) as a ORDER by a.id";
+    sql = `SELECT a.zonal,
+    a.cantidad,
+        CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+        END AS porcentaje
+    FROM ( SELECT c.id,
+            c.nombre AS zonal,
+            count(o.id) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras) AS total
+           FROM _comun.zonal c
+             LEFT JOIN obras.obras o ON o.zona = c.id
+          GROUP BY c.id, c.nombre
+        UNION
+         SELECT 999::bigint AS id,
+            'TOTAL'::character varying AS estado,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras) AS total) a
+      ORDER BY a.id;`;
     const resumenObrasZonales = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenObrasZonales) {
       respuesta.resumen_zonales = resumenObrasZonales;
     } else {
-      res.status(500).send("Error en la consulta (servidor backend)");
-      return;
+      //res.status(500).send("Error en la consulta (servidor backend)");
+      return {error: true, message: "Error en la consulta (servidor backend)"};
     }
-    sql = "select a.id, estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
-    (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras \
-    WHERE zona = 1) as total FROM obras.estado_obra eo left join (select * from obras.obras WHERE zona = 1) o on o.estado = eo.id \
-    group by eo.id, eo.nombre \
-    UNION \
-    select 999::bigint as id, 'TOTAL'::varchar as estado, (select count(id) as total from obras.obras WHERE zona = 1) \
-    as cantidad, (select count(id) as total from obras.obras  WHERE zona = 1) as total) as a order by a.id";
+
+
+    sql = `SELECT a.id,
+    a.estado,
+    a.cantidad,
+        CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+        END AS porcentaje
+   FROM ( SELECT eo.id,
+            eo.nombre AS estado,
+            count(o.id) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 1) AS total
+           FROM obras.estado_obra eo
+             LEFT JOIN ( SELECT obras.id,
+                    obras.codigo_obra,
+                    obras.numero_ot,
+                    obras.nombre_obra,
+                    obras.zona,
+                    obras.delegacion,
+                    obras.gestor_cliente,
+                    obras.numero_aviso,
+                    obras.numero_oc,
+                    obras.monto,
+                    obras.cantidad_uc,
+                    obras.fecha_llegada,
+                    obras.fecha_inicio,
+                    obras.fecha_termino,
+                    obras.tipo_trabajo,
+                    obras.persona_envia_info,
+                    obras.cargo_persona_envia_info,
+                    obras.empresa_contratista,
+                    obras.coordinador_contratista,
+                    obras.comuna,
+                    obras.ubicacion,
+                    obras.estado,
+                    obras.tipo_obra,
+                    obras.segmento,
+                    obras.eliminada,
+                    obras.jefe_delegacion,
+                    obras.oficina,
+                    obras.recargo_distancia
+                   FROM obras.obras
+                  WHERE obras.zona = 1) o ON o.estado = eo.id
+          GROUP BY eo.id, eo.nombre
+        UNION
+         SELECT 999::bigint AS id,
+            'TOTAL'::character varying AS estado,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 1) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 1) AS total) a
+      ORDER BY a.id;`;
     const resumenMauleNorte = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenMauleNorte) {
       respuesta.resumen_maule_norte = resumenMauleNorte;
     } else {
-      res.status(500).send("Error en la consulta (servidor backend)");
-      return;
+      //res.status(500).send("Error en la consulta (servidor backend)");
+      return {error: true, message: "Error en la consulta (servidor backend)"};
     }
-    sql = "select a.id, estado, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje from \
-    (SELECT eo.id as id, eo.nombre as estado, count(o.id) as cantidad, (select count(id) as total from obras.obras \
-    WHERE zona = 2) as total FROM obras.estado_obra eo left join (select * from obras.obras WHERE zona = 2) o on o.estado = eo.id \
-    group by eo.id, eo.nombre \
-    UNION \
-    select 999::bigint as id, 'TOTAL'::varchar as estado, (select count(id) as total from obras.obras \
-    WHERE zona = 2) \
-    as cantidad, (select count(id) as total from obras.obras  \
-    WHERE zona = 2) as total) as a order by a.id";
+
+
+    sql = `SELECT a.id,
+    a.estado,
+    a.cantidad,
+        CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+        END AS porcentaje
+   FROM ( SELECT eo.id,
+            eo.nombre AS estado,
+            count(o.id) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 2) AS total
+           FROM obras.estado_obra eo
+             LEFT JOIN ( SELECT obras.id,
+                    obras.codigo_obra,
+                    obras.numero_ot,
+                    obras.nombre_obra,
+                    obras.zona,
+                    obras.delegacion,
+                    obras.gestor_cliente,
+                    obras.numero_aviso,
+                    obras.numero_oc,
+                    obras.monto,
+                    obras.cantidad_uc,
+                    obras.fecha_llegada,
+                    obras.fecha_inicio,
+                    obras.fecha_termino,
+                    obras.tipo_trabajo,
+                    obras.persona_envia_info,
+                    obras.cargo_persona_envia_info,
+                    obras.empresa_contratista,
+                    obras.coordinador_contratista,
+                    obras.comuna,
+                    obras.ubicacion,
+                    obras.estado,
+                    obras.tipo_obra,
+                    obras.segmento,
+                    obras.eliminada,
+                    obras.jefe_delegacion,
+                    obras.oficina,
+                    obras.recargo_distancia
+                   FROM obras.obras
+                  WHERE obras.zona = 2) o ON o.estado = eo.id
+          GROUP BY eo.id, eo.nombre
+        UNION
+         SELECT 999::bigint AS id,
+            'TOTAL'::character varying AS estado,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 2) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 2) AS total) a
+    ORDER BY a.id;`;
     const resumenMauleSur = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenMauleSur) {
       respuesta.resumen_maule_sur = resumenMauleSur;
     } else {
-      res.status(500).send("Error en la consulta (servidor backend)");
-      return;
+      //res.status(500).send("Error en la consulta (servidor backend)");
+      return {error: true, message: "Error en la consulta (servidor backend)"};
     }
-    sql = `SELECT tipo_obra, cantidad, case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, bg_color \
-    as "bg-color", txt_color as "text-color"  from (SELECT tob.id as id, tob.descripcion as tipo_obra, tob.bg_color, \
-      tob.txt_color, count(o.id) as cantidad, (SELECT count(id) as total from obras.obras WHERE zona = 1) as total FROM \
-      obras.tipo_obra tob LEFT JOIN (select * from obras.obras WHERE zona = 1) o on o.tipo_obra = tob.id group by tob.id, tob.descripcion, \
-      tob.bg_color, tob.txt_color \
-      UNION \
-      SELECT 999::bigint as id, 'TOTAL'::varchar as tipo_obra, 'bg-purple-500'::varchar as bg_color, \
-      'text-purple-500'::varchar as txt_color,  (SELECT count(id) as total from obras.obras WHERE zona = 1) as cantidad, \
-      (SELECT count(id) as total from obras.obras WHERE zona = 1) as total) as a order by a.id`;
+
+
+    sql = `
+    SELECT a.tipo_obra,
+    a.cantidad,
+        CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+        END AS porcentaje,
+    a.bg_color AS "bg-color",
+    a.txt_color AS "text-color"
+   FROM ( SELECT tob.id,
+            tob.descripcion AS tipo_obra,
+            tob.bg_color,
+            tob.txt_color,
+            count(o.id) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 1) AS total
+           FROM obras.tipo_obra tob
+             LEFT JOIN ( SELECT obras.id,
+                    obras.codigo_obra,
+                    obras.numero_ot,
+                    obras.nombre_obra,
+                    obras.zona,
+                    obras.delegacion,
+                    obras.gestor_cliente,
+                    obras.numero_aviso,
+                    obras.numero_oc,
+                    obras.monto,
+                    obras.cantidad_uc,
+                    obras.fecha_llegada,
+                    obras.fecha_inicio,
+                    obras.fecha_termino,
+                    obras.tipo_trabajo,
+                    obras.persona_envia_info,
+                    obras.cargo_persona_envia_info,
+                    obras.empresa_contratista,
+                    obras.coordinador_contratista,
+                    obras.comuna,
+                    obras.ubicacion,
+                    obras.estado,
+                    obras.tipo_obra,
+                    obras.segmento,
+                    obras.eliminada,
+                    obras.jefe_delegacion,
+                    obras.oficina,
+                    obras.recargo_distancia
+                   FROM obras.obras
+                  WHERE obras.zona = 1) o ON o.tipo_obra = tob.id
+          GROUP BY tob.id, tob.descripcion, tob.bg_color, tob.txt_color
+        UNION
+         SELECT 999::bigint AS id,
+            'TOTAL'::character varying AS tipo_obra,
+            'bg-purple-500'::character varying AS bg_color,
+            'text-purple-500'::character varying AS txt_color,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 1) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 1) AS total) a
+    ORDER BY a.id;`;
+
     const resumenMnorteTipoObra = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenMnorteTipoObra) {
       respuesta.resumen_mnorte_tipo_obra = resumenMnorteTipoObra;
     } else {
-      res.status(500).send("Error en la consulta (servidor backend)");
-      return;
+      //res.status(500).send("Error en la consulta (servidor backend)");
+      return {error: true, message: "Error en la consulta (servidor backend)"};
     }
-    sql = `SELECT tipo_obra, 
-                  cantidad, 
-                  case when total=0 then 0 else ((cantidad::numeric/total::numeric)*100)::numeric(5,2) end as porcentaje, 
-                  bg_color as "bg-color", 
-                  txt_color as "text-color"  
-            FROM 
-              (
-                SELECT tob.id as id, 
-                      tob.descripcion as tipo_obra, 
-                      tob.bg_color, 
-                      tob.txt_color, 
-                      count(o.id) as cantidad, 
-                      (SELECT count(id) as total FROM obras.obras WHERE zona = 2) as total 
-                FROM obras.tipo_obra tob 
-                      LEFT JOIN 
-                        (select * from obras.obras WHERE zona = 2) o 
-                      ON o.tipo_obra = tob.id 
-                GROUP BY tob.id, tob.descripcion, tob.bg_color, tob.txt_color 
-              UNION 
-                SELECT 999::bigint as id, 
-                'TOTAL'::varchar as tipo_obra, 
-                'bg-purple-500'::varchar as bg_color,
-                'text-purple-500'::varchar as txt_color, 
-                (SELECT count(id) as total from obras.obras WHERE zona = 2) as cantidad, 
-                (SELECT count(id) as total from obras.obras WHERE zona = 2) as total
-              ) as a order by a.id`;
+
+
+    sql = `SELECT a.tipo_obra,
+    a.cantidad,
+        CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+        END AS porcentaje,
+    a.bg_color AS "bg-color",
+    a.txt_color AS "text-color"
+   FROM ( SELECT tob.id,
+            tob.descripcion AS tipo_obra,
+            tob.bg_color,
+            tob.txt_color,
+            count(o.id) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 2) AS total
+           FROM obras.tipo_obra tob
+             LEFT JOIN ( SELECT obras.id,
+                    obras.codigo_obra,
+                    obras.numero_ot,
+                    obras.nombre_obra,
+                    obras.zona,
+                    obras.delegacion,
+                    obras.gestor_cliente,
+                    obras.numero_aviso,
+                    obras.numero_oc,
+                    obras.monto,
+                    obras.cantidad_uc,
+                    obras.fecha_llegada,
+                    obras.fecha_inicio,
+                    obras.fecha_termino,
+                    obras.tipo_trabajo,
+                    obras.persona_envia_info,
+                    obras.cargo_persona_envia_info,
+                    obras.empresa_contratista,
+                    obras.coordinador_contratista,
+                    obras.comuna,
+                    obras.ubicacion,
+                    obras.estado,
+                    obras.tipo_obra,
+                    obras.segmento,
+                    obras.eliminada,
+                    obras.jefe_delegacion,
+                    obras.oficina,
+                    obras.recargo_distancia
+                   FROM obras.obras
+                  WHERE obras.zona = 2) o ON o.tipo_obra = tob.id
+          GROUP BY tob.id, tob.descripcion, tob.bg_color, tob.txt_color
+        UNION
+         SELECT 999::bigint AS id,
+            'TOTAL'::character varying AS tipo_obra,
+            'bg-purple-500'::character varying AS bg_color,
+            'text-purple-500'::character varying AS txt_color,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 2) AS cantidad,
+            ( SELECT count(obras.id) AS total
+                   FROM obras.obras
+                  WHERE obras.zona = 2) AS total) a
+    ORDER BY a.id;`;
+
     const resumenMsurTipoObra = await sequelize.query(sql, { type: QueryTypes.SELECT });
     if (resumenMsurTipoObra) {
       respuesta.resumen_msur_tipo_obra = resumenMsurTipoObra;
     } else {
-      res.status(500).send("Error en la consulta (servidor backend)");
-      return;
+      //res.status(500).send("Error en la consulta (servidor backend)");
+      return {error: true, message: "Error en la consulta (servidor backend)"};
     }
-    res.status(200).send(respuesta);
+    //res.status(200).send(respuesta);
+
+    if (generarLogResumen) {
+
+        sql = `INSERT INTO obras.log_resumen_obras (codigo, datos, fecha_hora)
+                VALUES ('${uuidv4()}', '${JSON.stringify(respuesta)}',
+                substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp)`;
+
+        const crea_log = await sequelize.query(sql, { type: QueryTypes.INSERT });
+    }
+    /*
+    if (crea_log) {
+      //res.status(200).send(crea_log);
+      console.log("crea_log", crea_log);
+    } else {
+      //res.status(500).send("Error en la consulta (servidor backend)");
+      console.log("Error en crea_log", crea_log);
+      return {error: true, message: "Error en la consulta (servidor backend)"};
+    }
+    */
+
+
+    return respuesta;
 
   } catch (error) {
-    res.status(500).send(error);
+    //res.status(500).send(error);
+    console.log('error -> ', error);
+    return {error: true, message: error};
   }
+
 }

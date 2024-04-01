@@ -1800,6 +1800,9 @@
                 },
                 "id_obra": {
                   "example": "any"
+                },
+                "pedido": {
+                  "example": "any"
                 }
               }
             }
