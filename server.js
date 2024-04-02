@@ -12,6 +12,7 @@ const bodyParser = require('body-parser')
 
 const app = express();
 const db = require("./app/models");
+const cronObras = require("./app/cron/obras.cron");
 const Origen_cors = db.backendCors;
 
 
@@ -112,10 +113,11 @@ require('./app/routes/obras_backoffice.routes')(app);
 require('./app/routes/sae_paneldecontrol.routes')(app);
 
 
-const Tiempo = process.env.CRON_TIEMPO || 4;
+const Tiempo = process.env.CRON_TIEMPO || 10;
 //Se propgrama el cron
 const job = nodeCron.schedule('*/' + Tiempo + ' * * * *', () => {
   console.log('se ejecuta la funcion por cron ' + '*/' + Tiempo + ' * * * *');
+  cronObras.resumenObras();
 })
 job.start();
 // set port, listen for requests
