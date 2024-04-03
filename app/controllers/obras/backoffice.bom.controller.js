@@ -665,6 +665,9 @@ exports.findBomByParametros = async (req, res) => {
         
        
         try {
+          //Considerar que para poder crear un pedido nuevo el numero de pedido no debe existir
+          //En caso de estar modificando un pedido existente, el pedido debe estar en estado 'pendiente'
+
             //valida datos de entrada
             const pedido = inputDatosSchema.parse(inputDatos);
 
@@ -677,6 +680,7 @@ exports.findBomByParametros = async (req, res) => {
             materiales = materiales.replace(",", ".");
             console.log('materiales -> ',materiales);
             let id_obra = pedido.id_obra;
+            const num_pedido = pedido.pedido;
             //el simblo guion separa la información de materiales
             let materiales_input = materiales.split("-");
             console.log('materiales_input -> ',materiales_input);
@@ -684,6 +688,7 @@ exports.findBomByParametros = async (req, res) => {
             let sql = "";
             let sql_chek = "";
             let sql_pedido_movimientos = "";
+            let sql_pedidos = "";
 
             let id_usuario = req.userId;
             let rut_usuario;
@@ -731,6 +736,7 @@ exports.findBomByParametros = async (req, res) => {
             if (codigos_sap) {
               sql_chek = "select m.sap_material from (select unnest(array[" + codigos_sap + "]) as sap_material) as m left join obras.maestro_materiales mm on m.sap_material = mm.codigo_sap where mm.codigo_sap is null;";
 
+              //No considerar los tipo_movimiento 'CANCELADO'
               sql_pedido_movimientos = `INSERT INTO obras.pedido_material_mandante (
                                             id_obra, 
                                             pedido,
@@ -742,7 +748,8 @@ exports.findBomByParametros = async (req, res) => {
                                             rut_usuario
                                           )
                                     SELECT 
-                                        m.id_obra,  
+                                        m.id_obra,
+                                        ${num_pedido}::bigint,
                                         m.sap_material, 
                                         case when bm.cantidad_requerida_new is null then 0::bigint else bm.cantidad_requerida_new end 
                                           as cantidad_requerida_old, 
@@ -753,7 +760,8 @@ exports.findBomByParametros = async (req, res) => {
                                           substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp as fecha_movimiento, 
                                         '${rut_usuario}'::varchar as rut_usuario 
                                     FROM 
-                                      (SELECT ${id_obra}::bigint as id_obra,  
+                                      (SELECT ${id_obra}::bigint as id_obra, 
+                                            ${num_pedido}::bigint as pedido,
                                             unnest(array[${codigos_sap}]) as sap_material, 
                                             unnest(array[${cantidades}]) as cant_material) as m 
                                     LEFT JOIN 
@@ -763,6 +771,7 @@ exports.findBomByParametros = async (req, res) => {
                                           cantidad_requerida_new, 
                                           fecha_movimiento 
                                       FROM obras.pedido_material_mandante 
+                                      WHERE tipo_movimiento <> 'CANCELADO'
                                       ORDER BY 
                                           id_obra, 
                                           codigo_sap_material, 
@@ -793,10 +802,56 @@ exports.findBomByParametros = async (req, res) => {
               res.status(500).send("Error en la consulta (servidor backend)");
               return;
             }
+
+            /******************** Chequea si el pedido existe */
+            sql_chek = "select * from obras.pedidos_mandante_obras where id= " + num_pedido;
+
+            const check_pedido = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
+            if (check_pedido){
+              if (check_pedido.length > 0){
+                //la reserva existe, verificar que este asociada al mismo id_obra
+                sql_chek = sql_chek + " and id_obra = " + id_obra;
+              } else {
+                //el pedido no existe, se debe insertar en la tabla pedidos_mandante_obras
+                sql_chek = null;
+                sql_pedidos = "insert into obras.pedidos_mandante_obras (id_obra, id, estado) values (" + id_obra + ", " + num_pedido + ", 'PENDIENTE');";
+              }
+            } else {
+              res.status(500).send("Error en la consulta (servidor backend)");
+              return;
+            }
+
+            /******************** Chequea si el pedido está asociado al mismo id_obra */
+            if (sql_chek){
+              const check_asociada = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
+              if (check_asociada){
+                if (check_asociada.length > 0){
+                  //El pedido está asociada al mismo id_obra, por último el pedido debe estar en estado 'pendiente'
+                  if (check_asociada[0].estado != 'PENDIENTE'){
+                    res.status(500).send("El id de pedido no se encuentra en estado pendiente, no es posible hacerle modificaciones");
+                    return;
+                  }
+                  todoOk = true;
+                } else {
+                  //El pedido está asociada a otro id_obra, error
+                  res.status(500).send("El id de pedido está asignado a otro id_obra");
+                  return;
+                }
+              } else {
+                res.status(500).send("Error en la consulta (servidor backend)");
+                return;
+              }
+            }
+
             /******************** Genera la consulta total 
             */
             if (todoOk){
+              if (sql_pedidos){
+                sql = sql_pedidos + sql_pedido_movimientos;
+              } else {
                 sql = sql_pedido_movimientos;
+              }
+               
             }
             if (sql){
                 const crea_pedido = await sequelize.query(sql, { type: QueryTypes.INSERT });
@@ -813,7 +868,7 @@ exports.findBomByParametros = async (req, res) => {
               return;
             }
         } catch (error) {
-          //console.log('error -> ', error);
+          console.log('error create pedido  -> ', error);
           if (error instanceof ZodError) {
             console.log(error.issues);
             const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
@@ -824,6 +879,186 @@ exports.findBomByParametros = async (req, res) => {
         }
   }
 
+   /***********************************************************************************/
+  /* Obtiene numero de pedido para crear un pedido
+  ;
+  */
+ exports.getNumeroPedido = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve el numero de pedido' */
+    try {
+        const dataInput = {
+          id_obra: req.query.id_obra
+        }
+
+        const IDataInputSchema = z.object({
+          id_obra: z.coerce.number(),
+        });
+
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const sql_pedido = `SELECT id_obra FROM obras.pedidos_mandante_obras 
+                            WHERE id_obra = ${validated.id_obra} AND estado = 'PENDIENTE' LIMIT 1;`;
+
+        const pedido = await sequelize.query(sql_pedido, { type: QueryTypes.SELECT });
+        if (pedido) { 
+          //HAy un estado con estado pendiente, no puede ebtregar un nuevo numero hasta que no quede ningun pendiente
+          if (pedido.length > 0){
+            res.status(400).send('Aún existe un pedido pendiente para esta obra, debe finalizarlo o cancelarlo antes de generar un nuevo pedido');
+            return;
+          }
+        }
+
+
+        const sql = "select nextval('obras.pedidos_mandante_obras_id_seq'::regclass) as valor;";
+        
+        const nextval = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (nextval) { 
+          res.status(200).send(nextval[0].valor);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+    }
+  }
+  /***********************************************************************************/
+  /* Obtiene listado de pedidos de marterial para una obra
+  ;
+  */
+  exports.getPedidosPorObra = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve el listado de pedidos para una obra' */
+    try {
+        const dataInput = {
+          id_obra: req.query.id_obra
+        }
+
+        const IDataInputSchema = z.object({
+          id_obra: z.coerce.number(),
+        });
+
+        const IDataOutputSchema = z.object({
+          id: z.coerce.number(),
+          id_obra: z.coerce.number(),
+          estado: z.coerce.string(),
+          fecha_hora: z.coerce.string()
+        });
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const id_obra = validated.id_obra;
+        const sql = `SELECT 
+                      pmo.id, 
+                      pmo.id_obra, 
+                      pmo.estado, 
+                      max(pmm.fecha_movimiento)::text as fecha_hora
+                    FROM 
+                      obras.pedidos_mandante_obras pmo 
+                    JOIN obras.pedido_material_mandante pmm
+                    ON 
+                      pmo.id = pmm.pedido 
+                    WHERE pmo.id_obra = ${id_obra}
+                    GROUP BY pmo.id, pmo.id_obra, pmo.estado
+                    ORDER BY pmo.id DESC`;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (pedidos) {
+          const data = IArrayDataOutputSchema.parse(pedidos);
+          res.status(200).send(data);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+    } 
+  }
+   /***********************************************************************************/
+  /* Obtiene listado de materiales para un pedido
+  ;
+  */
+  exports.getMaterialPorPedido = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve el listado de materiales para un pedido' */
+    try {
+        const dataInput = {
+          id: req.query.id
+        }
+
+        const IDataInputSchema = z.object({
+          id: z.coerce.number(),
+        });
+
+        const IDataOutputSchema = z.object({
+          id: z.coerce.number(),
+          id_obra: z.coerce.number(),
+          id_material: z.coerce.number(),
+          estado: z.coerce.string(),
+          fecha_hora: z.coerce.string()
+        });
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const id = validated.id;
+        const sql = `SELECT
+                      pmm.id, 
+                      pmm.id_obra, 
+                      pmm.id_material, 
+                      pmm.estado, 
+                      max(pmm.fecha_movimiento)::text as fecha_hora     
+                    FROM 
+                      obras.pedido_material_mandante pmm
+                    WHERE pmm.pedido = ${id}
+                    GROUP BY pmm.id, pmm.id_obra, pmm.id_material, pmm.estado
+                    ORDER BY pmm.id DESC`;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (pedidos) {
+          const data = IArrayDataOutputSchema.parse(pedidos);
+          res.status(200).send(data);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+    }
+
+  }
   /***********************************************************************************/
   /* Crea un nuevo bom de forma masiva
   ;
