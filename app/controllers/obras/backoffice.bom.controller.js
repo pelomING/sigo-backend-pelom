@@ -340,25 +340,25 @@ exports.findBomByParametros = async (req, res) => {
                     }
                     res.status(200).send(detalle_salida);
                   }else {
-                    //Chequear si la reserva existe en la tabla reservas_obras
+                    //Chequear si la reserva existe en la tabla mat_bom_reservas
                     //Si existe, chequear que el id_obra sea el mismo que se está ingresando
                     //Si no es el mismo quiere decir que la reserva ya está asignada a otra obra, por lo que debe arrojar error
-                    //Si la reserva no se encuentra se debe crear en la tabla reservas_obras y asignarla al codigo de obra
-                    sql_chek = "select * from obras.reservas_obras where reserva = " + reserva;
+                    //Si la reserva no se encuentra se debe crear en la tabla mat_bom_reservas y asignarla al codigo de obra
+                    sql_chek = "select * from obras.mat_bom_reservas where reserva = " + reserva;
                     const { QueryTypes } = require('sequelize');
                     const sequelize = db.sequelize;
                     const bom = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
                     if (bom){
                       if (bom.length > 0){
-                        //La reserva se encuentra en la tabla de reservas_obras
+                        //La reserva se encuentra en la tabla de mat_bom_reservas
                         //Chequear ahora si el id_obra es el mismo que se estaba ingresando
-                        sql_chek = "select * from obras.reservas_obras where reserva = " + reserva + " and id_obra = " + id_obra;
+                        sql_chek = "select * from obras.mat_bom_reservas where reserva = " + reserva + " and id_obra = " + id_obra;
                         const { QueryTypes } = require('sequelize');
                         const sequelize = db.sequelize;
                         const bom = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
                         if (bom){
                           if (bom.length > 0){
-                              //El id_obra se encuentra en la tabla de reservas_obras
+                              //El id_obra se encuentra en la tabla de mat_bom_reservas
                               //No hay errores, proceder a ingresar el bom
                               //Revisar si la combinacion de id_obra y reserva ya existe en la tabla bom_zero
                               sql = sql + ";";
@@ -377,17 +377,17 @@ exports.findBomByParametros = async (req, res) => {
                                   todoOk = true;
                               }
                           }else {
-                          //El id_obra no se encuentra en la tabla de reservas_obras 
+                          //El id_obra no se encuentra en la tabla de mat_bom_reservas 
                           //La reserva está asignada a otro id_de obra, arrojar un error
                           throw new Error("La reserva está asignada a otro id_obra");
                           }
                         }else {res.status(500).send("Error en la consulta (servidor backend)");}
   
                       }else{
-                        //La reserva no se encuentra en la tabla reservas_obras, se debe ingresar junto con el id de obra
-                        // Si la reserva no se encuentra en la tabla de reservas_obras
+                        //La reserva no se encuentra en la tabla mat_bom_reservas, se debe ingresar junto con el id de obra
+                        // Si la reserva no se encuentra en la tabla de mat_bom_reservas
                         // Se debe ingresar junto con el id de obra
-                        const sql_insert = "INSERT INTO obras.reservas_obras (reserva, id_obra) VALUES (" + reserva + ", " + id_obra + ");";
+                        const sql_insert = "INSERT INTO obras.mat_bom_reservas (reserva, id_obra) VALUES (" + reserva + ", " + id_obra + ");";
                         sql = sql_insert + sql;
                         todoOk = true;
                       }
@@ -502,7 +502,7 @@ exports.findBomByParametros = async (req, res) => {
             if (codigos_sap) {
               sql_chek = "select m.sap_material from (select unnest(array[" + codigos_sap + "]) as sap_material) as m left join obras.maestro_materiales mm on m.sap_material = mm.codigo_sap where mm.codigo_sap is null;";
 
-              sql_bom_movimientos = `INSERT INTO obras.bom_movimientos (
+              sql_bom_movimientos = `INSERT INTO obras.mat_bom_ingresos (
                                             id_obra, 
                                             cod_reserva, 
                                             codigo_sap_material, 
@@ -535,7 +535,7 @@ exports.findBomByParametros = async (req, res) => {
                                           codigo_sap_material, 
                                           cantidad_requerida_new, 
                                           fecha_movimiento 
-                                      FROM obras.bom_movimientos 
+                                      FROM obras.mat_bom_ingresos 
                                       ORDER BY 
                                           id_obra, 
                                           codigo_sap_material, 
@@ -568,7 +568,7 @@ exports.findBomByParametros = async (req, res) => {
             }
 
             /******************** Chequea si la reserva existe */
-            sql_chek = "select * from obras.reservas_obras where reserva = " + reserva;
+            sql_chek = "select * from obras.mat_bom_reservas where reserva = " + reserva;
             
             const check_reserva = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
             if (check_reserva){
@@ -576,9 +576,9 @@ exports.findBomByParametros = async (req, res) => {
                 //la reserva existe, verificar que este asociada al mismo id_obra
                 sql_chek = sql_chek + " and id_obra = " + id_obra;
               } else {
-                //la reserva no existe, se debe insertar en la tabla reservas_obras
+                //la reserva no existe, se debe insertar en la tabla mat_bom_reservas
                 sql_chek = null;
-                sql_reservas = "insert into obras.reservas_obras (id_obra, reserva) values (" + id_obra + ", " + reserva + ");";
+                sql_reservas = "insert into obras.mat_bom_reservas (id_obra, reserva) values (" + id_obra + ", " + reserva + ");";
               }
             } else {
               res.status(500).send("Error en la consulta (servidor backend)");
@@ -652,7 +652,7 @@ exports.findBomByParametros = async (req, res) => {
         const inputDatos = {
           materiales: req.body.materiales,
           id_obra: req.body.id_obra,
-          pedido: req.body.pedido
+          pedido: req.body.solicitud
         }
 
         //chequeo con Zod
@@ -673,6 +673,18 @@ exports.findBomByParametros = async (req, res) => {
 
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
+
+            const sql_consulta_pedido = `SELECT id_obra FROM obras.mat_solicitudes_obras 
+                            WHERE id_obra = ${pedido.id_obra} AND estado = 'PENDIENTE' LIMIT 1;`;
+
+            const consulta_pedido = await sequelize.query(sql_consulta_pedido, { type: QueryTypes.SELECT });
+            if (consulta_pedido) { 
+              //HAy un estado con estado pendiente, no puede ebtregar un nuevo numero hasta que no quede ningun pendiente
+              if (consulta_pedido.length > 0){
+                res.status(400).send('Aún existe un pedido pendiente para esta obra, debe finalizarlo o cancelarlo antes de generar un nuevo pedido');
+                return;
+              }
+            }
 
             let todoOk = false;
             let materiales = pedido.materiales;
@@ -737,7 +749,7 @@ exports.findBomByParametros = async (req, res) => {
               sql_chek = "select m.sap_material from (select unnest(array[" + codigos_sap + "]) as sap_material) as m left join obras.maestro_materiales mm on m.sap_material = mm.codigo_sap where mm.codigo_sap is null;";
 
               //No considerar los tipo_movimiento 'CANCELADO'
-              sql_pedido_movimientos = `INSERT INTO obras.pedido_material_mandante (
+              sql_pedido_movimientos = `INSERT INTO obras.mat_solicitudes_detalle (
                                             id_obra, 
                                             pedido,
                                             codigo_sap_material, 
@@ -770,7 +782,7 @@ exports.findBomByParametros = async (req, res) => {
                                           codigo_sap_material, 
                                           cantidad_requerida_new, 
                                           fecha_movimiento 
-                                      FROM obras.pedido_material_mandante 
+                                      FROM obras.mat_solicitudes_detalle 
                                       WHERE tipo_movimiento <> 'CANCELADO'
                                       ORDER BY 
                                           id_obra, 
@@ -804,7 +816,7 @@ exports.findBomByParametros = async (req, res) => {
             }
 
             /******************** Chequea si el pedido existe */
-            sql_chek = "select * from obras.pedidos_mandante_obras where id= " + num_pedido;
+            sql_chek = "select * from obras.mat_solicitudes_obras where id= " + num_pedido;
 
             const check_pedido = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
             if (check_pedido){
@@ -812,9 +824,12 @@ exports.findBomByParametros = async (req, res) => {
                 //la reserva existe, verificar que este asociada al mismo id_obra
                 sql_chek = sql_chek + " and id_obra = " + id_obra;
               } else {
-                //el pedido no existe, se debe insertar en la tabla pedidos_mandante_obras
+                //el pedido no existe, se debe insertar en la tabla mat_solicitudes_obras
                 sql_chek = null;
-                sql_pedidos = "insert into obras.pedidos_mandante_obras (id_obra, id, estado) values (" + id_obra + ", " + num_pedido + ", 'PENDIENTE');";
+                sql_pedidos = `INSERT INTO 
+                                obras.mat_solicitudes_obras (id_obra, id, estado, fecha_hora, rut_usuario) 
+                                VALUES ( ${id_obra},${num_pedido}, 'PENDIENTE', 
+                                substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp, '${rut_usuario}' );`;
               }
             } else {
               res.status(500).send("Error en la consulta (servidor backend)");
@@ -831,6 +846,10 @@ exports.findBomByParametros = async (req, res) => {
                     res.status(500).send("El id de pedido no se encuentra en estado pendiente, no es posible hacerle modificaciones");
                     return;
                   }
+                  sql_pedidos = `UPDATE 
+                                  obras.mat_solicitudes_obras 
+                                SET rut_usuario = '${rut_usuario}', fecha_hora = substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp 
+                                WHERE id = ${num_pedido};`;
                   todoOk = true;
                 } else {
                   //El pedido está asociada a otro id_obra, error
@@ -900,7 +919,7 @@ exports.findBomByParametros = async (req, res) => {
 
         const validated = IDataInputSchema.parse(dataInput);
 
-        const sql_pedido = `SELECT id_obra FROM obras.pedidos_mandante_obras 
+        const sql_pedido = `SELECT id_obra FROM obras.mat_solicitudes_obras 
                             WHERE id_obra = ${validated.id_obra} AND estado = 'PENDIENTE' LIMIT 1;`;
 
         const pedido = await sequelize.query(sql_pedido, { type: QueryTypes.SELECT });
@@ -913,7 +932,7 @@ exports.findBomByParametros = async (req, res) => {
         }
 
 
-        const sql = "select nextval('obras.pedidos_mandante_obras_id_seq'::regclass) as valor;";
+        const sql = "select nextval('obras.mat_solicitudes_obras_id_seq'::regclass) as valor;";
         
         const nextval = await sequelize.query(sql, { type: QueryTypes.SELECT });
         if (nextval) { 
@@ -924,6 +943,91 @@ exports.findBomByParametros = async (req, res) => {
           res.status(500).send("Error en la consulta (servidor backend)");
           return;
         }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+    }
+  }
+  /***********************************************************************************/
+  /* Modifica una solicitud a estado GENERADA
+  ;
+  */
+  exports.generaOcancelaSolicitud = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Modifica una solicitud a estado GENERADA' */
+    try {
+
+        const dataInput = {
+          id: req.query.id_solicitud,
+          nuevo_estado: req.query.nuevo_estado
+        }
+
+        const IDataInputSchema = z.object({
+          id: z.coerce.number(),
+          nuevo_estado: z.coerce.string()
+        });
+
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        if (validated.nuevo_estado !== 'GENERADO' && validated.nuevo_estado !== 'CANCELADO'){
+          res.status(400).send('El nuevo estado debe ser GENERADO o CANCELADO');
+          return;
+        }
+
+        const sql_consulta_pedido = `SELECT id, estado FROM obras.mat_solicitudes_obras 
+                            WHERE id = ${validated.id};`;
+
+        const consulta_pedido = await sequelize.query(sql_consulta_pedido, { type: QueryTypes.SELECT });
+        if (consulta_pedido) { 
+          //HAy un estado con estado pendiente, no puede ebtregar un nuevo numero hasta que no quede ningun pendiente
+          if (consulta_pedido.length > 0){
+            if (consulta_pedido[0].estado !== 'PENDIENTE'){
+              res.status(400).send('La solicitud debe estar en estado pendiente para ser generada [' + consulta_pedido[0].estado + ']');
+              return;
+            } //ok
+          } else {
+            res.status(400).send('La solicitud no existe');
+            return;
+          }
+        } else {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+
+        let id_usuario = req.userId;
+        let rut_usuario;
+        const sql_usuario = "select username from _auth.users where id = " + id_usuario;
+        await sequelize.query(sql_usuario, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          rut_usuario = data[0].username;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+
+        const sql_detalle = validated.nuevo_estado === 'CANCELADO' ? 
+        `UPDATE obras.mat_solicitudes_detalle SET tipo_movimiento = 'CANCELADO', rut_usuario = '${rut_usuario}',
+        fecha_movimiento = substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp WHERE pedido = ${validated.id};` 
+        :"";
+        const sql = `${sql_detalle}UPDATE obras.mat_solicitudes_obras SET estado = '${validated.nuevo_estado}', rut_usuario = '${rut_usuario}', 
+        fecha_hora = substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp WHERE id = ${validated.id};`;
+        const pedido = await sequelize.query(sql, { type: QueryTypes.UPDATE });
+        if (pedido) {
+          res.status(200).send(pedido);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        } 
     } catch (error) {
       if (error instanceof ZodError) {
         const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
@@ -950,10 +1054,11 @@ exports.findBomByParametros = async (req, res) => {
         });
 
         const IDataOutputSchema = z.object({
-          id: z.coerce.number(),
+          solicitud: z.coerce.number(),
           id_obra: z.coerce.number(),
           estado: z.coerce.string(),
-          fecha_hora: z.coerce.string()
+          fecha_hora: z.coerce.string(),
+          persona: z.coerce.string(),
         });
 
         const IArrayDataOutputSchema = z.array(IDataOutputSchema);
@@ -961,19 +1066,18 @@ exports.findBomByParametros = async (req, res) => {
         const validated = IDataInputSchema.parse(dataInput);
 
         const id_obra = validated.id_obra;
-        const sql = `SELECT 
-                      pmo.id, 
-                      pmo.id_obra, 
-                      pmo.estado, 
-                      max(pmm.fecha_movimiento)::text as fecha_hora
-                    FROM 
-                      obras.pedidos_mandante_obras pmo 
-                    JOIN obras.pedido_material_mandante pmm
-                    ON 
-                      pmo.id = pmm.pedido 
-                    WHERE pmo.id_obra = ${id_obra}
-                    GROUP BY pmo.id, pmo.id_obra, pmo.estado
-                    ORDER BY pmo.id DESC`;
+        const sql = `SELECT mso.id as solicitud,
+                      mso.id_obra,
+                      mso.estado,
+                      mso.fecha_HORA::text as fecha_hora,
+                      (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                          CASE
+                              WHEN p.apellido_2 IS NULL THEN ''::character varying
+                              ELSE p.apellido_2
+                          END::text AS persona
+                    FROM obras.mat_solicitudes_obras mso
+                      JOIN _auth.personas p ON mso.rut_usuario::text = p.rut::text
+                    WHERE mso.id_obra = ${id_obra};`;
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1005,19 +1109,28 @@ exports.findBomByParametros = async (req, res) => {
       #swagger.description = 'Devuelve el listado de materiales para un pedido' */
     try {
         const dataInput = {
-          id: req.query.id
+          id: req.query.id_solicitud
         }
 
         const IDataInputSchema = z.object({
           id: z.coerce.number(),
         });
 
+        const ISapMaterialSchema = z.object({
+          codigo_sap: z.coerce.number(),
+          texto_breve: z.coerce.string(),
+          descripcion: z.coerce.string()
+        })
+
         const IDataOutputSchema = z.object({
           id: z.coerce.number(),
           id_obra: z.coerce.number(),
-          id_material: z.coerce.number(),
-          estado: z.coerce.string(),
-          fecha_hora: z.coerce.string()
+          solicitud: z.coerce.number(),
+          sap_material: ISapMaterialSchema,
+          cantidad_requerida: z.coerce.number(),
+          fecha_ingreso: z.coerce.string(),
+          rut_usuario: z.coerce.string(),
+          persona: z.coerce.string()
         });
 
         const IArrayDataOutputSchema = z.array(IDataOutputSchema);
@@ -1025,17 +1138,25 @@ exports.findBomByParametros = async (req, res) => {
         const validated = IDataInputSchema.parse(dataInput);
 
         const id = validated.id;
-        const sql = `SELECT
-                      pmm.id, 
-                      pmm.id_obra, 
-                      pmm.id_material, 
-                      pmm.estado, 
-                      max(pmm.fecha_movimiento)::text as fecha_hora     
-                    FROM 
-                      obras.pedido_material_mandante pmm
-                    WHERE pmm.pedido = ${id}
-                    GROUP BY pmm.id, pmm.id_obra, pmm.id_material, pmm.estado
-                    ORDER BY pmm.id DESC`;
+        const sql = `SELECT DISTINCT ON (msd.pedido, msd.codigo_sap_material) 
+                          msd.id,
+                          msd.id_obra,
+                          msd.pedido as solicitud,
+                          row_to_json(mm) as sap_material,
+                          msd.cantidad_requerida_new AS cantidad_requerida,
+                          msd.fecha_movimiento::text AS fecha_ingreso,
+                          msd.rut_usuario,
+                          (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                          CASE
+                              WHEN p.apellido_2 IS NULL THEN ''::character varying
+                              ELSE p.apellido_2
+                          END::text AS persona
+                        FROM obras.mat_solicitudes_detalle msd
+                        JOIN _auth.personas p ON msd.rut_usuario::text = p.rut::text
+                      LEFT JOIN obras.maestro_materiales mm 
+                      ON msd.codigo_sap_material = mm.codigo_sap 
+                        WHERE msd.pedido = ${id}
+                        ORDER BY msd.pedido, msd.codigo_sap_material, msd.fecha_movimiento desc;`;
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -1058,6 +1179,343 @@ exports.findBomByParametros = async (req, res) => {
       res.status(500).send(error);
     }
 
+  }
+     /***********************************************************************************/
+  /* Obtiene listado de materiales para una reserva
+  ;
+  */
+  exports.getMaterialPorReserva = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve el listado de materiales para una reserva' */
+    try {
+        const dataInput = {
+          cod_reserva: req.query.codigo_reserva
+        }
+
+        const IDataInputSchema = z.object({
+          cod_reserva: z.coerce.number(),
+        });
+
+        const ISapMaterialSchema = z.object({
+          codigo_sap: z.coerce.number(),
+          texto_breve: z.coerce.string(),
+          descripcion: z.coerce.string()
+        })
+
+        const IDataOutputSchema = z.object({
+          id: z.coerce.number(),
+          id_obra: z.coerce.number(),
+          reserva: z.coerce.number(),
+          sap_material: ISapMaterialSchema,
+          cantidad_requerida: z.coerce.number(),
+          fecha_ingreso: z.coerce.string(),
+          rut_usuario: z.coerce.string(),
+          persona: z.coerce.string()
+        });
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const cod_reserva = validated.cod_reserva;
+        const sql = `SELECT DISTINCT ON (mbi.cod_reserva, mbi.codigo_sap_material) 
+                          mbi.id,
+                          mbi.id_obra,
+                          mbi.cod_reserva as reserva,
+                          row_to_json(mm) as sap_material,
+                          mbi.cantidad_requerida_new AS cantidad_requerida,
+                          mbi.fecha_movimiento::text AS fecha_ingreso,
+                          mbi.rut_usuario,
+                          (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                          CASE
+                              WHEN p.apellido_2 IS NULL THEN ''::character varying
+                              ELSE p.apellido_2
+                          END::text AS persona
+                        FROM obras.mat_bom_ingresos mbi
+                        JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                      LEFT JOIN obras.maestro_materiales mm 
+                      ON mbi.codigo_sap_material = mm.codigo_sap 
+                        WHERE mbi.cod_reserva = ${cod_reserva}
+                        ORDER BY mbi.cod_reserva, mbi.codigo_sap_material, mbi.fecha_movimiento desc;`;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const reservas = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (reservas) {
+          const data = IArrayDataOutputSchema.parse(reservas);
+          res.status(200).send(data);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+    }
+
+  }
+  /***********************************************************************************/
+  /* Obtiene listado de obras para pedido
+  ;
+  */
+  exports.getAllObrasParaBom = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve el listado de obras para un pedido' */
+    try {
+      const IDataOutputSchema = z.object({
+        codigo_obra: z.coerce.string(),
+        cant_reservas: z.coerce.number(),
+        cant_pedidos: z.coerce.number(),
+      });
+      const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+      const sql = `SELECT o.codigo_obra,
+                    CASE
+                        WHEN mbr.cant_reservas IS NULL THEN 0::bigint
+                        ELSE mbr.cant_reservas
+                    END AS cant_reservas,
+                    CASE
+                        WHEN mso.cant_pedidos IS NULL THEN 0::bigint
+                        ELSE mbr.cant_reservas
+                    END AS cant_pedidos
+                  FROM obras.obras o
+                    LEFT JOIN ( SELECT mat_bom_reservas.id_obra,
+                            count(mat_bom_reservas.id_obra) AS cant_reservas
+                          FROM obras.mat_bom_reservas
+                          GROUP BY mat_bom_reservas.id_obra) mbr ON o.id = mbr.id_obra
+                    LEFT JOIN ( SELECT mat_solicitudes_obras.id_obra,
+                            count(mat_solicitudes_obras.id_obra) AS cant_pedidos
+                          FROM obras.mat_solicitudes_obras
+                          GROUP BY mat_solicitudes_obras.id_obra) mso ON o.id = mso.id_obra
+                  WHERE o.estado = ANY (ARRAY[1, 4, 5])
+                  ORDER BY o.codigo_obra;`;
+
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (pedidos) {
+          const data = IArrayDataOutputSchema.parse(pedidos);
+          res.status(200).send(data);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+    }
+
+  }
+ /***********************************************************************************/
+  /* Obtiene listado de reservas en el bom para una obra
+  ;
+  */
+  exports.getReservasPorObra = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve el listado de reservas dentro del bom para una obra' */
+      try {
+        const dataInput = {
+          id_obra: req.query.id_obra
+        }
+
+        const IDataInputSchema = z.object({
+          id_obra: z.coerce.number(),
+        });
+
+        const IDataOutputSchema = z.object({
+          reserva: z.coerce.number(),
+          id_obra: z.coerce.number(),
+          estado: z.coerce.string(),
+          fecha_hora: z.coerce.string(),
+          persona: z.coerce.string(),
+        });
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const id_obra = validated.id_obra;
+        const sql = `SELECT ro.reserva as reserva,
+                    ro.id_obra,
+                    'CARGADA'::text as estado,
+                    bm.fecha_movimiento::text as fecha_hora,
+                    (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                      CASE
+                        WHEN p.apellido_2 IS NULL THEN ''::character varying
+                        ELSE p.apellido_2
+                      END::text AS persona
+                  FROM obras.mat_bom_reservas ro
+                    JOIN ( SELECT DISTINCT ON (mat_bom_ingresos.cod_reserva) mat_bom_ingresos.cod_reserva,
+                      mat_bom_ingresos.id_obra,
+                      mat_bom_ingresos.fecha_movimiento,
+                      mat_bom_ingresos.rut_usuario
+                      FROM obras.mat_bom_ingresos
+                      ORDER BY mat_bom_ingresos.cod_reserva, mat_bom_ingresos.fecha_movimiento DESC) bm 
+                      ON ro.reserva = bm.cod_reserva AND ro.id_obra = bm.id_obra
+                    JOIN _auth.personas p ON bm.rut_usuario::text = p.rut::text
+                  WHERE ro.id_obra = ${id_obra}
+                  ORDER BY bm.fecha_movimiento DESC`;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (pedidos) {
+          const data = IArrayDataOutputSchema.parse(pedidos);
+          res.status(200).send(data);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+    } 
+
+  }
+/***********************************************************************************/
+  /* Crea listado de materiales para salida a faena desde bodega
+  ;
+  */
+  exports.createListaFaena = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Crea un listado de materiales para salida a faena desde bodega' */
+
+    try {
+      console.log("createListaFaena");
+      const dataInput = {
+        id_obra: req.body.id_obra,
+        detalle: req.body.detalle
+      }
+      
+      const IDetalleSchema = z.object({
+        id_obra: z.coerce.number(),
+        materiales: z.string().regex(/^([1-9]\d+|[1-9])+_\d+(.\d+)?(-([1-9]\d+|[1-9])+_\d+(.\d+)?)*$/gm)
+      });
+
+      const IDataInputSchema = z.object({
+        id_obra: z.coerce.number(),
+        detalle: z.array(IDetalleSchema),
+      });
+
+      const validated = IDataInputSchema.parse(dataInput);
+      const id_obra = validated.id_obra;
+      const detalle = validated.detalle;
+
+      if (detalle.length === 0) {
+        res.status(400).send( "Debe existir al menos un material" );
+        return;
+      }
+      //Consultar el id de encabezado libre
+        /*
+        const sql_nextval = "select nextval('obras.mat_faena_encabezado_id_seq'::regclass) as valor;";
+        let id_encabezado;
+        
+        const querynextval = await sequelize.query(sql_nextval, { type: QueryTypes.SELECT });
+        if (querynextval) { 
+          id_encabezado = querynextval[0].valor;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+        */
+
+        let id_usuario = req.userId;
+        let rut_usuario;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const sql_usuario = "select username from _auth.users where id = " + id_usuario;
+        await sequelize.query(sql_usuario, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          rut_usuario = data[0].username;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+
+        let id_encabezado = 1;
+        const sql_inserta_encabezado = `INSERT INTO 
+                                        obras.mat_faena_encabezado (id, id_obra, estado, fecha_hora, rut_usuario) 
+                                        VALUES (${id_encabezado}, ${id_obra}, 'GENERADO', substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp, '${rut_usuario}');`;
+
+
+
+      let sql_inserta_detalle = "";
+      for (const element of detalle) {
+        
+        let materiales = element.materiales;
+        let id_obra_presta = element.id_obra;
+
+        if (!materiales) {
+          res.status(400).send( "Debe existir al menos un material" );
+          return;
+        }
+
+        if (!id_obra_presta) {
+          res.status(400).send( "Debe existir al menos un material" );
+          return; 
+        }
+
+        materiales = materiales.replace(",", ".");
+        let materiales_input = materiales.split("-");
+        let materiales_repetidos = []
+        sql_inserta_detalle = "";
+        for (const element of materiales_input) {
+          if (element) {
+            const valores = element.split("_")
+            const valor = {"codigo_sap": valores[0], "cantidad": Number(valores[1])}
+            materiales_repetidos.push(valor);
+          }
+        };
+
+        const arreglo_materiales = obtenerValoresUnicosConSuma(materiales_repetidos);
+        console.log('id_obra e id_obra_presta: ',id_obra ,id_obra_presta);
+        console.log('materiales_repetidos',materiales_repetidos);
+        console.log('arreglo_materiales',arreglo_materiales);
+
+        for (const element of arreglo_materiales) {
+          sql_inserta_detalle = sql_inserta_detalle + `INSERT INTO 
+                                                    obras.mat_faena_detalle 
+                                                    (id_encabezado, id_obra, cod_reserva, codigo_sap_material, cantidad) 
+                                                    VALUES `;
+          sql_inserta_detalle = sql_inserta_detalle + `(${id_encabezado}, ${id_obra}, 100, ${element.codigo_sap}, ${element.cantidad});`;
+        }
+      };
+
+      const sql_completo = sql_inserta_encabezado + sql_inserta_detalle;
+
+      res.status(200).send(sql_completo);
+
+    } catch (error) {
+      console.log('error -> ', error);
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+
+    }
   }
   /***********************************************************************************/
   /* Crea un nuevo bom de forma masiva
@@ -1106,39 +1564,39 @@ exports.findBomByParametros = async (req, res) => {
                     }
                     res.status(200).send(detalle_salida);
                   }else {
-                    //Chequear si la reserva existe en la tabla reservas_obras
+                    //Chequear si la reserva existe en la tabla mat_bom_reservas
                     //Si existe, chequear que el id_obra sea el mismo que se está ingresando
                     //Si no es el mismo quiere decir que la reserva ya está asignada a otra obra, por lo que debe arrojar error
-                    //Si la reserva no se encuentra se debe crear en la tabal reservas_obras y asignarla al codigo de obra
-                    sql_chek = "select * from obras.reservas_obras where reserva = " + reserva;
+                    //Si la reserva no se encuentra se debe crear en la tabal mat_bom_reservas y asignarla al codigo de obra
+                    sql_chek = "select * from obras.mat_bom_reservas where reserva = " + reserva;
                     const { QueryTypes } = require('sequelize');
                     const sequelize = db.sequelize;
                     const bom = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
                     if (bom){
                       if (bom.length > 0){
-                        //La reserva se encuentra en la tabla de reservas_obras
+                        //La reserva se encuentra en la tabla de mat_bom_reservas
                         //Chequear ahora si el id_obra es el mismo que se estaba ingresando
-                        sql_chek = "select * from obras.reservas_obras where reserva = " + reserva + " and id_obra = " + id_obra;
+                        sql_chek = "select * from obras.mat_bom_reservas where reserva = " + reserva + " and id_obra = " + id_obra;
                         const { QueryTypes } = require('sequelize');
                         const sequelize = db.sequelize;
                         const bom = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
                         if (bom){
                           if (bom.length > 0){
-                          //El id_obra se encuentra en la tabla de reservas_obras
+                          //El id_obra se encuentra en la tabla de mat_bom_reservas
                           //No hay errores, proceder a ingresar el bom
                           todoOk = true;
                           }else {
-                          //El id_obra no se encuentra en la tabla de reservas_obras 
+                          //El id_obra no se encuentra en la tabla de mat_bom_reservas 
                           //La reserva está asignada a otro id_de obra, arrojar un error
                           throw new Error("La reserva está asignada a otro id_obra");
                           }
                         }else {res.status(500).send("Error en la consulta (servidor backend)");}
   
                       }else{
-                        //La reserva no se encuentra en la tabla reservas_obras, se debe ingresar junto con el id de obra
-                        // Si la reserva no se encuentra en la tabla de reservas_obras
+                        //La reserva no se encuentra en la tabla mat_bom_reservas, se debe ingresar junto con el id de obra
+                        // Si la reserva no se encuentra en la tabla de mat_bom_reservas
                         // Se debe ingresar junto con el id de obra
-                        const sql_insert = "INSERT INTO obras.reservas_obras (reserva, id_obra) VALUES (" + reserva + ", " + id_obra + ");";
+                        const sql_insert = "INSERT INTO obras.mat_bom_reservas (reserva, id_obra) VALUES (" + reserva + ", " + id_obra + ");";
                         sql = sql_insert + sql;
                         todoOk = true;
                       }

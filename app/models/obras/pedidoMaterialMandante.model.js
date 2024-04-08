@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const PedidoMaterialMandante = sequelize.define("pedido_material_mandante", {
+    const PedidoMaterialMandante = sequelize.define("mat_solicitudes_detalle", {
         id: {
             type: Sequelize.BIGINT,
             autoIncrement: true,
