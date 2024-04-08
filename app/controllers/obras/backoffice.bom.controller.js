@@ -1399,6 +1399,7 @@ exports.findBomByParametros = async (req, res) => {
       #swagger.description = 'Crea un listado de materiales para salida a faena desde bodega' */
 
     try {
+      
       console.log("createListaFaena");
       const dataInput = {
         id_obra: req.body.id_obra,
