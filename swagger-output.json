@@ -1612,15 +1612,18 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allbom": {
+    "/api/obras/backoffice/v1/allobrasparabom": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
         ],
-        "description": "Devuelve todos los materiales en el bom",
+        "description": "Devuelve el listado de obras para un pedido",
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -1634,25 +1637,15 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/bomporparametros": {
+    "/api/obras/backoffice/v1/solicitudesmaterialporobra": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
         ],
-        "description": "Devuelve todos los materiales en el bom de acuerdo a los parámetros",
+        "description": "Devuelve el listado de pedidos para una obra",
         "parameters": [
           {
             "name": "id_obra",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "reserva",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "codigo_sap_material",
             "in": "query",
             "type": "string"
           }
@@ -1660,6 +1653,264 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/obtiene_numero_solicitud": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve el numero de pedido",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/creasolicitudmaterial": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Ingresa un grupo de materiales para generan un pedido de material",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "materiales": {
+                  "example": "any"
+                },
+                "id_obra": {
+                  "example": "any"
+                },
+                "solicitud": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/materialesporsolicitud": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve el listado de materiales para un pedido",
+        "parameters": [
+          {
+            "name": "id_solicitud",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/actualizasolicitud": {
+      "put": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Modifica una solicitud a estado GENERADA",
+        "parameters": [
+          {
+            "name": "id_solicitud",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "nuevo_estado",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/reservasporobra": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve el listado de reservas dentro del bom para una obra",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v2/creabom": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Ingresa un grupo de materiales en el bom de una sola vez Version 2",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "materiales": {
+                  "example": "any"
+                },
+                "id_obra": {
+                  "example": "any"
+                },
+                "reserva": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/materialesporreserva": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve el listado de materiales para una reserva",
+        "parameters": [
+          {
+            "name": "codigo_reserva",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -1737,12 +1988,12 @@
         }
       }
     },
-    "/api/obras/backoffice/v2/creabom": {
+    "/api/obras/backoffice/v1/crealistafaena": {
       "post": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
         ],
-        "description": "Ingresa un grupo de materiales en el bom de una sola vez Version 2",
+        "description": "Crea un listado de materiales para salida a faena desde bodega",
         "parameters": [
           {
             "name": "body",
@@ -1750,13 +2001,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "materiales": {
-                  "example": "any"
-                },
                 "id_obra": {
                   "example": "any"
                 },
-                "reserva": {
+                "detalle": {
                   "example": "any"
                 }
               }
@@ -1767,165 +2015,6 @@
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/obras/backoffice/v1/creapedidomaterial": {
-      "post": {
-        "tags": [
-          "Obras - Backoffice - Manejo materiales (bom)"
-        ],
-        "description": "Ingresa un grupo de materiales para generan un pedido de material",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "materiales": {
-                  "example": "any"
-                },
-                "id_obra": {
-                  "example": "any"
-                },
-                "pedido": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/obras/backoffice/v1/creabomindividual": {
-      "post": {
-        "tags": [
-          "Obras - Backoffice - Manejo materiales (bom)"
-        ],
-        "description": "Ingresa un sólo material en el bom",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "codigo_sap_material": {
-                  "example": "any"
-                },
-                "cantidad_requerida": {
-                  "example": "any"
-                },
-                "id_obra": {
-                  "example": "any"
-                },
-                "reserva": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/obras/backoffice/v1/eliminabomporreserva/{reserva}": {
-      "delete": {
-        "tags": [
-          "Obras - Backoffice - Manejo materiales (bom)"
-        ],
-        "description": "Borra un grupo de materiales asociados a una reserva",
-        "parameters": [
-          {
-            "name": "reserva",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/obras/backoffice/v1/eliminamaterialbom/{reserva}/{cod_sap}": {
-      "delete": {
-        "tags": [
-          "Obras - Backoffice - Manejo materiales (bom)"
-        ],
-        "description": "Borra un sólo material asociado a una reserva",
-        "parameters": [
-          {
-            "name": "reserva",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "cod_sap",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
           "400": {
             "description": "Bad Request"
           },
@@ -3584,6 +3673,28 @@
           "Obras - Backoffice - Uso del Sistema"
         ],
         "description": "Lista cantidad de obras sin reporte recietes",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/usosistema/v1/reportesdiarios_pordia": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Uso del Sistema"
+        ],
+        "description": "Devuelve el listado de reportes diarios por día",
         "responses": {
           "200": {
             "description": "OK"
