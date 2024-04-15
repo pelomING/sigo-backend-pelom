@@ -1418,12 +1418,14 @@ exports.findBomByParametros = async (req, res) => {
 
       const validated = IDataInputSchema.parse(dataInput);
       const id_obra = validated.id_obra;
-      const detalle = validated.detalle;
+      const detalleInput = validated.detalle;
 
-      if (detalle.length === 0) {
+      if (detalleInput.length === 0) {
         res.status(400).send( "Debe existir al menos un material" );
         return;
       }
+
+      const detalle = uniformarArregloFaena(detalleInput);
       //Consultar el id de encabezado libre
         /*
         const sql_nextval = "select nextval('obras.mat_faena_encabezado_id_seq'::regclass) as valor;";
@@ -1479,7 +1481,7 @@ exports.findBomByParametros = async (req, res) => {
         materiales = materiales.replace(",", ".");
         let materiales_input = materiales.split("-");
         let materiales_repetidos = []
-        sql_inserta_detalle = "";
+        //sql_inserta_detalle = "";
         for (const element of materiales_input) {
           if (element) {
             const valores = element.split("_")
@@ -1494,11 +1496,12 @@ exports.findBomByParametros = async (req, res) => {
         console.log('arreglo_materiales',arreglo_materiales);
 
         for (const element of arreglo_materiales) {
+          const cod_reserva = 100;
           sql_inserta_detalle = sql_inserta_detalle + `INSERT INTO 
                                                     obras.mat_faena_detalle 
                                                     (id_encabezado, id_obra, cod_reserva, codigo_sap_material, cantidad) 
                                                     VALUES `;
-          sql_inserta_detalle = sql_inserta_detalle + `(${id_encabezado}, ${id_obra}, 100, ${element.codigo_sap}, ${element.cantidad});`;
+          sql_inserta_detalle = sql_inserta_detalle + `(${id_encabezado}, ${id_obra}, ${cod_reserva}, ${element.codigo_sap}, ${element.cantidad});`;
         }
       };
 
@@ -1695,6 +1698,33 @@ exports.findBomByParametros = async (req, res) => {
     const resultado = Object.keys(objetoResultante).map((codigo_sap) => ({
         codigo_sap: codigo_sap,
         cantidad: objetoResultante[codigo_sap]
+    }));
+
+    return resultado;
+}
+
+function uniformarArregloFaena(arreglo) {
+  console.log( "uniformarArregloFaena", arreglo );
+  const objetoResultante = {};
+
+  // Iterar sobre el arreglo
+  arreglo.forEach((elemento) => {
+    const id_obra = elemento.id_obra;
+    const materiales = elemento.materiales;
+
+    // Si el código ya existe en el objeto, suma el valor al valor existente
+    if (objetoResultante[id_obra]) {
+        objetoResultante[id_obra] += '-' + materiales;
+    } else {
+        // Si el código no existe en el objeto, simplemente agrega el código y el valor
+        objetoResultante[id_obra] = materiales;
+    }
+    });
+
+    // Convertir el objeto en un arreglo de objetos si es necesario
+    const resultado = Object.keys(objetoResultante).map((id_obra) => ({
+        id_obra: id_obra,
+        materiales: objetoResultante[id_obra]
     }));
 
     return resultado;

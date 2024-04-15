@@ -221,3 +221,169 @@ exports.getObrasSinRepDiario = async (req, res) => {
     }
 
 }
+
+//Lista de los reportes diarios en los últimos días
+// GET /api/obras/backoffice/usosistema/v1/reportesdiarios_pordia
+exports.getReportesDiariosPorDia = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Uso del Sistema']
+          #swagger.description = 'Devuelve el listado de reportes diarios por día' */
+    
+        try {
+            const { QueryTypes } = require('sequelize');
+            const sequelize = db.sequelize;
+    
+            //consulta una vista en la base de datos
+            let sql = `
+            SELECT ( SELECT array_agg(row_to_json(z.*)) AS maule_norte
+            FROM ( SELECT row_number() OVER (ORDER BY serie.fecha) AS id,
+                     serie.fecha,
+                     ( SELECT
+                                 CASE
+                                     WHEN a.dia = 0 THEN 'Domingo'::text
+                                     WHEN a.dia = 1 THEN 'Lunes'::text
+                                     WHEN a.dia = 2 THEN 'Martes'::text
+                                     WHEN a.dia = 3 THEN 'Miércoles'::text
+                                     WHEN a.dia = 4 THEN 'Jueves'::text
+                                     WHEN a.dia = 5 THEN 'Viernes'::text
+                                     WHEN a.dia = 6 THEN 'Sábado'::text
+                                     ELSE NULL::text
+                                 END AS nombre_dia
+                            FROM ( SELECT EXTRACT(dow FROM serie.fecha)::integer AS dia) a) AS dia,
+                         CASE
+                             WHEN reportes.cantidad IS NULL THEN 0::bigint
+                             ELSE reportes.cantidad
+                         END AS cantidad,
+                          CASE
+                             WHEN EXTRACT(dow FROM serie.fecha) = 0::numeric THEN 'bg-pink-500'::character varying
+                             ELSE 'bg-cyan-500'::character varying
+                         END AS "bg-color",
+                         CASE
+                             WHEN EXTRACT(dow FROM serie.fecha) = 0::numeric THEN 'text-pink-500'::character varying
+                             ELSE 'text-cyan-500'::character varying
+                         END AS "text-color"
+                    FROM ( SELECT (now()::timestamp without time zone AT TIME ZONE 'america/santiago'::text)::date - a.num AS fecha
+                            FROM ( SELECT generate_series(0::bigint, b.valor)::integer AS num
+                                    FROM ( SELECT
+   CASE
+    WHEN a_1.valor IS NULL THEN 7::bigint
+    ELSE a_1.valor
+   END AS valor
+    FROM ( SELECT sum(parametros_config.valor::integer) AS valor
+      FROM _comun.parametros_config
+     WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
+                      LEFT JOIN ( SELECT erd.fecha_reporte,
+                             count(erd.fecha_reporte) AS cantidad
+                            FROM obras.encabezado_reporte_diario erd
+                              JOIN obras.obras o ON erd.id_obra = o.id
+                           WHERE o.zona = 1
+                           GROUP BY erd.fecha_reporte
+                           ORDER BY erd.fecha_reporte) reportes ON reportes.fecha_reporte = serie.fecha) z) AS maule_norte,
+     ( SELECT array_agg(row_to_json(z.*)) AS maule_norte
+            FROM ( SELECT row_number() OVER (ORDER BY serie.fecha) AS id,
+                     serie.fecha,
+                     ( SELECT
+                                 CASE
+                                     WHEN a.dia = 0 THEN 'Domingo'::text
+                                     WHEN a.dia = 1 THEN 'Lunes'::text
+                                     WHEN a.dia = 2 THEN 'Martes'::text
+                                     WHEN a.dia = 3 THEN 'Miércoles'::text
+                                     WHEN a.dia = 4 THEN 'Jueves'::text
+                                     WHEN a.dia = 5 THEN 'Viernes'::text
+                                     WHEN a.dia = 6 THEN 'Sábado'::text
+                                     ELSE NULL::text
+                                 END AS nombre_dia
+                            FROM ( SELECT EXTRACT(dow FROM serie.fecha)::integer AS dia) a) AS dia,
+                         CASE
+                             WHEN reportes.cantidad IS NULL THEN 0::bigint
+                             ELSE reportes.cantidad
+                         END AS cantidad,
+                          CASE
+                             WHEN EXTRACT(dow FROM serie.fecha) = 0::numeric THEN 'bg-pink-500'::character varying
+                             ELSE 'bg-cyan-500'::character varying
+                         END AS "bg-color",
+                         CASE
+                             WHEN EXTRACT(dow FROM serie.fecha) = 0::numeric THEN 'text-pink-500'::character varying
+                             ELSE 'text-cyan-500'::character varying
+                         END AS "text-color"
+                    FROM ( SELECT (now()::timestamp without time zone AT TIME ZONE 'america/santiago'::text)::date - a.num AS fecha
+                            FROM ( SELECT generate_series(0::bigint, b.valor)::integer AS num
+                                    FROM ( SELECT
+   CASE
+    WHEN a_1.valor IS NULL THEN 7::bigint
+    ELSE a_1.valor
+   END AS valor
+    FROM ( SELECT sum(parametros_config.valor::integer) AS valor
+      FROM _comun.parametros_config
+     WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
+                      LEFT JOIN ( SELECT erd.fecha_reporte,
+                             count(erd.fecha_reporte) AS cantidad
+                            FROM obras.encabezado_reporte_diario erd
+                              JOIN obras.obras o ON erd.id_obra = o.id
+                           WHERE o.zona = 2
+                           GROUP BY erd.fecha_reporte
+                           ORDER BY erd.fecha_reporte) reportes ON reportes.fecha_reporte = serie.fecha) z) AS maule_sur,
+     ( SELECT array_agg(row_to_json(z.*)) AS maule_norte
+            FROM ( SELECT row_number() OVER (ORDER BY serie.fecha) AS id,
+                     serie.fecha,
+                     ( SELECT
+                                 CASE
+                                     WHEN a.dia = 0 THEN 'Domingo'::text
+                                     WHEN a.dia = 1 THEN 'Lunes'::text
+                                     WHEN a.dia = 2 THEN 'Martes'::text
+                                     WHEN a.dia = 3 THEN 'Miércoles'::text
+                                     WHEN a.dia = 4 THEN 'Jueves'::text
+                                     WHEN a.dia = 5 THEN 'Viernes'::text
+                                     WHEN a.dia = 6 THEN 'Sábado'::text
+                                     ELSE NULL::text
+                                 END AS nombre_dia
+                            FROM ( SELECT EXTRACT(dow FROM serie.fecha)::integer AS dia) a) AS dia,
+                         CASE
+                             WHEN reportes.cantidad IS NULL THEN 0::bigint
+                             ELSE reportes.cantidad
+                         END AS cantidad,
+                          CASE
+                             WHEN EXTRACT(dow FROM serie.fecha) = 0::numeric THEN 'bg-pink-500'::character varying
+                             ELSE 'bg-cyan-500'::character varying
+                         END AS "bg-color",
+                         CASE
+                             WHEN EXTRACT(dow FROM serie.fecha) = 0::numeric THEN 'text-pink-500'::character varying
+                             ELSE 'text-cyan-500'::character varying
+                         END AS "text-color"
+                    FROM ( SELECT (now()::timestamp without time zone AT TIME ZONE 'america/santiago'::text)::date - a.num AS fecha
+                            FROM ( SELECT generate_series(0::bigint, b.valor)::integer AS num
+                                    FROM ( SELECT
+   CASE
+    WHEN a_1.valor IS NULL THEN 7::bigint
+    ELSE a_1.valor
+   END AS valor
+    FROM ( SELECT sum(parametros_config.valor::integer) AS valor
+      FROM _comun.parametros_config
+     WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
+                      LEFT JOIN ( SELECT erd.fecha_reporte,
+                             count(erd.fecha_reporte) AS cantidad
+                            FROM obras.encabezado_reporte_diario erd
+                              JOIN obras.obras o ON erd.id_obra = o.id
+                           WHERE o.zona = ANY (ARRAY[1, 2])
+                           GROUP BY erd.fecha_reporte
+                           ORDER BY erd.fecha_reporte) reportes ON reportes.fecha_reporte = serie.fecha) z) AS total;`;
+
+            const resumen = await sequelize.query(sql, { type: QueryTypes.SELECT });
+            let salida = {};
+    
+            if (resumen) {
+                    salida = {
+                        maule_norte: resumen[0].maule_norte,
+                        maule_sur: resumen[0].maule_sur,
+                        total: resumen[0].total
+                    }
+            }
+            if (salida===undefined){
+                res.status(500).send("Error en la consulta (servidor backend)");
+            }else{
+                res.status(200).send(salida);
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(500).send("Error en la consulta (servidor backend)");
+        }
+    }

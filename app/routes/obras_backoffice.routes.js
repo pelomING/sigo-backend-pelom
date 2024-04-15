@@ -251,4 +251,8 @@ module.exports = function(app) {
     // GET /api/obras/backoffice/usosistema/v1/resumenobrasinreportes
     app.get("/api/obras/backoffice/usosistema/v1/resumenobrasinreportes", [authJwt.verifyToken], backofficeUsoController.getObrasSinRepDiario);
 
+    //Lista de los reportes diarios en los últimos días
+    // GET /api/obras/backoffice/usosistema/v1/reportesdiarios_pordia
+    app.get("/api/obras/backoffice/usosistema/v1/reportesdiarios_pordia", [authJwt.verifyToken], backofficeUsoController.getReportesDiariosPorDia);
+
 }
