@@ -641,11 +641,12 @@ exports.paralizaObra = async (req, res) => {
           await t.commit();
     
         } catch (error) {
-          console.log('error paraliza obra rollback', error)
+          console.log('error paraliza obra', error)
           salida = { error: true, message: error }
           await t.rollback();
         }
         if (salida.error) {
+          console.log('error paraliza obra', error)
           res.status(500).send(salida.message);
         }else {
           res.status(200).send(salida);
@@ -753,12 +754,13 @@ exports.cierreObra = async (req, res) => {
             fecha_hora: fechahoy,
             modulo: modulo, 
             accion: accion.actualizar,
-            comentario: 'Obra cerrada con id: ' + id,
+            comentario: 'Obra cerrada con id: ' + id_obra,
             datos: obra_finalizada }, { transaction: t });
     
           await t.commit();
     
         } catch (error) {
+          //console.log('error finaliza obra', error)
           salida = { error: true, message: error }
           await t.rollback();
         }
