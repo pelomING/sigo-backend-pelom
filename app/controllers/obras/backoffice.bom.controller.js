@@ -644,7 +644,22 @@ exports.findBomByParametros = async (req, res) => {
   */
   exports.createPedidoMaterial = async (req, res) => {
        /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
-      #swagger.description = 'Ingresa un grupo de materiales para generan un pedido de material' */
+      #swagger.description = 'Ingresa un grupo de materiales para generan un pedido de material' 
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos para solicitud de material',
+            required: true,
+            schema: {
+                id_obra: 1,
+                solicitud: 1,
+                materiales: [
+                    {
+                      "codigo_sap": 1,
+                      "cantidad": 1
+                    }
+                ]
+            }
+        }*/
   
 
         //ejemplo: { "materiales": "1219_3-1220_2.5-3567_3", "id_obra": 22}
@@ -652,14 +667,22 @@ exports.findBomByParametros = async (req, res) => {
         const inputDatos = {
           materiales: req.body.materiales,
           id_obra: req.body.id_obra,
-          pedido: req.body.solicitud
+          pedido: req.body.solicitud,
+          estado: req.body.estado
         }
+
+        const inputMaterialSchema = z.object ({
+          codigo_sap: z.coerce.number().int().gt(0),
+          cantidad: z.coerce.number().gt(0)
+        })
 
         //chequeo con Zod
         const inputDatosSchema = z.object({
-          materiales: z.string().regex(/^([1-9]\d+|[1-9])+_\d+(.\d+)?(-([1-9]\d+|[1-9])+_\d+(.\d+)?)*$/gm),
-          id_obra: z.coerce.number().int().positive(),
-          pedido: z.coerce.number().int().positive()
+          //materiales: z.string().regex(/^([1-9]\d+|[1-9])+_\d+(.\d+)?(-([1-9]\d+|[1-9])+_\d+(.\d+)?)*$/gm),
+          materiales: z.array(inputMaterialSchema),
+          id_obra: z.coerce.number().int().gt(0),
+          pedido: z.nullable(z.coerce.number().int().gt(0)).optional(),
+          estado: z.nullable(z.coerce.string()).optional()
         })
 
         
@@ -674,8 +697,32 @@ exports.findBomByParametros = async (req, res) => {
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
 
+
+            let id_solicitud = 0;
+            const estado = pedido.estado || 'PENDIENTE';
+            if (estado !== 'PENDIENTE' && estado !== 'GENERADO'){
+              res.status(500).send("El estado debe ser 'PENDIENTE' o 'GENERADO'");
+              return;
+            }
+
+            if (!pedido.pedido){
+              let sql_nextval = "select nextval('obras.mat_solicitudes_obras_id_seq'::regclass) as valor";
+            
+              await sequelize.query(sql_nextval, {
+                type: QueryTypes.SELECT
+              }).then(data => {
+                id_solicitud = data[0].valor;
+              }).catch(err => {
+                res.status(500).send(err.message );
+              })
+              
+            }else {
+              id_solicitud = pedido.pedido;
+            }
+            
+
             const sql_consulta_pedido = `SELECT id_obra FROM obras.mat_solicitudes_obras 
-                            WHERE id_obra = ${pedido.id_obra} AND estado = 'PENDIENTE' LIMIT 1;`;
+                            WHERE id_obra = ${pedido.id_obra} AND estado = 'PENDIENTE' AND id <> ${id_solicitud} LIMIT 1;`;
 
             const consulta_pedido = await sequelize.query(sql_consulta_pedido, { type: QueryTypes.SELECT });
             if (consulta_pedido) { 
@@ -689,13 +736,18 @@ exports.findBomByParametros = async (req, res) => {
             let todoOk = false;
             let materiales = pedido.materiales;
             //reemplaza las comas por puntos, por si hay alguna cantidad decimal
-            materiales = materiales.replace(",", ".");
+            //materiales = materiales.replace(",", ".");
             console.log('materiales -> ',materiales);
             let id_obra = pedido.id_obra;
-            const num_pedido = pedido.pedido;
+            const num_pedido = id_solicitud;
             //el simblo guion separa la información de materiales
-            let materiales_input = materiales.split("-");
-            console.log('materiales_input -> ',materiales_input);
+            //let materiales_input = materiales //.split("-");
+            //console.log('materiales_input -> ',materiales_input);
+
+            if (!num_pedido) {
+              res.status(400).send("No puede estar vacío el campo pedido");
+              return;
+            }
 
             let sql = "";
             let sql_chek = "";
@@ -715,6 +767,7 @@ exports.findBomByParametros = async (req, res) => {
             })
 
             //Verifica que no repitan los código sap
+            /*
             let materiales_repetidos = []
             for (const element of materiales_input) {
               if (element) {
@@ -723,6 +776,8 @@ exports.findBomByParametros = async (req, res) => {
                 materiales_repetidos.push(valor);
               }
             };
+            */
+            let materiales_repetidos = materiales;
 
             const arreglo_materiales = obtenerValoresUnicosConSuma(materiales_repetidos);
             console.log('materiales_repetidos',materiales_repetidos);
@@ -749,50 +804,92 @@ exports.findBomByParametros = async (req, res) => {
               sql_chek = "select m.sap_material from (select unnest(array[" + codigos_sap + "]) as sap_material) as m left join obras.maestro_materiales mm on m.sap_material = mm.codigo_sap where mm.codigo_sap is null;";
 
               //No considerar los tipo_movimiento 'CANCELADO'
-              sql_pedido_movimientos = `INSERT INTO obras.mat_solicitudes_detalle (
-                                            id_obra, 
-                                            pedido,
-                                            codigo_sap_material, 
-                                            cantidad_requerida_old, 
-                                            cantidad_requerida_new, 
-                                            tipo_movimiento, 
-                                            fecha_movimiento, 
-                                            rut_usuario
-                                          )
-                                    SELECT 
-                                        m.id_obra,
-                                        ${num_pedido}::bigint,
-                                        m.sap_material, 
-                                        case when bm.cantidad_requerida_new is null then 0::bigint else bm.cantidad_requerida_new end 
-                                          as cantidad_requerida_old, 
-                                        case when m.cant_material <= 0 then 0::numeric else  m.cant_material end 
-                                          as cantidad_requerida_new, 
-                                        case when m.cant_material <= 0 then 'ELIMINADO' else case when bm.cantidad_requerida_new 
-                                          is null then 'INGRESADO' else 'MODIFICADO' end end as tipo_movimiento, 
-                                          substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp as fecha_movimiento, 
-                                        '${rut_usuario}'::varchar as rut_usuario 
-                                    FROM 
-                                      (SELECT ${id_obra}::bigint as id_obra, 
-                                            ${num_pedido}::bigint as pedido,
-                                            unnest(array[${codigos_sap}]) as sap_material, 
-                                            unnest(array[${cantidades}]) as cant_material) as m 
-                                    LEFT JOIN 
-                                      (SELECT DISTINCT ON (id_obra, codigo_sap_material) 
-                                          id_obra, 
-                                          codigo_sap_material, 
-                                          cantidad_requerida_new, 
-                                          fecha_movimiento 
-                                      FROM obras.mat_solicitudes_detalle 
-                                      WHERE tipo_movimiento <> 'CANCELADO'
-                                      ORDER BY 
-                                          id_obra, 
-                                          codigo_sap_material, 
-                                          fecha_movimiento desc
-                                      ) bm 
-                                    ON bm.id_obra = m.id_obra 
-                                    AND bm.codigo_sap_material = m.sap_material`;
+              sql_pedido_movimientos = `
+                              INSERT INTO obras.mat_solicitudes_detalle (
+                                id_obra, 
+                                pedido,
+                                codigo_sap_material, 
+                                cantidad_requerida_old, 
+                                cantidad_requerida_new, 
+                                tipo_movimiento, 
+                                fecha_movimiento, 
+                                rut_usuario
+                              )
+                              SELECT m.id_obra,
+                              ${num_pedido}::bigint AS pedido,
+                              m.sap_material AS codigo_sap_material,
+                                  CASE
+                                      WHEN bm.cantidad_requerida_new IS NULL THEN 0::bigint::numeric
+                                      ELSE bm.cantidad_requerida_new
+                                  END AS cantidad_requerida_old,
+                              m.cant_material AS cantidad_requerida_new,
+                              'INGRESADO'::character varying AS tipo_movimiento,
+                              "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp without time zone AS fecha_movimiento,
+                              '${rut_usuario}'::character varying AS rut_usuario
+                            FROM ( SELECT ${id_obra}::bigint AS id_obra,
+                              ${num_pedido}::bigint AS pedido,
+                                      unnest(ARRAY[${codigos_sap}]) AS sap_material,
+                                      unnest(ARRAY[${cantidades}]) AS cant_material) m
+                              LEFT JOIN ( SELECT DISTINCT ON (msd.id_obra, msd.pedido, msd.codigo_sap_material) msd.id_obra,
+                                      msd.pedido,
+                                      msd.codigo_sap_material,
+                                      msd.cantidad_requerida_new,
+                                      msd.fecha_movimiento
+                                    FROM obras.mat_solicitudes_detalle msd
+                                      JOIN obras.mat_solicitudes_obras mso ON msd.pedido = mso.id
+                                    WHERE mso.estado::text = 'PENDIENTE'::text
+                                    ORDER BY msd.id_obra, msd.pedido, msd.codigo_sap_material, msd.fecha_movimiento DESC) bm ON bm.id_obra = m.id_obra AND bm.codigo_sap_material = m.sap_material AND bm.pedido = m.pedido
+                            WHERE bm.codigo_sap_material IS NULL
+                          UNION
+                          SELECT bm.id_obra,
+                            ${num_pedido}::bigint AS pedido,
+                              bm.codigo_sap_material AS codigo_sap_material,
+                              bm.cantidad_requerida_new AS cantidad_requerida_old,
+                              0::numeric AS cantidad_requerida_new,
+                              'ELIMINADO'::character varying AS tipo_movimiento,
+                              "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp without time zone AS fecha_movimiento,
+                              '${rut_usuario}'::character varying AS rut_usuario
+                            FROM ( SELECT DISTINCT ON (msd.id_obra, msd.pedido, msd.codigo_sap_material) msd.id_obra,
+                                      msd.pedido,
+                                      msd.codigo_sap_material,
+                                      msd.cantidad_requerida_new,
+                                      msd.fecha_movimiento
+                                    FROM obras.mat_solicitudes_detalle msd
+                                      JOIN obras.mat_solicitudes_obras mso ON msd.pedido = mso.id
+                                    WHERE mso.estado::text = 'PENDIENTE'::text AND msd.id_obra = ${id_obra} AND msd.pedido = ${num_pedido}
+                                    ORDER BY msd.id_obra, msd.pedido, msd.codigo_sap_material, msd.fecha_movimiento DESC) bm
+                              LEFT JOIN ( SELECT ${id_obra}::bigint AS id_obra,
+                                      ${num_pedido}::bigint AS pedido,
+                                      unnest(ARRAY[${codigos_sap}]) AS sap_material,
+                                      unnest(ARRAY[${cantidades}]) AS cant_material) m ON bm.id_obra = m.id_obra AND bm.codigo_sap_material = m.sap_material AND bm.pedido = m.pedido
+                            WHERE m.sap_material IS NULL
+                          UNION
+                          SELECT m.id_obra,
+                              ${num_pedido}::bigint AS pedido,
+                              m.sap_material AS codigo_sap_material,
+                              bm.cantidad_requerida_new AS cantidad_requerida_old,
+                              m.cant_material AS cantidad_requerida_new,
+                              'MODIFICADO'::character varying AS tipo_movimiento,
+                              "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp without time zone AS fecha_movimiento,
+                              '${rut_usuario}'::character varying AS rut_usuario
+                            FROM ( SELECT ${id_obra}::bigint AS id_obra,
+                                    ${num_pedido}::bigint AS pedido,
+                                      unnest(ARRAY[${codigos_sap}]) AS sap_material,
+                                      unnest(ARRAY[${cantidades}]) AS cant_material) m
+                              JOIN ( SELECT DISTINCT ON (msd.id_obra, msd.pedido, msd.codigo_sap_material) msd.id_obra,
+                                      msd.pedido,
+                                      msd.codigo_sap_material,
+                                      msd.cantidad_requerida_new,
+                                      msd.fecha_movimiento
+                                    FROM obras.mat_solicitudes_detalle msd
+                                      JOIN obras.mat_solicitudes_obras mso ON msd.pedido = mso.id
+                                    WHERE mso.estado::text = 'PENDIENTE'::text AND msd.pedido = ${num_pedido}
+                                    ORDER BY msd.id_obra, msd.pedido, msd.codigo_sap_material, msd.fecha_movimiento DESC) bm ON bm.id_obra = m.id_obra AND bm.codigo_sap_material = m.sap_material AND bm.pedido = m.pedido
+                            WHERE m.cant_material::numeric <> bm.cantidad_requerida_new;`;
+
             }
         
+            console.log('sql_pedido_movimientos -> ', sql_pedido_movimientos);
             /******************** Chequea materiales no existentes */
             if (sql_chek){
 
@@ -828,7 +925,7 @@ exports.findBomByParametros = async (req, res) => {
                 sql_chek = null;
                 sql_pedidos = `INSERT INTO 
                                 obras.mat_solicitudes_obras (id_obra, id, estado, fecha_hora, rut_usuario) 
-                                VALUES ( ${id_obra},${num_pedido}, 'PENDIENTE', 
+                                VALUES ( ${id_obra},${num_pedido}, '${estado}', 
                                 substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp, '${rut_usuario}' );`;
               }
             } else {
@@ -848,7 +945,7 @@ exports.findBomByParametros = async (req, res) => {
                   }
                   sql_pedidos = `UPDATE 
                                   obras.mat_solicitudes_obras 
-                                SET rut_usuario = '${rut_usuario}', fecha_hora = substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp 
+                                SET estado = '${estado}', rut_usuario = '${rut_usuario}', fecha_hora = substring((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::timestamp 
                                 WHERE id = ${num_pedido};`;
                   todoOk = true;
                 } else {
@@ -1119,7 +1216,8 @@ exports.findBomByParametros = async (req, res) => {
         const ISapMaterialSchema = z.object({
           codigo_sap: z.coerce.number(),
           texto_breve: z.coerce.string(),
-          descripcion: z.coerce.string()
+          descripcion: z.coerce.string(),
+          unidad: z.coerce.string(),
         })
 
         const IDataOutputSchema = z.object({
@@ -1153,7 +1251,9 @@ exports.findBomByParametros = async (req, res) => {
                           END::text AS persona
                         FROM obras.mat_solicitudes_detalle msd
                         JOIN _auth.personas p ON msd.rut_usuario::text = p.rut::text
-                      LEFT JOIN obras.maestro_materiales mm 
+                      LEFT JOIN (SELECT codigo_sap, texto_breve, descripcion, mu.codigo_corto as unidad
+                        FROM obras.maestro_materiales mm join obras.maestro_unidades mu
+                        ON mm.id_unidad = mu.id) mm 
                       ON msd.codigo_sap_material = mm.codigo_sap 
                         WHERE msd.pedido = ${id}
                         ORDER BY msd.pedido, msd.codigo_sap_material, msd.fecha_movimiento desc;`;

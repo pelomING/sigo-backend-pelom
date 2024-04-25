@@ -73,6 +73,8 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/general/v1/allusuarios", [authJwt.verifyToken], backofficeGeneralController.findAllUsuariosFunciones);
 
+    app.get("/api/obras/backoffice/general/v1/allmaestromaterial", [authJwt.verifyToken], backofficeGeneralController.findAllMaestroMateriales);
+
     
 
 }
