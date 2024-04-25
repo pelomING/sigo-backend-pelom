@@ -2,6 +2,8 @@ const { authJwt } = require("../middleware");
 const mantendorController = require("../controllers/comun/mantenedor.controller");
 const upload = require("../middleware/upload");
 const fs = require('fs').promises;
+const axios = require('axios');
+const PDFDocument = require('pdfkit');
 
     
 module.exports = function(app) {
@@ -105,6 +107,78 @@ module.exports = function(app) {
         res.status(500).send(error);
       }
     });
+
+    //Download file
+    app.get("/api/mantenedor/v1/download/:filename", (req, res) => {
+      /*  #swagger.tags = ['SAE - Mantenedores - Upload']
+      #swagger.description = 'Descarga un archivo' */
+      const filename = req.params.filename;
+      const filePath = __dirname + './../../public/assets/' + filename;
+      console.log('filePath -> ', filePath);
+      res.download(
+        filePath, 
+        "flexiapp.pdf", // Remember to include file extension
+        (err) => {
+            if (err) {
+                res.send({
+                    error : err,
+                    msg   : "Problem downloading the file"
+                })
+            }
+    });
+    
+    })
+
+    app.post("/api/geovictoria/v1/login", async (req, res) => {
+      /*  #swagger.tags = ['SAE - Geovictoria']
+      #swagger.description = 'Hace el login en geovictoria' */
+      const { user, password } = req.body;
+      const tokenGeoVictoria = await loginGeovictoria();
+      res.status(200).send(tokenGeoVictoria);
+    });
+
+    app.post("/api/geovictoria/v1/userlist", async (req, res) => {
+      /*  #swagger.tags = ['SAE - Geovictoria']
+      #swagger.description = 'Consulta usuarios en geovictoria' */
+      const userToken = req.body.token;
+      const userList = await userListGeoVictoria(userToken);
+      res.status(200).send(userList);
+    });
+
+    app.post("/api/geovictoria/v1/attendanceBook", async (req, res) => {
+      /*  #swagger.tags = ['SAE - Geovictoria']
+      #swagger.description = 'Consulta un usuario en geovictoria' */
+      const userToken = req.body.token;
+      const StartDate = req.body.StartDate;
+      const EndDate = req.body.EndDate;
+      const UserIds = req.body.UserIds;
+      const userAttendanceBook = await attendanceBookGeoVictoria(userToken, StartDate, EndDate, UserIds);
+      res.status(200).send(userAttendanceBook);
+    });
+
+    app.get("/api/reportes/v1/generapdf", async (req, res) => {
+      /*  #swagger.tags = ['SAE - PDF']
+      #swagger.description = 'Genera un archivo pdf' */
+
+        // Crear un nuevo documento PDF en memoria
+        const doc = new PDFDocument();
+
+        //Inserta lgoo Pelom
+        doc.image('/public/assets/logo-pelom.jpg', 0, 15, {width: 300})
+        // Escribir contenido en el PDF
+        doc.text('¡Hola, este es un PDF generado en memoria!', 100, 100);
+
+        // Establecer el tipo de contenido como PDF
+        res.setHeader('Content-Type', 'application/pdf');
+
+        // Devolver el PDF como una respuesta al cliente
+        doc.pipe(res);
+        doc.end();
+      
+    })
+
+    
+    
   };
 
 async function existeRuta(ruta) {
@@ -119,4 +193,76 @@ async function existeRuta(ruta) {
 // Función asincrónica para crear una ruta
 async function crearRuta(ruta) {
   await fs.mkdir(ruta, { recursive: true }); // Usamos recursive: true para crear rutas anidadas si es necesario
+}
+
+async function loginGeovictoria() {
+  //Aquí debe logear a la api de geovictoria utilizando axios y el usuario y contraseña 
+      //especificados en las variables de ambiente GEOVIC_USER y GEOVIC_PASS
+
+      let respuesta;
+      await axios.post('https://customerapi.geovictoria.com/api/v1/Login', {
+        user: process.env.GEOVIC_USER,
+        password: process.env.GEOVIC_PASS
+      })
+      .then(function (response) {
+        respuesta = response.data;
+      })
+      .catch(function (error) {
+        respuesta = error;
+        console.log('error, login geovictoria', respuesta);
+      });
+      return respuesta;
+}
+
+async function userListGeoVictoria(token) {
+  let respuesta;
+  const headers = {
+    Authorization: 'Bearer ' + token
+  }
+  console.log('headers', headers);
+  
+  await axios.post("https://customerapi.geovictoria.com/api/v1/User/List", {data: ''},
+      {
+        headers: headers
+      }
+)
+  .then(function (response) {
+    respuesta = response.data;
+  })
+  .catch(function (error) {
+    respuesta = error;
+    //console.log('error, userListGeoVictoria', respuesta);
+  });
+  
+  console.log('token', token);
+  return respuesta;
+}
+
+async function attendanceBookGeoVictoria(token, StartDate, EndDate, UserIds) {
+  let respuesta;
+  const headers = {
+    Authorization: 'Bearer ' + token
+  }
+  const data = {
+    StartDate: StartDate,
+    EndDate: EndDate,
+    UserIds: UserIds
+  }
+  console.log('headers', headers);
+  
+  await axios.post("https://customerapi.geovictoria.com/api/v1/AttendanceBook", data,
+      {
+        headers: headers
+      }
+)
+  .then(function (response) {
+    respuesta = response.data;
+  })
+  .catch(function (error) {
+    respuesta = error;
+    //console.log('error, userListGeoVictoria', respuesta);
+  });
+  
+  console.log('token', token);
+  return respuesta;
 }

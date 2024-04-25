@@ -1,5 +1,7 @@
 const db = require("../../models");
 const bcrypt = require("bcryptjs");
+const z = require('zod');
+const ZodError = z.ZodError;
 const TipoObra = db.tipoObra;
 const Zonal = db.zonal;
 const Delegacion = db.delegacion;
@@ -14,6 +16,41 @@ const TipoOperacion = db.tipoOperacion;
 const TipoActividad = db.tipoActividad;
 const MaestroActividad = db.maestroActividad;
 const UsuariosFunciones = db.usuariosFunciones;
+
+const customErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.invalid_type) {
+    if (issue.received === "undefined") {
+      return { message: "Es requerido" };
+    }
+    if (issue.received === "null") {
+      return { message: "No puede ser nulo" };
+    }
+    if (issue.expected === "string") {
+      return { message: "Debe ser una cadena de texto" };
+    }
+    if (issue.expected === "number") {
+      return { message: "Debe ser un numero" };
+    }
+    if (issue.expected === "date") {
+      return { message: "Debe ser una fecha" };
+    }
+  }
+  if (issue.code === z.ZodIssueCode.invalid_string) {
+    if (issue.validation === "email") {
+      return { message: "El formato no es correcto, debe ser un email" };
+    }
+    return { message: "El formato no es correcto" };
+  }
+  if (issue.code === z.ZodIssueCode.too_small) {
+    return { message: `debe ser mayor que ${issue.minimum}` };
+  }
+  if (issue.code === z.ZodIssueCode.custom) {
+    return { message: `menor-que-${(issue.params || {}).minimum}` };
+  }
+  return { message: ctx.defaultError };
+};
+
+z.setErrorMap(customErrorMap);
 
 exports.findAllTipoObra = async (req, res) => {
     //metodo GET
@@ -509,3 +546,45 @@ exports.getResumenGeneral = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+
+exports.findAllMaestroMateriales = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Obras - General']
+    #swagger.description = 'Devuelve todas los materiales' */
+  try {
+    //metodo GET
+    
+
+    const IDataOutputSchema = z.object({
+      codigo_sap: z.coerce.number(),
+      material: z.coerce.string(),
+      unidad: z.coerce.string(),
+    });
+    const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+      
+    
+    const sql = `SELECT 
+                  codigo_sap, 
+                  descripcion as material, 
+                  mu.codigo_corto as unidad 
+                FROM obras.maestro_materiales mm 
+                JOIN  obras.maestro_unidades mu 
+                ON mm.id_unidad = mu.id 
+                ORDER by 1`;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const listaMateriales = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    const salida = IArrayDataOutputSchema.parse(listaMateriales);
+    res.status(200).send(salida);
+
+  } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+  }
+}
+

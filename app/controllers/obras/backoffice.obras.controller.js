@@ -32,40 +32,154 @@ exports.findAllObra = async (req, res) => {
         where = " and " + vista + " = ANY (vistas)";
       }
 
-      const sql = `SELECT o.id, codigo_obra, numero_ot, nombre_obra, row_to_json(z) as zona, row_to_json(d) as delegacion, 
-      o.gestor_cliente, numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, 
-      fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, row_to_json(ec) 
-      as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, ubicacion, row_to_json(eo) 
-      as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, case when erd.cuenta is null then 0 
-      else erd.cuenta end as cantidad_reportes, case when erd.pendiente is null then 0 else erd.pendiente end as reportes_pendientes, 
-      o.jefe_delegacion, case when cep.cuenta is null then 0 else cep.cuenta end as 
-      cantidad_estados_pago, row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as 
-      fecha_estado, row_to_json(op) as obra_paralizada, row_to_json(oc) as obras_cierres, evm.vistas, cep.hay_dato as hay_ep, 
-      erd.hay_dato as hay_rd,vt.hay_dato_vt as hay_vt FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from 
-      obras.obras_historial_cambios order by id_obra, fecha_hora desc) ohc on o.id = ohc.id_obra left join 
-      (SELECT distinct on (id_obra) id_obra, fecha_hora::text, responsable, motivo, observacion FROM obras.obras_paralizacion 
-      order by id_obra, fecha_hora desc) as op on o.id = op.id_obra left join (SELECT distinct on (id_obra) id_obra, fecha_hora::text, 
-      supervisor_responsable, coordinador_responsable, ito_mandante, observacion FROM obras.obras_cierres order by id_obra, 
-      fecha_hora desc) as oc on o.id = oc.id_obra left join _comun.zonal z on o.zona = z.id left join obras.delegaciones d 
-      on o.delegacion = d.id left join obras.tipo_trabajo tt on o.tipo_trabajo = tt.id left join obras.empresas_contratista ec 
-      on o.empresa_contratista = ec.id left join obras.coordinadores_contratista cc on o.coordinador_contratista = cc.id 
-      left join _comun.comunas c on o.comuna = c.codigo left join obras.estado_obra eo on o.estado = eo.id left join 
-      obras.tipo_obra tob on o.tipo_obra = tob.id left join obras.segmento s on o.segmento = s.id left join 
-      (select id_obra, count(id) as cuenta, sum(case when id_estado_pago is null then 1 else 0 end) as pendiente, case when count(id) > 0 then true else false end as hay_dato from 
-      obras.encabezado_reporte_diario group by id_obra) as erd on o.id = erd.id_obra left join 
-      (select id_obra, count(id) as cuenta, case when count(id) > 0 then true else false end as hay_dato 
-      FROM obras.encabezado_estado_pago group by id_obra) as cep on o.id = cep.id_obra 
-      LEFT JOIN   
-      (SELECT id_obra,case when count(id_obra) > 0 then true else false end as hay_dato_vt FROM obras.visitas_terreno group by id_obra) as vt on o.id = vt.id_obra 
-      left join 
-      (SELECT os.id, o.nombre as oficina, so.nombre as supervisor	FROM obras.oficina_supervisor os join _comun.oficinas o 
-        on os.oficina = o.id join obras.supervisores_contratista so on os.supervisor = so.id) ofi on o.oficina = ofi.id 
-        inner join (SELECT estado_obra_id, requiere_rep_dia, requiere_est_pago, array_agg(vista) as vistas 
-        FROM obras.vista_estado_muestra	group by estado_obra_id, requiere_rep_dia, requiere_est_pago) as evm on 
-        o.estado = evm.estado_obra_id left join (SELECT id, nombre, porcentaje FROM obras.recargos where id_tipo_recargo = 2) 
-        rec on o.recargo_distancia = rec.id WHERE case when evm.requiere_rep_dia then case when erd.hay_dato 
-        then true else false end else true end AND case when evm.requiere_est_pago then case when cep.hay_dato 
-        then true else false end else true end and not o.eliminada ${where} order by o.id desc;`;
+      const sql = `SELECT o.id,
+                  o.codigo_obra,
+                  o.numero_ot,
+                  o.nombre_obra,
+                  row_to_json(z.*) AS zona,
+                  row_to_json(d.*) AS delegacion,
+                  o.gestor_cliente,
+                  o.numero_aviso,
+                  o.numero_oc,
+                  o.monto,
+                  o.cantidad_uc,
+                  o.fecha_llegada::text AS fecha_llegada,
+                  o.fecha_inicio::text AS fecha_inicio,
+                  o.fecha_termino::text AS fecha_termino,
+                  row_to_json(tt.*) AS tipo_trabajo,
+                  o.persona_envia_info,
+                  o.cargo_persona_envia_info,
+                  row_to_json(ec.*) AS empresa_contratista,
+                  row_to_json(cc.*) AS coordinador_contratista,
+                  row_to_json(c.*) AS comuna,
+                  o.ubicacion,
+                  row_to_json(eo.*) AS estado,
+                  row_to_json(tob.*) AS tipo_obra,
+                  row_to_json(s.*) AS segmento,
+                  o.eliminada,
+                      CASE
+                          WHEN erd.cuenta IS NULL THEN 0::bigint
+                          ELSE erd.cuenta
+                      END AS cantidad_reportes,
+                      CASE
+                          WHEN erd.pendiente IS NULL THEN 0::bigint
+                          ELSE erd.pendiente
+                      END AS reportes_pendientes,
+                  o.jefe_delegacion,
+                      CASE
+                          WHEN cep.cuenta IS NULL THEN 0::bigint
+                          ELSE cep.cuenta
+                      END AS cantidad_estados_pago,
+                  CASE
+                          WHEN cep.cuenta IS NULL THEN null
+                          ELSE cep.cod_estados
+                      END AS codigo_estados,
+                      CASE
+                          WHEN cep.cuenta IS NULL THEN null
+                          ELSE cep.codigos_pelom
+                      END AS codigos_pelom,
+                  row_to_json(ofi.*) AS oficina,
+                  row_to_json(rec.*) AS recargo_distancia,
+                  ohc.fecha_hora::text AS fecha_estado,
+                  row_to_json(op.*) AS obra_paralizada,
+                  row_to_json(oc.*) AS obras_cierres,
+                  evm.vistas,
+                  cep.hay_dato AS hay_ep,
+                  erd.hay_dato AS hay_rd,
+                  vt.hay_dato_vt AS hay_vt
+                FROM obras.obras o
+                  LEFT JOIN ( SELECT DISTINCT ON (obras_historial_cambios.id_obra) obras_historial_cambios.id_obra,
+                          obras_historial_cambios.fecha_hora
+                        FROM obras.obras_historial_cambios
+                        ORDER BY obras_historial_cambios.id_obra, obras_historial_cambios.fecha_hora DESC) ohc ON o.id = ohc.id_obra
+                  LEFT JOIN ( SELECT DISTINCT ON (obras_paralizacion.id_obra) obras_paralizacion.id_obra,
+                          obras_paralizacion.fecha_hora::text AS fecha_hora,
+                          obras_paralizacion.responsable,
+                          obras_paralizacion.motivo,
+                          obras_paralizacion.observacion
+                        FROM obras.obras_paralizacion
+                        ORDER BY obras_paralizacion.id_obra, (obras_paralizacion.fecha_hora::text) DESC) op ON o.id = op.id_obra
+                  LEFT JOIN ( SELECT DISTINCT ON (obras_cierres.id_obra) obras_cierres.id_obra,
+                          obras_cierres.fecha_hora::text AS fecha_hora,
+                          obras_cierres.supervisor_responsable,
+                          obras_cierres.coordinador_responsable,
+                          obras_cierres.ito_mandante,
+                          obras_cierres.observacion
+                        FROM obras.obras_cierres
+                        ORDER BY obras_cierres.id_obra, (obras_cierres.fecha_hora::text) DESC) oc ON o.id = oc.id_obra
+                  LEFT JOIN _comun.zonal z ON o.zona = z.id
+                  LEFT JOIN obras.delegaciones d ON o.delegacion = d.id
+                  LEFT JOIN obras.tipo_trabajo tt ON o.tipo_trabajo = tt.id
+                  LEFT JOIN obras.empresas_contratista ec ON o.empresa_contratista = ec.id
+                  LEFT JOIN obras.coordinadores_contratista cc ON o.coordinador_contratista = cc.id
+                  LEFT JOIN _comun.comunas c ON o.comuna::text = c.codigo::text
+                  LEFT JOIN obras.estado_obra eo ON o.estado = eo.id
+                  LEFT JOIN obras.tipo_obra tob ON o.tipo_obra = tob.id
+                  LEFT JOIN obras.segmento s ON o.segmento = s.id
+                  LEFT JOIN ( SELECT encabezado_reporte_diario.id_obra,
+                          count(encabezado_reporte_diario.id) AS cuenta,
+                          sum(
+                              CASE
+                                  WHEN encabezado_reporte_diario.id_estado_pago IS NULL THEN 1
+                                  ELSE 0
+                              END) AS pendiente,
+                              CASE
+                                  WHEN count(encabezado_reporte_diario.id) > 0 THEN true
+                                  ELSE false
+                              END AS hay_dato
+                        FROM obras.encabezado_reporte_diario
+                        GROUP BY encabezado_reporte_diario.id_obra) erd ON o.id = erd.id_obra
+                  LEFT JOIN ( SELECT encabezado_estado_pago.id_obra,
+                          count(encabezado_estado_pago.id) AS cuenta,
+                              CASE
+                                  WHEN count(encabezado_estado_pago.id) > 0 THEN true
+                                  ELSE false
+                              END AS hay_dato, array_agg(json_build_object('id', id, 'codigo_pelom', codigo_pelom)) as cod_estados,
+                              array_agg(codigo_pelom) as codigos_pelom
+                        FROM obras.encabezado_estado_pago
+                        GROUP BY encabezado_estado_pago.id_obra) cep ON o.id = cep.id_obra
+                  LEFT JOIN ( SELECT visitas_terreno.id_obra,
+                              CASE
+                                  WHEN count(visitas_terreno.id_obra) > 0 THEN true
+                                  ELSE false
+                              END AS hay_dato_vt
+                        FROM obras.visitas_terreno
+                        GROUP BY visitas_terreno.id_obra) vt ON o.id = vt.id_obra
+                  LEFT JOIN ( SELECT os.id,
+                          o_1.nombre AS oficina,
+                          so.nombre AS supervisor
+                        FROM obras.oficina_supervisor os
+                          JOIN _comun.oficinas o_1 ON os.oficina = o_1.id
+                          JOIN obras.supervisores_contratista so ON os.supervisor = so.id) ofi ON o.oficina = ofi.id
+                  JOIN ( SELECT vista_estado_muestra.estado_obra_id,
+                          vista_estado_muestra.requiere_rep_dia,
+                          vista_estado_muestra.requiere_est_pago,
+                          array_agg(vista_estado_muestra.vista) AS vistas
+                        FROM obras.vista_estado_muestra
+                        GROUP BY vista_estado_muestra.estado_obra_id, vista_estado_muestra.requiere_rep_dia, vista_estado_muestra.requiere_est_pago) evm ON o.estado = evm.estado_obra_id
+                  LEFT JOIN ( SELECT recargos.id,
+                          recargos.nombre,
+                          recargos.porcentaje
+                        FROM obras.recargos
+                        WHERE recargos.id_tipo_recargo = 2) rec ON o.recargo_distancia = rec.id
+                WHERE
+                      CASE
+                          WHEN evm.requiere_rep_dia THEN
+                          CASE
+                              WHEN erd.hay_dato THEN true
+                              ELSE false
+                          END
+                          ELSE true
+                      END AND
+                      CASE
+                          WHEN evm.requiere_est_pago THEN
+                          CASE
+                              WHEN cep.hay_dato THEN true
+                              ELSE false
+                          END
+                          ELSE true
+                      END AND NOT o.eliminada ${where}
+                ORDER BY o.id DESC;`;
 
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
@@ -104,6 +218,8 @@ exports.findAllObra = async (req, res) => {
                 reportes_pendientes: Number(element.reportes_pendientes),
                 jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
                 cantidad_estados_pago: Number(element.cantidad_estados_pago),
+                codigo_estados: element.codigo_estados?element.codigo_estados:null,
+                codigos_pelom: element.codigos_pelom?element.codigos_pelom:null,
                 oficina: element.oficina, //json
                 recargo_distancia: element.recargo_distancia, //json
                 fecha_estado: String(element.fecha_estado),
