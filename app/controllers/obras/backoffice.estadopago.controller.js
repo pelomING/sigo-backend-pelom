@@ -120,7 +120,10 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                     FROM obras.valor_uc 
                     WHERE oficina = o.oficina 
                     ORDER BY oficina, fecha desc 
-                    LIMIT 1) as valor_uc 
+                    LIMIT 1) as valor_uc,
+                    CASE WHEN substring(codigo_obra,1,2) = 'E-' THEN
+					            repo.num_documento ELSE
+					            o.numero_oc END as numero_oc 
                 FROM obras.obras o 
                       LEFT JOIN obras.delegaciones d 
                             ON o.delegacion = d.id 
@@ -177,7 +180,8 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                     nombre_obra: element.nombre_obra?String(element.nombre_obra):null,
                     recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
                     recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
-                    valor_uc: element.valor_uc?Number(element.valor_uc):null
+                    valor_uc: element.valor_uc?Number(element.valor_uc):null,
+                    numero_oc: element.numero_oc?String(element.numero_oc):null
  
                   }
                   salida.push(detalle_salida);
@@ -233,6 +237,7 @@ exports.getAllActividadesByIdObra = async (req, res) => {
             res.status(500).send(consulta.detalle);
           }
       } catch (error) {
+        console.log('error 5', error)
         res.status(500).send(error);
       }
 }
@@ -368,6 +373,7 @@ exports.totalesEstadoPago = async (req, res) => {
 
     if (totalActividadesNormales===undefined || totalActividadesAdicionales===undefined || totalActividadesHoraExtra===undefined || totalAvances===undefined) {
       res.status(500).send("Error en la consulta (servidor backend)");
+      return;
     }
     const subtotal1 = Number(totalActividadesNormales);
     const subtotal2 = Number(totalActividadesAdicionales);
@@ -392,6 +398,7 @@ exports.totalesEstadoPago = async (req, res) => {
 
     res.status(200).send(result);
   } catch (error) {
+    console.log(error);
     res.status(500).send(error);
   }
 }
@@ -489,7 +496,7 @@ exports.creaEstadoPago = async (req, res) => {
       'id_obra', 'cliente', 'fecha_asignacion', 'tipo_trabajo',
       'segmento', 'solicitado_por', 'supervisor_pelom', 'coordinador', 'comuna',
       'direccion', 'fecha_ejecucion', 'jefe_delegacion', 'jefe_faena',
-      'codigo_pelom', 'valor_uc'
+      'codigo_pelom', 'valor_uc', 'numero_oc'
     ];
     for (const element of campos) {
       if (!req.body[element]) {
@@ -518,7 +525,7 @@ exports.creaEstadoPago = async (req, res) => {
           attributes: ['nombre_obra', 'numero_oc']
     });
     const nombreObra = obraInfo.nombre_obra?obraInfo.nombre_obra:undefined;
-    const numeroOc = obraInfo.numero_oc?obraInfo.numero_oc:undefined;
+    const numeroOc = req.body.numero_oc //obraInfo.numero_oc?obraInfo.numero_oc:undefined;
 
     const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
     const fecha_estado_pago = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
@@ -578,6 +585,7 @@ exports.creaEstadoPago = async (req, res) => {
         ot_sdi = ot_sdi + "}"
         */
         
+        
 
     const datos = {
       id: encabezado_estado_pago_id,
@@ -611,8 +619,10 @@ exports.creaEstadoPago = async (req, res) => {
       detalle_actividades: !actividadesNormales.error?actividadesNormales.detalle:undefined,
       detalle_otros: !actividadesAdicionales.error?actividadesAdicionales.detalle:undefined,
       detalle_horaextra: !actividadesHoraExtra.error?actividadesHoraExtra.detalle:undefined,
+      numero_oc: req.body.numero_oc
 
     }
+    console.log('datos -> ', datos)
     if (!datos.flexiapp) {
       res.status(400).send("No puede estar vacio el campo flexiapp. Por favor ingrese al menos un flexiapp en algún reporte diario");
       return
@@ -729,7 +739,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         eep.flexiapp, 
                         o.codigo_obra, 
                         o.nombre_obra, 
-                        eep.valor_uc 
+                        eep.valor_uc,
+                        eep.numero_oc 
                     FROM 
                         obras.encabezado_estado_pago eep 
                     LEFT JOIN obras.delegaciones d 
@@ -782,7 +793,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         nombre_obra: element.nombre_obra?String(element.nombre_obra):null,
                         recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
                         recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
-                        valor_uc: element.valor_uc?Number(element.valor_uc):null
+                        valor_uc: element.valor_uc?Number(element.valor_uc):null,
+                        numero_oc: element.numero_oc?String(element.numero_oc):null
 
                       }
                       salida.push(detalle_salida);
@@ -853,7 +865,8 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                           eep.detalle_avances, 
                           eep.detalle_actividades, 
                           eep.detalle_otros, 
-                          eep.detalle_horaextra 
+                          eep.detalle_horaextra,
+                          eep.numero_oc 
                       FROM obras.encabezado_estado_pago eep 
                       LEFT JOIN obras.obras o 
                           ON eep.id_obra = o.id 
@@ -912,6 +925,7 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                         recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
                         recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
                         valor_uc: element.valor_uc?Number(element.valor_uc):null,
+                        numero_oc: element.numero_oc?String(element.numero_oc):null
                     
                   }
                   const totales = {
@@ -1230,13 +1244,17 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
                     then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, 
                     (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
                     e.porcentaje as porcentaje, 
-                    e.recargo_distancia 
+                    e.recargo_distancia,
+                    e.descripcion_hextra,
+                    e.descripcion_distancia 
                 FROM 
                   (SELECT drda.tipo_operacion, 
                           drda.id_actividad, 
                           sum(drda.cantidad) as cantidad, 
-                          case when rec.nombre_corto is null then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto, 
-                          rec1.porcentaje as recargo_distancia, 
+                          case when rec.nombre_corto is null then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto,
+                          case when rec.nombre_corto is null then ''::varchar else ('(' || rec.nombre || ') ')::varchar end as descripcion_hextra,  
+                          rec1.porcentaje as recargo_distancia,
+                          rec1.nombre as descripcion_distancia, 
                           case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
                           o.oficina 
                     FROM obras.encabezado_reporte_diario erd 
@@ -1254,8 +1272,10 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
                         drda.tipo_operacion, 
                         drda.id_actividad, 
                         rec.nombre_corto, 
+                        rec.nombre,
                         rec.porcentaje, 
                         rec1.porcentaje, 
+				   		          rec1.nombre,
                         o.oficina
                   ) e 
                 JOIN obras.maestro_actividades ma 
@@ -1276,7 +1296,12 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
             if (actividades) {
                 
                 for (const element of actividades) {
-          
+
+                      //const total_pesos = Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc).toFixed(0));
+                      //const total_recargo_aplicado = Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+element.recargo_distancia/100)).toFixed(0));
+                      //const recargo_calculado = Number((Number(total_recargo_aplicado) - Number(total_pesos)).toFixed(0));
+                      const total_pesos =  Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+element.recargo_distancia/100)).toFixed(0));
+
                       const detalle_salida = {
                         clase: String(element.clase),
                         tipo: String(element.tipo),
@@ -1287,7 +1312,10 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
                         unitario_pesos: Number(element.unitario * element.valor_uc),
                         total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
                         recargos: element.recargo_distancia?element.recargo_distancia.toString()+'%':'0%',
-                        total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+element.recargo_distancia/100)).toFixed(0))
+                        total_pesos: total_pesos,
+                        //total_recargo_aplicado: total_recargo_aplicado,
+                        //recargo_calculado: recargo_calculado,
+                        //descripcion_distancia: element.descripcion_distancia?String(element.descripcion_distancia):null,
                         
                       }
                       salida.push(detalle_salida);
@@ -1299,6 +1327,7 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
               }
               return retorna;
   }catch (error) {
+    console.log('error, listadoActividadesAdicionalesByIdObra', error);
     const retorna = {
       error: true,
       detalle: error
