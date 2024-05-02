@@ -4,6 +4,7 @@ const upload = require("../middleware/upload");
 const fs = require('fs').promises;
 const axios = require('axios');
 const PDFDocument = require('pdfkit');
+const excel = require("exceljs");
 
     
 module.exports = function(app) {
@@ -177,8 +178,50 @@ module.exports = function(app) {
       
     })
 
+    app.get("/api/reportes/v1/generaxls", async (req, res) => {
+      /*  #swagger.tags = ['SAE - Excel'])
+      #swagger.description = 'Genera un archivo excel' */
+
+        // Crear un nuevo documento Excel en memoria
+        let workbook = new excel.Workbook();
+        let worksheet = workbook.addWorksheet("Tutorials");
+        let tutorials = [{
+          id: 1,
+          title: "Tutorial 1",
+          description: "This is tutorial 1",
+          published: "Yes",
+        }, {
+          id: 2,
+          title: "Tutorial 2",
+          description: "This is tutorial 2",
+          published: "No",
+        }];
+
+        worksheet.columns = [
+          { header: "Id", key: "id", width: 5 },
+          { header: "Title", key: "title", width: 25 },
+          { header: "Description", key: "description", width: 25 },
+          { header: "Published", key: "published", width: 10 },
+        ];
+
+        // Add Array Rows
+        worksheet.addRows(tutorials);
+
+        // res is a Stream object
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+        res.setHeader(
+          "Content-Disposition",
+          "attachment; filename=" + "tutorials.xlsx"
+        );
+        
+        return workbook.xlsx.write(res).then(function () {
+          res.status(200).end();
+        });
     
-    
+    })
   };
 
 async function existeRuta(ruta) {
