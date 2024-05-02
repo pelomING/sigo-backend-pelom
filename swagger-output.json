@@ -695,6 +695,16 @@
         }
       }
     },
+    "/api/reportes/v1/generaxls": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/general/v1/alltipoobras": {
       "get": {
         "tags": [
@@ -3325,6 +3335,43 @@
           "Obras - Backoffice - Estado de Pago"
         ],
         "description": "Obtiene todas las actividades adicionales y normales que tengan hora extra para un estado de pago",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "ids_reporte",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/estadopago/v1/getallrecargoextra": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Obtiene la explicación de los recargos en hora extra",
         "parameters": [
           {
             "name": "id_obra",
