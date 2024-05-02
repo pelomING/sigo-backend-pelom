@@ -329,6 +329,50 @@ exports.getAllActividadesHoraExtraByIdObra = async (req, res) => {
 
 }
 /*********************************************************************************** */
+/* Obtiene la explicación de los recargos en hora extra
+    GET /api/obras/backoffice/estadopago/v1/getallrecargoextra
+*/
+exports.getAllRecargoExtra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Obtiene la explicación de los recargos en hora extra' */
+  try {
+    const id_obra = req.query.id_obra;
+        const campos = [
+            'id_obra'
+          ];
+          for (const element of campos) {
+            if (!req.query[element]) {
+              res.status(400).send(
+                "No puede estar nulo el campo " + element
+              );
+              return;
+            }
+          };
+          const ids_reporte = req.query.ids_reporte?req.query.ids_reporte:null;
+          const array_id_reporte = ids_reporte?ids_reporte.split(",").map((e) => Number(e)):undefined;
+          if (array_id_reporte) {
+            for (const e of array_id_reporte){
+              if (Number.isNaN(e)){
+                res.status(400).send("Hay un problema con el formato de ids_reporte");
+                return
+              }
+            }
+          };
+
+          const consulta = await recargosHorasExtra( id_obra, ids_reporte );
+          if (consulta.error === false) {
+            res.status(200).send(consulta.detalle);
+          } else {
+            res.status(500).send(consulta.detalle);
+          }
+        } catch (error) {
+          console.log('error en getAllRecargoExtra: ', error);
+          res.status(500).send(error);
+        }
+}
+
+
+/*********************************************************************************** */
 /* Obtiene Los totales y subtotales de acuerdo a lo que viene de los detalles de actividades
     GET /api/obras/backoffice/estadopago/v1/totalesestadopago
 */
@@ -537,12 +581,14 @@ exports.creaEstadoPago = async (req, res) => {
 
     const actividadesNormales = await listadoActividadesByIdObra(id_obra, ids_reporte);
     let totalActividadesNormales = !actividadesNormales.error?actividadesNormales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
-   
+       
     const actividadesAdicionales = await listadoActividadesAdicionalesByIdObra(id_obra, ids_reporte);
     let totalActividadesAdicionales = !actividadesAdicionales.error?actividadesAdicionales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
     const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra, ids_reporte);
     let totalActividadesHoraExtra = !actividadesHoraExtra.error?actividadesHoraExtra.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
+
+    let recargosExtra = await recargosHorasExtra(id_obra, ids_reporte);
 
     //Chequear si que el total del estado paga sea mayor a cero, si no es así se debe devolver un error
     if (totalActividadesNormales+totalActividadesAdicionales+totalActividadesHoraExtra-totalAvances <= 0) {
@@ -619,6 +665,7 @@ exports.creaEstadoPago = async (req, res) => {
       detalle_actividades: !actividadesNormales.error?actividadesNormales.detalle:undefined,
       detalle_otros: !actividadesAdicionales.error?actividadesAdicionales.detalle:undefined,
       detalle_horaextra: !actividadesHoraExtra.error?actividadesHoraExtra.detalle:undefined,
+      recargos_extra: !recargosExtra.error?recargosExtra.detalle:undefined,
       numero_oc: req.body.numero_oc
 
     }
@@ -866,7 +913,8 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                           eep.detalle_actividades, 
                           eep.detalle_otros, 
                           eep.detalle_horaextra,
-                          eep.numero_oc 
+                          eep.numero_oc,
+                          eep.recargos_extra 
                       FROM obras.encabezado_estado_pago eep 
                       LEFT JOIN obras.obras o 
                           ON eep.id_obra = o.id 
@@ -946,7 +994,8 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                         actividades_por_obra: element.detalle_actividades,
                         actividades_adicionales: element.detalle_otros,
                         actividades_hora_extra: element.detalle_horaextra,
-                        avances_estado_pago: element.detalle_avances
+                        avances_estado_pago: element.detalle_avances,
+                        recargos_extra: element.recargos_extra
                       }
                       salida.push(detalle_salida);
                 };
@@ -1300,6 +1349,7 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
                       //const total_pesos = Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc).toFixed(0));
                       //const total_recargo_aplicado = Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+element.recargo_distancia/100)).toFixed(0));
                       //const recargo_calculado = Number((Number(total_recargo_aplicado) - Number(total_pesos)).toFixed(0));
+                      const total_neto = Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc).toFixed(0));
                       const total_pesos =  Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+element.recargo_distancia/100)).toFixed(0));
 
                       const detalle_salida = {
@@ -1313,6 +1363,7 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
                         total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
                         recargos: element.recargo_distancia?element.recargo_distancia.toString()+'%':'0%',
                         total_pesos: total_pesos,
+                        total_neto: total_neto,
                         //total_recargo_aplicado: total_recargo_aplicado,
                         //recargo_calculado: recargo_calculado,
                         //descripcion_distancia: element.descripcion_distancia?String(element.descripcion_distancia):null,
@@ -1429,6 +1480,9 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
     {    
         for (const element of actividades) 
         {
+              const total_neto = Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc).toFixed(0));
+              const total_pesos =  Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+element.recargo_distancia/100)).toFixed(0));
+
   
               const detalle_salida = 
               {
@@ -1441,7 +1495,8 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
                   unitario_pesos: Number(element.unitario * element.valor_uc),
                   total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
                   recargos: element.recargo_distancia?element.recargo_distancia.toString()+'%':'0%',
-                  total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+element.recargo_distancia/100)).toFixed(0))
+                  total_pesos: total_pesos,
+                  total_neto: total_neto
                   
               }
               salida.push(detalle_salida);
@@ -1560,6 +1615,9 @@ let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
             const recargo_hora = element.porcentaje?Number(element.porcentaje):0;
             const recargo_distancia = element.recargo_distancia?Number(element.recargo_distancia):0;
             const recargo_total = Number(recargo_hora+recargo_distancia);
+            const total_neto = Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc).toFixed(0));
+            const total_pesos =  Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+recargo_total/100)).toFixed(0));
+
 
             const detalle_salida = 
             {
@@ -1572,7 +1630,8 @@ let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
                 unitario_pesos: Number(element.unitario * element.valor_uc),
                 total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
                 recargos: recargo_total.toString()+'%',
-                total_pesos: Number((Number(element.cantidad) * Number(element.unitario) * element.valor_uc * (1+recargo_total/100)).toFixed(0))
+                total_pesos: total_pesos,
+                total_neto: total_neto
             }
             salida.push(detalle_salida);
         };
@@ -1644,4 +1703,74 @@ let listadoAvancesEstadoPagoIdObra = async (id_obra) => {
       }
       return retorna;
   }
+}
+
+let recargosHorasExtra = async (id_obra, ids_reporte) => {
+  try {
+
+    const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
+    const sql = `SELECT 
+                  
+                  rec.nombre_corto,
+                  rec.nombre,
+                  rec1.porcentaje as recargo_distancia, 
+                  case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
+                  o.oficina 
+                      FROM 
+                          obras.encabezado_reporte_diario erd 
+                      JOIN obras.detalle_reporte_diario_actividad drda 
+                          ON erd.id = drda.id_encabezado_rep 
+                      LEFT JOIN obras.recargos rec 
+                          ON erd.recargo_hora = rec.id 
+                      JOIN obras.obras o 
+                          ON erd.id_obra = o.id 
+                      LEFT JOIN obras.recargos rec1 
+                          ON o.recargo_distancia = rec1.id 
+                      WHERE rec.porcentaje is not null and rec.porcentaje > 0 AND
+              id_obra = ${id_obra} 
+                      ${condicion_reporte}
+                      GROUP BY 
+                          rec.nombre_corto,
+              rec.nombre,
+                          rec.porcentaje, 
+                          rec1.porcentaje, 
+                          o.oficina`;
+
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      const recargoExtra = await sequelize.query(sql, { type: QueryTypes.SELECT });
+      let salida = [];
+      if (recargoExtra) 
+      {  
+          for (const element of recargoExtra) 
+          {
+
+              const detalle_salida = 
+              {
+                tipo_extra: String(element.nombre_corto),
+                descripcion: String(element.nombre),
+                recargo_distancia: Number(element.recargo_distancia),
+                recargo_extra: Number(element.porcentaje),
+                recargo_total: Number((Number(element.recargo_distancia) + Number(element.porcentaje)).toFixed(2))
+                               
+              }
+              salida.push(detalle_salida);
+          };
+      }
+      const retorna = 
+      {
+          error: false,
+          detalle: salida
+      }
+      return retorna;
+  } catch (error) {
+      const retorna = 
+      {
+          error: true,
+          detalle: error
+      }
+      return retorna;
+
+  }
+
 }
