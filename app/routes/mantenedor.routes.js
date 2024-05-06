@@ -35,7 +35,7 @@ module.exports = function(app) {
       #swagger.description = 'Sube un archivo al servidor' */
 
       const file = req.file;
-      const folderName = req.body.folderName;
+      //const folderName = req.body.folderName;
       if (!req.file) {
         res.status(400).send('No file uploaded');
         return;
@@ -221,6 +221,27 @@ module.exports = function(app) {
           res.status(200).end();
         });
     
+    })
+
+    app.get("/imagen", async (req, res) => {
+      /*  #swagger.tags = ['SAE - Imagen'])
+      #swagger.description = 'Genera una imagen' */
+      const filename = 'logo-pelom.jpg';
+      const filePath = __dirname + './../../public/assets/' + filename;
+      const salida = fs.readFileSync(filePath);
+
+      res.setHeader('Content-Type', 'image/jpg');
+
+      if (!existeRuta(filePath)) {
+        await crearRuta(filePath).then(() => {
+          res.send(salida);
+        });
+      } else {
+        res.send(salida);
+      }
+
+      
+
     })
   };
 

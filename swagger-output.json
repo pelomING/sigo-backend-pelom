@@ -469,20 +469,6 @@
           "SAE - Mantenedores - Upload"
         ],
         "description": "Sube un archivo al servidor",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "folderName": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -696,6 +682,16 @@
       }
     },
     "/api/reportes/v1/generaxls": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/imagen": {
       "get": {
         "description": "",
         "responses": {
@@ -1960,6 +1956,38 @@
         }
       }
     },
+    "/api/obras/backoffice/v1/totalmaterialsolicitadoporobra": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve el listado de todo el materiale que se ha solictado para una obra",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/actualizasolicitud": {
       "put": {
         "tags": [
@@ -2479,6 +2507,11 @@
           },
           {
             "name": "fecha_reporte",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "mostrar_todos",
             "in": "query",
             "type": "string"
           }
@@ -3232,6 +3265,11 @@
         "parameters": [
           {
             "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "ids_reporte",
             "in": "query",
             "type": "string"
           }

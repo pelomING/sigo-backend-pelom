@@ -80,6 +80,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
       #swagger.description = 'Genera un nuevo encabezado para estado de pago' */
   try {
     const id_obra = req.query.id_obra;
+    const ids_reporte = req.query.ids_reporte;
     const campos = [
         'id_obra'
       ];
@@ -92,6 +93,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
         }
       };
       
+     const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
      const sql = `SELECT 
                   o.id as id_obra, 
                   o.codigo_obra as codigo_obra, 
@@ -121,9 +123,14 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                     WHERE oficina = o.oficina 
                     ORDER BY oficina, fecha desc 
                     LIMIT 1) as valor_uc,
-                    CASE WHEN substring(codigo_obra,1,2) = 'E-' THEN
-					            repo.num_documento ELSE
-					            o.numero_oc END as numero_oc 
+                    (SELECT DISTINCT ON (id) numero_oc
+                      FROM obras.encabezado_reporte_diario erd WHERE id_obra = ${id_obra}
+                      ${condicion_reporte}
+                      ORDER BY id DESC limit 1) as numero_oc,
+                      (SELECT DISTINCT ON (id) referencia
+                      FROM obras.encabezado_reporte_diario erd WHERE id_obra = ${id_obra}
+                      ${condicion_reporte}
+                      ORDER BY id DESC limit 1) as referencia
                 FROM obras.obras o 
                       LEFT JOIN obras.delegaciones d 
                             ON o.delegacion = d.id 
@@ -181,7 +188,8 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                     recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
                     recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
                     valor_uc: element.valor_uc?Number(element.valor_uc):null,
-                    numero_oc: element.numero_oc?String(element.numero_oc):null
+                    numero_oc: element.numero_oc?String(element.numero_oc):null,
+                    referencia: element.referencia?String(element.referencia):null
  
                   }
                   salida.push(detalle_salida);
@@ -411,9 +419,10 @@ exports.totalesEstadoPago = async (req, res) => {
     const actividadesHoraExtra = await listadoActividadesHoraExtraByIdObra(id_obra, ids_reporte);
     let totalActividadesHoraExtra = !actividadesHoraExtra.error?actividadesHoraExtra.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
 
-    const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
-    let totalAvances = !detalle_avances.error?detalle_avances.detalle.reduce(((total, num) => total + num.monto), 0):undefined;
-
+    //const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
+    //let totalAvances = !detalle_avances.error?detalle_avances.detalle.reduce(((total, num) => total + num.monto), 0):undefined;
+    
+    let totalAvances = 0;
 
     if (totalActividadesNormales===undefined || totalActividadesAdicionales===undefined || totalActividadesHoraExtra===undefined || totalAvances===undefined) {
       res.status(500).send("Error en la consulta (servidor backend)");
@@ -465,12 +474,18 @@ exports.avancesEstadoPago = async (req, res) => {
         }
       };
       //Va a consultar a la funcion listadoAvancesEstadoPagoIdObra definida mas abajo
+      //Deshabilitar los avance 2024/05/06 y enviar un array vacío
+      /*
       const consulta = await listadoAvancesEstadoPagoIdObra(id_obra);
       if (consulta.error === false) {
         res.status(200).send(consulta.detalle);
       } else {
         res.status(500).send(consulta.detalle);
       }
+      */
+
+      res.status(200).send([]);
+
     
   } catch (error) {
     res.status(500).send(error);
@@ -576,8 +591,10 @@ exports.creaEstadoPago = async (req, res) => {
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
 
-    const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
-    let totalAvances = !detalle_avances.error?detalle_avances.detalle.reduce(((total, num) => total + num.monto), 0):undefined;
+    //const detalle_avances = await listadoAvancesEstadoPagoIdObra(id_obra);
+    //let totalAvances = !detalle_avances.error?detalle_avances.detalle.reduce(((total, num) => total + num.monto), 0):undefined;
+    const detalle_avances = []
+    let totalAvances = 0;
 
     const actividadesNormales = await listadoActividadesByIdObra(id_obra, ids_reporte);
     let totalActividadesNormales = !actividadesNormales.error?actividadesNormales.detalle.reduce(((total, num) => total + num.total_pesos), 0):undefined;
@@ -666,7 +683,8 @@ exports.creaEstadoPago = async (req, res) => {
       detalle_otros: !actividadesAdicionales.error?actividadesAdicionales.detalle:undefined,
       detalle_horaextra: !actividadesHoraExtra.error?actividadesHoraExtra.detalle:undefined,
       recargos_extra: !recargosExtra.error?recargosExtra.detalle:undefined,
-      numero_oc: req.body.numero_oc
+      numero_oc: req.body.numero_oc,
+      referencia: req.body.referencia?String(req.body.referencia):undefined
 
     }
     console.log('datos -> ', datos)
@@ -787,7 +805,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         o.codigo_obra, 
                         o.nombre_obra, 
                         eep.valor_uc,
-                        eep.numero_oc 
+                        eep.numero_oc,
+                        eep.referencia 
                     FROM 
                         obras.encabezado_estado_pago eep 
                     LEFT JOIN obras.delegaciones d 
@@ -841,7 +860,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
                         recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
                         valor_uc: element.valor_uc?Number(element.valor_uc):null,
-                        numero_oc: element.numero_oc?String(element.numero_oc):null
+                        numero_oc: element.numero_oc?String(element.numero_oc):null,
+                        referencia: element.referencia?String(element.referencia):null
 
                       }
                       salida.push(detalle_salida);
@@ -914,7 +934,8 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                           eep.detalle_otros, 
                           eep.detalle_horaextra,
                           eep.numero_oc,
-                          eep.recargos_extra 
+                          eep.recargos_extra,
+                          eep.referencia 
                       FROM obras.encabezado_estado_pago eep 
                       LEFT JOIN obras.obras o 
                           ON eep.id_obra = o.id 
@@ -973,7 +994,8 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                         recargo_nombre: element.recargo_nombre?String(element.recargo_nombre):null,
                         recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
                         valor_uc: element.valor_uc?Number(element.valor_uc):null,
-                        numero_oc: element.numero_oc?String(element.numero_oc):null
+                        numero_oc: element.numero_oc?String(element.numero_oc):null,
+                        referencia: element.referencia?String(element.referencia):null
                     
                   }
                   const totales = {
