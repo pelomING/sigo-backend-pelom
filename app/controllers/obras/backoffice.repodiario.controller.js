@@ -165,6 +165,8 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
                   num_documento: String(element.num_documento),
                   flexiapp: element.flexiapp,
                   recargo_hora: element.recargo,
+                  referencia: element.referencia,
+                  numero_oc: element.numero_oc,
                   det_actividad: element.detalle_actividad,
                   det_otros: element.detalle_otros
                   
@@ -192,8 +194,10 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
   const parametros = {
     id: req.query.id,
     id_obra: req.query.id_obra,
-    fecha_reporte: req.query.fecha_reporte
+    fecha_reporte: req.query.fecha_reporte,
+    mostrar_todos: req.query.mostrar_todos
   }
+  console.log(parametros);  
   const keys = Object.keys(parametros)
   let sql_array = [];
   let param = {};
@@ -218,6 +222,8 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
     res.status(500).send("Debe incluir algun parametro para consultar");
   }else {
     try {
+      const condicion_muestra = parametros.mostrar_todos==="true"?"":" AND rd.id_estado_pago is null";
+      console.log('condicion_muestra', condicion_muestra);
       let b = sql_array.reduce((total, num) => total + " AND " + num);
       if (b){
       
@@ -247,7 +253,9 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
               row_to_json(c) as comuna, 
               num_documento, 
               rd.flexiapp, 
-              row_to_json(rec) as recargo, 
+              row_to_json(rec) as recargo,
+              rd.referencia,
+              rd.numero_oc, 
               (SELECT ARRAY_AGG(detalle) as detalle_actividad 
                 FROM (SELECT row_to_json(a) as detalle 
                       FROM (SELECT 
@@ -315,7 +323,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
                 ON rd.recargo_hora = rec.id 
             LEFT JOIN obras.encabezado_estado_pago eep 
                 ON rd.id_estado_pago = eep.id
-            WHERE ${b}`;
+            WHERE (${b}${condicion_muestra})`;
        
 
         //const sql = sql_all_reportes_diarios + ` WHERE ${b}`;
@@ -352,9 +360,11 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
               hora_llegada_base: String(element.hora_llegada_base),
               alimentador: String(element.alimentador),
               comuna: element.comuna,
-              num_documento: String(element.num_documento),
+              num_documento: element.num_documento?String(element.num_documento):null,
               flexiapp: element.flexiapp,
               recargo_hora: element.recargo,
+              referencia: element.referencia?String(element.referencia):null,
+              numero_oc: element.numero_oc?String(element.numero_oc):null,
               det_actividad: element.detalle_actividad,
               det_otros: element.detalle_otros
 
@@ -745,6 +755,8 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
       const id_obra = req.body.id_obra;
 
       //Verifica que la fecha de reporte no este asignada a una obra
+      //Deshabilitar desde 2024-05-03, ahora va a poder a generar un repo diario para el mismo día
+      /*
       await EncabezadoReporteDiario.findAll({where: {id_obra: id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
           if (data.length > 0) {
             salir = true;
@@ -759,7 +771,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         if (salir) {
           return;
         }
-
+*/
         let flexiapp;
         //const flexiapp = req.body.flexiapp;
         if (req.body.flexiapp === null || req.body.flexiapp === undefined) {
@@ -936,7 +948,9 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             comuna: String(req.body.comuna),
             num_documento: String(req.body.num_documento),
             flexiapp: String(flexiapp),
-            recargo_hora: recargo_aplicar?Number(req.body.recargo_hora.id):null
+            recargo_hora: recargo_aplicar?Number(req.body.recargo_hora.id):null,
+            referencia: req.body.referencia?String(req.body.referencia):null,
+            numero_oc: req.body.numero_oc?String(req.body.numero_oc):null
         }
 
         let salida = {};
@@ -1198,7 +1212,9 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       comuna: req.body.comuna?String(req.body.comuna):undefined,
       num_documento: req.body.num_documento?String(req.body.num_documento):undefined,
       flexiapp: flexiapp?String(flexiapp):undefined,
-      recargo_hora: recargo_aplicar
+      recargo_hora: recargo_aplicar,
+      referencia: req.body.referencia?String(req.body.referencia):undefined,
+      numero_oc: req.body.numero_oc?String(req.body.numero_oc):undefined
 
   }
 
