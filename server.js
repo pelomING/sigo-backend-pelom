@@ -41,6 +41,9 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
+const imagePath = './public/assets/';
+app.use('/assets', express.static(imagePath));
+
 app.use(
   cookieSession({
     name: "pelom-session",
@@ -111,6 +114,9 @@ require('./app/routes/mantenedor.routes')(app);
 require('./app/routes/sae_reportes.routes')(app);
 require('./app/routes/obras_backoffice.routes')(app);
 require('./app/routes/sae_paneldecontrol.routes')(app);
+
+
+
 
 
 const Tiempo = process.env.CRON_TIEMPO || 10;

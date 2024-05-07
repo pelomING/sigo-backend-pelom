@@ -1280,6 +1280,79 @@ exports.findBomByParametros = async (req, res) => {
     }
 
   }
+  /***********************************************************************************/
+  /* Obtiene listado de todo el materiale que se ha solictado para una obra
+  ;
+  */
+  exports.getTotalMaterialSolicitadoPorObra = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve el listado de todo el materiale que se ha solictado para una obra' */
+    try {
+
+        const dataInput = {
+          id_obra: req.query.id_obra
+        }
+
+        const IDataInputSchema = z.object({
+          id_obra: z.coerce.number(),
+        });
+
+        const IDataOutputSchema = z.object({
+          codigo_sap_material: z.coerce.number(),
+          descripcion: z.coerce.string(),
+          codigo_corto: z.coerce.string(),
+          cantidad: z.coerce.number()
+        });
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+        
+        const sql = `SELECT n.codigo_sap_material, mm.descripcion, mu.codigo_corto,
+                        sum(n.cantidad_requerida_new) AS cantidad
+                      FROM ( SELECT DISTINCT ON (m.pedido, m.codigo_sap_material) m.pedido,
+                                m.codigo_sap_material,
+                                m.cantidad_requerida_new
+                              FROM ( SELECT msd.id,
+                                        msd.id_obra,
+                                        msd.pedido,
+                                        msd.codigo_sap_material,
+                                        msd.cantidad_requerida_old,
+                                        msd.cantidad_requerida_new,
+                                        msd.tipo_movimiento,
+                                        msd.fecha_movimiento,
+                                        msd.rut_usuario
+                                      FROM obras.mat_solicitudes_detalle msd
+                                        JOIN obras.mat_solicitudes_obras mso ON msd.pedido = mso.id
+                                      WHERE mso.id_obra = ${validated.id_obra} AND mso.estado::text = 'GENERADO'::text) m
+                              ORDER BY m.pedido, m.codigo_sap_material, m.fecha_movimiento DESC) n
+                          JOIN obras.maestro_materiales mm ON n.codigo_sap_material = mm.codigo_sap
+                          JOIN obras.maestro_unidades mu ON mm.id_unidad = mu.id
+                      GROUP BY n.codigo_sap_material, mm.descripcion, mu.codigo_corto
+                      ORDER BY codigo_sap_material;`;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (pedidos) {
+          const data = IArrayDataOutputSchema.parse(pedidos);
+          res.status(200).send(data);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+    } catch (error) {
+        if (error instanceof ZodError) {
+          console.log(error.issues);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+    }
+  }
+
      /***********************************************************************************/
   /* Obtiene listado de materiales para una reserva
   ;

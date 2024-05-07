@@ -117,6 +117,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         recargos_extra : {
             type: Sequelize.ARRAY(Sequelize.JSON)
+        },
+        referencia : {
+            type: Sequelize.STRING
         }
     },
         {

@@ -123,6 +123,7 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/v1/obtiene_numero_solicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getNumeroPedido);
     app.post("/api/obras/backoffice/v1/creasolicitudmaterial", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createPedidoMaterial);
     app.get("/api/obras/backoffice/v1/materialesporsolicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorPedido);
+    app.get("/api/obras/backoffice/v1/totalmaterialsolicitadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialSolicitadoPorObra);
     app.put("/api/obras/backoffice/v1/actualizasolicitud", [authJwt.verifyToken, authJwt.updateObrasBackofficeBom], backofficeBomController.generaOcancelaSolicitud);
     app.get("/api/obras/backoffice/v1/reservasporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getReservasPorObra);
     app.post("/api/obras/backoffice/v2/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo_v2);
