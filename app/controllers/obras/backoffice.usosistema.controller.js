@@ -180,10 +180,12 @@ exports.getObrasSinRepDiario = async (req, res) => {
         ( SELECT array_agg(row_to_json(z.*)) AS detalle
            FROM ( SELECT a.id_obra AS id,
                     a.codigo_obra,
+				 	a.nombre_obra,
                     a.fecha_reporte AS fecha_ultimo,
                     a.dias AS dias_sin_rep
                    FROM ( SELECT DISTINCT ON (erd.id_obra) erd.id_obra,
                             o.codigo_obra,
+						 	o.nombre_obra,
                             erd.fecha_reporte,
                             now()::date - erd.fecha_reporte AS dias
                            FROM obras.obras o
