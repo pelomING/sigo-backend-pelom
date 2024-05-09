@@ -273,13 +273,13 @@ exports.getReportesDiariosPorDia = async (req, res) => {
     FROM ( SELECT sum(parametros_config.valor::integer) AS valor
       FROM _comun.parametros_config
      WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
-                      LEFT JOIN ( SELECT erd.fecha_reporte,
-                             count(erd.fecha_reporte) AS cantidad
+                      LEFT JOIN ( SELECT erd.fecha_ingreso,
+                             count(erd.fecha_ingreso) AS cantidad
                             FROM obras.encabezado_reporte_diario erd
                               JOIN obras.obras o ON erd.id_obra = o.id
                            WHERE o.zona = 1
-                           GROUP BY erd.fecha_reporte
-                           ORDER BY erd.fecha_reporte) reportes ON reportes.fecha_reporte = serie.fecha) z) AS maule_norte,
+                           GROUP BY erd.fecha_ingreso
+                           ORDER BY erd.fecha_ingreso) reportes ON reportes.fecha_ingreso = serie.fecha) z) AS maule_norte,
      ( SELECT array_agg(row_to_json(z.*)) AS maule_norte
             FROM ( SELECT row_number() OVER (ORDER BY serie.fecha) AS id,
                      serie.fecha,
@@ -317,13 +317,13 @@ exports.getReportesDiariosPorDia = async (req, res) => {
     FROM ( SELECT sum(parametros_config.valor::integer) AS valor
       FROM _comun.parametros_config
      WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
-                      LEFT JOIN ( SELECT erd.fecha_reporte,
-                             count(erd.fecha_reporte) AS cantidad
+                      LEFT JOIN ( SELECT erd.fecha_ingreso,
+                             count(erd.fecha_ingreso) AS cantidad
                             FROM obras.encabezado_reporte_diario erd
                               JOIN obras.obras o ON erd.id_obra = o.id
                            WHERE o.zona = 2
-                           GROUP BY erd.fecha_reporte
-                           ORDER BY erd.fecha_reporte) reportes ON reportes.fecha_reporte = serie.fecha) z) AS maule_sur,
+                           GROUP BY erd.fecha_ingreso
+                           ORDER BY erd.fecha_ingreso) reportes ON reportes.fecha_ingreso = serie.fecha) z) AS maule_sur,
      ( SELECT array_agg(row_to_json(z.*)) AS maule_norte
             FROM ( SELECT row_number() OVER (ORDER BY serie.fecha) AS id,
                      serie.fecha,
@@ -361,13 +361,13 @@ exports.getReportesDiariosPorDia = async (req, res) => {
     FROM ( SELECT sum(parametros_config.valor::integer) AS valor
       FROM _comun.parametros_config
      WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
-                      LEFT JOIN ( SELECT erd.fecha_reporte,
-                             count(erd.fecha_reporte) AS cantidad
+                      LEFT JOIN ( SELECT erd.fecha_ingreso,
+                             count(erd.fecha_ingreso) AS cantidad
                             FROM obras.encabezado_reporte_diario erd
                               JOIN obras.obras o ON erd.id_obra = o.id
                            WHERE o.zona = ANY (ARRAY[1, 2])
-                           GROUP BY erd.fecha_reporte
-                           ORDER BY erd.fecha_reporte) reportes ON reportes.fecha_reporte = serie.fecha) z) AS total;`;
+                           GROUP BY erd.fecha_ingreso
+                           ORDER BY erd.fecha_ingreso) reportes ON reportes.fecha_ingreso = serie.fecha) z) AS total;`;
 
             const resumen = await sequelize.query(sql, { type: QueryTypes.SELECT });
             let salida = {};

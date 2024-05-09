@@ -114,7 +114,8 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                   json_build_object('id', repo.id_jefe, 'nombre', repo.jefe_faena) as jefe_faena, 
                   repo.num_documento as numero_documento, 
                   rec.nombre as recargo_nombre, 
-                  rec.porcentaje as recargo_porcentaje, 
+                  rec.porcentaje as recargo_porcentaje,
+                  case when tob.no_exige_oc then 1::integer else 0::integer end no_exige_oc, 
                   (SELECT 'EDP-' || (case when max(id) is null then 0 else max(id) end + 10000001)::text || 
                   '-' || substring(current_timestamp::text,1,4) 
                     FROM obras.encabezado_estado_pago) as codigo_pelom, 
@@ -141,7 +142,9 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                       LEFT JOIN obras.coordinadores_contratista cc 
                             ON o.coordinador_contratista = cc.id 
                       LEFT JOIN _comun.comunas c 
-                            ON o.comuna = c.codigo 
+                            ON o.comuna = c.codigo
+                      LEFT JOIN obras.tipo_obra tob
+                            ON o.tipo_obra = tob.id 
                       LEFT JOIN (SELECT os.id, o.nombre as oficina, so.nombre as supervisor 
                                   FROM obras.oficina_supervisor os 
                                   JOIN _comun.oficinas o ON os.oficina = o.id 
@@ -189,7 +192,8 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                     recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
                     valor_uc: element.valor_uc?Number(element.valor_uc):null,
                     numero_oc: element.numero_oc?String(element.numero_oc):null,
-                    referencia: element.referencia?String(element.referencia):null
+                    referencia: element.referencia?String(element.referencia):null,
+                    no_exige_oc: element.no_exige_oc?Number(element.no_exige_oc):null
  
                   }
                   salida.push(detalle_salida);
@@ -1513,7 +1517,7 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
                   actividad: String(element.actividad),
                   unidad: String(element.unidad),
                   cantidad: Number(element.cantidad),
-                  unitario: Number(element.unitario),
+                  unitario: Number(element.unitario).toFixed(3),
                   unitario_pesos: Number(element.unitario * element.valor_uc),
                   total: Number((Number(element.cantidad) * Number(element.unitario)).toFixed(2)),
                   recargos: element.recargo_distancia?element.recargo_distancia.toString()+'%':'0%',
