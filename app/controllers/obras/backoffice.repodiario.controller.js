@@ -85,7 +85,9 @@ const sql_all_reportes_diarios = `SELECT
                                     glosa, 
                                     uc_unitaria, 
                                     cantidad, 
-                                    total_uc, 
+                                    total_uc,
+                                    unitario_pesos,
+                                    total_pesos, 
                                     json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) 
                                         as encabezado_reporte 
                                 FROM 
@@ -300,7 +302,9 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
                                 glosa, 
                                 uc_unitaria, 
                                 cantidad, 
-                                total_uc, 
+                                total_uc,
+                                unitario_pesos,
+                                total_pesos, 
                                 json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) 
                                   as encabezado_reporte 
                               FROM obras.detalle_reporte_diario_otras_actividades drd 
@@ -726,13 +730,17 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                         "glosa": "descripcion de la tarea 1", 
                         "uc_unitaria": 1, 
                         "cantidad": 1, 
-                        "uc_total": 1
+                        "uc_total": 1,
+                        "unitario_pesos": 1,
+                        "total_pesos": 1
                       },
                       {
                         "glosa": "descripcion de la tarea 2", 
                         "uc_unitaria": 1, 
                         "cantidad": 1, 
-                        "uc_total": 1
+                        "uc_total": 1,
+                        "unitario_pesos": 1,
+                        "total_pesos": 1
                       }
                 ]
             }
@@ -892,6 +900,21 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           res.status(500).send(err.message );
         })
 
+        //Determina el valor de la UC para esa obra
+        let valor_uc = 0;
+        sql = "SELECT vu.precio AS valor_uc FROM obras.obras o	JOIN obras.oficina_supervisor os ON o.oficina = os.id JOIN obras.valor_uc vu ON os.oficina = vu.id WHERE o.id = " + id_obra + ";";
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          valor_uc = data[0].valor_uc;
+        }).catch(err => {
+          res.status(500).send(err.message );
+        })
+        if (!valor_uc) {
+          res.status(500).send( 'No hay valor de UC para esta obra');
+          return;
+        }
+
         //determina el usario que está modificando
         let id_usuario = req.userId;
         let user_name;
@@ -971,12 +994,20 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           }
 
           for (const element of req.body.det_otros) {
+
+            const unitario_pesos = element.unitario_pesos?Number(element.unitario_pesos):0;
+            const cantidad = element.cantidad?Number(element.cantidad):0;
+            const uc_unit = unitario_pesos&&valor_uc?Number(unitario_pesos/valor_uc):0;
+            const uc_total = Number(uc_unit*cantidad);
+
             const det_otros = {
               id_encabezado_rep: Number(encabezado_reporte_diario_id),
               glosa: String(element.glosa),
-              uc_unitaria: Number(element.uc_unitaria),
-              total_uc: Number(element.uc_total),
-              cantidad: Number(element.cantidad)
+              uc_unitaria: uc_unit,
+              total_uc: uc_total,
+              cantidad: cantidad,
+              unitario_pesos: element.unitario_pesos?Number(element.unitario_pesos):0,
+              total_pesos: element.total_pesos?Number(element.total_pesos):0
             }
             await DetalleRporteDiarioOtrasActividades.create(det_otros, { transaction: t });
           }
@@ -1075,13 +1106,17 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                         "glosa": "descripcion de la tarea 1", 
                         "uc_unitaria": 1, 
                         "cantidad": 1, 
-                        "uc_total": 1
+                        "uc_total": 1,
+                        "unitario_pesos": 1,
+                        "total_pesos": 1
                       },
                       {
                         "glosa": "descripcion de la tarea 2", 
                         "uc_unitaria": 1, 
                         "cantidad": 1, 
-                        "uc_total": 1
+                        "uc_total": 1,
+                        "unitario_pesos": 1,
+                        "total_pesos": 1
                       }
                 ]
             }
@@ -1130,6 +1165,8 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       return;
     })
 
+    
+
     //Encuentra el id de la obra segun el reporte diario
     let id_obra;
     await EncabezadoReporteDiario.findOne({
@@ -1146,6 +1183,22 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         res.status(500).send( 'El reporte diario no existe');
         return;
     }
+
+    //Determina el valor de la UC para esa obra
+    let valor_uc = 0;
+    sql = "SELECT vu.precio AS valor_uc FROM obras.obras o	JOIN obras.oficina_supervisor os ON o.oficina = os.id JOIN obras.valor_uc vu ON os.oficina = vu.id WHERE o.id = " + id_obra + ";";
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      valor_uc = data[0].valor_uc;
+    }).catch(err => {
+      res.status(500).send(err.message );
+    })
+    if (!valor_uc) {
+      res.status(500).send( 'No hay valor de UC para esta obra');
+      return;
+    }
+
     let estado_obra_actual;
     //busca el estado de la obra dentro de la tabla obras por ID de obra
     await Obra.findOne({
@@ -1254,12 +1307,20 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
             //luego volver a insertar los registros
             
             for (const element of detalle_otros) {
+
+              const unitario_pesos = element.unitario_pesos?Number(element.unitario_pesos):0;
+              const cantidad = element.cantidad?Number(element.cantidad):0;
+              const uc_unit = unitario_pesos&&valor_uc?Number(unitario_pesos/valor_uc):0;
+              const uc_total = Number(uc_unit*cantidad);
+
               const det_otros = {
                 id_encabezado_rep: Number(id),
-                glosa: String(element.glosa),
-                uc_unitaria: Number(element.uc_unitaria),
-                total_uc: Number(element.uc_total),
-                cantidad: Number(element.cantidad)
+                glosa: element.glosa?String(element.glosa):undefined,
+                uc_unitaria: uc_unit,
+                total_uc: uc_total,
+                cantidad: cantidad,
+                unitario_pesos: unitario_pesos,
+                total_pesos: element.total_pesos?Number(element.total_pesos):undefined
               }
               await DetalleRporteDiarioOtrasActividades.create(det_otros, { transaction: t });
             }
@@ -1273,6 +1334,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
           await t.commit();
           
         } catch (error) {
+          console.log('error en updateEncabezadoReporteDiario_V2: ', error)
           salida = { error: true, message: error }
           await t.rollback();
         }
@@ -1287,6 +1349,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
           res.status(200).send(salida);
         }
   }catch (error) {
+    console.log('error en updateEncabezadoReporteDiario_V2: ', error)
     res.status(500).send(error);
   }
 }
@@ -1567,7 +1630,7 @@ exports.findDetalleReporteDiarioOtrasPorParametros = async (req, res) => {
         join obras.maestro_actividades ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd \
         on dra.id_encabezado_rep = erd.id WHERE "+b;*/
 
-        const sql = "SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, json_build_object('id', erd.id, 'id_obra', erd.id_obra, \
+        const sql = "SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, unitario_pesos, total_pesos, json_build_object('id', erd.id, 'id_obra', erd.id_obra, \
         'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades drd \
         join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE "+b;
 
