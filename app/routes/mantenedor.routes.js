@@ -162,19 +162,78 @@ module.exports = function(app) {
       #swagger.description = 'Genera un archivo pdf' */
 
         // Crear un nuevo documento PDF en memoria
-        const doc = new PDFDocument();
+        const pdfDoc = new PDFDocument();
+
+        pdfDoc.image('public/assets/logo-pelom.jpg', 15, 15, {width: 150});
+        pdfDoc.fontSize(11).text('Solicitud de Material', 250, 40);
+
+        pdfDoc.lineWidth(0.5);
+
+        // Primer recuadro
+        pdfDoc.roundedRect(15, 60, 585, 50, 5)
+
+        pdfDoc.stroke();
+
+        pdfDoc.fontSize(10).text('Nombre Solicitante', 25, 65);
+        pdfDoc.fontSize(10).text('Zona Solicitado', 25, 80);
+        pdfDoc.fontSize(10).text('Mail', 25, 95);
+
+        pdfDoc.fontSize(10).text('Rut', 400, 65);
+        pdfDoc.fontSize(10).text('Fono', 400, 80);
+        pdfDoc.fontSize(10).text('Fecha', 400, 95);
+        ///********************************************* */
+
+        let punto = 60
+        // Segundo recuadro
+        pdfDoc.roundedRect(15, 60 + punto, 585, 50, 5)
+
+        pdfDoc.stroke();
+
+        pdfDoc.fontSize(10).text('Nombre Supervisor', 25, 65 + punto);
+        pdfDoc.fontSize(10).text('Zona', 25, 80 + punto);
+        pdfDoc.fontSize(10).text('Mail', 25, 95 + punto);
+
+        pdfDoc.fontSize(10).text('Rut', 400, 65 + punto);
+        pdfDoc.fontSize(10).text('Fono', 400, 80 + punto);
+        pdfDoc.fontSize(10).text('Firma', 400, 95 + punto);
+        ///********************************************* */
+
+        punto = 120
+        // Tercer recuadro
+        pdfDoc.roundedRect(15, 60 + punto, 585, 40, 5)
+
+        pdfDoc.stroke();
+
+        pdfDoc.fontSize(10).text('Número CGED', 25, 65 + punto);
+        pdfDoc.fontSize(10).text('Dirección Proyecto', 25, 80 + punto);
+
+
+        pdfDoc.fontSize(10).text('Número OC', 300, 65 + punto);
+        ///*******************************
+
+        pdfDoc.lineWidth(0.15);
+        pdfDoc.rect(15, 250, 585, 500)
+
+
+        for (let i = 1; i < 10; i++) {
+            pdfDoc.lineCap('butt').moveTo(15, 250 + i*12).lineTo(600, 250 + i*12).stroke();
+            pdfDoc.font('public/fonts/calibrib.ttf').fontSize(8).text('1234567', 50, 254 + i*12);
+            pdfDoc.font('Courier-Bold').fontSize(8).text('Material 22334 fsfff ffdggdf', 105, 254 + i*12);
+        }
+        pdfDoc.lineCap('butt').moveTo(40, 250).lineTo(40, 700).stroke();
+        pdfDoc.lineCap('butt').moveTo(100, 250).lineTo(100, 700).stroke();
 
         //Inserta lgoo Pelom
-        doc.image('/public/assets/logo-pelom.jpg', 0, 15, {width: 300})
+        //doc.image('public/assets/logo-pelom.jpg', 0, 15, {width: 300})
         // Escribir contenido en el PDF
-        doc.text('¡Hola, este es un PDF generado en memoria!', 100, 100);
+        //doc.text('¡Hola, este es un PDF generado en memoria!', 100, 100);
 
         // Establecer el tipo de contenido como PDF
         res.setHeader('Content-Type', 'application/pdf');
 
         // Devolver el PDF como una respuesta al cliente
-        doc.pipe(res);
-        doc.end();
+        pdfDoc.pipe(res);
+        pdfDoc.end();
       
     })
 
