@@ -932,6 +932,11 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
         const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
+        const fec_new = Number(req.body.fecha_reporte.substring(0,4) + req.body.fecha_reporte.substring(5,7) + req.body.fecha_reporte.substring(8,10))
+        if (fec_new > Number(fechahoy.substring(0,4) + fechahoy.substring(5,7) + fechahoy.substring(8,10))) {
+          res.status(500).send("La fecha del reporte no puede ser mayor a la fecha de hoy");
+          return;
+        }
 
 
         //estado visita agendada = 2
