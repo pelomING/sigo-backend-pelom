@@ -1,9 +1,12 @@
 const db = require("../../models");
 const config = require("../../config/auth.config");
+const config_version = require("../../config/version.config");
 const User = db.user;
 const Role = db.role;
 const UsuariosFunciones = db.usuariosFunciones;
 const LoginHistorial = db.loginHistorial;
+const VerHomepage = db.verHomepage;
+const ParametrosConfig = db.parametrosConfig;
 
 const Op = db.Sequelize.Op;
 
@@ -91,7 +94,9 @@ exports.signin = async (req, res) => {
       authorities.push("ROLE_" + element.name.toUpperCase());
     }
 
+    // Esta línea es la que envía las cookies al cliente
     req.session.token = token;
+    // *******************************************
 
     //* almacenar el log *//
     const loginHistorial = await LoginHistorial.create({
@@ -104,18 +109,58 @@ exports.signin = async (req, res) => {
     }).catch(err => {
       console.log('err', err);
     })
-    const rol_consulta = idRole[0]?idRole[0]:0;
+    
 
-    const sql = "select menu from _frontend.ver_menu where rol_id = " + rol_consulta + ";";
+    //Chequear que la la password no sea igual al nombre de usuario
+    //if (req.body.username === req.body.password) {
+
+    // Aqui se debe hacer la consulta del menu, pero con id_servicio = 0 para que entregue sólo el menu de gestion de usuario
+    //  return res.status(401).send( "Debe cambiar la password de inmediato para utilizar el sistema" );
+    //}
+    
+
+    const rol_consulta = idRole[0]?idRole[0]:0;
+    const mensaje_id = req.body.username===req.body.password?2:userFuncion.cod_mensaje; //Si usuario = password debe cambiar la password de inmediato para utilizar el sistema
+
+    const verHomepage = await VerHomepage.findOne({ attributes: ['mensaje', 'homepage'], where: { mensajeId: mensaje_id, rolId: rol_consulta}});
+    
+    const mensajeMenu = verHomepage.mensaje?verHomepage.mensaje:null;
+    const homepage = verHomepage.homepage?verHomepage.homepage:null;
+
+    const sql = req.body.username===req.body.password?
+    "select * from _frontend.ver_menu_new where id_servicio=0 and rol_id = " + rol_consulta + ";":
+    "select * from _frontend.ver_menu_new where rol_id = " + rol_consulta + ";";
+
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const menu = await sequelize.query(sql, { type: QueryTypes.SELECT });
+
+    function compararPorCampo(a, b) {
+      if (a.orden < b.orden) {
+        return -1;
+      }
+      if (a.orden > b.orden) {
+        return 1;
+      }
+      return 0;
+    }
 
     //determina el menu de salida
     let menu_salida = [];
     if (menu) {
         for (const element of menu) {
-          menu_salida.push(element.menu);
+          element.items.sort(compararPorCampo);
+          let items = [];
+          for (const item of element.items) {
+            delete item.orden;
+            items.push(item);
+          }
+          const salida = {
+            "label": element.label,
+            "items": items
+          }
+          menu_salida.push(salida);
+          //menu_salida.push(element.menu);
         }
       }
     /////////////////////////////////
@@ -126,8 +171,11 @@ exports.signin = async (req, res) => {
       funcion: userFuncion.funcion,
       email: user.email,
       roles: authorities,
+      mensaje: mensajeMenu,
+      homepage: homepage,
       accessToken: token,
-      menu: menu_salida
+      menu: menu_salida,
+      version: config_version.version
     });
   } catch (error) {
     if (error.message === "connect ECONNREFUSED ::1:5432") {

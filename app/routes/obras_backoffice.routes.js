@@ -5,6 +5,7 @@ const backofficeBomController = require("../controllers/obras/backoffice.bom.con
 const backofficeTerrenoController = require("../controllers/obras/backoffice.terreno.controller");
 const backofficeRepodiarioController = require("../controllers/obras/backoffice.repodiario.controller");
 const backofficeEstadopagoController = require("../controllers/obras/backoffice.estadopago.controller");
+const backofficeUsoController = require("../controllers/obras/backoffice.usosistema.controller");
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -64,7 +65,15 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/general/v1/alloficinasupervisor", [authJwt.verifyToken], backofficeGeneralController.findAllOficinas);
 
+
     app.get("/api/obras/backoffice/general/v1/allrecargospordistancia", [authJwt.verifyToken], backofficeGeneralController.findAllRecargosDistancia);
+
+    
+    app.get("/api/obras/backoffice/general/v1/resumengeneral", [authJwt.verifyToken], backofficeGeneralController.getResumenGeneral);
+
+    app.get("/api/obras/backoffice/general/v1/allusuarios", [authJwt.verifyToken], backofficeGeneralController.findAllUsuariosFunciones);
+
+    app.get("/api/obras/backoffice/general/v1/allmaestromaterial", [authJwt.verifyToken], backofficeGeneralController.findAllMaestroMateriales);
 
     
 
@@ -84,6 +93,10 @@ module.exports = function(app) {
 
     app.delete("/api/obras/backoffice/v1/eliminaobra/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeObras], backofficeObrasController.deleteObra);
 
+    app.post("/api/obras/backoffice/v1/paralizaobra", [authJwt.verifyToken, authJwt.createObrasBackofficeObras], backofficeObrasController.paralizaObra);
+
+    app.post("/api/obras/backoffice/v1/cierraobra", [authJwt.verifyToken, authJwt.createObrasBackofficeObras], backofficeObrasController.cierreObra);
+
 
     app.get("/api/obras/backoffice/v1/obras/:id", [authJwt.verifyToken, authJwt.readObrasBackofficeObras], backofficeObrasController.findObraById);
 
@@ -93,28 +106,37 @@ module.exports = function(app) {
     /* Obtiene el código de obra en caso de que sea de tipo emergencia*/
     app.get("/api/obras/backoffice/v1/codigodeobraemergencia", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeObrasController.getCodigoObraEmergencia);
 
+    /* Obtiene el resumen informartivo de obras*/
+    app.get("/api/obras/backoffice/v1/resumenobras", [authJwt.verifyToken, authJwt.readObrasBackofficeObras], backofficeObrasController.getResumenObras);
+
 
 }
 /*/*********************************************************************************** */
 /******* BOM ******************************************************************** */    
 
 { /*** BOM ** */
-    app.get("/api/obras/backoffice/v1/allbom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findAllBom);
+    //app.get("/api/obras/backoffice/v1/allbom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findAllBom);
+    //app.get("/api/obras/backoffice/v1/bomporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findBomByParametros);
 
+    app.get("/api/obras/backoffice/v1/allobrasparabom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getAllObrasParaBom);
+    app.get("/api/obras/backoffice/v1/solicitudesmaterialporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getPedidosPorObra);
+    app.get("/api/obras/backoffice/v1/obtiene_numero_solicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getNumeroPedido);
+    app.post("/api/obras/backoffice/v1/creasolicitudmaterial", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createPedidoMaterial);
+    app.get("/api/obras/backoffice/v1/materialesporsolicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorPedido);
+    app.get("/api/obras/backoffice/v1/totalmaterialsolicitadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialSolicitadoPorObra);
+    app.put("/api/obras/backoffice/v1/actualizasolicitud", [authJwt.verifyToken, authJwt.updateObrasBackofficeBom], backofficeBomController.generaOcancelaSolicitud);
+    app.get("/api/obras/backoffice/v1/reservasporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getReservasPorObra);
+    app.post("/api/obras/backoffice/v2/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo_v2);
+    app.get("/api/obras/backoffice/v1/materialesporreserva", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorReserva);
+    app.get("/api/obras/backoffice/v1/bom_inicial_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomZero);
+    app.get("/api/obras/backoffice/v1/bom_actual_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomFinal);
 
-    app.get("/api/obras/backoffice/v1/bomporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findBomByParametros);
+    app.post("/api/obras/backoffice/v1/crealistafaena", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createListaFaena);
 
-
-    app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo);
-
-
-    app.post("/api/obras/backoffice/v1/creabomindividual", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomIndividual);
-
-
-    app.delete("/api/obras/backoffice/v1/eliminabomporreserva/:reserva", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByReserva);
-
-
-    app.delete("/api/obras/backoffice/v1/eliminamaterialbom/:reserva/:cod_sap", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByMaterial);
+    //app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo);
+    //app.post("/api/obras/backoffice/v1/creabomindividual", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomIndividual);
+    //app.delete("/api/obras/backoffice/v1/eliminabomporreserva/:reserva", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByReserva);
+    //app.delete("/api/obras/backoffice/v1/eliminamaterialbom/:reserva/:cod_sap", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByMaterial);
 }
 
 { /*** VISITA TERRENOS ** */
@@ -189,6 +211,10 @@ module.exports = function(app) {
     // Obtiene todas las actividades adicionales y normales que tengan hora extra para un estado de pago
     app.get("/api/obras/backoffice/estadopago/v1/allactividadesconhoraextra", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllActividadesHoraExtraByIdObra);
 
+    /* Obtiene la explicación de los recargos en hora extra
+    GET /api/obras/backoffice/estadopago/v1/getallrecargoextra*/
+    app.get("/api/obras/backoffice/estadopago/v1/getallrecargoextra", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllRecargoExtra);
+
     // Obtiene la tabla de los avances de estado de pago
     //GET /api/obras/backoffice/estadopago/v1/avancesestadopago
     app.get("/api/obras/backoffice/estadopago/v1/avancesestadopago", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.avancesEstadoPago);
@@ -208,6 +234,36 @@ module.exports = function(app) {
     //GET /api/obras/backoffice/estadopago/v1/historicoestadopagoporid
     app.get("/api/obras/backoffice/estadopago/v1/historicoestadopagoporid", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getHistoricoEstadosPagoByIdEstadoPago);
 
+    // Actualiza los datos de un estado de pago gestionado para facturación
+    // PUT /api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado
+    app.put("/api/obras/backoffice/estadopago/v1/updateEstadoPagoGestionado/:id", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.updateEstadoPagoGestionado);
 
+    // Lista todos los estados de pago gestionados
+    // GET /api/obras/backoffice/estadopago/v1/allestadospagogestion
+    app.get("/api/obras/backoffice/estadopago/v1/allestadospagogestion", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.allestadospagogestion);
+
+
+///****************************************** Uso del Sistema ***********************      */
+
+    // Lista un resumen de los login hechos en el sistema dentro de un período
+    // GET /api/obras/backoffice/usosistema/v1/alllogin
+    app.get("/api/obras/backoffice/usosistema/v1/alllogin", [authJwt.verifyToken], backofficeUsoController.getAllLoginSistema);
+
+
+    // Lista un resumen del ingreso de obras en el sistema en los dias recientes
+    // GET /api/obras/backoffice/usosistema/v1/resumenobrasrecientes
+    app.get("/api/obras/backoffice/usosistema/v1/resumenobrasrecientes", [authJwt.verifyToken], backofficeUsoController.getObrasIngresadasResumen);
+
+    // Lista cantidad de obras sin reporte recietes
+    // GET /api/obras/backoffice/usosistema/v1/resumenobrasinreportes
+    app.get("/api/obras/backoffice/usosistema/v1/resumenobrasinreportes", [authJwt.verifyToken], backofficeUsoController.getObrasSinRepDiario);
+
+    //Lista de los reportes diarios en los últimos días
+    // GET /api/obras/backoffice/usosistema/v1/reportesdiarios_pordia
+    app.get("/api/obras/backoffice/usosistema/v1/reportesdiarios_pordia", [authJwt.verifyToken], backofficeUsoController.getReportesDiariosPorDia);
+
+    //Lista de los cambios realizados al programa
+    // GET /api/obras/backoffice/usosistema/v1/changelog
+    app.get("/api/obras/backoffice/usosistema/v1/changelog", [authJwt.verifyToken], backofficeUsoController.getChangeLog);
 
 }

@@ -70,6 +70,7 @@ db.cliente = require("./comun/cliente.model.js")(sequelize, Sequelize);
 db.comuna = require("./comun/comuna.model.js")(sequelize, Sequelize);
 db.eventosTipo = require("./comun/eventosTipo.model.js")(sequelize, Sequelize);
 db.paquete = require("./comun/paquete.model.js")(sequelize, Sequelize);
+db.parametrosConfig = require("./comun/parametrosConfig.model.js")(sequelize, Sequelize);
 db.tipoFuncionPersonal = require("./comun/tipoFuncionPersonal.model.js")(sequelize, Sequelize);
 db.tipoTurno = require("./comun/tipoTurno.model.js")(sequelize, Sequelize);
 db.turnos = require("./comun/turnos.model.js")(sequelize, Sequelize);
@@ -77,6 +78,9 @@ db.zonal = require("./comun/zonal.model.js")(sequelize, Sequelize);
 
 /***********DEPLOY ********* */
 db.backendCors = require("./deploy/backendCors.model.js")(sequelize, Sequelize);
+
+/***********FRONTEND ********* */
+db.verHomepage = require("./frontend/verHomepage.model.js")(sequelize, Sequelize);
 
 /*****  OBRAS */
 db.bom = require("./obras/bom.model.js")(sequelize, Sequelize);
@@ -88,13 +92,19 @@ db.empresaContratista = require("./obras/empresaContratista.model.js")(sequelize
 db.encabezadoEstadoPago = require("./obras/encabezadoEstadoPago.model.js")(sequelize, Sequelize);
 db.encabezadoReporteDiario = require("./obras/encabezadoReporteDiario.model.js")(sequelize, Sequelize);
 db.estadoObra = require("./obras/estadoObra.model.js")(sequelize, Sequelize);
+db.estadoPagoEstados = require("./obras/estadoPagoEstados.model.js")(sequelize, Sequelize);
+db.estadoPagoGestion = require("./obras/estadoPagoGestion.model.js")(sequelize, Sequelize);
+db.estadoPagoHistorial = require("./obras/estadoPagoHistorial.model.js")(sequelize, Sequelize);
 db.estadoVisita = require("./obras/estadoVisita.model.js")(sequelize, Sequelize);
 db.jefesFaena = require("./obras/jefesFaena.model.js")(sequelize, Sequelize);
+db.logMovimiento = require("./obras/logMovimiento.model.js")(sequelize, Sequelize);
 db.maestroActividad = require("./obras/maestroActividad.model.js")(sequelize, Sequelize);
 db.obra = require("./obras/obra.model.js")(sequelize, Sequelize);
 db.obrasCierres = require("./obras/obrasCierres.model.js")(sequelize, Sequelize);
 db.obrasHistorialCambios = require("./obras/obrasHistorialCambios.model.js")(sequelize, Sequelize);
 db.obrasParalizacion = require("./obras/obrasParalizacion.model.js")(sequelize, Sequelize);
+db.oficinaSupervisor = require("./obras/oficinaSupervisor.model.js")(sequelize, Sequelize);
+db.pedidoMaterialMandante = require("./obras/pedidoMaterialMandante.model.js")(sequelize, Sequelize);
 db.recargo = require("./obras/recargo.model.js")(sequelize, Sequelize);
 db.segmento = require("./obras/segmento.model.js")(sequelize, Sequelize);
 db.tipoActividad = require("./obras/tipoActividad.model.js")(sequelize, Sequelize);
@@ -103,6 +113,8 @@ db.tipoOperacion = require("./obras/tipoOperacion.model.js")(sequelize, Sequeliz
 db.tipoRecargo = require("./obras/tipoRecargo.model.js")(sequelize, Sequelize);
 db.tipoTrabajo = require("./obras/tipoTrabajo.model.js")(sequelize, Sequelize);
 db.visitaTerreno = require("./obras/visitaTerreno.model.js")(sequelize, Sequelize);
+db.vwBomFinal = require("./obras/vwBomFinal.model.js")(sequelize, Sequelize);
+db.vwBomZero = require("./obras/vwBomZero.model.js")(sequelize, Sequelize);
 
 
 /*****  SAE */

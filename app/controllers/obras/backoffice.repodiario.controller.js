@@ -4,10 +4,114 @@ const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
 const DetalleRporteDiarioOtrasActividades = db.detalleReporteDiarioOtrasActividades; 
 const tipoOperacion = db.tipoOperacion;
 const maestroActividad = db.maestroActividad;
+const Obra = db.obra;
+const ObrasHistorialCambios = db.obrasHistorialCambios;
 //const encabezado_reporte_diario = db.encabezadoReporteDiario;
 const JefesFaena = db.jefesFaena;
 const TipoActividad = db.tipoActividad;
 const TipoTrabajo = db.tipoTrabajo;
+
+const sql_all_reportes_diarios = `SELECT 
+                        rd.id, 
+                        id_estado_pago,
+                        eep.codigo_pelom, 
+                        json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, 
+                        fecha_reporte::text, 
+                        row_to_json(jf) as jefe_faena, 
+                        rd.sdi, 
+                        rd.gestor_cliente, 
+                        row_to_json(tt) as id_area, 
+                        brigada_pesada, 
+                        observaciones, 
+                        entregado_por_persona, 
+                        fecha_entregado::text, 
+                        revisado_por_persona, 
+                        fecha_revisado::text, 
+                        sector, 
+                        hora_salida_base::text, 
+                        hora_llegada_terreno::text, 
+                        hora_salida_terreno::text, 
+                        hora_llegada_base::text, 
+                        alimentador, 
+                        row_to_json(c) as comuna, 
+                        num_documento, 
+                        rd.flexiapp, 
+                        row_to_json(rec) as recargo, 
+                        (SELECT ARRAY_AGG(detalle) as detalle_actividad FROM 
+                            (SELECT row_to_json(a) as detalle FROM 
+                                (SELECT 
+                                    dra.id, 
+                                    row_to_json(top) as tipo_operacion, 
+                                    ma.tipo_actividad, 
+                                    row_to_json(ma) as actividad, 
+                                    cantidad, 
+                                    json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) 
+                                        as encabezado_reporte, 
+                                    case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 
+                                        then uc_traslado else 0 end as unitario, 
+                                    case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 
+                                        then uc_traslado else 0 end * cantidad as total 
+                                  FROM 
+                                      obras.detalle_reporte_diario_actividad dra 
+                                  JOIN obras.tipo_operacion top 
+                                      ON dra.tipo_operacion = top.id 
+                                  JOIN (SELECT 
+                                            ma.id, 
+                                            actividad, 
+                                            row_to_json(ta) as tipo_actividad, 
+                                            uc_instalacion, 
+                                            uc_retiro, 
+                                            uc_traslado, 
+                                            ma.descripcion, 
+                                            row_to_json(mu) as unidad 
+                                        FROM 
+                                            obras.maestro_actividades ma 
+                                        JOIN obras.tipo_actividad ta 
+                                            ON ma.id_tipo_actividad = ta.id 
+                                        JOIN obras.maestro_unidades mu 
+                                            ON ma.id_unidad = mu.id
+                                        ) ma 
+                                      ON dra.id_actividad = ma.id 
+                                  JOIN obras.encabezado_reporte_diario erd 
+                                      ON dra.id_encabezado_rep = erd.id 
+                                  WHERE dra.id_encabezado_rep = rd.id
+                                ) a
+                            ) b
+                        ), 
+                        (SELECT ARRAY_AGG(detalle) as detalle_otros FROM 
+                            (SELECT row_to_json(a) as detalle FROM 
+                                (SELECT 
+                                    drd.id, 
+                                    glosa, 
+                                    uc_unitaria, 
+                                    cantidad, 
+                                    total_uc,
+                                    unitario_pesos,
+                                    total_pesos, 
+                                    json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) 
+                                        as encabezado_reporte 
+                                FROM 
+                                    obras.detalle_reporte_diario_otras_actividades drd 
+                                JOIN obras.encabezado_reporte_diario erd 
+                                    ON drd.id_encabezado_rep = erd.id 
+                                WHERE drd.id_encabezado_rep = rd.id
+                                ) a
+                            ) b
+                        ) 
+                    FROM 
+                        obras.encabezado_reporte_diario rd 
+                    JOIN obras.tipo_trabajo tt 
+                        ON rd.id_area = tt.id 
+                    JOIN obras.obras o 
+                        ON rd.id_obra = o.id 
+                    JOIN _comun.comunas c 
+                        ON rd.comuna = c.codigo 
+                    LEFT JOIN obras.jefes_faena jf 
+                        ON rd.jefe_faena = jf.id 
+                    LEFT JOIN obras.recargos rec 
+                        ON rd.recargo_hora = rec.id
+                    LEFT JOIN obras.encabezado_estado_pago eep
+						            ON rd.id = eep.id`;
 
 /***********************************************************************************/
 /*                                                                                 */
@@ -26,36 +130,10 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
   /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
       #swagger.description = 'Devuelve todos los ancabezados de reporte diario' */
     try {
-      /*
-        const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
-        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
-        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
-        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-        num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join \
-        obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = jf.id";
-        */
-       const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
-       row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
-       entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
-       hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-       num_documento, flexiapp, row_to_json(rec) as recargo, (select array_agg(detalle) as detalle_actividad from \
-       (select row_to_json(a) as detalle from (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, \
-       row_to_json(ma) as actividad, cantidad, json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', \
-       erd.fecha_reporte) as encabezado_reporte, case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro \
-       when top.id = 3 then uc_traslado else 0 end as unitario, case when top.id = 1 then uc_instalacion when top.id = 2 \
-       then uc_retiro when top.id = 3 then uc_traslado else 0 end * cantidad as total FROM obras.detalle_reporte_diario_actividad \
-       dra join obras.tipo_operacion top on dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) \
-       as tipo_actividad, uc_instalacion, uc_retiro, uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM \
-       obras.maestro_actividades ma join obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades \
-       mu on ma.id_unidad = mu.id) ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd on \
-       dra.id_encabezado_rep = erd.id WHERE dra.id_encabezado_rep = rd.id) a) b), (select array_agg(detalle) as \
-       detalle_otros from (select row_to_json(a) as detalle from (SELECT drd.id, glosa, uc_unitaria, cantidad, \
-        total_uc, json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as \
-        encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades drd join obras.encabezado_reporte_diario \
-        erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) a) b) FROM obras.encabezado_reporte_diario \
-        rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o on rd.id_obra = o.id join _comun.comunas c \
-        on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = jf.id left join obras.recargos rec on \
-        rd.recargo_hora = rec.id";
+
+        const sql = sql_all_reportes_diarios;
+
+
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const encabezadoReporte = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -65,6 +143,7 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
     
                 const detalle_salida = {
                   id: Number(element.id),
+                  id_estado_pago: element.id_estado_pago?Number(element.id_estado_pago):null,
                   id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
                   fecha_reporte: String(element.fecha_reporte),
                   jefe_faena: element.jefe_faena,
@@ -88,6 +167,8 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
                   num_documento: String(element.num_documento),
                   flexiapp: element.flexiapp,
                   recargo_hora: element.recargo,
+                  referencia: element.referencia,
+                  numero_oc: element.numero_oc,
                   det_actividad: element.detalle_actividad,
                   det_otros: element.detalle_otros
                   
@@ -115,8 +196,10 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
   const parametros = {
     id: req.query.id,
     id_obra: req.query.id_obra,
-    fecha_reporte: req.query.fecha_reporte
+    fecha_reporte: req.query.fecha_reporte,
+    mostrar_todos: req.query.mostrar_todos
   }
+  console.log(parametros);  
   const keys = Object.keys(parametros)
   let sql_array = [];
   let param = {};
@@ -141,47 +224,114 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
     res.status(500).send("Debe incluir algun parametro para consultar");
   }else {
     try {
+      const condicion_muestra = parametros.mostrar_todos==="true"?"":" AND rd.id_estado_pago is null";
+      console.log('condicion_muestra', condicion_muestra);
       let b = sql_array.reduce((total, num) => total + " AND " + num);
       if (b){
-        /*
-        const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
-        fecha_reporte::text, jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, \
-        observaciones, entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, \
-        sector, hora_salida_base::text, hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, \
-        alimentador, row_to_json(c) as comuna, num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo \
-        tt on rd.id_area = tt.id join obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo WHERE "+b;*/
+      
+       const sql = `
+          SELECT 
+              rd.id, 
+              id_estado_pago, 
+              eep.codigo_pelom,
+              json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, 
+              fecha_reporte::text, 
+              row_to_json(jf) as jefe_faena, 
+              rd.sdi, 
+              rd.gestor_cliente, 
+              row_to_json(tt) as id_area, 
+              brigada_pesada, 
+              observaciones, 
+              entregado_por_persona, 
+              fecha_entregado::text, 
+              revisado_por_persona, 
+              fecha_revisado::text, 
+              sector, 
+              hora_salida_base::text, 
+              hora_llegada_terreno::text, 
+              hora_salida_terreno::text, 
+              hora_llegada_base::text, 
+              alimentador, 
+              row_to_json(c) as comuna, 
+              num_documento, 
+              rd.flexiapp, 
+              row_to_json(rec) as recargo,
+              rd.referencia,
+              rd.numero_oc, 
+              (SELECT ARRAY_AGG(detalle) as detalle_actividad 
+                FROM (SELECT row_to_json(a) as detalle 
+                      FROM (SELECT 
+                              dra.id, 
+                              row_to_json(top) as tipo_operacion, 
+                              ma.tipo_actividad, row_to_json(ma) as actividad, 
+                              cantidad, 
+                              json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) 
+                                as encabezado_reporte, 
+                              case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 
+                                then uc_traslado else 0 end as unitario, 
+                              case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 
+                                then uc_traslado else 0 end * cantidad as total 
+                            FROM 
+                              obras.detalle_reporte_diario_actividad dra 
+                            JOIN obras.tipo_operacion top 
+                              ON dra.tipo_operacion = top.id 
+                            JOIN (SELECT ma.id, 
+                                    actividad, 
+                                    row_to_json(ta) as tipo_actividad, 
+                                    uc_instalacion, 
+                                    uc_retiro, 
+                                    uc_traslado, 
+                                    ma.descripcion, 
+                                    row_to_json(mu) as unidad 
+                                  FROM obras.maestro_actividades ma 
+                                  JOIN obras.tipo_actividad ta 
+                                      ON ma.id_tipo_actividad = ta.id 
+                                  JOIN obras.maestro_unidades mu 
+                                      ON ma.id_unidad = mu.id) ma 
+                                ON dra.id_actividad = ma.id 
+                            JOIN obras.encabezado_reporte_diario erd 
+                                ON dra.id_encabezado_rep = erd.id 
+                            WHERE dra.id_encabezado_rep = rd.id
+                            ) a
+                      ) b
+                ), 
+              (SELECT ARRAY_AGG(detalle) as detalle_otros 
+                FROM (SELECT row_to_json(a) as detalle 
+                        FROM (SELECT 
+                                drd.id, 
+                                glosa, 
+                                uc_unitaria, 
+                                cantidad, 
+                                total_uc,
+                                unitario_pesos,
+                                total_pesos, 
+                                json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) 
+                                  as encabezado_reporte 
+                              FROM obras.detalle_reporte_diario_otras_actividades drd 
+                              JOIN obras.encabezado_reporte_diario erd 
+                                  ON drd.id_encabezado_rep = erd.id 
+                              WHERE drd.id_encabezado_rep = rd.id
+                              ) a
+                      ) b
+                ) 
+            FROM obras.encabezado_reporte_diario rd 
+            JOIN obras.tipo_trabajo tt 
+                ON rd.id_area = tt.id 
+            JOIN obras.obras o 
+                ON rd.id_obra = o.id 
+            LEFT JOIN _comun.comunas c 
+                ON rd.comuna = c.codigo 
+            LEFT JOIN obras.jefes_faena jf 
+                ON rd.jefe_faena = jf.id 
+            LEFT JOIN obras.recargos rec 
+                ON rd.recargo_hora = rec.id 
+            LEFT JOIN obras.encabezado_estado_pago eep 
+                ON rd.id_estado_pago = eep.id
+            WHERE (${b}${condicion_muestra})`;
+       
 
-        /*
-        const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
-        row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
-        entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
-        hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-        num_documento, flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join \
-        obras.obras o on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = jf.id WHERE "+b;
-        */
-       const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, fecha_reporte::text, \
-       row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
-       entregado_por_persona, fecha_entregado::text, revisado_por_persona, fecha_revisado::text, sector, hora_salida_base::text, \
-       hora_llegada_terreno::text, hora_salida_terreno::text, hora_llegada_base::text, alimentador, row_to_json(c) as comuna, \
-       num_documento, flexiapp, row_to_json(rec) as recargo, (select array_agg(detalle) as detalle_actividad from (select row_to_json(a) as detalle from \
-       (SELECT dra.id, row_to_json(top) as tipo_operacion, ma.tipo_actividad, row_to_json(ma) as actividad, cantidad, \
-       json_build_object('id', erd.id, 'id_obra', erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte, \
-       case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then uc_traslado else 0 \
-       end as unitario, case when top.id = 1 then uc_instalacion when top.id = 2 then uc_retiro when top.id = 3 then \
-       uc_traslado else 0 end * cantidad as total FROM obras.detalle_reporte_diario_actividad dra join obras.tipo_operacion \
-       top on dra.tipo_operacion = top.id join (SELECT ma.id, actividad, row_to_json(ta) as tipo_actividad, uc_instalacion, \
-       uc_retiro, uc_traslado, ma.descripcion, row_to_json(mu) as unidad FROM obras.maestro_actividades ma join \
-       obras.tipo_actividad ta on ma.id_tipo_actividad = ta.id join obras.maestro_unidades mu on ma.id_unidad = mu.id) \
-       ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd on dra.id_encabezado_rep = erd.id \
-       WHERE dra.id_encabezado_rep = rd.id) a) b), (select array_agg(detalle) as detalle_otros from (select row_to_json(a) \
-       as detalle from (SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, json_build_object('id', erd.id, 'id_obra', \
-       erd.id_obra, 'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades \
-       drd join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE drd.id_encabezado_rep = rd.id) \
-       a) b) FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
-       on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
-       jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE "+b;
+        //const sql = sql_all_reportes_diarios + ` WHERE ${b}`;
 
-        console.log("sql: "+sql);
         const { QueryTypes } = require('sequelize'); 
         const sequelize = db.sequelize;
         const encabezadoReporte = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
@@ -192,6 +342,8 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
 
             const detalle_salida = {
               id: Number(element.id),
+              id_estado_pago: element.id_estado_pago?Number(element.id_estado_pago):null,
+              codigo_pelom: element.codigo_pelom?String(element.codigo_pelom):null,
               id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
               fecha_reporte: String(element.fecha_reporte),
               jefe_faena: element.jefe_faena,
@@ -212,9 +364,11 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
               hora_llegada_base: String(element.hora_llegada_base),
               alimentador: String(element.alimentador),
               comuna: element.comuna,
-              num_documento: String(element.num_documento),
+              num_documento: element.num_documento?String(element.num_documento):null,
               flexiapp: element.flexiapp,
               recargo_hora: element.recargo,
+              referencia: element.referencia?String(element.referencia):null,
+              numero_oc: element.numero_oc?String(element.numero_oc):null,
               det_actividad: element.detalle_actividad,
               det_otros: element.detalle_otros
 
@@ -264,12 +418,38 @@ exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
      let b = sql_array.reduce((total, num) => total + " AND " + num);
      if (b){
       
-      const sql = "SELECT rd.id, json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, \
-      row_to_json(jf) as jefe_faena, sdi, rd.gestor_cliente, row_to_json(tt) as id_area, brigada_pesada, observaciones, \
-      entregado_por_persona, revisado_por_persona, sector, alimentador, row_to_json(c) as comuna, num_documento, \
-      flexiapp FROM obras.encabezado_reporte_diario rd join obras.tipo_trabajo tt on rd.id_area = tt.id join obras.obras o \
-      on rd.id_obra = o.id join _comun.comunas c on rd.comuna = c.codigo left join obras.jefes_faena jf on rd.jefe_faena = \
-      jf.id left join obras.recargos rec on rd.recargo_hora = rec.id WHERE "+b+" order by fecha_reporte desc limit 1;";
+      const sql = `SELECT 
+                      rd.id, 
+                      id_estado_pago, 
+                      json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, 
+                      row_to_json(jf) as jefe_faena, 
+                      sdi, 
+                      rd.gestor_cliente, 
+                      row_to_json(tt) as id_area, 
+                      brigada_pesada, 
+                      observaciones, 
+                      entregado_por_persona, 
+                      revisado_por_persona, 
+                      sector, 
+                      alimentador, 
+                      row_to_json(c) as comuna, 
+                      num_documento, 
+                      flexiapp 
+                  FROM 
+                      obras.encabezado_reporte_diario rd 
+                  JOIN obras.tipo_trabajo tt 
+                      ON rd.id_area = tt.id 
+                  JOIN obras.obras o 
+                      ON rd.id_obra = o.id 
+                  JOIN _comun.comunas c 
+                      ON rd.comuna = c.codigo 
+                  LEFT JOIN obras.jefes_faena jf 
+                      ON rd.jefe_faena = jf.id 
+                  LEFT JOIN obras.recargos rec 
+                      ON rd.recargo_hora = rec.id 
+                  WHERE ${b} 
+                  ORDER BY fecha_reporte DESC 
+                  LIMIT 1;`;
 
        console.log("sql: "+sql);
        const { QueryTypes } = require('sequelize'); 
@@ -285,6 +465,7 @@ exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
 
            const detalle_salida = {
              id: Number(element.id),
+             id_estado_pago: element.id_estado_pago?Number(element.id_estado_pago):null,
              id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
              fecha_reporte: String(fecha_hoy),
              jefe_faena: element.jefe_faena,
@@ -549,13 +730,17 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                         "glosa": "descripcion de la tarea 1", 
                         "uc_unitaria": 1, 
                         "cantidad": 1, 
-                        "uc_total": 1
+                        "uc_total": 1,
+                        "unitario_pesos": 1,
+                        "total_pesos": 1
                       },
                       {
                         "glosa": "descripcion de la tarea 2", 
                         "uc_unitaria": 1, 
                         "cantidad": 1, 
-                        "uc_total": 1
+                        "uc_total": 1,
+                        "unitario_pesos": 1,
+                        "total_pesos": 1
                       }
                 ]
             }
@@ -575,14 +760,18 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           return;
         }
       };
+      const id_obra = req.body.id_obra;
 
       //Verifica que la fecha de reporte no este asignada a una obra
-      await EncabezadoReporteDiario.findAll({where: {id_obra: req.body.id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
+      //Deshabilitar desde 2024-05-03, ahora va a poder a generar un repo diario para el mismo día
+      /*
+      await EncabezadoReporteDiario.findAll({where: {id_obra: id_obra, fecha_reporte: req.body.fecha_reporte}}).then(data => {
           if (data.length > 0) {
             salir = true;
             res.status(400).send(`La fecha de reporte '${req.body.fecha_reporte} ya está asignada a la obra. Por favor cambie la fecha o actualice la que ya existe.'`);
           }
         }).catch(err => {
+            console.log('error: ' + err.message);
             salir = true;
             res.status(500).send(err.message );
         })
@@ -590,16 +779,28 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         if (salir) {
           return;
         }
+*/
+        let flexiapp;
         //const flexiapp = req.body.flexiapp;
-        let flexiapp = "{";
-        for (const b of req.body.flexiapp){
-          if (flexiapp.length==1) {
-            flexiapp = flexiapp + b
-          }else {
-            flexiapp = flexiapp + ", " + b
+        if (req.body.flexiapp === null || req.body.flexiapp === undefined) {
+          flexiapp = "{}";
+        } else {
+          if (typeof req.body.flexiapp[Symbol.iterator] === 'function') {
+            flexiapp = "{";
+            for (const b of req.body.flexiapp){
+              if (flexiapp.length==1) {
+                flexiapp = flexiapp + b
+              }else {
+                flexiapp = flexiapp + ", " + b
+              }
+            }
+            flexiapp = flexiapp + "}"
+          } else {
+            flexiapp = "{}";
           }
         }
-        flexiapp = flexiapp + "}"
+
+        console.log('flexiapp: ' + flexiapp)
         // procesa detalle de actividad
         for (const element of req.body.det_actividad) {
           if (!element.clase || !element.actividad || !element.cantidad) {
@@ -608,7 +809,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             return;
           }
         };
-        //const detalle_actividad = JSON.stringify(req.body.det_actividad);
+
         const detalle_actividad = req.body.det_actividad;
         const detalle_otros = req.body.det_otros;
         if (Array.isArray(detalle_actividad)) {
@@ -659,8 +860,35 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           }
         }
 
+        console.log('id_obra (1) --> ', id_obra)
+        let estado_obra_actual;
+        //busca el estado de la obra dentro de la tabla obras por ID de obra
+        await Obra.findOne({
+            where: {
+                id: id_obra
+            }
+        }).then (data => {
+            estado_obra_actual = data?data.estado:undefined;
+        }).catch(err => {
+            console.log('error estado_obra_actual --> ', err)
+        })
+
+        console.log('estado_obra_actual (1) --> ', estado_obra_actual)
+        if (!estado_obra_actual) {
+            res.status(500).send( 'No hay una obra para asociar al reporte diario');
+            return;
+        }
+        if (estado_obra_actual === 8) {
+            res.status(500).send( 'La obra se encuentra en estado eliminada');
+            return;
+        }
+
+        // Si el estado actual de la obra es 7 (finalizada) se mantiene en el mismo estado, si es otro estado
+        // cambia a 5 (en faena)
+        const estado_obra = estado_obra_actual === 7 ? 7 : 5;
+
         // Busca el ID de encabezado disponible
-        const sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
+        let sql = "select nextval('obras.encabezado_reporte_diario_id_seq'::regclass) as valor";
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         let encabezado_reporte_diario_id = 0;
@@ -671,10 +899,63 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         }).catch(err => {
           res.status(500).send(err.message );
         })
+
+        //Determina el valor de la UC para esa obra
+        let valor_uc = 0;
+        sql = "SELECT vu.precio AS valor_uc FROM obras.obras o	JOIN obras.oficina_supervisor os ON o.oficina = os.id JOIN obras.valor_uc vu ON os.oficina = vu.id WHERE o.id = " + id_obra + ";";
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          valor_uc = data[0].valor_uc;
+        }).catch(err => {
+          res.status(500).send(err.message );
+        })
+        if (!valor_uc) {
+          res.status(500).send( 'No hay valor de UC para esta obra');
+          return;
+        }
+
+        //determina el usario que está modificando
+        let id_usuario = req.userId;
+        let user_name;
+        sql = "select username from _auth.users where id = " + id_usuario;
+        await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          user_name = data[0].username;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+
+        //determina fecha actual
+        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+        const fec_new = Number(req.body.fecha_reporte.substring(0,4) + req.body.fecha_reporte.substring(5,7) + req.body.fecha_reporte.substring(8,10))
+        if (fec_new > Number(fechahoy.substring(0,4) + fechahoy.substring(5,7) + fechahoy.substring(8,10))) {
+          res.status(500).send("La fecha del reporte no puede ser mayor a la fecha de hoy");
+          return;
+        }
+
+
+        //estado visita agendada = 2
+        const obra = {estado: estado_obra};
+
+        //Guarda historial
+        const obra_historial = {
+          id_obra: id_obra,
+          fecha_hora: fechahoy,
+          usuario_rut: user_name,
+          estado_obra: estado_obra,  //Estado 5 es en faena
+          datos: obra,
+          observacion: "Ingreso de reporte diario"
+        }
+
         const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
         const encabezado_reporte_diario = {
             id: encabezado_reporte_diario_id,
-            id_obra: Number(req.body.id_obra),
+            id_obra: Number(id_obra),
             fecha_reporte: String(req.body.fecha_reporte),
             jefe_faena: Number(req.body.jefe_faena),
             sdi: String(req.body.sdi),
@@ -695,12 +976,17 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             comuna: String(req.body.comuna),
             num_documento: String(req.body.num_documento),
             flexiapp: String(flexiapp),
-            recargo_hora: recargo_aplicar?Number(req.body.recargo_hora.id):null
+            recargo_hora: recargo_aplicar?Number(req.body.recargo_hora.id):null,
+            referencia: req.body.referencia?String(req.body.referencia):null,
+            numero_oc: req.body.numero_oc?String(req.body.numero_oc):null
         }
 
-        const result = await sequelize.transaction(async () => {
-          // both of these queries will run in the transaction
-          const encabezadoReporteDiario = await EncabezadoReporteDiario.create(encabezado_reporte_diario);
+        let salida = {};
+        const t = await sequelize.transaction();
+        try {
+
+          salida = {"error": false, "message": "Reporte diario ingresado ok"};
+          const encabezadoReporteDiario = await EncabezadoReporteDiario.create(encabezado_reporte_diario, { transaction: t });
       
           for (const element of req.body.det_actividad) {
             const det_actividad = {
@@ -709,23 +995,44 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
               id_actividad: Number(element.actividad),
               cantidad: Number(element.cantidad)
             }
-            await DetalleReporteDiarioActividad.create(det_actividad);
+            await DetalleReporteDiarioActividad.create(det_actividad, { transaction: t });
           }
 
           for (const element of req.body.det_otros) {
+
+            const unitario_pesos = element.unitario_pesos?Number(element.unitario_pesos):0;
+            const cantidad = element.cantidad?Number(element.cantidad):0;
+            const uc_unit = unitario_pesos&&valor_uc?Number(unitario_pesos/valor_uc):0;
+            const uc_total = Number(uc_unit*cantidad);
+
             const det_otros = {
               id_encabezado_rep: Number(encabezado_reporte_diario_id),
               glosa: String(element.glosa),
-              uc_unitaria: Number(element.uc_unitaria),
-              total_uc: Number(element.uc_total),
-              cantidad: Number(element.cantidad)
+              uc_unitaria: uc_unit,
+              total_uc: uc_total,
+              cantidad: cantidad,
+              unitario_pesos: element.unitario_pesos?Number(element.unitario_pesos):0,
+              total_pesos: element.total_pesos?Number(element.total_pesos):0
             }
-            await DetalleRporteDiarioOtrasActividades.create(det_otros);
+            await DetalleRporteDiarioOtrasActividades.create(det_otros, { transaction: t });
           }
-          return encabezadoReporteDiario;
-        });
-        res.status(200).send(result);
+          const obra_creada = obra?await Obra.update(obra, { where: { id: id_obra }, transaction: t }):null;
+            
+          const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
+    
+          await t.commit();
+        } catch (error) {
+          salida = { error: true, message: error }
+          console.log('Error Result ---> ', error);
+          await t.rollback();
+        }
+        if (salida.error) {
+          res.status(500).send(salida.message);
+        }else {
+          res.status(200).send(salida);
+        }
   }catch (error) {
+    console.log('error general 500 --> ', error);
     res.status(500).send(error);
   }
 }
@@ -804,21 +1111,30 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                         "glosa": "descripcion de la tarea 1", 
                         "uc_unitaria": 1, 
                         "cantidad": 1, 
-                        "uc_total": 1
+                        "uc_total": 1,
+                        "unitario_pesos": 1,
+                        "total_pesos": 1
                       },
                       {
                         "glosa": "descripcion de la tarea 2", 
                         "uc_unitaria": 1, 
                         "cantidad": 1, 
-                        "uc_total": 1
+                        "uc_total": 1,
+                        "unitario_pesos": 1,
+                        "total_pesos": 1
                       }
                 ]
             }
         } */
   try{
     const id = req.params.id;
-    let flexiapp = undefined;
-    if (req.body.flexiapp){
+
+    let flexiapp;
+    //const flexiapp = req.body.flexiapp;
+    if (req.body.flexiapp === null || req.body.flexiapp === undefined) {
+      flexiapp = "{}";
+    } else {
+      if (typeof req.body.flexiapp[Symbol.iterator] === 'function') {
         flexiapp = "{";
         for (const b of req.body.flexiapp){
           if (flexiapp.length==1) {
@@ -828,11 +1144,108 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
           }
         }
         flexiapp = flexiapp + "}"
-    };
+      } else {
+        flexiapp = "{}";
+      }
+    }
     
     let detalle_actividad = req.body.det_actividad;
+    console.log('detalle_actividad --> ', detalle_actividad)
  
     let detalle_otros = req.body.det_otros;
+    console.log('detalle_otros --> ', detalle_otros)
+
+    //determina el usario que está modificando
+    let id_usuario = req.userId;
+    let user_name;
+    let sql = "select username from _auth.users where id = " + id_usuario;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      user_name = data[0].username;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
+
+    
+
+    //Encuentra el id de la obra segun el reporte diario
+    let id_obra;
+    await EncabezadoReporteDiario.findOne({
+        where: {
+            id: id
+        }
+    }).then(data => {
+        id_obra = data?data.id_obra:undefined;
+    }).catch(err => {
+        console.log('error id_obra --> ', err)
+    })
+
+    if (!id_obra) {
+        res.status(500).send( 'El reporte diario no existe');
+        return;
+    }
+
+    //Determina el valor de la UC para esa obra
+    let valor_uc = 0;
+    sql = "SELECT vu.precio AS valor_uc FROM obras.obras o	JOIN obras.oficina_supervisor os ON o.oficina = os.id JOIN obras.valor_uc vu ON os.oficina = vu.id WHERE o.id = " + id_obra + ";";
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      valor_uc = data[0].valor_uc;
+    }).catch(err => {
+      res.status(500).send(err.message );
+    })
+    if (!valor_uc) {
+      res.status(500).send( 'No hay valor de UC para esta obra');
+      return;
+    }
+
+    let estado_obra_actual;
+    //busca el estado de la obra dentro de la tabla obras por ID de obra
+    await Obra.findOne({
+        where: {
+            id: id_obra
+        }
+    }).then (data => {
+        estado_obra_actual = data?data.estado:undefined;
+    }).catch(err => {
+        console.log('error estado_obra_actual --> ', err)
+    })
+
+    if (!estado_obra_actual) {
+        res.status(500).send( 'No hay una opbra asociada al reporte diario');
+        return;
+    }
+    if (estado_obra_actual === 8) {
+        res.status(500).send( 'La obra fue eliminada');
+        return;
+    }
+
+    // Si el estado actual de la obra es 7 (finalizada) se mantiene en el mismo estado, si es otro estado
+    // cambia a 5 (en faena)
+    const estado_obra = estado_obra_actual === 7 ? 7 : 5;
+
+
+    //determina fecha actual
+    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+    //estado visita agendada = 2
+    const obra = {estado: estado_obra};
+
+    //Guarda historial
+    const obra_historial = {
+      id_obra: id_obra,
+      fecha_hora: fechahoy,
+      usuario_rut: user_name,
+      estado_obra: estado_obra,  //Estado 5 es en faena
+      datos: obra,
+      observacion: "Actualizacion de reporte diario"
+    }
 
 
    const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
@@ -857,68 +1270,91 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       comuna: req.body.comuna?String(req.body.comuna):undefined,
       num_documento: req.body.num_documento?String(req.body.num_documento):undefined,
       flexiapp: flexiapp?String(flexiapp):undefined,
-      recargo_hora: recargo_aplicar
+      recargo_hora: recargo_aplicar,
+      referencia: req.body.referencia?String(req.body.referencia):undefined,
+      numero_oc: req.body.numero_oc?String(req.body.numero_oc):undefined
 
   }
 
-    console.log('encabezado_reporte_diario', encabezadoReporteDiario);
-      const sequelize = db.sequelize;
-      const result = await sequelize.transaction(async () => {
+      console.log('encabezadoReporteDiario --> ', encabezadoReporteDiario);
 
-      let salida = {};
-      
-      // realizar la actualizacion del encabezado por id
-      await EncabezadoReporteDiario.update(encabezadoReporteDiario, {
-        where: { id: id }
-      }).then(async data => {
-          salida = { message: "Obra actualizada" }
+        let salida = {};
+        const t = await sequelize.transaction();
+        try {
+          salida = {"error": false, "message": "Reporte diario actualizado ok"};
+          
+
+          // realizar la actualizacion del encabezado por id
+          await EncabezadoReporteDiario.update(encabezadoReporteDiario, { where: { id: id }, transaction: t });
+          
           //actualizar detalles
-            if (detalle_actividad){
-              //primer debe borrar los regisatros que tenga asociado el encabezado
-              await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
-              //luego volver a insertar los registros
-              for (const element of detalle_actividad) {
-                const det_actividad = {
-                  id_encabezado_rep: Number(id),
-                  tipo_operacion: Number(element.clase),
-                  id_actividad: Number(element.actividad),
-                  cantidad: Number(element.cantidad)
-                }
-                await DetalleReporteDiarioActividad.create(det_actividad);
+          if (detalle_actividad){
+            
+            //primer debe borrar los regisatros que tenga asociado el encabezado
+            await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id }, transaction: t } );
+            ;
+            //luego volver a insertar los registros
+            for (const element of detalle_actividad) {
+              const det_actividad = {
+                id_encabezado_rep: Number(id),
+                tipo_operacion: Number(element.clase),
+                id_actividad: Number(element.actividad),
+                cantidad: Number(element.cantidad)
               }
+              await DetalleReporteDiarioActividad.create(det_actividad, { transaction: t });
             }
-            if (detalle_otros){
-              //primer debe borrar los regisatros que tenga asociado el encabezado
-              await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id } } );
-              //luego volver a insertar los registros
-              for (const element of detalle_otros) {
-                const det_otros = {
-                  id_encabezado_rep: Number(id),
-                  glosa: String(element.glosa),
-                  uc_unitaria: Number(element.uc_unitaria),
-                  total_uc: Number(element.uc_total),
-                  cantidad: Number(element.cantidad)
-                }
-                await DetalleRporteDiarioOtrasActividades.create(det_otros);
+          };
+          
+          if (detalle_otros){
+            
+            //primer debe borrar los regisatros que tenga asociado el encabezado
+            await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id }, transaction: t } );
+            //luego volver a insertar los registros
+            
+            for (const element of detalle_otros) {
+
+              const unitario_pesos = element.unitario_pesos?Number(element.unitario_pesos):0;
+              const cantidad = element.cantidad?Number(element.cantidad):0;
+              const uc_unit = unitario_pesos&&valor_uc?Number(unitario_pesos/valor_uc):0;
+              const uc_total = Number(uc_unit*cantidad);
+
+              const det_otros = {
+                id_encabezado_rep: Number(id),
+                glosa: element.glosa?String(element.glosa):undefined,
+                uc_unitaria: uc_unit,
+                total_uc: uc_total,
+                cantidad: cantidad,
+                unitario_pesos: unitario_pesos,
+                total_pesos: element.total_pesos?Number(element.total_pesos):undefined
               }
+              await DetalleRporteDiarioOtrasActividades.create(det_otros, { transaction: t });
             }
-      }).catch(err => {
-        //return { message: err }
-        salida = { message: err }
-      });
-      return salida;
-    });
-    if (result.message==="Obra actualizada") {
-      res.status(200).send(result);
-    }else {
-      if (result.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
-        res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
-      }else{
-        res.status(400).send(result.message);
-      }
-      
-    }
+          }
+
+          const obra_creada = obra?await Obra.update(obra, { where: { id: id_obra }, transaction: t }):null;
+            
+          const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
+          
+    
+          await t.commit();
+          
+        } catch (error) {
+          console.log('error en updateEncabezadoReporteDiario_V2: ', error)
+          salida = { error: true, message: error }
+          await t.rollback();
+        }
+        if (salida.error) {
+          
+          if (salida.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
+            res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
+          }else{
+            res.status(400).send(salida.message);
+          }
+        }else {
+          res.status(200).send(salida);
+        }
   }catch (error) {
+    console.log('error en updateEncabezadoReporteDiario_V2: ', error)
     res.status(500).send(error);
   }
 }
@@ -1199,7 +1635,7 @@ exports.findDetalleReporteDiarioOtrasPorParametros = async (req, res) => {
         join obras.maestro_actividades ma on dra.id_actividad = ma.id join obras.encabezado_reporte_diario erd \
         on dra.id_encabezado_rep = erd.id WHERE "+b;*/
 
-        const sql = "SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, json_build_object('id', erd.id, 'id_obra', erd.id_obra, \
+        const sql = "SELECT drd.id, glosa, uc_unitaria, cantidad, total_uc, unitario_pesos, total_pesos, json_build_object('id', erd.id, 'id_obra', erd.id_obra, \
         'fecha_reporte', erd.fecha_reporte) as encabezado_reporte FROM obras.detalle_reporte_diario_otras_actividades drd \
         join obras.encabezado_reporte_diario erd on drd.id_encabezado_rep = erd.id WHERE "+b;
 
