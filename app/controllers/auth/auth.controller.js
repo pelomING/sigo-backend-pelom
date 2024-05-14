@@ -1,5 +1,6 @@
 const db = require("../../models");
 const config = require("../../config/auth.config");
+const config_version = require("../../config/version.config");
 const User = db.user;
 const Role = db.role;
 const UsuariosFunciones = db.usuariosFunciones;
@@ -173,7 +174,8 @@ exports.signin = async (req, res) => {
       mensaje: mensajeMenu,
       homepage: homepage,
       accessToken: token,
-      menu: menu_salida
+      menu: menu_salida,
+      version: config_version.version
     });
   } catch (error) {
     if (error.message === "connect ECONNREFUSED ::1:5432") {
