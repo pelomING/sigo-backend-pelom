@@ -1,4 +1,6 @@
 const db = require("../../models");
+const z = require('zod');
+const ZodError = z.ZodError;
 /***********************************************************************************/
 /*                                                                                 */
 /*                                                                                 */
@@ -6,6 +8,41 @@ const db = require("../../models");
 /*                                                                                 */
 /*                                                                                 */
 /***********************************************************************************/
+const customErrorMap = (issue, ctx) => {
+    if (issue.code === z.ZodIssueCode.invalid_type) {
+      if (issue.received === "undefined") {
+        return { message: "Es requerido" };
+      }
+      if (issue.received === "null") {
+        return { message: "No puede ser nulo" };
+      }
+      if (issue.expected === "string") {
+        return { message: "Debe ser una cadena de texto" };
+      }
+      if (issue.expected === "number") {
+        return { message: "Debe ser un numero" };
+      }
+      if (issue.expected === "date") {
+        return { message: "Debe ser una fecha" };
+      }
+    }
+    if (issue.code === z.ZodIssueCode.invalid_string) {
+      if (issue.validation === "email") {
+        return { message: "El formato no es correcto, debe ser un email" };
+      }
+      return { message: "El formato no es correcto" };
+    }
+    if (issue.code === z.ZodIssueCode.too_small) {
+      return { message: `debe ser mayor que ${issue.minimum}` };
+    }
+    if (issue.code === z.ZodIssueCode.custom) {
+      return { message: `menor-que-${(issue.params || {}).minimum}` };
+    }
+    return { message: ctx.defaultError };
+  };
+  
+  z.setErrorMap(customErrorMap);
+
 
 // Lista un resumen de los login hechos en el sistema dentro de un período
 // GET /api/obras/backoffice/usosistema/v1/alllogin
@@ -273,13 +310,13 @@ exports.getReportesDiariosPorDia = async (req, res) => {
     FROM ( SELECT sum(parametros_config.valor::integer) AS valor
       FROM _comun.parametros_config
      WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
-                      LEFT JOIN ( SELECT erd.fecha_ingreso,
-                             count(erd.fecha_ingreso) AS cantidad
+                      LEFT JOIN ( SELECT erd.fecha_ingreso::date,
+                             count(erd.fecha_ingreso::date) AS cantidad
                             FROM obras.encabezado_reporte_diario erd
                               JOIN obras.obras o ON erd.id_obra = o.id
                            WHERE o.zona = 1
-                           GROUP BY erd.fecha_ingreso
-                           ORDER BY erd.fecha_ingreso) reportes ON reportes.fecha_ingreso = serie.fecha) z) AS maule_norte,
+                           GROUP BY erd.fecha_ingreso::date
+                           ORDER BY erd.fecha_ingreso::date) reportes ON reportes.fecha_ingreso = serie.fecha) z) AS maule_norte,
      ( SELECT array_agg(row_to_json(z.*)) AS maule_norte
             FROM ( SELECT row_number() OVER (ORDER BY serie.fecha) AS id,
                      serie.fecha,
@@ -317,13 +354,13 @@ exports.getReportesDiariosPorDia = async (req, res) => {
     FROM ( SELECT sum(parametros_config.valor::integer) AS valor
       FROM _comun.parametros_config
      WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
-                      LEFT JOIN ( SELECT erd.fecha_ingreso,
-                             count(erd.fecha_ingreso) AS cantidad
+                      LEFT JOIN ( SELECT erd.fecha_ingreso::date,
+                             count(erd.fecha_ingreso::date) AS cantidad
                             FROM obras.encabezado_reporte_diario erd
                               JOIN obras.obras o ON erd.id_obra = o.id
                            WHERE o.zona = 2
-                           GROUP BY erd.fecha_ingreso
-                           ORDER BY erd.fecha_ingreso) reportes ON reportes.fecha_ingreso = serie.fecha) z) AS maule_sur,
+                           GROUP BY erd.fecha_ingreso::date
+                           ORDER BY erd.fecha_ingreso::date) reportes ON reportes.fecha_ingreso = serie.fecha) z) AS maule_sur,
      ( SELECT array_agg(row_to_json(z.*)) AS maule_norte
             FROM ( SELECT row_number() OVER (ORDER BY serie.fecha) AS id,
                      serie.fecha,
@@ -361,13 +398,13 @@ exports.getReportesDiariosPorDia = async (req, res) => {
     FROM ( SELECT sum(parametros_config.valor::integer) AS valor
       FROM _comun.parametros_config
      WHERE parametros_config.clave::text = 'dias_reporte_ingresadas'::text) a_1) b) a) serie
-                      LEFT JOIN ( SELECT erd.fecha_ingreso,
-                             count(erd.fecha_ingreso) AS cantidad
+                      LEFT JOIN ( SELECT erd.fecha_ingreso::date,
+                             count(erd.fecha_ingreso::date) AS cantidad
                             FROM obras.encabezado_reporte_diario erd
                               JOIN obras.obras o ON erd.id_obra = o.id
                            WHERE o.zona = ANY (ARRAY[1, 2])
-                           GROUP BY erd.fecha_ingreso
-                           ORDER BY erd.fecha_ingreso) reportes ON reportes.fecha_ingreso = serie.fecha) z) AS total;`;
+                           GROUP BY erd.fecha_ingreso::date
+                           ORDER BY erd.fecha_ingreso::date) reportes ON reportes.fecha_ingreso = serie.fecha) z) AS total;`;
 
             const resumen = await sequelize.query(sql, { type: QueryTypes.SELECT });
             let salida = {};
@@ -389,3 +426,48 @@ exports.getReportesDiariosPorDia = async (req, res) => {
             res.status(500).send("Error en la consulta (servidor backend)");
         }
     }
+
+//Lista de los cambios realizados al programa
+// GET /api/obras/backoffice/usosistema/v1/changelog
+exports.getChangeLog = async (req, res) => {
+    //metodo GET
+  /*  #swagger.tags = ['Obras - Backoffice - Uso del Sistema']
+    #swagger.description = 'Devuelve todos los cambios realizados al programa (Change Log)' */
+  try {
+    //metodo GET
+    
+    const IDataCambiosSchema = z.object({
+        tipo_cambio: z.coerce.string(),
+        descripcion: z.coerce.string(),
+        version_front: z.coerce.string(),
+        version_back: z.coerce.string()
+    });
+
+    const IDataOutputSchema = z.object({
+      fecha: z.coerce.string(),
+      datos: z.array(IDataCambiosSchema)
+    });
+    const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+      
+    
+    const sql = `SELECT fecha, ARRAY_AGG(datos) as datos FROM (select to_char(fecha::date, 'DD/MM/YYYY') as fecha, 
+                    json_build_object('tipo_cambio', tipo_cambio, 'descripcion', 
+                    descripcion, 'version_front', version_front, 'version_back', version_back) as datos 
+                    FROM _frontend.changelog ORDER BY fecha::date DESC, tipo_cambio, id) as a GROUP BY fecha order by fecha DESC`;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const changelog = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    const salida = IArrayDataOutputSchema.parse(changelog);
+    res.status(200).send(salida);
+
+  } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      console.log(error);
+      res.status(500).send(error);
+  }
+}

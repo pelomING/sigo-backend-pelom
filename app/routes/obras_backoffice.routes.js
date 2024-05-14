@@ -262,4 +262,8 @@ module.exports = function(app) {
     // GET /api/obras/backoffice/usosistema/v1/reportesdiarios_pordia
     app.get("/api/obras/backoffice/usosistema/v1/reportesdiarios_pordia", [authJwt.verifyToken], backofficeUsoController.getReportesDiariosPorDia);
 
+    //Lista de los cambios realizados al programa
+    // GET /api/obras/backoffice/usosistema/v1/changelog
+    app.get("/api/obras/backoffice/usosistema/v1/changelog", [authJwt.verifyToken], backofficeUsoController.getChangeLog);
+
 }
