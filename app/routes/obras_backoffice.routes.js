@@ -242,6 +242,10 @@ module.exports = function(app) {
     // GET /api/obras/backoffice/estadopago/v1/allestadospagogestion
     app.get("/api/obras/backoffice/estadopago/v1/allestadospagogestion", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.allestadospagogestion);
 
+    // Elimina un estado de pago
+    // DELETE /api/obras/backoffice/estadopago/v1/borraestadopago
+    app.delete("/api/obras/backoffice/estadopago/v1/borraestadopago/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeEstadoPago], backofficeEstadopagoController.borraEstadoPago);
+
 
 ///****************************************** Uso del Sistema ***********************      */
 
