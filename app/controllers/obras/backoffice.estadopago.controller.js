@@ -102,7 +102,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                   fecha_llegada::text as fecha_asignacion, 
                   row_to_json(tt) as tipo_trabajo, 
                   row_to_json(s) as segmento, 
-                  gestor_cliente as solicitado_por, 
+                  initcap(gestor_cliente)::varchar as solicitado_por, 
                   repo.sdi as sdi, 
                   row_to_json(ofi) as supervisor_pelom, 
                   row_to_json(cc) as coordinador, 
@@ -110,15 +110,26 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                   ubicacion as direccion, 
                   repo.flexiapp as flexiapp, 
                   fecha_termino::text as fecha_ejecucion, 
-                  o.jefe_delegacion as jefe_delegacion, 
+                  initcap(o.jefe_delegacion)::varchar as jefe_delegacion, 
                   json_build_object('id', repo.id_jefe, 'nombre', repo.jefe_faena) as jefe_faena, 
                   repo.num_documento as numero_documento, 
                   rec.nombre as recargo_nombre, 
                   rec.porcentaje as recargo_porcentaje,
                   case when tob.no_exige_oc then 1::integer else 0::integer end no_exige_oc, 
-                  (SELECT 'EDP-' || (case when max(id) is null then 0 else max(id) end + 10000001)::text || 
-                  '-' || substring(current_timestamp::text,1,4) 
-                    FROM obras.encabezado_estado_pago) as codigo_pelom, 
+                  (SELECT CASE WHEN cod_borrado IS NULL THEN cod_nuevo ELSE cod_borrado END as codigo_pelom
+                    FROM
+                    (SELECT 
+                    (SELECT DISTINCT ON (codigo_pelom) codigo_pelom 
+                    FROM obras.encabezado_estado_pago_borrado
+                    WHERE codigo_pelom NOT IN
+                    (SELECT codigo_pelom FROM obras.encabezado_estado_pago)
+                    AND id_obra = ${id_obra}
+                    ORDER BY codigo_pelom, fecha_borrado ASC) as cod_borrado,
+                    (SELECT 'EDP-' || (case when max(id) is null then 0 else max(id) end + 10000001)::text || 
+                                      '-' || substring(current_timestamp::text,1,4) 
+                                        FROM (select id from obras.encabezado_estado_pago 
+                                  UNION select (datos->>'id')::bigint as id 
+                                FROM obras.encabezado_estado_pago_borrado) as eep) as cod_nuevo) as a) as codigo_pelom, 
                   (SELECT precio 
                     FROM obras.valor_uc 
                     WHERE oficina = o.oficina 
@@ -139,18 +150,23 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                             ON o.tipo_trabajo = tt.id 
                       LEFT JOIN obras.segmento s 
                             ON o.segmento = s.id 
-                      LEFT JOIN obras.coordinadores_contratista cc 
+                      LEFT JOIN 
+                          (SELECT id, initcap(nombre)::varchar as nombre, id_empresa, 
+                          replace(to_char(left(rut, length(rut) - 2)::integer, 'FM99,999,999') 
+					                || right(rut, 2),',','.') as rut FROM
+                          obras.coordinadores_contratista) cc
                             ON o.coordinador_contratista = cc.id 
                       LEFT JOIN _comun.comunas c 
                             ON o.comuna = c.codigo
                       LEFT JOIN obras.tipo_obra tob
                             ON o.tipo_obra = tob.id 
-                      LEFT JOIN (SELECT os.id, o.nombre as oficina, so.nombre as supervisor 
+                      LEFT JOIN (SELECT os.id, o.nombre as oficina, initcap(so.nombre) as supervisor,
+                              so.rut as rut 
                                   FROM obras.oficina_supervisor os 
                                   JOIN _comun.oficinas o ON os.oficina = o.id 
                                   JOIN obras.supervisores_contratista so ON os.supervisor = so.id) ofi 
                             ON o.oficina = ofi.id 
-                      LEFT JOIN (SELECT id_obra, jf.nombre as jefe_faena, jf.id as id_jefe, sdi, num_documento, flexiapp[1] 
+                      LEFT JOIN (SELECT id_obra, initcap(jf.nombre) as jefe_faena, jf.id as id_jefe, sdi, num_documento, flexiapp[1] 
                                 FROM obras.encabezado_reporte_diario erd join obras.jefes_faena jf 
                                 ON erd.jefe_faena = jf.id	
                                 WHERE id_obra = ${id_obra} 
@@ -904,66 +920,73 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
           const { QueryTypes } = require('sequelize');
           const sequelize = db.sequelize;
           const sql = `SELECT 
-                          eep.id, 
-                          eep.fecha_estado_pago, 
-                          eep.id_obra, 
-                          o.codigo_obra, 
-                          o.nombre_obra, 
-                          row_to_json(d) as cliente, 
-                          eep.fecha_asignacion::text, 
-                          row_to_json(tt) as tipo_trabajo, 
-                          row_to_json(s) as segmento, 
-                          eep.solicitado_por::varchar, 
-                          eep.sdi::text, 
-                          row_to_json(ofi) as supervisor_pelom, 
-                          row_to_json(cc) as coordinador, 
-                          row_to_json(c) as comuna, 
-                          eep.direccion, 
-                          eep.flexiapp, 
-                          eep.fecha_ejecucion::text, 
-                          eep.jefe_delegacion::varchar, 
-                          row_to_json(jf) as jefe_faena, 
-                          eep.ot as numero_documento, 
-                          eep.recargo_nombre, 
-                          eep.recargo_porcentaje, 
-                          eep.codigo_pelom, 
-                          eep.valor_uc, 
-                          eep.estado, 
-                          eep.subtotal1, 
-                          eep.subtotal2, 
-                          eep.subtotal3, 
-                          eep.descuento_avance, 
-                          eep.detalle_avances, 
-                          eep.detalle_actividades, 
-                          eep.detalle_otros, 
-                          eep.detalle_horaextra,
-                          eep.numero_oc,
-                          eep.recargos_extra,
-                          eep.referencia 
-                      FROM obras.encabezado_estado_pago eep 
-                      LEFT JOIN obras.obras o 
-                          ON eep.id_obra = o.id 
-                      LEFT JOIN obras.delegaciones d 
-                          ON o.delegacion = d.id 
-                      LEFT JOIN obras.tipo_trabajo tt 
-                          ON o.tipo_trabajo = tt.id 
-                      LEFT JOIN obras.segmento s 
-                          ON o.segmento = s.id 
-                      LEFT JOIN _comun.comunas c 
-                          ON o.comuna = c.codigo 
-                      LEFT JOIN obras.coordinadores_contratista cc 
-                          ON o.coordinador_contratista = cc.id 
-                      LEFT JOIN 
-                          (SELECT os.id, o.nombre as oficina, so.nombre as supervisor 
-                              FROM obras.oficina_supervisor os 
-                              JOIN _comun.oficinas o 
-                                ON os.oficina = o.id 
-                              JOIN obras.supervisores_contratista so 
-                                ON os.supervisor = so.id) ofi 
-                          ON o.oficina = ofi.id 
-                      LEFT JOIN obras.jefes_faena jf 
-                          ON eep.jefe_faena = jf.id 
-                      WHERE eep.id = ${id_estado_pago}`;
+                            eep.id, 
+                            eep.fecha_estado_pago, 
+                            eep.id_obra, 
+                            o.codigo_obra, 
+                            o.nombre_obra, 
+                            row_to_json(d) as cliente, 
+                            eep.fecha_asignacion::text, 
+                            row_to_json(tt) as tipo_trabajo, 
+                            row_to_json(s) as segmento, 
+                            initcap(eep.solicitado_por::varchar)::varchar as solicitado_por, 
+                            eep.sdi::text, 
+                            row_to_json(ofi) as supervisor_pelom, 
+                            row_to_json(cc) as coordinador, 
+                            row_to_json(c) as comuna, 
+                            eep.direccion, 
+                            eep.flexiapp, 
+                            eep.fecha_ejecucion::text, 
+                            initcap(eep.jefe_delegacion)::varchar as jefe_delegacion, 
+                            row_to_json(jf) as jefe_faena, 
+                            eep.ot as numero_documento, 
+                            eep.recargo_nombre, 
+                            eep.recargo_porcentaje, 
+                            eep.codigo_pelom, 
+                            eep.valor_uc, 
+                            eep.estado, 
+                            eep.subtotal1, 
+                            eep.subtotal2, 
+                            eep.subtotal3, 
+                            eep.descuento_avance, 
+                            eep.detalle_avances, 
+                            eep.detalle_actividades, 
+                            eep.detalle_otros, 
+                            eep.detalle_horaextra,
+                            eep.numero_oc,
+                            eep.recargos_extra,
+                            eep.referencia 
+                        FROM obras.encabezado_estado_pago eep 
+                        LEFT JOIN obras.obras o 
+                            ON eep.id_obra = o.id 
+                        LEFT JOIN obras.delegaciones d 
+                            ON o.delegacion = d.id 
+                        LEFT JOIN obras.tipo_trabajo tt 
+                            ON o.tipo_trabajo = tt.id 
+                        LEFT JOIN obras.segmento s 
+                            ON o.segmento = s.id 
+                        LEFT JOIN _comun.comunas c 
+                            ON o.comuna = c.codigo 
+                        LEFT JOIN 
+                  (SELECT id, initcap(nombre)::varchar as nombre, id_empresa, 
+                  replace(to_char(left(rut, length(rut) - 2)::integer, 'FM99,999,999') 
+					        || right(rut, 2),',','.') as rut FROM
+                  obras.coordinadores_contratista) cc 
+                            ON o.coordinador_contratista = cc.id 
+                        LEFT JOIN 
+                            (SELECT os.id, o.nombre as oficina, initcap(so.nombre) as supervisor,
+                  so.rut as rut
+                                FROM obras.oficina_supervisor os 
+                                JOIN _comun.oficinas o 
+                                  ON os.oficina = o.id 
+                                JOIN obras.supervisores_contratista so 
+                                  ON os.supervisor = so.id) ofi 
+                            ON o.oficina = ofi.id 
+                        LEFT JOIN 
+                  (SELECT id, initcap(nombre)::varchar as nombre FROM 
+                  obras.jefes_faena) jf 
+                            ON eep.jefe_faena = jf.id 
+                        WHERE eep.id = ${id_estado_pago}`;
 
             const historiaEstadoPago = await sequelize.query(sql, { type: QueryTypes.SELECT });
             let salida = [];
@@ -1303,6 +1326,56 @@ exports.allestadospagogestion = async (req, res) => {
       res.status(500).send(error);
   }
 }
+
+// Elimina un estado de pago
+// DELETE /api/obras/backoffice/estadopago/v1/borraestadopago
+exports.borraEstadoPago = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Estado de Pago']
+      #swagger.description = 'Elimina un estado de pago' */
+
+  try {
+    const id_estado_pago = req.params.id;
+
+    let codigo_pelom;
+    let sql = `SELECT codigo_pelom	FROM obras.encabezado_estado_pago WHERE id = ${id_estado_pago};`
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      codigo_pelom = data[0].codigo_pelom;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
+
+    let id_usuario = req.userId;
+    let user_name;
+    sql = "select username from _auth.users where id = " + id_usuario;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      user_name = data[0].username;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
+
+    const sql_borra = `INSERT INTO obras.encabezado_estado_pago_borrado (id_obra, codigo_pelom, usuario_rut, datos) 
+                            SELECT eep.id_obra, eep.codigo_pelom, '${user_name}'::varchar, row_to_json(eep) as datos	
+                            FROM obras.encabezado_estado_pago as eep WHERE id = ${id_estado_pago};
+                      DELETE FROM obras.estado_pago_historial WHERE codigo_pelom = '${codigo_pelom}';
+                      DELETE FROM obras.estado_pago_gestion WHERE codigo_pelom = '${codigo_pelom}';
+                      UPDATE obras.encabezado_reporte_diario SET id_estado_pago = null WHERE id_estado_pago = ${id_estado_pago};
+                      DELETE FROM obras.encabezado_estado_pago WHERE id = ${id_estado_pago};`
+
+    
+    const estado = await sequelize.query(sql_borra, { type: QueryTypes.DELETE });
+    res.status(200).send(estado);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+} 
 
 let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
   try {
