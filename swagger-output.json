@@ -3896,6 +3896,36 @@
         }
       }
     },
+    "/api/obras/backoffice/estadopago/v1/borraestadopago/{id}": {
+      "delete": {
+        "tags": [
+          "Obras - Backoffice - Estado de Pago"
+        ],
+        "description": "Elimina un estado de pago",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/usosistema/v1/alllogin": {
       "get": {
         "tags": [
