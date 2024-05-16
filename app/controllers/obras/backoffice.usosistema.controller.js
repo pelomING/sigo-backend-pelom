@@ -440,7 +440,8 @@ exports.getChangeLog = async (req, res) => {
         tipo_cambio: z.coerce.string(),
         descripcion: z.coerce.string(),
         version_front: z.coerce.string(),
-        version_back: z.coerce.string()
+        version_back: z.coerce.string(),
+        solicitado_por: z.coerce.string() 
     });
 
     const IDataOutputSchema = z.object({
@@ -450,10 +451,10 @@ exports.getChangeLog = async (req, res) => {
     const IArrayDataOutputSchema = z.array(IDataOutputSchema);
       
     
-    const sql = `SELECT fecha, ARRAY_AGG(datos) as datos FROM (select to_char(fecha::date, 'DD/MM/YYYY') as fecha, 
-                    json_build_object('tipo_cambio', tipo_cambio, 'descripcion', 
-                    descripcion, 'version_front', version_front, 'version_back', version_back) as datos 
-                    FROM _frontend.changelog ORDER BY fecha::date DESC, tipo_cambio, id) as a GROUP BY fecha order by fecha DESC`;
+    const sql = `SELECT fecha, ARRAY_AGG(datos) as datos FROM (select to_char(fecha::date, 'DD/MM/YYYY') as fecha, fecha::date as fecha_orden,
+    json_build_object('tipo_cambio', tipo_cambio, 'descripcion',
+    descripcion, 'version_front', version_front, 'version_back', version_back, 'solicitado_por', solicitado_por) as datos
+    FROM _frontend.changelog ORDER BY fecha::date DESC, tipo_cambio, id) as a GROUP BY fecha, fecha_orden order by fecha_orden DESC`;
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const changelog = await sequelize.query(sql, { type: QueryTypes.SELECT });
