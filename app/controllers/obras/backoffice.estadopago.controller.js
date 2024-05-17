@@ -119,12 +119,12 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                   (SELECT CASE WHEN cod_borrado IS NULL THEN cod_nuevo ELSE cod_borrado END as codigo_pelom
                     FROM
                     (SELECT 
-                    (SELECT DISTINCT ON (codigo_pelom) codigo_pelom 
+                    (SELECT DISTINCT ON (id_obra) codigo_pelom 
                     FROM obras.encabezado_estado_pago_borrado
                     WHERE codigo_pelom NOT IN
                     (SELECT codigo_pelom FROM obras.encabezado_estado_pago)
                     AND id_obra = ${id_obra}
-                    ORDER BY codigo_pelom, fecha_borrado ASC) as cod_borrado,
+                    ORDER BY id_obra, fecha_borrado ASC) as cod_borrado,
                     (SELECT 'EDP-' || (case when max(id) is null then 0 else max(id) end + 10000001)::text || 
                                       '-' || substring(current_timestamp::text,1,4) 
                                         FROM (select id from obras.encabezado_estado_pago 
