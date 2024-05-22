@@ -597,6 +597,7 @@ exports.deleteObra = async (req, res) => {
 
     let id_usuario = req.userId;
     let user_name;
+    let datos_obra;
 
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
@@ -610,6 +611,77 @@ exports.deleteObra = async (req, res) => {
       return;
     })
 
+    const campos = [
+      {
+        tabla: 'obras.visitas_terreno',
+        mensaje: 'No se puede borrar la obra porque tiene visitas terreno asociadas',
+      },
+      {
+        tabla: 'obras.mat_solicitudes_obras',
+        mensaje: 'No se puede borrar la obra porque tiene solicitud de materiales asociada',
+      },
+      {
+        tabla: 'obras.encabezado_reporte_diario',
+        mensaje: 'No se puede borrar la obra porque tiene un reporte diario asociado',
+      },
+      {
+        tabla: 'obras.obras_paralizacion',
+        mensaje: 'No se puede borrar la obra porque tiene obras paralizadas asociada',
+      },
+      {
+        tabla: 'obras.bom',
+        mensaje: 'No se puede borrar la obra porque tiene un bom asociado',
+      },
+      {
+        tabla: 'obras.mat_bom_reservas',
+        mensaje: 'No se puede borrar la obra porque tiene una reserva de materiales asociada',
+      },
+      {
+        tabla: 'obras.mat_faena_encabezado',
+        mensaje: 'No se puede borrar la obra porque tiene materiales en faena asociada',
+      },
+      {
+        tabla: 'obras.obras_cierres',
+        mensaje: 'No se puede borrar la obra porque tiene cierres de obra asociado',
+      },
+      {
+        tabla: 'obras.reservas_obras',
+        mensaje: 'No se puede borrar la obra porque tiene una reserva de materiales asociada',
+      },
+    ];
+
+
+    let mensaje;
+    for (const element of campos) {
+      let sql = `SELECT id FROM ${element.tabla} WHERE id_obra = ${id}`;
+      await sequelize.query(sql, {
+        type: QueryTypes.SELECT
+      }).then(data => {
+        if (data.length > 0) {
+          mensaje = element.mensaje;
+        }
+      }).catch(err => {
+        mensaje = err.message;
+      })
+      if (mensaje) {
+        break;
+      }
+    }
+    if (mensaje) {
+      res.status(500).send(mensaje);
+      return;
+    }
+
+    sql_obra = `select row_to_json(o) as datos_obra from obras.obras o WHERE id = ${id}`;
+    await sequelize.query(sql_obra, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      datos_obra = data[0].datos_obra;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
+
     const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
     const obra_historial = {
@@ -617,7 +689,7 @@ exports.deleteObra = async (req, res) => {
       fecha_hora: fechahoy,
       usuario_rut: user_name,
       estado_obra: 8,     // 8 es eliminada
-      datos: borrar
+      datos: datos_obra
     }
 
     let salida = {};
@@ -627,7 +699,7 @@ exports.deleteObra = async (req, res) => {
 
 
       salida = {"error": false, "message": "obra eliminada"};
-      const obra_creada = await Obra.update(borrar, { where: { id: id }, transaction: t });
+      
 
       const obra_historial_creado = await ObrasHistorialCambios.create(obra_historial, { transaction: t });
 
@@ -637,11 +709,15 @@ exports.deleteObra = async (req, res) => {
         modulo: modulo, 
         accion: accion.borrar,
         comentario: 'Obra borrada con id: ' + id,
-        datos: borrar }, { transaction: t });
+        datos: datos_obra }, { transaction: t });
+
+        //const obra_creada = await Obra.update(borrar, { where: { id: id }, transaction: t });
+        await Obra.destroy({ where: { id: id }, transaction: t });
 
       await t.commit();
 
     } catch (error) {
+      console.log('error en deleteObra: ', error);
       salida = { error: true, message: error }
       await t.rollback();
     }
@@ -650,7 +726,6 @@ exports.deleteObra = async (req, res) => {
     }else {
       res.status(200).send(salida);
     }
-
   }catch (error) {
     res.status(500).send(error);
   }
