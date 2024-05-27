@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BIGINT,
             allowNull: false
         },
-        codigo_sap_material: {
+        sap_material: {
             type: Sequelize.BIGINT,
             allowNull: false
         },

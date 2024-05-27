@@ -113,6 +113,10 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                   initcap(o.jefe_delegacion)::varchar as jefe_delegacion, 
                   json_build_object('id', repo.id_jefe, 'nombre', repo.jefe_faena) as jefe_faena, 
                   repo.num_documento as numero_documento, 
+                  (SELECT centrality FROM obras.encabezado_reporte_diario erd 
+                    WHERE centrality is not null 
+                    ${condicion_reporte}
+                    ORDER BY fecha_reporte DESC LIMIT 1) as centrality,
                   rec.nombre as recargo_nombre, 
                   rec.porcentaje as recargo_porcentaje,
                   case when tob.no_exige_oc then 1::integer else 0::integer end no_exige_oc, 
@@ -166,10 +170,12 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                                   JOIN _comun.oficinas o ON os.oficina = o.id 
                                   JOIN obras.supervisores_contratista so ON os.supervisor = so.id) ofi 
                             ON o.oficina = ofi.id 
-                      LEFT JOIN (SELECT id_obra, initcap(jf.nombre) as jefe_faena, jf.id as id_jefe, sdi, num_documento, flexiapp[1] 
+                      LEFT JOIN (SELECT id_obra, initcap(jf.nombre) as jefe_faena, jf.id as id_jefe, sdi, num_documento, 
+                                flexiapp[1] 
                                 FROM obras.encabezado_reporte_diario erd join obras.jefes_faena jf 
                                 ON erd.jefe_faena = jf.id	
                                 WHERE id_obra = ${id_obra} 
+                                ${condicion_reporte}
                                 ORDER BY fecha_reporte desc LIMIT 1) as repo 
                             ON o.id = repo.id_obra 
                       LEFT JOIN obras.recargos rec 
@@ -192,6 +198,7 @@ exports.generaNuevoEncabezadoEstadoPago = async (req, res) => {
                     segmento: element.segmento,
                     solicitado_por: element.solicitado_por?String(element.solicitado_por):null,
                     ot: element.numero_documento?String(element.numero_documento):null,
+                    centrality: element.centrality?String(element.centrality):null,
                     sdi: element.sdi?String(element.sdi):null,
                     supervisor_pelom: element.supervisor_pelom,
                     coordinador: element.coordinador,
@@ -704,7 +711,8 @@ exports.creaEstadoPago = async (req, res) => {
       detalle_horaextra: !actividadesHoraExtra.error?actividadesHoraExtra.detalle:undefined,
       recargos_extra: !recargosExtra.error?recargosExtra.detalle:undefined,
       numero_oc: req.body.numero_oc,
-      referencia: req.body.referencia?String(req.body.referencia):undefined
+      referencia: req.body.referencia?String(req.body.referencia):undefined,
+      centrality: req.body.centrality?String(req.body.centrality):undefined,
 
     }
     console.log('datos -> ', datos)
@@ -826,7 +834,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         o.nombre_obra, 
                         eep.valor_uc,
                         eep.numero_oc,
-                        eep.referencia 
+                        eep.referencia,
+                        eep.centrality 
                     FROM 
                         obras.encabezado_estado_pago eep 
                     LEFT JOIN obras.delegaciones d 
@@ -881,7 +890,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
                         valor_uc: element.valor_uc?Number(element.valor_uc):null,
                         numero_oc: element.numero_oc?String(element.numero_oc):null,
-                        referencia: element.referencia?String(element.referencia):null
+                        referencia: element.referencia?String(element.referencia):null,
+                        centrality: element.centrality?String(element.centrality):null
 
                       }
                       salida.push(detalle_salida);
@@ -955,7 +965,8 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                             eep.detalle_horaextra,
                             eep.numero_oc,
                             eep.recargos_extra,
-                            eep.referencia 
+                            eep.referencia,
+                            eep.centrality 
                         FROM obras.encabezado_estado_pago eep 
                         LEFT JOIN obras.obras o 
                             ON eep.id_obra = o.id 
@@ -1022,7 +1033,8 @@ exports.getHistoricoEstadosPagoByIdEstadoPago = async (req, res) => {
                         recargo_porcentaje: element.recargo_porcentaje?Number(element.recargo_porcentaje):null,
                         valor_uc: element.valor_uc?Number(element.valor_uc):null,
                         numero_oc: element.numero_oc?String(element.numero_oc):null,
-                        referencia: element.referencia?String(element.referencia):null
+                        referencia: element.referencia?String(element.referencia):null,
+                        centrality: element.centrality?String(element.centrality):null
                     
                   }
                   const totales = {

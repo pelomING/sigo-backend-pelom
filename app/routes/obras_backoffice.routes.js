@@ -1,4 +1,5 @@
 const { authJwt } = require("../middleware");
+const uploadJs = require("../middleware/upload");
 const backofficeGeneralController = require("../controllers/obras/backoffice.general.controller");
 const backofficeObrasController = require("../controllers/obras/backoffice.obras.controller");
 const backofficeBomController = require("../controllers/obras/backoffice.bom.controller");
@@ -124,9 +125,12 @@ module.exports = function(app) {
     app.post("/api/obras/backoffice/v1/creasolicitudmaterial", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createPedidoMaterial);
     app.get("/api/obras/backoffice/v1/materialesporsolicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorPedido);
     app.get("/api/obras/backoffice/v1/totalmaterialsolicitadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialSolicitadoPorObra);
+    app.get("/api/obras/backoffice/v1/totalmaterialreservadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialReservadoPorObra);
+
     app.put("/api/obras/backoffice/v1/actualizasolicitud", [authJwt.verifyToken, authJwt.updateObrasBackofficeBom], backofficeBomController.generaOcancelaSolicitud);
     app.get("/api/obras/backoffice/v1/reservasporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getReservasPorObra);
     app.post("/api/obras/backoffice/v2/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo_v2);
+    app.post("/api/obras/backoffice/v1/reserva_upload", [authJwt.verifyToken, authJwt.createObrasBackofficeBom, uploadJs.upload.single('file')], backofficeBomController.createBomFromExcel);
     app.get("/api/obras/backoffice/v1/materialesporreserva", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorReserva);
     app.get("/api/obras/backoffice/v1/bom_inicial_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomZero);
     app.get("/api/obras/backoffice/v1/bom_actual_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomFinal);

@@ -1,10 +1,12 @@
 const db = require("../../models");
 const z = require('zod');
+const excel = require("exceljs");
 const ZodError = z.ZodError;
 
 const Bom = db.bom;
 const BomZero = db.vwBomZero;
 const BomFinal = db.vwBomFinal;
+const MaestroMateriales = db.maestroMateriales;
 /***********************************************************************************/
 /*                                                                                 */
 /*                                                                                 */
@@ -169,11 +171,18 @@ exports.findBomByParametros = async (req, res) => {
         id_obra: z.coerce.number(),
       });
 
+      const IMaestroMaterialSchema = z.object({
+        codigo_sap: z.number(),
+        texto_breve: z.string(),
+        descripcion: z.string(),
+        id_unidad: z.number(),
+      });
+
       const IDataOutputSchema = z.object({
         id: z.coerce.number(),
         id_obra: z.coerce.number(),
         cod_reserva: z.coerce.number(),
-        codigo_sap_material: z.coerce.number(),
+        sap_material: IMaestroMaterialSchema,
         cantidad_requerida: z.coerce.number(),
         fecha_ingreso: z.coerce.string(),
         rut_usuario: z.coerce.string(),
@@ -221,11 +230,18 @@ exports.findBomByParametros = async (req, res) => {
         id_obra: z.coerce.number(),
       });
 
+      const IMaestroMaterialSchema = z.object({
+        codigo_sap: z.number(),
+        texto_breve: z.string(),
+        descripcion: z.string(),
+        id_unidad: z.number(),
+      });
+
       const IDataOutputSchema = z.object({
         id: z.coerce.number(),
         id_obra: z.coerce.number(),
         cod_reserva: z.coerce.number(),
-        codigo_sap_material: z.coerce.number(),
+        sap_material: IMaestroMaterialSchema,
         cantidad_requerida: z.coerce.number(),
         fecha_ingreso: z.coerce.string(),
         rut_usuario: z.coerce.string(),
@@ -234,7 +250,6 @@ exports.findBomByParametros = async (req, res) => {
 
       const IArrayDataOutputSchema = z.array(IDataOutputSchema);
       
-
       try {
 
         const validated = IDataInputSchema.parse(dataInput);
@@ -243,6 +258,15 @@ exports.findBomByParametros = async (req, res) => {
           where: {
             id_obra: validated.id_obra}
         });
+        console.log('bom ->', bom);
+        if (bom===undefined || bom===null){
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+        if (bom.length===0){
+          res.status(500).send([]);
+          return;
+        }
         const data = IArrayDataOutputSchema.parse(bom);
         res.status(200).send(data);
         
@@ -421,11 +445,24 @@ exports.findBomByParametros = async (req, res) => {
         //ejemplo: { "materiales": "1219_3-1220_2.5-3567_3", "id_obra": 22, "reserva": 3456}
 
         //chequeo con Zod
-        const inputDatosSchema = z.object({
+        /*const inputDatosSchema = z.object({
           materiales: z.string().regex(/^([1-9]\d+|[1-9])+_\d+(.\d+)?(-([1-9]\d+|[1-9])+_\d+(.\d+)?)*$/gm),
           id_obra: z.coerce.number().int().positive(),
           reserva: z.coerce.number().int().positive(),
-        })
+        })*/
+        const IDataMaterialesSchema = z.object({
+          codigo_sap: z.coerce.number().int().gt(0),
+          cantidad: z.coerce.number().gt(0)
+        });
+        const IArrayDataMaterialesSchema = z.array(IDataMaterialesSchema);
+
+        const IDataInputSchema = z.object(
+          {
+            id_obra: z.coerce.number().int().positive(),
+            reserva: z.coerce.number().int().positive(),
+            materiales: IArrayDataMaterialesSchema
+          }
+        )
 
         const inputDatos = {
           materiales: req.body.materiales,
@@ -435,7 +472,7 @@ exports.findBomByParametros = async (req, res) => {
        
         try {
             //valida datos de entrada
-            const bom = inputDatosSchema.parse(inputDatos);
+            const bom = IDataInputSchema.parse(inputDatos);
 
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
@@ -443,13 +480,13 @@ exports.findBomByParametros = async (req, res) => {
             let todoOk = false;
             let materiales = bom.materiales;
             //reemplaza las comas por puntos, por si hay alguna cantidad decimal
-            materiales = materiales.replace(",", ".");
-            console.log('materiales -> ',materiales);
+            //materiales = materiales.replace(",", ".");
+            //console.log('materiales -> ',materiales);
             let id_obra = bom.id_obra;
             let reserva = bom.reserva;
             //el simblo guion separa la información de materiales
-            let materiales_input = materiales.split("-");
-            console.log('materiales_input -> ',materiales_input);
+            //let materiales_input = materiales.split("-");
+            //console.log('materiales_input -> ',materiales_input);
 
             let sql = "";
             let sql_chek = "";
@@ -467,20 +504,19 @@ exports.findBomByParametros = async (req, res) => {
               res.status(500).send(err.message );
               return;
             })
-
+ 
             //Verifica que no repitan los código sap
-            let materiales_repetidos = []
-            for (const element of materiales_input) {
-              if (element) {
-                const valores = element.split("_")
-                const valor = {"codigo_sap": valores[0], "cantidad": Number(valores[1])}
-                materiales_repetidos.push(valor);
-              }
-            };
+            //let materiales_repetidos = []
+            //for (const element of materiales_input) {
+            //  if (element) {
+            //    const valores = element.split("_")
+            //    const valor = {"codigo_sap": valores[0], "cantidad": Number(valores[1])}
+            //    materiales_repetidos.push(valor);
+            //  }
+            //};
 
-            const arreglo_materiales = obtenerValoresUnicosConSuma(materiales_repetidos);
-            console.log('materiales_repetidos',materiales_repetidos);
-            console.log('arreglo_materiales',arreglo_materiales);
+            const arreglo_materiales = obtenerValoresUnicosConSuma(materiales);
+
 
             const codigos_sap = arreglo_materiales.reduce((acumulador, elemento, indice) => {
                 // Agregar coma si no es el primer elemento
@@ -627,7 +663,7 @@ exports.findBomByParametros = async (req, res) => {
               return;
             }
         } catch (error) {
-          //console.log('error -> ', error);
+          console.log('error -> ', error);
           if (error instanceof ZodError) {
             console.log(error.issues);
             const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
@@ -637,6 +673,218 @@ exports.findBomByParametros = async (req, res) => {
           res.status(500).send(error);
         }
 
+  }
+  /***********************************************************************************/
+  /* Crea un nuevo bom desde un archivo Excel
+  ;
+  */
+  exports.createBomFromExcel = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+          #swagger.description = 'Sube un archivo excel con los materiales reserva al servidor'
+          #swagger.consumes = ['multipart/form-data']  
+          #swagger.parameters['file'] = {
+              in: 'formData',
+              type: 'file',
+              required: 'true',
+              description: 'Archivo excel...', 
+          }
+      */
+
+
+
+          try {
+
+            const IDataExcelSchema = z.object({
+              codigo_sap: z.coerce.number().int().gt(0),
+              cantidad: z.coerce.number().gt(0)
+            });
+            const IArrayDataExcelSchema = z.array(IDataExcelSchema);
+
+            const IDataMaterialSalidaSchema = z.object({
+              codigo_sap: z.coerce.number().int().gt(0),
+              descripcion: z.string().min(1),
+              cantidad: z.coerce.number().gt(0)
+            })
+            
+
+            const IDataOutputSchema = z.object({
+              reserva: z.number().int().gt(0),
+              materiales: z.array(IDataMaterialSalidaSchema),
+            })
+
+            const INombreHojaSchema = z.coerce.number();
+
+            const file = req.file;
+            //const folderName = req.body.folderName;
+            if (!req.file) {
+              res.status(400).send('No file uploaded');
+              return;
+            }
+            const workbook = new excel.Workbook();
+            await workbook.xlsx.load(file.buffer);
+
+            let id_workbook;
+            workbook.eachSheet((worksheet, sheetId) => {
+              console.log(`Hoja ${sheetId}: ${worksheet.name}`);
+              id_workbook = sheetId;
+            });
+    
+            if (!id_workbook){
+              res.status(400).send('No se encontro una hoja con nombre valido, la primera hoja debe llevar el código de reserva');
+              return;
+            }
+            const worksheet = workbook.getWorksheet(id_workbook);
+            //Guardar el nombre de la hoja en una variable que despues se usará como el codigo de la reserva
+            const sheetName = worksheet.name;
+            console.log('sheetName -> ', sheetName);
+
+            // Validar el nombre de la hoja
+            let numero_reserva;
+            try {
+              numero_reserva = INombreHojaSchema.parse(sheetName);
+            } catch (error) {
+              if (error instanceof ZodError) {
+                console.log('INombreHojaSchema -> ', error.issues);
+                const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                res.status(400).send(mensaje);  //bad request
+                return;
+              }
+              res.status(500).send(error);
+              return;
+            }
+
+            // Leer datos de la hoja
+            let jsonData = [];
+            let columnas = [];
+            worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+              let rowData = {};
+              if (rowNumber === 1) {
+                  row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                  columnas.push(cell.value);
+                });
+              }else if (rowNumber > 1) {
+                  row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                    rowData[`${columnas[colNumber-1]}`] = cell.value;
+                  });
+                  jsonData.push(rowData);
+              }
+            });
+
+            let materiales;
+            try {
+              materiales = IArrayDataExcelSchema.parse(jsonData);
+            } catch (error) {
+              if (error instanceof ZodError) {
+                console.log('IArrayDataExcelSchema -> ', error.issues);
+                const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                res.status(400).send(mensaje);  //bad request
+                return;
+              }
+              res.status(500).send(error);
+              return;
+            }
+
+            //Buscar si hay valores repetidos dentro del arreglo de materiales
+            const duplicados = [];
+            let hayDuplicados = false;
+
+            // Iterar sobre el arreglo
+            materiales.forEach((elemento) => {
+                const codigo_sap = elemento.codigo_sap;
+                const cantidad = elemento.cantidad;
+
+                // Si el código ya existe en el objeto, suma el valor al valor existente
+                if (duplicados[codigo_sap]) {
+                    hayDuplicados = true;
+                    return;
+                } else {
+                    // Si el código no existe en el objeto, simplemente agrega el código y el valor
+                    duplicados[codigo_sap] = cantidad;
+                }
+            });
+
+            if (hayDuplicados) {
+                res.status(400).send('Hay códigos sap duplicados, revise por favor');
+                return;
+            }
+
+            const codigos_sap = materiales.reduce((acumulador, elemento, indice) => {
+              // Agregar coma si no es el primer elemento
+              if (indice !== 0) {
+                  acumulador += ', ';
+              }
+              // Concatenar el elemento actual al acumulador
+              return acumulador + elemento.codigo_sap;
+            }, '');
+            const cantidades = materiales.reduce((acumulador, elemento, indice) => {
+                // Agregar coma si no es el primer elemento
+                if (indice !== 0) {
+                    acumulador += ', ';
+                }
+                // Concatenar el elemento actual al acumulador
+                return acumulador + elemento.cantidad;
+            }, '');
+
+            let sql_chek = "select m.sap_material from (select unnest(array[" + codigos_sap + "]) as sap_material) as m left join obras.maestro_materiales mm on m.sap_material = mm.codigo_sap where mm.codigo_sap is null;";
+            console.log('sql_chek -> ', sql_chek)
+            const { QueryTypes } = require('sequelize');
+            const sequelize = db.sequelize;
+            const check_mat = await sequelize.query(sql_chek, { type: QueryTypes.SELECT });
+            if (check_mat) {
+                if (check_mat.length > 0){
+                  console.log('check_mat -> ', check_mat)
+                  const materialesNoExistentes = check_mat.reduce((acumulador, elemento, indice) => {
+                            // Agregar coma si no es el primer elemento
+                            if (indice !== 0) {
+                                acumulador += ', ';
+                            }
+                            // Concatenar el elemento actual al acumulador
+                            return acumulador + String(elemento.sap_material);
+                        }, '');
+                  res.status(500).send("Hay códigos de material no definidos en la base de datos: " + materialesNoExistentes);
+                  return;
+                } else {
+                  todoOk = true;
+                }
+            } else {
+              res.status(500).send("Error en la consulta (servidor backend)");
+              return;
+            }
+
+            let sql_detalle = `SELECT 
+                                  m.codigo_sap, 
+                                  mm.descripcion, 
+                                  m.cantidad 
+                                FROM 
+                                (SELECT UNNEST(array[${codigos_sap}]) as codigo_sap, 
+                                        UNNEST(array[${cantidades}]) as cantidad) m
+                                JOIN obras.maestro_materiales mm
+                                ON mm.codigo_sap = m.codigo_sap
+                                ORDER BY codigo_sap`;
+            const detalle = await sequelize.query(sql_detalle, { type: QueryTypes.SELECT });
+            if (detalle) {
+              const data = {
+                materiales: detalle,
+                reserva: numero_reserva
+              }
+              const salida = IDataOutputSchema.parse(data);
+              res.status(200).send(salida);
+              return;
+            }else
+            {
+              res.status(500).send("Error en la consulta (servidor backend)");
+              return;
+            } 
+          }catch (error) {
+            if (error instanceof ZodError) {
+              console.log('General -> ', error.issues);
+              //const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+              const mensaje = "Error en el formato del archivo, la hoja 1 debe tener como nombre el codigo de la reserva y además debe tener 2 columnas: codigo_sap (entero mayor a cero), cantidad (numerico mayor a cero), todos los valores son exigidos";
+              res.status(400).send(mensaje);  //bad request
+              return;
+            }
+            res.status(500).send(error.message);
+          }
   }
  /***********************************************************************************/
   /* Crea un nuevo pedido de material para una obra
@@ -1297,18 +1545,25 @@ exports.findBomByParametros = async (req, res) => {
           id_obra: z.coerce.number(),
         });
 
-        const IDataOutputSchema = z.object({
-          codigo_sap_material: z.coerce.number(),
+        const ISapMaterialSchema = z.object({
+          codigo_sap: z.coerce.number(),
           descripcion: z.coerce.string(),
-          codigo_corto: z.coerce.string(),
-          cantidad: z.coerce.number()
+          unidad: z.coerce.string()          
+        })
+
+        const IDataOutputSchema = z.object({
+          id_obra: z.coerce.number(),
+          sap_material: ISapMaterialSchema,
+          cantidad: z.coerce.number(),
         });
 
         const IArrayDataOutputSchema = z.array(IDataOutputSchema);
 
         const validated = IDataInputSchema.parse(dataInput);
         
-        const sql = `SELECT n.codigo_sap_material, mm.descripcion, mu.codigo_corto,
+        const sql = `SELECT ${validated.id_obra} as id_obra, 
+                            json_build_object('codigo_sap', n.codigo_sap_material, 
+                            'descripcion', mm.descripcion, 'unidad', mu.codigo_corto) as sap_material
                         sum(n.cantidad_requerida_new) AS cantidad
                       FROM ( SELECT DISTINCT ON (m.pedido, m.codigo_sap_material) m.pedido,
                                 m.codigo_sap_material,
@@ -1352,6 +1607,87 @@ exports.findBomByParametros = async (req, res) => {
         res.status(500).send(error);
     }
   }
+   /***********************************************************************************/
+  /* Obtiene listado de todo el material que se ha tiene reserva para una obra
+  ;
+  */
+  exports.getTotalMaterialReservadoPorObra = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve el listado de todo el material que tiene reserva para una obra' */
+    try {
+
+        const dataInput = {
+          id_obra: req.query.id_obra
+        }
+
+        const IDataInputSchema = z.object({
+          id_obra: z.coerce.number(),
+        });
+
+        const ISapMaterialSchema = z.object({
+          codigo_sap: z.coerce.number(),
+          descripcion: z.coerce.string(),
+          unidad: z.coerce.string()          
+        })
+
+        const IDataOutputSchema = z.object({
+          id_obra: z.coerce.number(),
+          sap_material: ISapMaterialSchema,
+          cantidad: z.coerce.number(),
+          reservas: z.array(z.coerce.number())                    
+        });
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const sql = `SELECT ${validated.id_obra} as id_obra, json_build_object('codigo_sap', n.codigo_sap_material, 
+                            'descripcion', mm.descripcion, 'unidad', mu.codigo_corto) as sap_material,
+                      sum(n.cantidad_requerida_new) AS cantidad,
+                      array_agg(n.cod_reserva) as reservas
+                    FROM ( SELECT DISTINCT ON (m.cod_reserva, m.codigo_sap_material) m.cod_reserva,
+                              m.codigo_sap_material,
+                              m.cantidad_requerida_new
+                            FROM ( SELECT mbi.id,
+                                      mbi.id_obra,
+                                      mbi.cod_reserva,
+                                      mbi.codigo_sap_material,
+                                      mbi.cantidad_requerida_old,
+                                      mbi.cantidad_requerida_new,
+                                      mbi.tipo_movimiento,
+                                      mbi.fecha_movimiento,
+                                      mbi.rut_usuario
+                                    FROM obras.mat_bom_ingresos mbi
+                                      JOIN obras.mat_bom_reservas mbr ON mbi.cod_reserva = mbr.reserva
+                                    WHERE mbr.id_obra = ${validated.id_obra}) m
+                            ORDER BY m.cod_reserva, m.codigo_sap_material, m.fecha_movimiento DESC) n
+                      JOIN obras.maestro_materiales mm ON n.codigo_sap_material = mm.codigo_sap
+                      JOIN obras.maestro_unidades mu ON mm.id_unidad = mu.id
+                    GROUP BY n.codigo_sap_material, mm.descripcion, mu.codigo_corto
+                    ORDER BY n.codigo_sap_material;`;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const reservados = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (reservados) {
+          const data = IArrayDataOutputSchema.parse(reservados);
+          res.status(200).send(data);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+    } catch (error) {
+        console.log('error getTotalMaterialReservadoPorObra -> ', error);
+        if (error instanceof ZodError) {
+          console.log(error.issues);  
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+    }
+  }
 
      /***********************************************************************************/
   /* Obtiene listado de materiales para una reserva
@@ -1371,8 +1707,8 @@ exports.findBomByParametros = async (req, res) => {
 
         const ISapMaterialSchema = z.object({
           codigo_sap: z.coerce.number(),
-          texto_breve: z.coerce.string(),
-          descripcion: z.coerce.string()
+          descripcion: z.coerce.string(),
+          unidad: z.coerce.string()          
         })
 
         const IDataOutputSchema = z.object({
@@ -1380,7 +1716,7 @@ exports.findBomByParametros = async (req, res) => {
           id_obra: z.coerce.number(),
           reserva: z.coerce.number(),
           sap_material: ISapMaterialSchema,
-          cantidad_requerida: z.coerce.number(),
+          cantidad: z.coerce.number(),
           fecha_ingreso: z.coerce.string(),
           rut_usuario: z.coerce.string(),
           persona: z.coerce.string()
@@ -1396,7 +1732,7 @@ exports.findBomByParametros = async (req, res) => {
                           mbi.id_obra,
                           mbi.cod_reserva as reserva,
                           row_to_json(mm) as sap_material,
-                          mbi.cantidad_requerida_new AS cantidad_requerida,
+                          mbi.cantidad_requerida_new AS cantidad,
                           mbi.fecha_movimiento::text AS fecha_ingreso,
                           mbi.rut_usuario,
                           (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
@@ -1406,7 +1742,9 @@ exports.findBomByParametros = async (req, res) => {
                           END::text AS persona
                         FROM obras.mat_bom_ingresos mbi
                         JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
-                      LEFT JOIN obras.maestro_materiales mm 
+                      LEFT JOIN (SELECT mm.codigo_sap, mm.descripcion, mu.codigo_corto as unidad FROM 
+                        obras.maestro_materiales mm JOIN obras.maestro_unidades mu
+                        ON mm.id_unidad = mu.id) mm 
                       ON mbi.codigo_sap_material = mm.codigo_sap 
                         WHERE mbi.cod_reserva = ${cod_reserva}
                         ORDER BY mbi.cod_reserva, mbi.codigo_sap_material, mbi.fecha_movimiento desc;`;
