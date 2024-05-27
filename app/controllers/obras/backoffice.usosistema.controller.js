@@ -300,7 +300,7 @@ exports.getReportesDiariosPorDia = async (req, res) => {
                              WHEN EXTRACT(dow FROM serie.fecha) = 0::numeric THEN 'text-pink-500'::character varying
                              ELSE 'text-cyan-500'::character varying
                          END AS "text-color"
-                    FROM ( SELECT (now()::timestamp without time zone AT TIME ZONE 'america/santiago'::text)::date - a.num AS fecha
+                    FROM ( SELECT SUBSTRING((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::date - a.num AS fecha
                             FROM ( SELECT generate_series(0::bigint, b.valor)::integer AS num
                                     FROM ( SELECT
    CASE
@@ -344,7 +344,7 @@ exports.getReportesDiariosPorDia = async (req, res) => {
                              WHEN EXTRACT(dow FROM serie.fecha) = 0::numeric THEN 'text-pink-500'::character varying
                              ELSE 'text-cyan-500'::character varying
                          END AS "text-color"
-                    FROM ( SELECT (now()::timestamp without time zone AT TIME ZONE 'america/santiago'::text)::date - a.num AS fecha
+                    FROM ( SELECT SUBSTRING((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::date - a.num AS fecha
                             FROM ( SELECT generate_series(0::bigint, b.valor)::integer AS num
                                     FROM ( SELECT
    CASE
@@ -388,7 +388,7 @@ exports.getReportesDiariosPorDia = async (req, res) => {
                              WHEN EXTRACT(dow FROM serie.fecha) = 0::numeric THEN 'text-pink-500'::character varying
                              ELSE 'text-cyan-500'::character varying
                          END AS "text-color"
-                    FROM ( SELECT (now()::timestamp without time zone AT TIME ZONE 'america/santiago'::text)::date - a.num AS fecha
+                    FROM ( SELECT SUBSTRING((now()::timestamp at time zone 'utc' at time zone 'america/santiago')::text,1,19)::date - a.num AS fecha
                             FROM ( SELECT generate_series(0::bigint, b.valor)::integer AS num
                                     FROM ( SELECT
    CASE

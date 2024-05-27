@@ -120,6 +120,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         referencia : {
             type: Sequelize.STRING
+        },
+        centrality: {
+            type: Sequelize.STRING
         }
     },
         {
