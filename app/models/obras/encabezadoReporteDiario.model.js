@@ -81,6 +81,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         numero_oc: {
             type: Sequelize.STRING
+        },
+        centrality: {
+            type: Sequelize.STRING
         }
     },
         {

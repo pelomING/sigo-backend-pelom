@@ -469,12 +469,27 @@
           "SAE - Mantenedores - Upload"
         ],
         "description": "Sube un archivo al servidor",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "Archivo excel..."
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
           },
           "400": {
             "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -1988,6 +2003,38 @@
         }
       }
     },
+    "/api/obras/backoffice/v1/totalmaterialreservadoporobra": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve el listado de todo el material que tiene reserva para una obra",
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/actualizasolicitud": {
       "put": {
         "tags": [
@@ -2081,6 +2128,43 @@
                 }
               }
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/v1/reserva_upload": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Sube un archivo excel con los materiales reserva al servidor",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "Archivo excel..."
           }
         ],
         "responses": {
@@ -2651,13 +2735,13 @@
                   "type": "string",
                   "example": "alimentador"
                 },
-                "comuna": {
-                  "type": "string",
-                  "example": "10305"
-                },
                 "num_documento": {
                   "type": "string",
                   "example": "10001000600"
+                },
+                "centrality": {
+                  "type": "string",
+                  "example": "321654"
                 },
                 "flexiapp": {
                   "type": "array",
@@ -2837,13 +2921,13 @@
                   "type": "string",
                   "example": "alimentador"
                 },
-                "comuna": {
-                  "type": "string",
-                  "example": "10305"
-                },
                 "num_documento": {
                   "type": "string",
                   "example": "10001000600"
+                },
+                "centrality": {
+                  "type": "string",
+                  "example": "321654"
                 },
                 "flexiapp": {
                   "type": "array",

@@ -33,10 +33,13 @@ const sql_all_reportes_diarios = `SELECT
                         hora_salida_terreno::text, 
                         hora_llegada_base::text, 
                         alimentador, 
-                        row_to_json(c) as comuna, 
+                        --row_to_json(c) as comuna, 
                         num_documento, 
                         rd.flexiapp, 
-                        row_to_json(rec) as recargo, 
+                        row_to_json(rec) as recargo,
+                        rd.referencia,
+                        rd.numero_oc, 
+                        rd.centrality,
                         (SELECT ARRAY_AGG(detalle) as detalle_actividad FROM 
                             (SELECT row_to_json(a) as detalle FROM 
                                 (SELECT 
@@ -104,8 +107,8 @@ const sql_all_reportes_diarios = `SELECT
                         ON rd.id_area = tt.id 
                     JOIN obras.obras o 
                         ON rd.id_obra = o.id 
-                    JOIN _comun.comunas c 
-                        ON rd.comuna = c.codigo 
+                    --JOIN _comun.comunas c 
+                    --    ON rd.comuna = c.codigo 
                     LEFT JOIN obras.jefes_faena jf 
                         ON rd.jefe_faena = jf.id 
                     LEFT JOIN obras.recargos rec 
@@ -169,6 +172,7 @@ exports.findAllEncabezadoReporteDiario = async (req, res) => {
                   recargo_hora: element.recargo,
                   referencia: element.referencia,
                   numero_oc: element.numero_oc,
+                  centrality: element.centrality,
                   det_actividad: element.detalle_actividad,
                   det_otros: element.detalle_otros
                   
@@ -252,12 +256,13 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
               hora_salida_terreno::text, 
               hora_llegada_base::text, 
               alimentador, 
-              row_to_json(c) as comuna, 
+              --row_to_json(c) as comuna, 
               num_documento, 
               rd.flexiapp, 
               row_to_json(rec) as recargo,
               rd.referencia,
               rd.numero_oc, 
+              rd.centrality,
               (SELECT ARRAY_AGG(detalle) as detalle_actividad 
                 FROM (SELECT row_to_json(a) as detalle 
                       FROM (SELECT 
@@ -319,8 +324,8 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
                 ON rd.id_area = tt.id 
             JOIN obras.obras o 
                 ON rd.id_obra = o.id 
-            LEFT JOIN _comun.comunas c 
-                ON rd.comuna = c.codigo 
+            --LEFT JOIN _comun.comunas c 
+            --    ON rd.comuna = c.codigo 
             LEFT JOIN obras.jefes_faena jf 
                 ON rd.jefe_faena = jf.id 
             LEFT JOIN obras.recargos rec 
@@ -369,6 +374,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
               recargo_hora: element.recargo,
               referencia: element.referencia?String(element.referencia):null,
               numero_oc: element.numero_oc?String(element.numero_oc):null,
+              centrality: element.centrality?String(element.centrality):null,
               det_actividad: element.detalle_actividad,
               det_otros: element.detalle_otros
 
@@ -432,7 +438,7 @@ exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
                       revisado_por_persona, 
                       sector, 
                       alimentador, 
-                      row_to_json(c) as comuna, 
+                      --row_to_json(c) as comuna, 
                       num_documento, 
                       flexiapp 
                   FROM 
@@ -441,8 +447,8 @@ exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
                       ON rd.id_area = tt.id 
                   JOIN obras.obras o 
                       ON rd.id_obra = o.id 
-                  JOIN _comun.comunas c 
-                      ON rd.comuna = c.codigo 
+                  --JOIN _comun.comunas c 
+                  --    ON rd.comuna = c.codigo 
                   LEFT JOIN obras.jefes_faena jf 
                       ON rd.jefe_faena = jf.id 
                   LEFT JOIN obras.recargos rec 
@@ -708,8 +714,8 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                 hora_salida_terreno: "2023-10-25 18:30",
                 hora_llegada_base: "2023-10-25 19:30",
                 alimentador: "alimentador",
-                comuna: "10305",
                 num_documento: "10001000600",
+                centrality: "321654",
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
                 det_actividad: [
                     {
@@ -978,7 +984,8 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             flexiapp: String(flexiapp),
             recargo_hora: recargo_aplicar?Number(req.body.recargo_hora.id):null,
             referencia: req.body.referencia?String(req.body.referencia):null,
-            numero_oc: req.body.numero_oc?String(req.body.numero_oc):null
+            numero_oc: req.body.numero_oc?String(req.body.numero_oc):null,
+            centrality: req.body.centrality?String(req.body.centrality):null
         }
 
         let salida = {};
@@ -1089,8 +1096,8 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                 hora_salida_terreno: "2023-10-25 18:30",
                 hora_llegada_base: "2023-10-25 19:30",
                 alimentador: "alimentador",
-                comuna: "10305",
                 num_documento: "10001000600",
+                centrality: "321654",
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
                 det_actividad: [
                     {
@@ -1272,11 +1279,11 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
       flexiapp: flexiapp?String(flexiapp):undefined,
       recargo_hora: recargo_aplicar,
       referencia: req.body.referencia?String(req.body.referencia):undefined,
-      numero_oc: req.body.numero_oc?String(req.body.numero_oc):undefined
+      numero_oc: req.body.numero_oc?String(req.body.numero_oc):undefined,
+      centrality: req.body.centrality?String(req.body.centrality):undefined
 
   }
 
-      console.log('encabezadoReporteDiario --> ', encabezadoReporteDiario);
 
         let salida = {};
         const t = await sequelize.transaction();
@@ -1339,7 +1346,6 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
           await t.commit();
           
         } catch (error) {
-          console.log('error en updateEncabezadoReporteDiario_V2: ', error)
           salida = { error: true, message: error }
           await t.rollback();
         }
@@ -1354,7 +1360,6 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
           res.status(200).send(salida);
         }
   }catch (error) {
-    console.log('error en updateEncabezadoReporteDiario_V2: ', error)
     res.status(500).send(error);
   }
 }

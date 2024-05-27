@@ -1,6 +1,6 @@
 const { authJwt } = require("../middleware");
 const mantendorController = require("../controllers/comun/mantenedor.controller");
-const upload = require("../middleware/upload");
+const uploadJs = require("../middleware/upload");
 const fs = require('fs').promises;
 const axios = require('axios');
 const PDFDocument = require('pdfkit');
@@ -30,17 +30,51 @@ module.exports = function(app) {
     app.get("/api/mantenedor/v1/oficinas", [authJwt.verifyToken], mantendorController.oficinas);
 
     // upload.single('file')
-    app.post("/api/mantenedor/v1/upload", upload.single('file'), (req, res) => {
+    app.post("/api/mantenedor/v1/upload", uploadJs.upload.single('file'), async (req, res) => {
       /*  #swagger.tags = ['SAE - Mantenedores - Upload']
-      #swagger.description = 'Sube un archivo al servidor' */
+          #swagger.description = 'Sube un archivo al servidor'
+          #swagger.consumes = ['multipart/form-data']  
+          #swagger.parameters['file'] = {
+              in: 'formData',
+              type: 'file',
+              required: 'true',
+              description: 'Archivo excel...', 
+          }
+      */
 
-      const file = req.file;
-      //const folderName = req.body.folderName;
-      if (!req.file) {
-        res.status(400).send('No file uploaded');
-        return;
+      try {
+        const file = req.file;
+        //const folderName = req.body.folderName;
+        if (!req.file) {
+          res.status(400).send('No file uploaded');
+          return;
+        }
+        const workbook = new excel.Workbook();
+        await workbook.xlsx.load(file.buffer);
+
+        const worksheet = workbook.getWorksheet(1);
+        // Leer datos de la hoja
+        let jsonData = [];
+        let columnas = [];
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+          let rowData = {};
+          if (rowNumber === 1) {
+              row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+              columnas.push(cell.value);
+            });
+          }else if (rowNumber > 1) {
+              row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                rowData[`${columnas[colNumber-1]}`] = cell.value;
+              });
+              jsonData.push(rowData);
+          }
+        });
+        
+        res.json(jsonData);
+      }catch (error) {
+        console.log('error ', error);
+        res.status(500).send(error.message);
       }
-      res.json({ message: 'File uploaded successfully!' });
     });
 
     // Ejecuta comando
