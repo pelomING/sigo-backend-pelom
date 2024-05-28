@@ -1788,7 +1788,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/allobrasparabom": {
+    "/api/obras/backoffice/material/v1/allobrasparabom": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -1813,7 +1813,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/solicitudesmaterialporobra": {
+    "/api/obras/backoffice/material/v1/solicitudesmaterialporobra": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -1845,7 +1845,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/obtiene_numero_solicitud": {
+    "/api/obras/backoffice/material/v1/obtiene_numero_solicitud": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -1877,7 +1877,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/creasolicitudmaterial": {
+    "/api/obras/backoffice/material/v1/creasolicitudmaterial": {
       "post": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -1939,7 +1939,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/materialesporsolicitud": {
+    "/api/obras/backoffice/material/v1/materialesporsolicitud": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -1971,7 +1971,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/totalmaterialsolicitadoporobra": {
+    "/api/obras/backoffice/material/v1/totalmaterialsolicitadoporobra": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -2003,7 +2003,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/totalmaterialreservadoporobra": {
+    "/api/obras/backoffice/material/v1/totalmaterialreservadoporobra": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -2035,7 +2035,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/actualizasolicitud": {
+    "/api/obras/backoffice/material/v1/actualizasolicitud": {
       "put": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -2072,7 +2072,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/reservasporobra": {
+    "/api/obras/backoffice/material/v1/reservasporobra": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -2104,7 +2104,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v2/creabom": {
+    "/api/obras/backoffice/material/v2/crea_reserva_material": {
       "post": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -2149,7 +2149,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/reserva_upload": {
+    "/api/obras/backoffice/material/v1/reserva_upload": {
       "post": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -2186,7 +2186,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/materialesporreserva": {
+    "/api/obras/backoffice/material/v1/materialesporreserva": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -2218,7 +2218,32 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/bom_inicial_por_obra": {
+    "/api/obras/backoffice/material/v1/allreservas": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Devuelve el listado de todas las reservas disponibles",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/material/v1/bom_inicial_por_obra": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -2250,7 +2275,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/bom_actual_por_obra": {
+    "/api/obras/backoffice/material/v1/bom_actual_por_obra": {
       "get": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
@@ -2282,7 +2307,7 @@
         }
       }
     },
-    "/api/obras/backoffice/v1/crealistafaena": {
+    "/api/obras/backoffice/material/v1/crealistafaena": {
       "post": {
         "tags": [
           "Obras - Backoffice - Manejo materiales (bom)"
