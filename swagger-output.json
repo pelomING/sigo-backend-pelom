@@ -696,26 +696,6 @@
         }
       }
     },
-    "/api/reportes/v1/generaxls": {
-      "get": {
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/imagen": {
-      "get": {
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/api/obras/backoffice/general/v1/alltipoobras": {
       "get": {
         "tags": [
@@ -2700,6 +2680,18 @@
                   "type": "number",
                   "example": 1
                 },
+                "rut_jefe_faena": {
+                  "type": "string",
+                  "example": "11111111-1"
+                },
+                "referencia": {
+                  "type": "string",
+                  "example": "descripción breve del trabajo"
+                },
+                "numero_oc": {
+                  "type": "string",
+                  "example": "orden de compra"
+                },
                 "sdi": {
                   "type": "string",
                   "example": "sdi"
@@ -2763,10 +2755,6 @@
                 "num_documento": {
                   "type": "string",
                   "example": "10001000600"
-                },
-                "centrality": {
-                  "type": "string",
-                  "example": "321654"
                 },
                 "flexiapp": {
                   "type": "array",
