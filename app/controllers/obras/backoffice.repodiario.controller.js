@@ -699,6 +699,9 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                 id_obra: 1,
                 fecha_reporte: "2023-10-25",
                 jefe_faena: 1,
+                rut_jefe_faena: "11111111-1",
+                referencia: "descripción breve del trabajo",
+                numero_oc: "orden de compra",
                 sdi: "sdi",
                 ito_mandante: "nombre gestor cliente",
                 id_area: 1,
@@ -714,8 +717,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
                 hora_salida_terreno: "2023-10-25 18:30",
                 hora_llegada_base: "2023-10-25 19:30",
                 alimentador: "alimentador",
-                num_documento: "10001000600",
-                centrality: "321654",
+                centrality: "123456",
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
                 det_actividad: [
                     {
@@ -754,7 +756,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
   try{
       let salir = false;
       const campos = [
-        'id_obra', 'fecha_reporte', 'jefe_faena', 'sdi', 'ito_mandante', 'id_area', 
+        'id_obra', 'fecha_reporte', 'sdi', 'ito_mandante', 'id_area', 'referencia', 'numero_oc',
         'observaciones', 'entregado_por_persona', 'fecha_entregado', 
         'revisado_por_persona', 'fecha_revisado', 'sector', 'hora_salida_base', 
         'hora_llegada_terreno', 'hora_salida_terreno', 'hora_llegada_base', 'det_actividad'
@@ -767,6 +769,26 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         }
       };
       const id_obra = req.body.id_obra;
+
+      let jefe_faena;
+      if (!req.body.jefe_faena){
+        //revisar si viene el campo rut_jefe_faena
+        if (!req.body.rut_jefe_faena){
+          res.status(400).send("Debe especificar el jefe de faena");
+          return;
+        } else {
+          //Buscar el id en la tabal jefe de faenas por el rut
+          await JefesFaena.findOne({where: {rut: req.body.rut_jefe_faena}}).then(data => {
+            jefe_faena = data.id;
+          }).catch(err => {
+            console.log('error: ' + err.message);
+            res.status(500).send(err.message );
+            return;
+          })
+        }
+      } else {
+        jefe_faena = req.body.jefe_faena;
+      }
 
       //Verifica que la fecha de reporte no este asignada a una obra
       //Deshabilitar desde 2024-05-03, ahora va a poder a generar un repo diario para el mismo día
@@ -963,7 +985,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             id: encabezado_reporte_diario_id,
             id_obra: Number(id_obra),
             fecha_reporte: String(req.body.fecha_reporte),
-            jefe_faena: Number(req.body.jefe_faena),
+            jefe_faena: Number(jefe_faena),
             sdi: String(req.body.sdi),
             gestor_cliente: String(req.body.ito_mandante),
             id_area: Number(req.body.id_area),
@@ -1082,6 +1104,9 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                 fecha_reporte: "2023-10-25",
                 jefe_faena: 1,
                 sdi: "sdi",
+                rut_jefe_faena: "11111111-1",
+                referencia: "descripción breve del trabajo",
+                numero_oc: "orden de compra",
                 ito_mandante: "nombre gestor cliente",
                 id_area: 1,
                 brigada_pesada: false,
@@ -1096,8 +1121,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                 hora_salida_terreno: "2023-10-25 18:30",
                 hora_llegada_base: "2023-10-25 19:30",
                 alimentador: "alimentador",
-                num_documento: "10001000600",
-                centrality: "321654",
+                centrality: "123456"
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
                 det_actividad: [
                     {
@@ -1155,6 +1179,25 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
         flexiapp = "{}";
       }
     }
+    let jefe_faena;
+      if (!req.body.jefe_faena){
+        //revisar si viene el campo rut_jefe_faena
+        if (!req.body.rut_jefe_faena){
+          res.status(400).send("Debe especificar el jefe de faena");
+          return;
+        } else {
+          //Buscar el id en la tabal jefe de faenas por el rut
+          await JefesFaena.findOne({where: {rut: req.body.rut_jefe_faena}}).then(data => {
+            jefe_faena = data.id;
+          }).catch(err => {
+            console.log('error: ' + err.message);
+            res.status(500).send(err.message );
+            return;
+          })
+        }
+      } else {
+        jefe_faena = req.body.jefe_faena;
+      }
     
     let detalle_actividad = req.body.det_actividad;
     console.log('detalle_actividad --> ', detalle_actividad)
@@ -1258,7 +1301,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
    const recargo_aplicar = req.body.recargo_hora?req.body.recargo_hora.id:undefined;
     const encabezadoReporteDiario = {
       fecha_reporte: req.body.fecha_reporte?String(req.body.fecha_reporte):undefined,
-      jefe_faena: req.body.jefe_faena?Number(req.body.jefe_faena):undefined,
+      jefe_faena: jefe_faena?Number(jefe_faena):undefined,
       sdi: req.body.sdi?String(req.body.sdi):undefined,
       gestor_cliente: req.body.ito_mandante?String(req.body.ito_mandante):undefined,
       id_area: req.body.id_area?Number(req.body.id_area):undefined,

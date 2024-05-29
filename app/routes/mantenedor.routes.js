@@ -270,10 +270,10 @@ module.exports = function(app) {
         pdfDoc.end();
       
     })
+/*
 
     app.get("/api/reportes/v1/generaxls", async (req, res) => {
-      /*  #swagger.tags = ['SAE - Excel'])
-      #swagger.description = 'Genera un archivo excel' */
+
 
         // Crear un nuevo documento Excel en memoria
         let workbook = new excel.Workbook();
@@ -317,8 +317,7 @@ module.exports = function(app) {
     })
 
     app.get("/imagen", async (req, res) => {
-      /*  #swagger.tags = ['SAE - Imagen'])
-      #swagger.description = 'Genera una imagen' */
+
       const filename = 'logo-pelom.jpg';
       const filePath = __dirname + './../../public/assets/' + filename;
       const salida = fs.readFileSync(filePath);
@@ -336,6 +335,8 @@ module.exports = function(app) {
       
 
     })
+
+    */
   };
 
 async function existeRuta(ruta) {

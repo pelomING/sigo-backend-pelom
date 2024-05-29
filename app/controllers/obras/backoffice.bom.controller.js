@@ -452,7 +452,7 @@ exports.findBomByParametros = async (req, res) => {
         })*/
         const IDataMaterialesSchema = z.object({
           codigo_sap: z.coerce.number().int().gt(0),
-          cantidad: z.coerce.number().gt(0)
+          cantidad: z.coerce.number().gt(-1)
         });
         const IArrayDataMaterialesSchema = z.array(IDataMaterialesSchema);
 
@@ -566,19 +566,22 @@ exports.findBomByParametros = async (req, res) => {
                                             unnest(array[${codigos_sap}]) as sap_material, 
                                             unnest(array[${cantidades}]) as cant_material) as m 
                                     LEFT JOIN 
-                                      (SELECT DISTINCT ON (id_obra, codigo_sap_material) 
+                                      (SELECT DISTINCT ON (id_obra, codigo_sap_material, cod_reserva) 
                                           id_obra, 
+                                          cod_reserva, 
                                           codigo_sap_material, 
                                           cantidad_requerida_new, 
                                           fecha_movimiento 
                                       FROM obras.mat_bom_ingresos 
                                       ORDER BY 
                                           id_obra, 
+                                          cod_reserva,
                                           codigo_sap_material, 
                                           fecha_movimiento desc
                                       ) bm 
                                     ON bm.id_obra = m.id_obra 
-                                    AND bm.codigo_sap_material = m.sap_material`;
+                                    AND bm.codigo_sap_material = m.sap_material
+                                    AND bm.cod_reserva = m.cod_reserva`;
             }
         
             /******************** Chequea materiales no existentes */
@@ -703,6 +706,7 @@ exports.findBomByParametros = async (req, res) => {
             const IDataMaterialSalidaSchema = z.object({
               codigo_sap: z.coerce.number().int().gt(0),
               descripcion: z.string().min(1),
+              unidad: z.string().min(1),
               cantidad: z.coerce.number().gt(0)
             })
             
@@ -854,12 +858,15 @@ exports.findBomByParametros = async (req, res) => {
             let sql_detalle = `SELECT 
                                   m.codigo_sap, 
                                   mm.descripcion, 
+                                  mu.codigo_corto as unidad,
                                   m.cantidad 
                                 FROM 
                                 (SELECT UNNEST(array[${codigos_sap}]) as codigo_sap, 
                                         UNNEST(array[${cantidades}]) as cantidad) m
                                 JOIN obras.maestro_materiales mm
                                 ON mm.codigo_sap = m.codigo_sap
+                                JOIN obras.maestro_unidades mu
+                                ON mm.id_unidad = mu.id
                                 ORDER BY codigo_sap`;
             const detalle = await sequelize.query(sql_detalle, { type: QueryTypes.SELECT });
             if (detalle) {
@@ -1463,7 +1470,6 @@ exports.findBomByParametros = async (req, res) => {
 
         const ISapMaterialSchema = z.object({
           codigo_sap: z.coerce.number(),
-          texto_breve: z.coerce.string(),
           descripcion: z.coerce.string(),
           unidad: z.coerce.string(),
         })
@@ -1473,7 +1479,7 @@ exports.findBomByParametros = async (req, res) => {
           id_obra: z.coerce.number(),
           solicitud: z.coerce.number(),
           sap_material: ISapMaterialSchema,
-          cantidad_requerida: z.coerce.number(),
+          cantidad: z.coerce.number(),
           fecha_ingreso: z.coerce.string(),
           rut_usuario: z.coerce.string(),
           persona: z.coerce.string()
@@ -1489,7 +1495,7 @@ exports.findBomByParametros = async (req, res) => {
                           msd.id_obra,
                           msd.pedido as solicitud,
                           row_to_json(mm) as sap_material,
-                          msd.cantidad_requerida_new AS cantidad_requerida,
+                          msd.cantidad_requerida_new AS cantidad,
                           msd.fecha_movimiento::text AS fecha_ingreso,
                           msd.rut_usuario,
                           (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
@@ -1555,6 +1561,7 @@ exports.findBomByParametros = async (req, res) => {
           id_obra: z.coerce.number(),
           sap_material: ISapMaterialSchema,
           cantidad: z.coerce.number(),
+          pedidos: z.array(z.coerce.number())
         });
 
         const IArrayDataOutputSchema = z.array(IDataOutputSchema);
@@ -1563,8 +1570,9 @@ exports.findBomByParametros = async (req, res) => {
         
         const sql = `SELECT ${validated.id_obra} as id_obra, 
                             json_build_object('codigo_sap', n.codigo_sap_material, 
-                            'descripcion', mm.descripcion, 'unidad', mu.codigo_corto) as sap_material
-                        sum(n.cantidad_requerida_new) AS cantidad
+                            'descripcion', mm.descripcion, 'unidad', mu.codigo_corto) as sap_material,
+                        sum(n.cantidad_requerida_new) AS cantidad,
+                        array_agg(n.pedido) as pedidos
                       FROM ( SELECT DISTINCT ON (m.pedido, m.codigo_sap_material) m.pedido,
                                 m.codigo_sap_material,
                                 m.cantidad_requerida_new
@@ -1689,7 +1697,7 @@ exports.findBomByParametros = async (req, res) => {
     }
   }
 
-     /***********************************************************************************/
+  /***********************************************************************************/
   /* Obtiene listado de materiales para una reserva
   ;
   */
@@ -1771,6 +1779,65 @@ exports.findBomByParametros = async (req, res) => {
     }
 
   }
+/***********************************************************************************/
+  /* Obtiene listado de todas las reservas disponibles
+  ;
+  */
+  exports.getAllReservas = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Devuelve el listado de todas las reservas disponibles' */
+    try {
+      const IDataOutputSchema = z.object({
+        reserva: z.coerce.number(),
+        id_obra: z.coerce.number(),
+        estado: z.coerce.string(),
+        fecha_hora: z.coerce.string(),
+        persona: z.coerce.string(),
+      });
+      const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+      
+      const sql = `SELECT mbr.reserva as reserva,
+                    mbr.id_obra,
+                    'CARGADA'::text as estado,
+                    mbi.fecha_movimiento::text as fecha_hora,
+                    (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                      CASE
+                        WHEN p.apellido_2 IS NULL THEN ''::character varying
+                        ELSE p.apellido_2
+                      END::text AS persona
+                  FROM obras.mat_bom_reservas mbr
+                    JOIN ( SELECT DISTINCT ON (mat_bom_ingresos.cod_reserva) mat_bom_ingresos.cod_reserva,
+                      mat_bom_ingresos.id_obra,
+                      mat_bom_ingresos.fecha_movimiento,
+                      mat_bom_ingresos.rut_usuario
+                      FROM obras.mat_bom_ingresos
+                      ORDER BY mat_bom_ingresos.cod_reserva, mat_bom_ingresos.fecha_movimiento DESC) mbi 
+                      ON mbr.reserva = mbi.cod_reserva AND mbr.id_obra = mbi.id_obra
+                    JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                  ORDER BY mbi.fecha_movimiento DESC`;
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      const reservas = await sequelize.query(sql, { type: QueryTypes.SELECT });
+      if (reservas) {
+        const data = IArrayDataOutputSchema.parse(reservas);
+        res.status(200).send(data);
+        return; 
+      }else
+      {
+        res.status(500).send("Error en la consulta (servidor backend)");
+        return;
+      }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      res.status(500).send(error);
+    }
+  } 
+
   /***********************************************************************************/
   /* Obtiene listado de obras para pedido
   ;
@@ -1858,26 +1925,26 @@ exports.findBomByParametros = async (req, res) => {
         const validated = IDataInputSchema.parse(dataInput);
 
         const id_obra = validated.id_obra;
-        const sql = `SELECT ro.reserva as reserva,
-                    ro.id_obra,
-                    'CARGADA'::text as estado,
-                    bm.fecha_movimiento::text as fecha_hora,
-                    (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
-                      CASE
-                        WHEN p.apellido_2 IS NULL THEN ''::character varying
-                        ELSE p.apellido_2
-                      END::text AS persona
-                  FROM obras.mat_bom_reservas ro
-                    JOIN ( SELECT DISTINCT ON (mat_bom_ingresos.cod_reserva) mat_bom_ingresos.cod_reserva,
-                      mat_bom_ingresos.id_obra,
-                      mat_bom_ingresos.fecha_movimiento,
-                      mat_bom_ingresos.rut_usuario
-                      FROM obras.mat_bom_ingresos
-                      ORDER BY mat_bom_ingresos.cod_reserva, mat_bom_ingresos.fecha_movimiento DESC) bm 
-                      ON ro.reserva = bm.cod_reserva AND ro.id_obra = bm.id_obra
-                    JOIN _auth.personas p ON bm.rut_usuario::text = p.rut::text
-                  WHERE ro.id_obra = ${id_obra}
-                  ORDER BY bm.fecha_movimiento DESC`;
+        const sql = `SELECT mbr.reserva as reserva,
+                        mbr.id_obra,
+                        'CARGADA'::text as estado,
+                        mbi.fecha_movimiento::text as fecha_hora,
+                        (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                          CASE
+                            WHEN p.apellido_2 IS NULL THEN ''::character varying
+                            ELSE p.apellido_2
+                          END::text AS persona
+                      FROM obras.mat_bom_reservas mbr
+                        JOIN ( SELECT DISTINCT ON (mat_bom_ingresos.cod_reserva) mat_bom_ingresos.cod_reserva,
+                          mat_bom_ingresos.id_obra,
+                          mat_bom_ingresos.fecha_movimiento,
+                          mat_bom_ingresos.rut_usuario
+                          FROM obras.mat_bom_ingresos
+                          ORDER BY mat_bom_ingresos.cod_reserva, mat_bom_ingresos.fecha_movimiento DESC) mbi 
+                          ON mbr.reserva = mbi.cod_reserva AND mbr.id_obra = mbi.id_obra
+                        JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                      WHERE mbr.id_obra = ${id_obra}
+                      ORDER BY mbi.fecha_movimiento DESC`;
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });

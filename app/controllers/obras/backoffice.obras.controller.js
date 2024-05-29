@@ -1163,9 +1163,15 @@ exports.getCodigoObraEmergencia = async (req, res) => {
       #swagger.description = 'Obtiene el código de obra en caso de que sea de tipo emergencia' */
   try {
     //tipo_obra igual 7 es emergencia
-      const sql = "select case when maximo is null then 'E-0000000001'::text else \
-      ('E-' || to_char(maximo+1, 'FM0999999999'))::text end as valor from \
-      (select max(id) as maximo from obras.obras WHERE tipo_obra = 7) as a";
+      //const sql = "select case when maximo is null then 'E-0000000001'::text else \
+      //('E-' || to_char(maximo+1, 'FM0999999999'))::text end as valor from \
+      //(select max(id) as maximo from obras.obras WHERE tipo_obra = 7) as a";
+      const sql = `select case when maximo is null then 'E-0000000001'::text else 
+                    ('E-' || to_char(maximo+1, 'FM0999999999'))::text end as valor from 
+                    (select max(cod) as maximo FROM
+                    (SELECT substring(codigo_obra,6)::bigint as cod FROM obras.obras 
+                    WHERE substring(codigo_obra,1,5) = 'E-000') as a) as b`;
+
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
       const codigoEmergencia = await sequelize.query(sql, { type: QueryTypes.SELECT });

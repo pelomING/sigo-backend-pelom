@@ -119,23 +119,24 @@ module.exports = function(app) {
     //app.get("/api/obras/backoffice/v1/allbom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findAllBom);
     //app.get("/api/obras/backoffice/v1/bomporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findBomByParametros);
 
-    app.get("/api/obras/backoffice/v1/allobrasparabom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getAllObrasParaBom);
-    app.get("/api/obras/backoffice/v1/solicitudesmaterialporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getPedidosPorObra);
-    app.get("/api/obras/backoffice/v1/obtiene_numero_solicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getNumeroPedido);
-    app.post("/api/obras/backoffice/v1/creasolicitudmaterial", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createPedidoMaterial);
-    app.get("/api/obras/backoffice/v1/materialesporsolicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorPedido);
-    app.get("/api/obras/backoffice/v1/totalmaterialsolicitadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialSolicitadoPorObra);
-    app.get("/api/obras/backoffice/v1/totalmaterialreservadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialReservadoPorObra);
+    app.get("/api/obras/backoffice/material/v1/allobrasparabom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getAllObrasParaBom);
+    app.get("/api/obras/backoffice/material/v1/solicitudesmaterialporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getPedidosPorObra);
+    app.get("/api/obras/backoffice/material/v1/obtiene_numero_solicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getNumeroPedido);
+    app.post("/api/obras/backoffice/material/v1/creasolicitudmaterial", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createPedidoMaterial);
+    app.get("/api/obras/backoffice/material/v1/materialesporsolicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorPedido);
+    app.get("/api/obras/backoffice/material/v1/totalmaterialsolicitadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialSolicitadoPorObra);
+    app.get("/api/obras/backoffice/material/v1/totalmaterialreservadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialReservadoPorObra);
 
-    app.put("/api/obras/backoffice/v1/actualizasolicitud", [authJwt.verifyToken, authJwt.updateObrasBackofficeBom], backofficeBomController.generaOcancelaSolicitud);
-    app.get("/api/obras/backoffice/v1/reservasporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getReservasPorObra);
-    app.post("/api/obras/backoffice/v2/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo_v2);
-    app.post("/api/obras/backoffice/v1/reserva_upload", [authJwt.verifyToken, authJwt.createObrasBackofficeBom, uploadJs.upload.single('file')], backofficeBomController.createBomFromExcel);
-    app.get("/api/obras/backoffice/v1/materialesporreserva", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorReserva);
-    app.get("/api/obras/backoffice/v1/bom_inicial_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomZero);
-    app.get("/api/obras/backoffice/v1/bom_actual_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomFinal);
+    app.put("/api/obras/backoffice/material/v1/actualizasolicitud", [authJwt.verifyToken, authJwt.updateObrasBackofficeBom], backofficeBomController.generaOcancelaSolicitud);
+    app.get("/api/obras/backoffice/material/v1/reservasporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getReservasPorObra);
+    app.post("/api/obras/backoffice/material/v2/crea_reserva_material", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo_v2);
+    app.post("/api/obras/backoffice/material/v1/reserva_upload", [authJwt.verifyToken, authJwt.createObrasBackofficeBom, uploadJs.upload.single('file')], backofficeBomController.createBomFromExcel);
+    app.get("/api/obras/backoffice/material/v1/materialesporreserva", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorReserva);
+    app.get("/api/obras/backoffice/material/v1/allreservas", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getAllReservas);
+    app.get("/api/obras/backoffice/material/v1/bom_inicial_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomZero);
+    app.get("/api/obras/backoffice/material/v1/bom_actual_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomFinal);
 
-    app.post("/api/obras/backoffice/v1/crealistafaena", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createListaFaena);
+    app.post("/api/obras/backoffice/material/v1/crealistafaena", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createListaFaena);
 
     //app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo);
     //app.post("/api/obras/backoffice/v1/creabomindividual", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomIndividual);
