@@ -237,6 +237,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
           SELECT 
               rd.id, 
               id_estado_pago, 
+              eep.estado,
               eep.codigo_pelom,
               json_build_object('id', o.id, 'codigo_obra', o.codigo_obra) as id_obra, 
               fecha_reporte::text, 
@@ -348,6 +349,7 @@ exports.findAllEncabezadoReporteDiarioByParametros = async (req, res) => {
             const detalle_salida = {
               id: Number(element.id),
               id_estado_pago: element.id_estado_pago?Number(element.id_estado_pago):null,
+              estado: element.estado?element.estado:null,
               codigo_pelom: element.codigo_pelom?String(element.codigo_pelom):null,
               id_obra: element.id_obra, //json {"id": id, "codigo_obra": codigo_obra}
               fecha_reporte: String(element.fecha_reporte),
@@ -1121,7 +1123,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
                 hora_salida_terreno: "2023-10-25 18:30",
                 hora_llegada_base: "2023-10-25 19:30",
                 alimentador: "alimentador",
-                centrality: "123456"
+                centrality: "123456",
                 flexiapp: ["CGE-123343-55", "CGE-123343-56"],
                 det_actividad: [
                     {
