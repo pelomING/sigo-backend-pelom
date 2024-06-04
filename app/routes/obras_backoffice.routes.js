@@ -232,6 +232,9 @@ module.exports = function(app) {
     // Graba un estado de pago
     app.post("/api/obras/backoffice/estadopago/v1/creaestadopago", [authJwt.verifyToken, authJwt.createObrasBackofficeEstadoPago], backofficeEstadopagoController.creaEstadoPago);
 
+    // Graba un estado de pago Version 2
+    app.post("/api/obras/backoffice/estadopago/v2/creaestadopago", [authJwt.verifyToken, authJwt.createObrasBackofficeEstadoPago], backofficeEstadopagoController.creaEstadoPago_v2);
+
     // Lista los estados de pago por id_obra  GET /api/obras/backoffice/estadopago/v1/listaestadospago
     app.get("/api/obras/backoffice/estadopago/v1/listaestadospago", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllEstadosPagoByIdObra);
 
@@ -250,6 +253,11 @@ module.exports = function(app) {
     // Elimina un estado de pago
     // DELETE /api/obras/backoffice/estadopago/v1/borraestadopago
     app.delete("/api/obras/backoffice/estadopago/v1/borraestadopago/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeEstadoPago], backofficeEstadopagoController.borraEstadoPago);
+
+
+    //Consulta los reportes diarios asociados a un estado de pago
+    app.get("/api/obras/backoffice/estadopago/v1/reportesdiarios", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.findAllEncabezadoReporteDiarioByIdEstadoPago);
+
 
 
 ///****************************************** Uso del Sistema ***********************      */
