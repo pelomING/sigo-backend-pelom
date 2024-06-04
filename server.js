@@ -28,7 +28,7 @@ app.use(
     "https://pelom-ing-dev.up.railway.app",
     "https://pelom-ing-testobras.up.railway.app",
     "https://pelom-ing-test.up.railway.app",
-    "http://front-reportes-diarios-desarrollo.up.railway.app",
+    "https://front-reportes-diarios-desarrollo.up.railway.app",
   ],
   })
 );

@@ -1892,7 +1892,8 @@ exports.findAllEncabezadoReporteDiarioByIdEstadoPago = async (req, res) => {
                ON rd.id_estado_pago = eep.id
            WHERE rd.id_estado_pago = ${id_estado_pago}
            OR (rd.id_estado_pago is null
-           AND rd.id_obra = (select id_obra from obras.encabezado_estado_pago where id = ${id_estado_pago}))
+           AND rd.id_obra = (select id_obra from obras.encabezado_estado_pago where id = ${id_estado_pago})
+           AND (select case when estado = 0 then true else false end from obras.encabezado_estado_pago where id = ${id_estado_pago}))
            ORDER by rd.id_estado_pago, rd.fecha_reporte::date desc`;
       
 
