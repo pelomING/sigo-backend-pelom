@@ -924,18 +924,37 @@ exports.creaEstadoPago_v2 = async (req, res) => {
       res.status(500).send("No es posible crear un estado de pago con un total menor o igual a 0");
       return;
     }
+    let id_estado_pago;
+    let sql = `SELECT id FROM obras.encabezado_estado_pago WHERE codigo_pelom = '${req.body.codigo_pelom}';`;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
 
-    let sql = "select nextval('obras.encabezado_estado_pago_id_seq'::regclass) as valor";
-        const { QueryTypes } = require('sequelize');
-        const sequelize = db.sequelize;
-        let encabezado_estado_pago_id = 0;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      if (data.length == 0) {
+        id_estado_pago = 0
+      } else {
+        id_estado_pago = data[0].id
+      }
+    })
+
+    let encabezado_estado_pago_id = 0;
+    if (!id_estado_pago) {
+        sql = "select nextval('obras.encabezado_estado_pago_id_seq'::regclass) as valor";
         await sequelize.query(sql, {
           type: QueryTypes.SELECT
         }).then(data => {
           encabezado_estado_pago_id = data[0].valor;
         }).catch(err => {
           res.status(500).send(err.message );
+          return;
         })
+    } else {
+      encabezado_estado_pago_id = id_estado_pago;
+    }
+
+    
 
 
         /*
@@ -1000,7 +1019,7 @@ exports.creaEstadoPago_v2 = async (req, res) => {
       centrality: req.body.centrality?String(req.body.centrality):undefined,
 
     }
-    console.log('datos -> ', datos)
+
     if (!datos.flexiapp) {
       res.status(400).send("No puede estar vacio el campo flexiapp. Por favor ingrese al menos un flexiapp en algún reporte diario");
       return
@@ -1017,7 +1036,12 @@ exports.creaEstadoPago_v2 = async (req, res) => {
     await sequelize.query(sql, {
       type: QueryTypes.SELECT
     }).then(data => {
-      user_name = data[0].username;
+      if (data.length==0) {
+        res.status(500).send("No se encontro el usuario");
+        return
+      } else {
+        user_name = data[0].username;
+      }
     }).catch(err => {
       res.status(500).send(err.message );
       return;
@@ -1049,7 +1073,19 @@ exports.creaEstadoPago_v2 = async (req, res) => {
         try {
 
           salida = {"error": false, "message": "obra ingresada"};
-          await EncabezadoEstadoPago.create(datos, { transaction: t });
+
+          if (id_estado_pago) {
+            //actualizar
+            await EncabezadoEstadoPago.update(
+               datos, 
+              {where: {id: id_estado_pago}, transaction: t});
+
+              await EncabezadoReporteDiario.update({id_estado_pago: null}, 
+                {where: {id_estado_pago: id_estado_pago}, transaction: t});
+          } else {
+            //agregar
+            await EncabezadoEstadoPago.create(datos, { transaction: t });
+          }
 
           await EncabezadoReporteDiario.update(
             {id_estado_pago: encabezado_estado_pago_id}, 
@@ -1066,11 +1102,12 @@ exports.creaEstadoPago_v2 = async (req, res) => {
         }
         if (salida.error) {
           res.status(500).send(salida.message);
+          return
         }else {
           res.status(200).send(salida);
+          return
         }
   }catch(error){
-    console.log(error);
     res.status(500).send(error);
   }
 }
