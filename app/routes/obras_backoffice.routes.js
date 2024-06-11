@@ -193,6 +193,8 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/repodiario/v1/allrecargoshora", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllRecargosHoraExtra);
 
+    app.post("/api/obras/movil/repodiario/v1/upload_reportediario", [authJwt.verifyToken, authJwt.createObrasBackofficeRepodiario], backofficeRepodiarioController.creaReporteDiarioMovil);
+
 }
 
 

@@ -3333,6 +3333,136 @@
         }
       }
     },
+    "/api/obras/movil/repodiario/v1/upload_reportediario": {
+      "post": {
+        "tags": [
+          "Obras - Movil - Reporte diario"
+        ],
+        "description": "Crea un nuevo Reporte Diario",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sdi": {
+                  "type": "string",
+                  "example": "11111"
+                },
+                "gestor_cliente": {
+                  "type": "string",
+                  "example": "Nombre gestor"
+                },
+                "id_area": {
+                  "type": "number",
+                  "example": 1
+                },
+                "brigada_pesada": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "hora_salida_base": {
+                  "type": "string",
+                  "example": "YYYY-MM-DDTHH:NN:SS"
+                },
+                "hora_llegada_terreno": {
+                  "type": "string",
+                  "example": "YYYY-MM-DDTHH:NN:SS"
+                },
+                "hora_salida_terreno": {
+                  "type": "string",
+                  "example": "YYYY-MM-DDTHH:NN:SS"
+                },
+                "hora_llegada_base": {
+                  "type": "string",
+                  "example": "YYYY-MM-DDTHH:NN:SS"
+                },
+                "alimentador": {
+                  "type": "string",
+                  "example": "Nombre alimentador"
+                },
+                "comuna": {
+                  "type": "string",
+                  "example": "07301"
+                },
+                "nro_documento": {
+                  "type": "string",
+                  "example": "1111111"
+                },
+                "flexiapps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "flexiapp": {
+                        "type": "string",
+                        "example": "1111111"
+                      }
+                    }
+                  }
+                },
+                "recargo_hora": {
+                  "type": "number",
+                  "example": 3
+                },
+                "referencia": {
+                  "type": "string",
+                  "example": "Observación"
+                },
+                "nro_oc": {
+                  "type": "string",
+                  "example": "1111111"
+                },
+                "det_actividad": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "tActividad": {
+                        "type": "number",
+                        "example": 13
+                      },
+                      "tOperacion": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "mActividad": {
+                        "type": "number",
+                        "example": 201
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 5
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/estadopago/v1/alltiporecargo": {
       "get": {
         "tags": [

@@ -1,7 +1,10 @@
 const db = require("../../models");
+const z = require('zod');
+const ZodError = z.ZodError;
 const EncabezadoReporteDiario = db.encabezadoReporteDiario;
 const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
-const DetalleRporteDiarioOtrasActividades = db.detalleReporteDiarioOtrasActividades; 
+const DetalleRporteDiarioOtrasActividades = db.detalleReporteDiarioOtrasActividades;
+const MovilReporteDiario = db.movilReporteDiario;
 const tipoOperacion = db.tipoOperacion;
 const maestroActividad = db.maestroActividad;
 const Obra = db.obra;
@@ -10,6 +13,42 @@ const ObrasHistorialCambios = db.obrasHistorialCambios;
 const JefesFaena = db.jefesFaena;
 const TipoActividad = db.tipoActividad;
 const TipoTrabajo = db.tipoTrabajo;
+
+
+const customErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.invalid_type) {
+    if (issue.received === "undefined") {
+      return { message: "Es requerido" };
+    }
+    if (issue.received === "null") {
+      return { message: "No puede ser nulo" };
+    }
+    if (issue.expected === "string") {
+      return { message: "Debe ser una cadena de texto" };
+    }
+    if (issue.expected === "number") {
+      return { message: "Debe ser un numero" };
+    }
+    if (issue.expected === "date") {
+      return { message: "Debe ser una fecha" };
+    }
+  }
+  if (issue.code === z.ZodIssueCode.invalid_string) {
+    if (issue.validation === "email") {
+      return { message: "El formato no es correcto, debe ser un email" };
+    }
+    return { message: "El formato no es correcto" };
+  }
+  if (issue.code === z.ZodIssueCode.too_small) {
+    return { message: `debe ser mayor que ${issue.minimum}` };
+  }
+  if (issue.code === z.ZodIssueCode.custom) {
+    return { message: `menor-que-${(issue.params || {}).minimum}` };
+  }
+  return { message: ctx.defaultError };
+};
+
+z.setErrorMap(customErrorMap);
 
 const sql_all_reportes_diarios = `SELECT 
                         rd.id, 
@@ -1993,6 +2032,146 @@ exports.findAllTipoTrabajo = async (req, res) => {
       res.status(200).send(salida);
     }
   } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+exports.creaReporteDiarioMovil = async (req, res) => {
+  //metodo POST
+  /*  #swagger.tags = ['Obras - Movil - Reporte diario']
+    #swagger.description = 'Crea un nuevo Reporte Diario' 
+    #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos encabezado reporte diario',
+            required: true,
+            schema: {
+                    "sdi": "11111",
+                    "gestor_cliente": "Nombre gestor",
+                    "id_area": 1,
+                    "brigada_pesada": true,
+                    "hora_salida_base": "YYYY-MM-DDTHH:NN:SS",
+                    "hora_llegada_terreno": "YYYY-MM-DDTHH:NN:SS",
+                    "hora_salida_terreno": "YYYY-MM-DDTHH:NN:SS",
+                    "hora_llegada_base": "YYYY-MM-DDTHH:NN:SS",
+                    "alimentador": "Nombre alimentador",
+                    "comuna": "07301",
+                    "nro_documento": "1111111",
+                    "flexiapps": [
+                      {
+                        "flexiapp": "1111111"
+                      },
+                      {
+                        "flexiapp": "1111111"
+                      }
+                    ],
+                    "recargo_hora": 3,
+                    "referencia": "Observación",
+                    "nro_oc": "1111111",
+                    "det_actividad": [
+                      {
+                        "tActividad": 16,
+                        "tOperacion": 1,
+                        "mActividad": 376,
+                        "cantidad": 1
+                      },
+                      {
+                        "tActividad": 13,
+                        "tOperacion": 1,
+                        "mActividad": 201,
+                        "cantidad": 5
+                      }
+                    ]
+                 }
+    }*/
+
+  try {
+
+    const IDataInputSchema = z.object({
+      sdi: z.string().optional(),
+      gestor_cliente: z.string().optional(),
+      id_area: z.number(),
+      brigada_pesada: z.boolean(),
+      hora_salida_base: z.string(),
+      hora_llegada_terreno: z.string(),
+      hora_salida_terreno: z.string(),
+      hora_llegada_base: z.string(),
+      alimentador: z.string(),
+      comuna: z.string(),
+      nro_documento: z.string().optional(),
+      flexiapps: z.array(z.object({
+        flexiapp: z.string()
+      })).optional(),
+      recargo_hora: z.number().optional(),
+      referencia: z.string(),
+      nro_oc: z.string(),
+      det_actividad: z.array(z.object({
+        tActividad: z.number(),
+        tOperacion: z.number(),
+        mActividad: z.number(),
+        cantidad: z.number()
+      })).optional()
+    })
+
+    const datos = IDataInputSchema.parse(req.body);
+    console.log('datos',req.body);
+
+    //determina el usario que está modificando
+    let id_usuario = req.userId;
+    let user_name;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    sql = "select username from _auth.users where id = " + id_usuario;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      user_name = data[0].username;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
+
+    if (!datos) {
+      res.status(400).send({ message: "No se recibieron datos" });
+      return;
+    }
+
+    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+
+    const movil_reporteDiario = {
+      usuario_rut: user_name,
+      fecha_insert: fechahoy,
+      fecha_update: fechahoy,
+      estado: 'NUEVO',
+      datos: datos
+    
+    }
+
+    
+    const t = await sequelize.transaction();
+    let salida = {};
+    try {
+      salida = {"error": false, "message": "Reporte diario ingresado ok"};
+      await MovilReporteDiario.create(movil_reporteDiario, { transaction: t });
+      await t.commit();
+    } catch (error) {
+      salida = { error: true, message: error }
+      await t.rollback();
+    }
+    if (salida.error) {
+      console.log("error (1)", salida.message);
+      if (salida.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
+        res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
+      }else{
+        res.status(400).send(salida.message);
+      }
+    }else {
+      res.status(200).send(salida);
+    }
+
+  } catch (error) {
+    console.log("error (2)", error);
     res.status(500).send(error);
   }
 }
