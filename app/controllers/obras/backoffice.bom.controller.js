@@ -787,7 +787,8 @@ exports.findBomByParametros = async (req, res) => {
             } catch (error) {
               if (error instanceof ZodError) {
                 console.log('INombreHojaSchema -> ', error.issues);
-                const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                //const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                const mensaje = 'El nombre de la hoja excel debe ser el número de reserva'
                 res.status(400).send(mensaje);  //bad request
                 return;
               }
@@ -817,8 +818,9 @@ exports.findBomByParametros = async (req, res) => {
               materiales = IArrayDataExcelSchema.parse(jsonData);
             } catch (error) {
               if (error instanceof ZodError) {
-                console.log('IArrayDataExcelSchema -> ', error.issues);
-                const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                //console.log('IArrayDataExcelSchema -> ', error.issues);
+                //const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                const mensaje = 'El formato del archivo excel es incorrecto, revisar por favor'
                 res.status(400).send(mensaje);  //bad request
                 return;
               }
@@ -2027,6 +2029,63 @@ exports.findBomByParametros = async (req, res) => {
       res.status(500).send(error);
     } 
 
+  }
+  /***********************************************************************************/
+  /* Genera archivo excel con listado de materiales para una reserva
+  ;
+  */
+  exports.getExcelReserva = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Genera archivo excel con listado de materiales para una reserva' */
+
+
+    const dataInput = {
+      codigo_reserva: req.query.codigo_reserva
+    }
+    try {
+
+      // Crear un nuevo documento Excel en memoria
+      let workbook = new excel.Workbook();
+      let worksheet = workbook.addWorksheet("Tutorials");
+      let tutorials = [{
+        id: 1,
+        title: "Tutorial 1",
+        description: "This is tutorial 1",
+        published: "Yes",
+      }, {
+        id: 2,
+        title: "Tutorial 2",
+        description: "This is tutorial 2",
+        published: "No",
+      }];
+
+      worksheet.columns = [
+        { header: "Id", key: "id", width: 5 },
+        { header: "Title", key: "title", width: 25 },
+        { header: "Description", key: "description", width: 25 },
+        { header: "Published", key: "published", width: 10 },
+      ];
+
+      // Add Array Rows
+      worksheet.addRows(tutorials);
+
+      // res is a Stream object
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=" + "tutorials.xlsx"
+      );
+      
+      return workbook.xlsx.write(res).then(function () {
+        res.status(200).end();
+      });
+      
+    } catch (error) {
+      res.status(500).send(error);
+    }
   }
 /***********************************************************************************/
   /* Crea listado de materiales para salida a faena desde bodega
