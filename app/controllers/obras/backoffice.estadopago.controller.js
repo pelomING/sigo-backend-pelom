@@ -625,7 +625,7 @@ exports.creaEstadoPago = async (req, res) => {
     const nombreObra = obraInfo.nombre_obra?obraInfo.nombre_obra:undefined;
     const numeroOc = req.body.numero_oc //obraInfo.numero_oc?obraInfo.numero_oc:undefined;
 
-    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
     const fecha_estado_pago = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
@@ -898,7 +898,7 @@ exports.creaEstadoPago_v2 = async (req, res) => {
     const nombreObra = obraInfo.nombre_obra?obraInfo.nombre_obra:undefined;
     const numeroOc = req.body.numero_oc //obraInfo.numero_oc?obraInfo.numero_oc:undefined;
 
-    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
     const fecha_estado_pago = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
@@ -1647,7 +1647,7 @@ exports.updateEstadoPagoGestionado = async (req, res) => {
       return;
     })
 
-    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
     const estadoPagoHistorial = {

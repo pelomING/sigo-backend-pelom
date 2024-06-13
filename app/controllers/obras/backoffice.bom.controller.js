@@ -2046,7 +2046,12 @@ exports.findBomByParametros = async (req, res) => {
 
       // Crear un nuevo documento Excel en memoria
       let workbook = new excel.Workbook();
-      let worksheet = workbook.addWorksheet("Tutorials");
+      workbook.creator = 'Héctor';
+      workbook.lastModifiedBy = 'Bot';
+      workbook.created = new Date(2024, 6, 13);
+      workbook.modified = new Date();
+      workbook.lastPrinted = new Date(2024, 6, 13);
+      let worksheet = workbook.addWorksheet("Reserva");
       let tutorials = [{
         id: 1,
         title: "Tutorial 1",
@@ -2059,15 +2064,29 @@ exports.findBomByParametros = async (req, res) => {
         published: "No",
       }];
 
-      worksheet.columns = [
+      /*worksheet.columns = [
         { header: "Id", key: "id", width: 5 },
         { header: "Title", key: "title", width: 25 },
         { header: "Description", key: "description", width: 25 },
         { header: "Published", key: "published", width: 10 },
-      ];
+      ];*/
+      worksheet.addRow(['Nombre Obra', 'Maule'])
+      worksheet.addRow(['Fecha', '2024-06-13'])
+      worksheet.addRow(['Responsable', 'Héctor'])
+      worksheet.addRow(['Numero reserva', dataInput.codigo_reserva])
+      //Saltar una línea
+      worksheet.addRow([])
+
+      // Add Header Row
+      const headerRow = worksheet.addRow(["ID", "Title", "Description", "Published"]);
+      headerRow.font = { bold: true };
 
       // Add Array Rows
-      worksheet.addRows(tutorials);
+      //worksheet.addRows(tutorials);
+      for (const tutorial of tutorials) {
+        const tutorialRow = worksheet.addRow([tutorial.id, tutorial.title, tutorial.description, tutorial.published]);
+        
+      }
 
       // res is a Stream object
       res.setHeader(
@@ -2084,6 +2103,7 @@ exports.findBomByParametros = async (req, res) => {
       });
       
     } catch (error) {
+      console.log(error);
       res.status(500).send(error);
     }
   }
