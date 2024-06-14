@@ -136,6 +136,7 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/material/v1/bom_inicial_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomZero);
     app.get("/api/obras/backoffice/material/v1/bom_actual_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomFinal);
     app.get("/api/obras/backoffice/material/v1/exportarexcel", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelReserva);
+    app.get("/api/obras/backoffice/material/v1/exportarexceltodo", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelReservaPorObra);
     app.post("/api/obras/backoffice/material/v1/crealistafaena", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createListaFaena);
 
     //app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo);

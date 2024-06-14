@@ -2044,49 +2044,185 @@ exports.findBomByParametros = async (req, res) => {
     }
     try {
 
+        let id_usuario = req.userId;
+        let rut_usuario;
+        let nombre_persona;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const sql_usuario = `select username, (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                          CASE
+                              WHEN p.apellido_2 IS NULL THEN ''::character varying
+                              ELSE p.apellido_2
+                          END::text AS persona from _auth.users u join _auth.personas p
+                              on u.username = p.rut
+                              where u.id = ${id_usuario}`;
+        await sequelize.query(sql_usuario, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          rut_usuario = data[0].username;
+          nombre_persona = data[0].persona;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+
+
+        const IDataInputSchema = z.object({
+          codigo_reserva: IReservaSchema,
+        });
+
+        const IDataOutputSchema = IReservaHeaderSchema.extend({
+          nombre_obra: z.string(),
+          materiales: z.array(IMaterialCantidadUsuarioSchema),
+        })
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const cod_reserva = validated.codigo_reserva;
+        const sql = ` SELECT e.reserva,
+                          f.id_obra,
+                          (select nombre_obra from obras.obras where id = f.id_obra) nombre_obra,
+                          e.fecha_hora::text AS fecha_hora,
+                          e.rut_usuario,
+                          e.persona,
+                          f.materiales
+                        FROM ( SELECT DISTINCT ON (mbi.cod_reserva) mbi.cod_reserva AS reserva,
+                                  mbi.fecha_movimiento AS fecha_hora,
+                                  mbi.rut_usuario,
+                                  (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                                      CASE
+                                          WHEN p.apellido_2 IS NULL THEN ''::character varying
+                                          ELSE p.apellido_2
+                                      END::text AS persona
+                                FROM obras.mat_bom_ingresos mbi
+                                  JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                                ORDER BY mbi.cod_reserva, mbi.fecha_movimiento DESC) e
+                          JOIN ( SELECT b.reserva,
+                                  b.id_obra,
+                                  array_agg(b.material) AS materiales
+                                FROM ( SELECT a.reserva,
+                                          a.id_obra,
+                                          json_build_object('sap_material', a.sap_material, 'cantidad', a.cantidad, 
+                                          'fecha_ingreso', a.fecha_ingreso, 'rut_usuario', a.rut_usuario, 'persona', a.persona) 
+                                            AS material
+                                        FROM ( SELECT DISTINCT ON (mbi.cod_reserva, mbi.codigo_sap_material) mbi.id,
+                                                  mbi.id_obra,
+                                                  mbi.cod_reserva AS reserva,
+                                                  row_to_json(mm.*) AS sap_material,
+                                                  mbi.cantidad_requerida_new AS cantidad,
+                                                  mbi.fecha_movimiento::text AS fecha_ingreso,
+                                                  mbi.rut_usuario,
+                                                  (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                                                      CASE
+                                                          WHEN p.apellido_2 IS NULL THEN ''::character varying
+                                                          ELSE p.apellido_2
+                                                      END::text AS persona
+                                                FROM obras.mat_bom_ingresos mbi
+                                                  JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                                                  LEFT JOIN ( SELECT mm_1.codigo_sap,
+                                                          mm_1.descripcion,
+                                                          mu.codigo_corto AS unidad
+                                                        FROM obras.maestro_materiales mm_1
+                                                          JOIN obras.maestro_unidades mu ON mm_1.id_unidad = mu.id) mm 
+                                                          ON mbi.codigo_sap_material = mm.codigo_sap
+                                                WHERE mbi.cod_reserva = ${cod_reserva}
+                                                ORDER BY mbi.cod_reserva, mbi.codigo_sap_material, mbi.fecha_movimiento DESC) a) b
+                                GROUP BY b.reserva, b.id_obra) f USING (reserva);`;
+
+        let resultado_consulta = {};
+        const reservas = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (reservas) {
+          const data = IArrayDataOutputSchema.parse(reservas);
+          if (data.length > 0)
+            resultado_consulta = data[0];
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+
+
       // Crear un nuevo documento Excel en memoria
       let workbook = new excel.Workbook();
-      workbook.creator = 'Héctor';
-      workbook.lastModifiedBy = 'Bot';
-      workbook.created = new Date(2024, 6, 13);
+      workbook.creator = nombre_persona;
+      workbook.lastModifiedBy = nombre_persona;
+      workbook.created = new Date();
       workbook.modified = new Date();
-      workbook.lastPrinted = new Date(2024, 6, 13);
+      workbook.lastPrinted = new Date();
       let worksheet = workbook.addWorksheet("Reserva");
-      let tutorials = [{
-        id: 1,
-        title: "Tutorial 1",
-        description: "This is tutorial 1",
-        published: "Yes",
-      }, {
-        id: 2,
-        title: "Tutorial 2",
-        description: "This is tutorial 2",
-        published: "No",
-      }];
 
-      /*worksheet.columns = [
-        { header: "Id", key: "id", width: 5 },
-        { header: "Title", key: "title", width: 25 },
-        { header: "Description", key: "description", width: 25 },
-        { header: "Published", key: "published", width: 10 },
-      ];*/
-      worksheet.addRow(['Nombre Obra', 'Maule'])
-      worksheet.addRow(['Fecha', '2024-06-13'])
-      worksheet.addRow(['Responsable', 'Héctor'])
-      worksheet.addRow(['Numero reserva', dataInput.codigo_reserva])
+      worksheet.properties.defaultColWidth = 25;
+      if (resultado_consulta == {}) {
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+        res.setHeader(
+          "Content-Disposition",
+          "attachment; filename=" + "tutorials.xlsx"
+        );
+        
+        return workbook.xlsx.write(res).then(function () {
+          res.status(200).end();
+        });
+      }
+
+      let detalle_material = resultado_consulta.materiales;
+
+      worksheet.addRow(['Nombre Obra', resultado_consulta.nombre_obra])
+      worksheet.getCell('A1').font = { bold: true };
+      worksheet.getCell('A1').border = { top: { style: "bold" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+
+      worksheet.addRow(['Fecha', resultado_consulta.fecha_hora])
+      worksheet.getCell('A2').font = { bold: true };
+      /*
+      worksheet.getCell('A2').fill = {
+        type: 'gradient',
+        gradient: 'path',
+        center:{left:0.5,top:0.5},
+        stops: [
+          {position:0, color:{argb:'FFFF0000'}},
+          {position:1, color:{argb:'FF00FF00'}}
+        ]
+      };*/
+
+      worksheet.addRow(['Responsable', resultado_consulta.rut_usuario + ' ' + resultado_consulta.persona])
+      worksheet.getCell('A3').font = { bold: true };
+
+      worksheet.addRow(['Numero reserva', resultado_consulta.reserva])
+      worksheet.getCell('A4').font = { bold: true };
+      worksheet.getCell('B4').alignment = { horizontal: 'left' };
       //Saltar una línea
       worksheet.addRow([])
 
       // Add Header Row
-      const headerRow = worksheet.addRow(["ID", "Title", "Description", "Published"]);
+      const headerRow = worksheet.addRow(["Código SAP", "Cantidad", "Unidad", "Descripción"]);
       headerRow.font = { bold: true };
+      headerRow.border = { 
+        top: { style: "double", color: {argb:'045565'} }, 
+        left: { style: "double", color: {argb:'045565'} }, 
+        bottom: { style: "double", color: {argb:'045565'} }, 
+        right: { style: "double", color: {argb:'045565'} } };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern:'solid',
+        fgColor:{argb:'28D4F6'}
+      };
 
       // Add Array Rows
       //worksheet.addRows(tutorials);
-      for (const tutorial of tutorials) {
-        const tutorialRow = worksheet.addRow([tutorial.id, tutorial.title, tutorial.description, tutorial.published]);
+      for (const detalle of detalle_material) {
+        const detalleRow = worksheet.addRow([detalle.sap_material.codigo_sap, detalle.cantidad, detalle.sap_material.unidad, detalle.sap_material.descripcion]);
+        detalleRow.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        detalleRow.alignment = { horizontal: 'left' };
         
       }
+
+      const firstColumn = worksheet.getColumn(1);
+      firstColumn.width = 40;
+
 
       // res is a Stream object
       res.setHeader(
@@ -2107,6 +2243,210 @@ exports.findBomByParametros = async (req, res) => {
       res.status(500).send(error);
     }
   }
+  /***********************************************************************************/
+  /* Genera archivo excel con listado de materiales totales para una obra
+  ;
+  */
+ exports.getExcelReservaPorObra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Genera archivo excel con listado de materiales totales para una obra' */
+
+
+      const dataInput = {
+        id_obra: req.query.id_obra
+      }
+      try {
+  
+          let id_usuario = req.userId;
+          let rut_usuario;
+          let nombre_persona;
+          const { QueryTypes } = require('sequelize');
+          const sequelize = db.sequelize;
+          const sql_usuario = `select username, (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                            CASE
+                                WHEN p.apellido_2 IS NULL THEN ''::character varying
+                                ELSE p.apellido_2
+                            END::text AS persona from _auth.users u join _auth.personas p
+                                on u.username = p.rut
+                                where u.id = ${id_usuario}`;
+          await sequelize.query(sql_usuario, {
+            type: QueryTypes.SELECT
+          }).then(data => {
+            rut_usuario = data[0].username;
+            nombre_persona = data[0].persona;
+          }).catch(err => {
+            res.status(500).send(err.message );
+            return;
+          })
+  
+  
+          
+  
+          const IDataInputSchema = z.object({
+            id_obra: z.coerce.number(),
+          });
+  
+          const IMaterialParaReservaConReservasSchema = IMaterialCantidadSchema.extend({
+            reservas: z.array(IReservaSchema)
+          })
+  
+          const IDataOutputSchema = z.object({
+            id_obra: z.coerce.number(),
+            nombre_obra: z.string(),
+            codigo_obra: z.string(),
+            materiales: z.array(IMaterialParaReservaConReservasSchema)
+          })
+  
+          const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+  
+          const validated = IDataInputSchema.parse(dataInput);
+
+          const sql = ` SELECT id_obra, 
+	(select nombre_obra from obras.obras where id = id_obra) nombre_obra,
+    (select codigo_obra from obras.obras where id = id_obra) codigo_obra,
+	array_agg(material) as materiales
+                            FROM
+                          (SELECT n.id_obra, json_build_object(
+                                      'sap_material', json_build_object('codigo_sap', n.codigo_sap_material, 
+                                                      'descripcion', mm.descripcion, 'unidad', mu.codigo_corto),
+                                      'cantidad', sum(n.cantidad_requerida_new),
+                                      'reservas', array_agg(n.cod_reserva)) as material
+                                              FROM ( SELECT DISTINCT ON (m.cod_reserva, m.codigo_sap_material) m.id_obra, m.cod_reserva,
+                                                        m.codigo_sap_material,
+                                                        m.cantidad_requerida_new
+                                                      FROM ( SELECT mbi.id,
+                                                                mbi.id_obra,
+                                                                mbi.cod_reserva,
+                                                                mbi.codigo_sap_material,
+                                                                mbi.cantidad_requerida_old,
+                                                                mbi.cantidad_requerida_new,
+                                                                mbi.tipo_movimiento,
+                                                                mbi.fecha_movimiento,
+                                                                mbi.rut_usuario
+                                                              FROM obras.mat_bom_ingresos mbi
+                                                                JOIN obras.mat_bom_reservas mbr ON mbi.cod_reserva = mbr.reserva
+                                                              WHERE mbr.id_obra = ${validated.id_obra}) m
+                                                      ORDER BY m.cod_reserva, m.codigo_sap_material, m.fecha_movimiento DESC) n
+                                                JOIN obras.maestro_materiales mm ON n.codigo_sap_material = mm.codigo_sap
+                                                JOIN obras.maestro_unidades mu ON mm.id_unidad = mu.id
+                                              GROUP BY n.id_obra, n.codigo_sap_material, mm.descripcion, mu.codigo_corto
+                                              ORDER BY n.codigo_sap_material) A
+                          GROUP BY id_obra`;
+  
+          let resultado_consulta = {};
+          const reservas = await sequelize.query(sql, { type: QueryTypes.SELECT });
+          if (reservas) {
+            const data = IArrayDataOutputSchema.parse(reservas);
+            if (data.length > 0)
+              resultado_consulta = data[0];
+          }else
+          {
+            res.status(500).send("Error en la consulta (servidor backend)");
+            return;
+          }
+  
+  
+        // Crear un nuevo documento Excel en memoria
+        let workbook = new excel.Workbook();
+        workbook.creator = nombre_persona;
+        workbook.lastModifiedBy = nombre_persona;
+        workbook.created = new Date();
+        workbook.modified = new Date();
+        workbook.lastPrinted = new Date();
+        let worksheet = workbook.addWorksheet("Reserva");
+  
+        worksheet.properties.defaultColWidth = 25;
+        if (resultado_consulta == {}) {
+          res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          );
+          res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=" + "tutorials.xlsx"
+          );
+          
+          return workbook.xlsx.write(res).then(function () {
+            res.status(200).end();
+          });
+        }
+  
+        //const nombre_archivo = `Reserva_${resultado_consulta.codigo_obra}_${new Date().toLocaleString()}`
+        const nombre_archivo = `reserva_${resultado_consulta.codigo_obra}`
+        console.log('nombre_archivo', nombre_archivo)
+        let detalle_material = resultado_consulta.materiales;
+  
+        worksheet.addRow(['Nombre Obra', resultado_consulta.nombre_obra])
+        worksheet.getCell('A1').font = { bold: true };
+        worksheet.getCell('A1').border = { top: { style: "bold" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+  
+        worksheet.addRow(['Código obra', resultado_consulta.codigo_obra])
+        worksheet.getCell('A2').font = { bold: true };
+        worksheet.getCell('A2').border = { top: { style: "bold" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        /*
+        worksheet.getCell('A2').fill = {
+          type: 'gradient',
+          gradient: 'path',
+          center:{left:0.5,top:0.5},
+          stops: [
+            {position:0, color:{argb:'FFFF0000'}},
+            {position:1, color:{argb:'FF00FF00'}}
+          ]
+        };*/
+        //Saltar una línea
+        worksheet.addRow([])
+  
+        // Add Header Row
+        const headerRow = worksheet.addRow(["Código SAP", "Cantidad", "Unidad", "Reservas", "Descripción"]);
+        headerRow.font = { bold: true };
+        headerRow.border = { 
+          top: { style: "double", color: {argb:'045565'} }, 
+          left: { style: "double", color: {argb:'045565'} }, 
+          bottom: { style: "double", color: {argb:'045565'} }, 
+          right: { style: "double", color: {argb:'045565'} } };
+        headerRow.fill = {
+          type: 'pattern',
+          pattern:'solid',
+          fgColor:{argb:'28D4F6'}
+        };
+  
+        // Add Array Rows
+        for (const detalle of detalle_material) {
+          const detalleRow = worksheet.addRow([detalle.sap_material.codigo_sap, 
+            detalle.cantidad, 
+            detalle.sap_material.unidad, 
+            detalle.reservas,
+            detalle.sap_material.descripcion, 
+            ]);
+          detalleRow.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+          detalleRow.alignment = { horizontal: 'left' };
+          
+        }
+  
+        const firstColumn = worksheet.getColumn(1);
+        firstColumn.width = 40;
+  
+  
+        // res is a Stream object
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+        res.setHeader(
+          "Content-Disposition",
+          "attachment; filename=" + `${nombre_archivo}.xlsx`
+        );
+        
+        return workbook.xlsx.write(res).then(function () {
+          res.status(200).end();
+        });
+        
+      } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+      }
+   
+ }
 /***********************************************************************************/
   /* Crea listado de materiales para salida a faena desde bodega
   ;
