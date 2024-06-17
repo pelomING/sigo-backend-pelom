@@ -381,7 +381,7 @@ exports.createObra = async (req, res) => {
           recargo_distancia: req.body.recargo_distancia?req.body.recargo_distancia.id:null
 
       }
-      const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+      const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
       const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
       const obra_historial = {
@@ -536,7 +536,7 @@ exports.updateObra = async (req, res) => {
       recargo_distancia: req.body.recargo_distancia?req.body.recargo_distancia.id:undefined
 
   }
-        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
         const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
         const obra_historial = {
           id_obra: id,
@@ -682,7 +682,7 @@ exports.deleteObra = async (req, res) => {
       return;
     })
 
-    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
     const obra_historial = {
       id_obra: id,
@@ -788,7 +788,7 @@ exports.paralizaObra = async (req, res) => {
           return;
         })
     
-        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
         const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
         const obra_historial = {
@@ -906,7 +906,7 @@ exports.cierreObra = async (req, res) => {
           return;
         })
     
-        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
         const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
         const obra_historial = {

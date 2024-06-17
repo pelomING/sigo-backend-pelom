@@ -1415,7 +1415,7 @@ exports.permanenciaByBrigada = async (req, res) => {
       if (param_fecha_fin.length == 10){
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
-        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
         fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
       }else {
@@ -1578,7 +1578,7 @@ exports.findHorasExtras = async (req, res) => {
         if (param_fecha_fin.length == 10){
           //ok
           param_fecha_fin = param_fecha_fin + " 23:59:59";
-          let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+          let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
           fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
           condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
         }else {
@@ -1664,7 +1664,7 @@ exports.findTurnosAdicionales = async (req, res) => {
       if (param_fecha_fin.length == 10){
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
-        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
         fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
       }else {
@@ -1742,7 +1742,7 @@ exports.findTurnosContingencia = async (req, res) => {
       if (param_fecha_fin.length == 10){
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
-        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
         fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora_ini <= '${fecha}'::timestamp`;
       }else {
@@ -1814,7 +1814,7 @@ exports.findProduccionPxQ = async (req, res) => {
       if (param_fecha_fin.length == 10){
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
-        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
         fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
       }else {
@@ -1899,7 +1899,7 @@ exports. findRepCobroAdicional = async (req, res) => {
       if (param_fecha_fin.length == 10){
         //ok
         param_fecha_fin = param_fecha_fin + " 23:59:59";
-        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
         fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
         condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
       }else {
@@ -1964,7 +1964,7 @@ exports.findRepDescuentos = async (req, res) => {
           if (param_fecha_fin.length == 10){
             //ok
             param_fecha_fin = param_fecha_fin + " 23:59:59";
-            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
             fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
             condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
           }else {
@@ -2028,7 +2028,7 @@ exports. findRepResumen = async (req, res) => {
           if (param_fecha_fin.length == 10){
             //ok
             param_fecha_fin = param_fecha_fin + " 23:59:59";
-            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
             fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
             condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
             condicion_fecha_permanencia = `and fecha_hora_ini <= '${fecha}'::timestamp`;
@@ -2974,7 +2974,7 @@ exports.detallePxQ = async (req, res) => {
           if (param_fecha_fin.length == 10){
             //ok
             param_fecha_fin = param_fecha_fin + " 23:59:59";
-            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
             fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " 23:59:59";
             condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
           }else {
@@ -3095,7 +3095,7 @@ exports.cierraEstadoPago = async (req, res) => {
           if (param_fecha_fin.length == 10){
             //ok
             param_fecha_fin = param_fecha_fin + " 23:59:59";
-            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {timeZone: "America/Santiago"});
+            let fecha = new Date(param_fecha_fin).toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
             fecha = fecha.slice(6,10) + "-" + fecha.slice(3,5) + "-" + fecha.slice(0,2) + " " + fecha.slice(12)
             condicion_fecha = `and fecha_hora <= '${fecha}'::timestamp`;
             condicion_fecha_permanencia = `and fecha_hora_ini <= '${fecha}'::timestamp`;
@@ -3106,7 +3106,7 @@ exports.cierraEstadoPago = async (req, res) => {
         }
 
         const codigo_estado = 'Z1-Z3-SAE-' + Math.floor(Math.random() * 999).toString() + '-' + req.body.periodo;
-        let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        let fecha_hoy = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
         fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2) + " " + fecha_hoy.slice(12,20);
 
 

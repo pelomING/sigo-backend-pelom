@@ -48,7 +48,7 @@ exports.signin = async (req, res) => {
   /*  #swagger.tags = ['Autenticación']
       #swagger.description = 'Login de usuario' */
   try {
-    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
     const fechoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12)
   
 

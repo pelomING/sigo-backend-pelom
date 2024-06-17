@@ -504,7 +504,7 @@ exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
        const encabezadoReporte = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
        let salida = [];
        if (encabezadoReporte) {
-        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
         const fecha_hoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
 
          for (const element of encabezadoReporte) {
@@ -998,7 +998,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         })
 
         //determina fecha actual
-        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
         const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
         const fec_new = Number(req.body.fecha_reporte.substring(0,4) + req.body.fecha_reporte.substring(5,7) + req.body.fecha_reporte.substring(8,10))
@@ -1322,7 +1322,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
 
 
     //determina fecha actual
-    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
     //estado visita agendada = 2
@@ -2135,7 +2135,7 @@ exports.creaReporteDiarioMovil = async (req, res) => {
       return;
     }
 
-    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
 
