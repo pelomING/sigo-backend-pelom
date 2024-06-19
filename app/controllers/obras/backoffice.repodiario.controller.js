@@ -2045,10 +2045,12 @@ exports.creaReporteDiarioMovil = async (req, res) => {
             description: 'Datos encabezado reporte diario',
             required: true,
             schema: {
+                    "jefe_faena": "19113380-3",
                     "sdi": "11111",
                     "gestor_cliente": "Nombre gestor",
                     "id_area": 1,
                     "brigada_pesada": true,
+                    "fecha_reporte": "2024-06-19",
                     "hora_salida_base": "YYYY-MM-DDTHH:NN:SS",
                     "hora_llegada_terreno": "YYYY-MM-DDTHH:NN:SS",
                     "hora_salida_terreno": "YYYY-MM-DDTHH:NN:SS",
@@ -2080,6 +2082,14 @@ exports.creaReporteDiarioMovil = async (req, res) => {
                         "mActividad": 201,
                         "cantidad": 5
                       }
+                    ],
+                    "det_otros": [
+                      { "glosa": "test Glosa", 
+                       "valor_unitario": 50, 
+                       "cantidad": 4 },
+                      { "glosa": "test 2 Glosa", 
+                       "valor_unitario": 100, 
+                       "cantidad": 1 }
                     ]
                  }
     }*/
@@ -2087,10 +2097,12 @@ exports.creaReporteDiarioMovil = async (req, res) => {
   try {
 
     const IDataInputSchema = z.object({
+      jefe_faena: z.string(),
       sdi: z.string().optional(),
       gestor_cliente: z.string().optional(),
       id_area: z.number(),
       brigada_pesada: z.boolean(),
+      fecha_reporte: z.string(),
       hora_salida_base: z.string(),
       hora_llegada_terreno: z.string(),
       hora_salida_terreno: z.string(),
@@ -2101,15 +2113,20 @@ exports.creaReporteDiarioMovil = async (req, res) => {
       flexiapps: z.array(z.object({
         flexiapp: z.string()
       })).optional(),
-      recargo_hora: z.number().optional(),
+      recargo_hora: z.number(),
       referencia: z.string(),
-      nro_oc: z.string(),
+      nro_oc: z.string().optional(),
       det_actividad: z.array(z.object({
         tActividad: z.number(),
         tOperacion: z.number(),
         mActividad: z.number(),
         cantidad: z.number()
-      })).optional()
+      })).optional(),
+      det_otros: z.array(z.object({
+        glosa: z.string(),
+        valor_unitario: z.number().gte(1),
+        cantidad: z.number().gt(0)
+      }))
     })
 
     const datos = IDataInputSchema.parse(req.body);
