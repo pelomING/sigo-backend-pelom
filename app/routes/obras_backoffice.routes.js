@@ -124,6 +124,7 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/material/v1/obtiene_numero_solicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getNumeroPedido);
     app.post("/api/obras/backoffice/material/v1/creasolicitudmaterial", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createPedidoMaterial);
     app.get("/api/obras/backoffice/material/v1/materialesporsolicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorPedido);
+    app.get("/api/obras/backoffice/material/v1/exportarexcelporpedido", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelMaterialPorPedido);
     app.get("/api/obras/backoffice/material/v1/totalmaterialsolicitadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialSolicitadoPorObra);
     app.get("/api/obras/backoffice/material/v1/totalmaterialreservadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialReservadoPorObra);
 

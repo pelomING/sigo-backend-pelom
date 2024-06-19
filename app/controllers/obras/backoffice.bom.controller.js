@@ -1,4 +1,5 @@
 const db = require("../../models");
+const fs = require('fs');
 const excel = require("exceljs");
 const z = require('zod');
 const ZodError = z.ZodError;
@@ -1574,6 +1575,339 @@ exports.findBomByParametros = async (req, res) => {
     }
 
   }
+   /***********************************************************************************/
+  /* Obtiene archivo excel de materiales para un pedido
+  ;
+  */
+ exports.getExcelMaterialPorPedido = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Genera archivo excel de materiales para un pedido' */
+      try {
+        const dataInput = {
+          id: req.query.id_solicitud
+        }
+
+        const IDataInputSchema = z.object({
+          id: z.coerce.number(),
+        });
+
+        const IDatoObraSchema = z.object({
+
+          codigo_obra: z.coerce.string(),
+          nombre_obra: z.coerce.string(),
+          nombre_supervisor: z.coerce.string(),
+          rut_supervisor: z.coerce.string(),
+          email_supervisor: z.coerce.string(),
+          zona: z.coerce.string()
+          
+        })
+
+        const IDatoMaterialesSchema = z.object({
+          sap_material: ISapMaterialSchema,
+          cantidad: z.coerce.number(),
+          fecha_ingreso: z.coerce.string(),
+          rut_usuario: z.coerce.string(),
+          persona: z.coerce.string()
+          
+        })
+
+        const IDataOutputSchema = z.object({
+          id_obra: z.coerce.number(),
+          obra: IDatoObraSchema,
+          solicitud: z.coerce.number(),
+          materiales: z.array(IDatoMaterialesSchema),
+        });
+
+        let id_usuario = req.userId;
+        let rut_usuario;
+        let nombre_persona;
+        let zona_usuario;
+        let email_usuario;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const sql_usuario = `select username, (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                          CASE
+                              WHEN p.apellido_2 IS NULL THEN ''::character varying
+                              ELSE p.apellido_2
+                          END::text AS persona, z.nombre as zona, u.email from _auth.users u join _auth.personas p
+									        JOIN _comun.base b on p.base = b.id
+								          JOIN _comun.paquete pa on b.id_paquete = pa.id
+								          JOIN _comun.zonal z on pa.id_zonal = z.id
+                              on u.username = p.rut
+                              WHERE u.id = ${id_usuario}`;
+        await sequelize.query(sql_usuario, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          rut_usuario = data[0].username;
+          nombre_persona = data[0].persona;
+          zona_usuario = data[0].zona;
+          email_usuario = data[0].email;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const id = validated.id;
+        const sql = `SELECT id_obra, (SELECT row_to_json(dato) as dato_obra FROM
+							(SELECT codigo_obra, nombre_obra, sc.nombre as nombre_supervisor, sc.rut as rut_supervisor, u.email as email_supervisor
+              , z.nombre as zona
+							FROM obras.obras o JOIN obras.oficina_supervisor os
+							ON o.oficina = os.id JOIN obras.supervisores_contratista sc
+							ON os.supervisor = sc.id  JOIN _comun.zonal z ON o.zona = z.id
+							JOIN _auth.users u ON u.username = replace(sc.rut, '.', '') 
+							WHERE o.id = id_obra) dato) obra, solicitud, array_agg(datos) as materiales
+              FROM
+              (SELECT DISTINCT ON (msd.pedido, msd.codigo_sap_material) 
+                          msd.id,
+                          msd.id_obra,
+                          msd.pedido as solicitud,
+						  json_build_object('sap_material', row_to_json(mm), 
+								'cantidad', msd.cantidad_requerida_new, 
+								'fecha_ingreso', msd.fecha_movimiento::text,
+								'rut_usuario', msd.rut_usuario, 
+								'persona', (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+		                          CASE
+		                              WHEN p.apellido_2 IS NULL THEN ''::character varying
+		                              ELSE p.apellido_2
+		                          END::text) as datos
+                        FROM obras.mat_solicitudes_detalle msd
+                        JOIN _auth.personas p ON msd.rut_usuario::text = p.rut::text
+                      LEFT JOIN (SELECT codigo_sap, texto_breve, descripcion, mu.codigo_corto as unidad
+                        FROM obras.maestro_materiales mm join obras.maestro_unidades mu
+                        ON mm.id_unidad = mu.id) mm 
+                      ON msd.codigo_sap_material = mm.codigo_sap 
+                        WHERE msd.pedido = ${id}
+                        ORDER BY msd.pedido, msd.codigo_sap_material, msd.fecha_movimiento desc) A
+                      GROUP BY id_obra, solicitud`;
+        
+        let resultado_consulta = {};
+        const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (pedidos) {
+          const data = IArrayDataOutputSchema.parse(pedidos);
+          if (data.length > 0)
+            resultado_consulta = data[0];
+          //res.status(200).send(data);
+          //return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+        //Ir a la parte Excel
+        const materiales = resultado_consulta.materiales;
+
+        console.log('resultado_consulta', resultado_consulta)
+
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
+        const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2);
+        const nombre_archivo = `SOLICITUD_MATERIAL_${resultado_consulta.obra.codigo_obra}_${fechahoy}.xlsx`;
+  
+      // Crear un nuevo libro de Excel
+      const workbook = new excel.Workbook();
+      workbook.creator = nombre_persona;
+      workbook.lastModifiedBy = nombre_persona;
+      workbook.created = new Date();
+      workbook.modified = new Date();
+      workbook.lastPrinted = new Date();
+      const worksheet = workbook.addWorksheet('materiales');
+  
+      for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+          //worksheet.getCell(`A${i}`).value = i;
+          if (i === 1) {
+              worksheet.getColumn(i).width = 3;
+          } else  {
+              worksheet.getColumn(i).width = 8;
+          }
+      }
+  
+      worksheet.getCell('B3').value = 'SOLICITUD DE MATERIAL - PROYECTO CGE';
+      worksheet.mergeCells('B3:K3');
+      worksheet.getCell('B3').alignment = { vertical: 'middle', horizontal: 'center' };
+      worksheet.getCell('B3').font = { bold: true, size: 12, color: { argb: 'FF000000' } };
+  
+      worksheet.getCell('B5').value = 'Nombre Solicitante'
+      worksheet.getCell('B5').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B5:C5');
+      worksheet.getCell('B6').value = 'Zona Solicitante'
+      worksheet.getCell('B6').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B6:C6');
+      worksheet.getCell('B7').value = 'Email Solicitante'
+      worksheet.getCell('B7').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B7:C7');
+  
+      worksheet.getCell('I5').value = 'RUT'
+      worksheet.getCell('I5').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.getCell('I6').value = 'Fono'
+      worksheet.getCell('I6').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.getCell('I7').value = 'Fecha'
+      worksheet.getCell('I7').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+
+
+      worksheet.getCell('D5').value = nombre_persona
+      worksheet.getCell('D5').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D5:H5');
+      worksheet.getCell('D6').value = zona_usuario
+      worksheet.getCell('D6').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D6:H6');
+      worksheet.getCell('D7').value = email_usuario
+      worksheet.getCell('D7').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D7:H7');
+
+      worksheet.getCell('B9').value = 'Nombre Supervisor'
+      worksheet.getCell('B9').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B9:C9');
+      worksheet.getCell('B10').value = 'Zona Supervisor'
+      worksheet.getCell('B10').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B10:C10');
+      worksheet.getCell('B11').value = 'Email Supervisor'
+      worksheet.getCell('B11').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B11:C11');
+  
+      worksheet.getCell('I9').value = 'RUT'
+      worksheet.getCell('I9').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.getCell('I10').value = 'Fono'
+      worksheet.getCell('I10').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      //worksheet.getCell('I11').value = 'Fecha'
+      //worksheet.getCell('I11').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+
+      worksheet.getCell('D9').value = resultado_consulta.obra.nombre_supervisor
+      worksheet.getCell('D9').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D9:H9');
+      worksheet.getCell('D10').value = resultado_consulta.obra.zona
+      worksheet.getCell('D10').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D10:H10');
+      worksheet.getCell('D11').value = resultado_consulta.obra.email_supervisor
+      worksheet.getCell('D11').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D11:H11');
+
+      worksheet.getCell('J9').value = resultado_consulta.obra.rut_supervisor
+      worksheet.getCell('J9').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('J9:K9');
+      worksheet.getCell('J10').value = ''
+      worksheet.getCell('J10').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('J10:K10');
+      //worksheet.getCell('J7').value = fechahoy
+      //worksheet.getCell('J7').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      //worksheet.mergeCells('J7:K7');
+  
+      const rowInicial = 15;
+  
+      worksheet.getCell(`B${rowInicial}`).value = 'Id'
+      worksheet.getCell(`B${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      
+      worksheet.getCell(`C${rowInicial}`).value = 'Código'
+      worksheet.getCell(`C${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+  
+      worksheet.getCell(`D${rowInicial}`).value = 'Descripción'
+      worksheet.getCell(`D${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells(`D${rowInicial}:I${rowInicial}`);
+      worksheet.getCell(`D${rowInicial}`).alignment = { vertical: 'middle', horizontal: 'center' };
+  
+      worksheet.getCell(`J${rowInicial}`).value = 'Cant.'
+      worksheet.getCell(`J${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+  
+      worksheet.getCell(`K${rowInicial}`).value = 'Unidad'
+      worksheet.getCell(`K${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+  
+      for (const columna of ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']) {
+          worksheet.getCell(`${columna}${rowInicial}`).border = { 
+              top: { style: "double", color: {argb:'045565'} }, 
+              left: { style: "double", color: {argb:'045565'} }, 
+              bottom: { style: "double", color: {argb:'045565'} }, 
+              right: { style: "double", color: {argb:'045565'} } };
+          worksheet.getCell(`${columna}${rowInicial}`).fill = {
+                  type: 'pattern',
+                  pattern:'solid',
+                  fgColor:{argb:'28D4F6'}
+                };
+      }
+  
+      
+      let cont = 1;
+      for (const elemento of materiales) {
+          worksheet.getCell(`B${rowInicial + cont}`).value = `${cont}`;
+          worksheet.getCell(`C${rowInicial + cont}`).value = `${elemento.sap_material.codigo_sap}`;
+          worksheet.getCell(`D${rowInicial + cont}`).value = `${elemento.sap_material.descripcion}`;
+          worksheet.getCell(`J${rowInicial + cont}`).value = `${elemento.cantidad}`;
+          worksheet.getCell(`K${rowInicial + cont}`).value = `${elemento.sap_material.unidad}`;
+          worksheet.mergeCells(`D${rowInicial + cont}:I${rowInicial + cont}`);
+  
+          for (const columna of ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']) {
+              worksheet.getCell(`${columna}${rowInicial + cont}`).border = { 
+                  left: { style: "thin" }, 
+                  bottom: { style: "thin" }, 
+                  right: { style: "thin" } };
+          }
+          
+          cont += 1;
+      }
+  
+      // Leer la imagen en formato base64
+      const imagePath = './public/assets/images/pelom-logo.png';
+      const imageData = fs.readFileSync(imagePath);
+      const imageBase64 = imageData.toString('base64');
+  
+      // Agregar la imagen al workbook
+      const imageId = workbook.addImage({
+          base64: imageBase64,
+          extension: 'png',
+      });
+  
+      const imageRecuadroPath = './public/assets/images/recuadro1.png';
+      const imageRecuadroData = fs.readFileSync(imageRecuadroPath);
+      const imageRecuadroBase64 = imageRecuadroData.toString('base64');
+      const recuadroID = workbook.addImage({
+          base64: imageRecuadroBase64,
+          extension: 'png',
+      });
+  
+      // Definir la posición y tamaño de la imagen
+      worksheet.addImage(imageId, {
+          tl: { col: 1, row: 0 },  // Top left corner
+          ext: { width: 170, height: 38 }  // Width and height in points
+      });
+  
+      worksheet.addImage(recuadroID, {
+          tl: { col: 1, row: 4 },  // Top left corner
+          ext: { width: 565, height: 70 }  // Width and height in points
+      });
+
+      // res is a Stream object
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=" + `${nombre_archivo}.xlsx`
+      );
+      
+      return workbook.xlsx.write(res).then(function () {
+        res.status(200).end();
+      });
+  
+      // Guardar el archivo de Excel
+      //await workbook.xlsx.writeFile('test.xlsx');
+      //console.log('Archivo Excel creado con imagen.');
+      
+
+
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      console.log(error);
+      res.status(500).send(error);
+    }
+   
+ }
   /***********************************************************************************/
   /* Obtiene listado de todo el materiale que se ha solictado para una obra
   ;

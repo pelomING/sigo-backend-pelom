@@ -1951,6 +1951,41 @@
         }
       }
     },
+    "/api/obras/backoffice/material/v1/exportarexcelporpedido": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Genera archivo excel de materiales para un pedido",
+        "produces": [
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ],
+        "parameters": [
+          {
+            "name": "id_solicitud",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/material/v1/totalmaterialsolicitadoporobra": {
       "get": {
         "tags": [
