@@ -2192,3 +2192,52 @@ exports.creaReporteDiarioMovil = async (req, res) => {
     res.status(500).send(error);
   }
 }
+
+/*********************************************************************************** */
+/* Obtiene todos los reportes diarios que viene de faena
+*/
+exports.findAllReportesDeFaena = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los reportes diarios que viene de faena' */
+      try {
+      
+        const IReporteFaenaSchema = z.object({
+          id: z.coerce.number(),
+          fecha_reporte: z.string(),
+          jefe_faena: z.string().optional().nullable(),
+          referencia: z.coerce.string()
+        })
+
+        const IArrayReporteFaenaSchema = z.array(IReporteFaenaSchema);
+       
+        const sql = `SELECT id,
+              (datos->>'fecha_reporte')::varchar as fecha_reporte,
+              (SELECT nombre FROM obras.jefes_faena WHERE rut = datos->>'jefe_faena') as jefe_faena,
+            (datos->>'referencia')::varchar as referencia
+              FROM movil.reporte_diario 
+            WHERE (datos->>'fecha_reporte')::varchar is not null`
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const reporteFaena = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (reporteFaena) {
+          const data = IArrayReporteFaenaSchema.parse(reporteFaena);
+          if (data.length > 0) 
+            res.status(200).send(data);
+          else
+            res.status(200).send([]);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+      } catch (error) {
+        if (error instanceof ZodError) {
+          console.log(error.issues);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+      }
+}
