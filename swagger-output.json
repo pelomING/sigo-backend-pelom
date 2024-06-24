@@ -3590,12 +3590,44 @@
         }
       }
     },
-    "/api/obras/movil/repodiario/v1/reportesdefaena": {
+    "/api/obras/backoffice/repodiario/v1/reportesdefaena": {
       "get": {
         "tags": [
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Devuelve todos los reportes diarios que viene de faena",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/reportesdefaenaactividad": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Obtiene un reporte diario de faena por id de reporte",
+        "parameters": [
+          {
+            "name": "id_reporte",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
