@@ -197,6 +197,10 @@ module.exports = function(app) {
 
     app.post("/api/obras/movil/repodiario/v1/upload_reportediario", [authJwt.verifyToken, authJwt.createObrasBackofficeRepodiario], backofficeRepodiarioController.creaReporteDiarioMovil);
 
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdefaena", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllReportesDeFaena);
+
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdefaenaactividad", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.getReporteDeFaenaById);
+
 }
 
 

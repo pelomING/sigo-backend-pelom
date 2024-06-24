@@ -3447,6 +3447,10 @@
             "schema": {
               "type": "object",
               "properties": {
+                "jefe_faena": {
+                  "type": "string",
+                  "example": "19113380-3"
+                },
                 "sdi": {
                   "type": "string",
                   "example": "11111"
@@ -3462,6 +3466,10 @@
                 "brigada_pesada": {
                   "type": "boolean",
                   "example": true
+                },
+                "fecha_reporte": {
+                  "type": "string",
+                  "example": "2024-06-19"
                 },
                 "hora_salida_base": {
                   "type": "string",
@@ -3538,9 +3546,86 @@
                       }
                     }
                   }
+                },
+                "det_otros": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "glosa": {
+                        "type": "string",
+                        "example": "test 2 Glosa"
+                      },
+                      "valor_unitario": {
+                        "type": "number",
+                        "example": 100
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
                 }
               }
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/reportesdefaena": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los reportes diarios que viene de faena",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/reportesdefaenaactividad": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Obtiene un reporte diario de faena por id de reporte",
+        "parameters": [
+          {
+            "name": "id_reporte",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {

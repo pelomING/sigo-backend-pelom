@@ -2074,13 +2074,15 @@ exports.creaReporteDiarioMovil = async (req, res) => {
                         "tActividad": 16,
                         "tOperacion": 1,
                         "mActividad": 376,
-                        "cantidad": 1
+                        "cantidad": 1,
+                        actividad_ref: "Descripción actividad (opcional)"
                       },
                       {
                         "tActividad": 13,
                         "tOperacion": 1,
                         "mActividad": 201,
-                        "cantidad": 5
+                        "cantidad": 5,
+                        actividad_ref: "Descripción actividad (opcional)"
                       }
                     ],
                     "det_otros": [
@@ -2096,6 +2098,7 @@ exports.creaReporteDiarioMovil = async (req, res) => {
 
   try {
 
+    
     const IDataInputSchema = z.object({
       jefe_faena: z.string(),
       sdi: z.string().optional(),
@@ -2108,19 +2111,20 @@ exports.creaReporteDiarioMovil = async (req, res) => {
       hora_salida_terreno: z.string(),
       hora_llegada_base: z.string(),
       alimentador: z.string(),
-      comuna: z.string(),
+      comuna: z.string().optional(),
       nro_documento: z.string().optional(),
       flexiapps: z.array(z.object({
         flexiapp: z.string()
       })).optional(),
-      recargo_hora: z.number(),
+      recargo_hora: z.number().optional(),
       referencia: z.string(),
       nro_oc: z.string().optional(),
       det_actividad: z.array(z.object({
         tActividad: z.number(),
         tOperacion: z.number(),
         mActividad: z.number(),
-        cantidad: z.number()
+        cantidad: z.number(),
+        actividad_ref: z.string().optional().nullable(),
       })).optional(),
       det_otros: z.array(z.object({
         glosa: z.string(),
@@ -2191,4 +2195,185 @@ exports.creaReporteDiarioMovil = async (req, res) => {
     console.log("error (2)", error);
     res.status(500).send(error);
   }
+}
+
+/*********************************************************************************** */
+/* Obtiene todos los reportes diarios que viene de faena
+*/
+exports.findAllReportesDeFaena = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los reportes diarios que viene de faena' */
+      try {
+      
+        const IReporteFaenaSchema = z.object({
+          id: z.coerce.number(),
+          fecha_reporte: z.string(),
+          jefe_faena: z.string().optional().nullable(),
+          referencia: z.coerce.string()
+        })
+
+        const IArrayReporteFaenaSchema = z.array(IReporteFaenaSchema);
+       
+        const sql = `SELECT id,
+              (datos->>'fecha_reporte')::varchar as fecha_reporte,
+              (SELECT nombre FROM obras.jefes_faena WHERE rut = datos->>'jefe_faena') as jefe_faena,
+            (datos->>'referencia')::varchar as referencia
+              FROM movil.reporte_diario 
+            WHERE (datos->>'fecha_reporte')::varchar is not null 
+                        AND (datos->>'jefe_faena') is not null`
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const reporteFaena = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (reporteFaena) {
+          const data = IArrayReporteFaenaSchema.parse(reporteFaena);
+          if (data.length > 0) 
+            res.status(200).send(data);
+          else
+            res.status(200).send([]);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+      } catch (error) {
+        if (error instanceof ZodError) {
+          console.log(error.issues);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+      }
+}
+
+/*********************************************************************************** */
+/* Obtiene un reporte diario de faena por id de reporte
+*/
+exports.getReporteDeFaenaById = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Obtiene un reporte diario de faena por id de reporte' */
+      try {
+        const IIdReporteSchema = z.coerce.number().gt(0);
+
+        const id_reporte = IIdReporteSchema.parse(req.query.id_reporte);
+
+        const IDetActividadSchema = z.object({
+          tipo_actividad: z.coerce.number(),
+          tipo_operacion: z.coerce.number(),
+          actividad: z.coerce.number(),
+          cantidad: z.coerce.number()
+        })
+        const IDetOtrosSchema = z.object({
+          glosa: z.coerce.string(),
+          unitario_pesos: z.coerce.number(),
+          cantidad: z.coerce.number()
+        })
+        /*Obligatorios:
+          id
+          fecha_reporte
+          brigada_pesada
+          fecha_entregado
+          fecha_revisado
+          hora_salida_base
+          hora_llegada_terreno
+          hora_salida_terreno
+          hora_llegada_base
+          alimentador
+          referencia
+    
+    */
+        const IReporteFaenaSchema = z.object({
+          id: z.coerce.number(),
+          fecha_reporte: z.string(),
+          jefe_faena: z.object({
+                        id: z.coerce.number(),
+                        nombre: z.coerce.string(),
+                        rut: z.coerce.string()}).optional().nullable(),
+          sdi: z.coerce.string().optional().nullable(),
+          area: z.object({
+                        id: z.coerce.number(),
+                        descripcion: z.coerce.string()}).optional().nullable(),
+          brigada_pesada: z.object({
+                        id: z.coerce.number(),
+                        descripcion: z.coerce.string()}),
+          fecha_entregado: z.coerce.string(),
+          fecha_revisado: z.coerce.string(),
+          hora_salida_base: z.coerce.string(),
+          hora_llegada_terreno: z.coerce.string(),
+          hora_salida_terreno: z.coerce.string(),
+          hora_llegada_base: z.coerce.string(),
+          alimentador: z.coerce.string(),
+          comuna: z.coerce.string().optional().nullable(),
+          num_documento: z.coerce.string().optional().nullable(),
+          flexiapps: z.array(z.coerce.string()).optional().nullable(),
+          recargo_hora: z.coerce.number().optional().nullable(),
+          referencia: z.coerce.string(),
+          numero_oc: z.coerce.string().optional().nullable(),
+          centrality: z.coerce.number().optional().nullable(),
+          det_actividad: z.array(IDetActividadSchema).optional().nullable(),
+          det_otros: z.array(IDetOtrosSchema).optional().nullable()
+        })
+        const IArrayReporteFaenaSchema = z.array(IReporteFaenaSchema);
+        const sql = `SELECT id,
+                        (datos->>'fecha_reporte')::varchar as fecha_reporte,
+                        (select row_to_json(a) from (SELECT id, nombre, rut FROM obras.jefes_faena WHERE rut = datos->>'jefe_faena') a) as jefe_faena,
+                        (datos->>'sdi')::varchar as sdi,
+                        (SELECT row_to_json(a) FROM (SELECT * FROM obras.tipo_trabajo WHERE id = (datos->>'id_area')::integer) a) as area,
+                        CASE WHEN (datos->>'brigada_pesada')::boolean THEN '{"id": 2, "descripcion": "PESADA"}'::json 
+                        ELSE '{"id": 1, "descripcion": "LIVIANA"}'::json END as brigada_pesada,
+                        ("substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 10)::date)::text AS fecha_entregado,
+                        ("substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 10)::date)::text AS fecha_revisado,
+                        ((datos->>'hora_salida_base')::timestamp)::text as hora_salida_base,
+                        ((datos->>'hora_llegada_terreno')::timestamp)::text as hora_llegada_terreno,
+                        ((datos->>'hora_salida_terreno')::timestamp)::text as hora_salida_terreno,
+                        ((datos->>'hora_llegada_base')::timestamp)::text as hora_llegada_base,
+                        
+                        (datos->>'alimentador')::varchar as alimentador,
+                        (datos->>'comuna')::varchar as comuna,
+                        (datos->>'nro_documento')::varchar as num_documento,
+                        (select array_agg(flexiapp)	from
+                          (select flexiapp from json_to_recordset((datos->>'flexiapps')::json) as x(flexiapp varchar))
+                          as flexiapp) as flexiapp,
+                        (datos->>'recargo_hora')::integer as recargo_hora,
+                        (datos->>'referencia')::varchar as referencia,
+                        (datos->>'nro_oc')::varchar as numero_oc,
+                        (datos->>'nro_documento')::varchar as centrality,
+                        (select array_agg(datos) from
+                        (select row_to_json(a) as datos from
+                        (select "tActividad" as tipo_actividad,"tOperacion" as tipo_operacion,"mActividad" as actividad,cantidad 
+                        from json_to_recordset((datos->>'det_actividad')::json) 
+                        as x("tActividad" integer, "tOperacion" integer, "mActividad" integer, cantidad numeric)) a) b) as det_actividad,
+                        (select array_agg(datos) from
+                        (select row_to_json(a) as datos from
+                        (select glosa, valor_unitario as unitario_pesos, cantidad 
+                        from json_to_recordset('[{"glosa":"test Glosa","valor_unitario":50,"cantidad":4},{"glosa":"test 2 Glosa","valor_unitario":100,"cantidad":1}]') 
+                        as x(glosa text, valor_unitario numeric, cantidad numeric)) a) b) as det_otros
+                        FROM movil.reporte_diario
+                        WHERE id = ${id_reporte} AND (datos->>'fecha_reporte')::varchar is not null;`;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const reporteFaena = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (reporteFaena) {
+          const data = IArrayReporteFaenaSchema.parse(reporteFaena);
+          if (data.length > 0) 
+            res.status(200).send(data[0]);
+          else
+            res.status(200).send({});
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+       
+      } catch (error) {
+        if (error instanceof ZodError) {
+          //console.log('ZodError -> ', error);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+      }
 }
