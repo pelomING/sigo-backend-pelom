@@ -201,6 +201,8 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/repodiario/v1/reportesdefaenaactividad", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.getReporteDeFaenaById);
 
+    app.put("/api/obras/backoffice/repodiario/v1/asignareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.createObrasBackofficeRepodiario], backofficeRepodiarioController.grabaRepoFaenaAObra);
+
 }
 
 
