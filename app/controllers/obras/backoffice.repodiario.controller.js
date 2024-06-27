@@ -810,6 +810,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         }
       };
       const id_obra = req.body.id_obra;
+      const id_reporte_movil = req.body.id_reporte_movil;
 
       let jefe_faena;
       if (!req.body.jefe_faena){
@@ -1089,6 +1090,8 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           const obra_creada = obra?await Obra.update(obra, { where: { id: id_obra }, transaction: t }):null;
             
           const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
+
+          const repo_movil = id_reporte_movil?await MovilReporteDiario.update({ estado: 'PROCESADO' }, { where: { id: id_reporte_movil }, transaction: t }):null;
     
           await t.commit();
         } catch (error) {
@@ -2307,12 +2310,14 @@ exports.getReporteDeFaenaById = async (req, res) => {
           }),
           cantidad: z.coerce.number(),
           unitario: z.coerce.number(),
-          total: z.coerce.number()
+          total: z.coerce.number(),
+          observacion: z.coerce.string()
         })
         const IDetOtrosSchema = z.object({
           glosa: z.coerce.string(),
           unitario_pesos: z.coerce.number(),
-          cantidad: z.coerce.number()
+          cantidad: z.coerce.number(),
+          total_pesos: z.coerce.number()
         })
         /*Obligatorios:
           id
@@ -2351,7 +2356,7 @@ exports.getReporteDeFaenaById = async (req, res) => {
           alimentador: z.coerce.string(),
           comuna: z.coerce.string().optional().nullable(),
           num_documento: z.coerce.string().optional().nullable(),
-          flexiapps: z.array(z.coerce.string()).optional().nullable(),
+          flexiapp: z.array(z.coerce.string()).optional().nullable(),
           recargo_hora: z.object({
                         id: z.coerce.number(),
                         nombre: z.coerce.string(),
@@ -2366,48 +2371,48 @@ exports.getReporteDeFaenaById = async (req, res) => {
           det_otros: z.array(IDetOtrosSchema).optional().nullable()
         })
         const IArrayReporteFaenaSchema = z.array(IReporteFaenaSchema);
-        const sql = `SELECT id, null as id_estado_pago, null as estado, null as codigo_pelom, 
-						(select json_build_object('id', id, 'codigo_obra', codigo_obra) as id_obra from obras.obras where id = id_obra_asignada) as id_obra,
-						
+        const sql = `SELECT id, null as id_estado_pago, null as estado, null as codigo_pelom,
+                                                (select json_build_object('id', id, 'codigo_obra', codigo_obra) as id_obra from obras.obras where id = id_obra_asignada) as id_obra,
+
                         (datos->>'fecha_reporte')::varchar as fecha_reporte,
                         (select row_to_json(a) from (SELECT id, nombre, rut FROM obras.jefes_faena WHERE rut = datos->>'jefe_faena') a) as jefe_faena,
                         (datos->>'sdi')::varchar as sdi,
-						'x'::text as supervisor,
-						'1'::text as ito_mandante,
+                                                'x'::text as supervisor,
+                                                '1'::text as ito_mandante,
                         (SELECT row_to_json(a) FROM (SELECT * FROM obras.tipo_trabajo WHERE id = (datos->>'id_area')::integer) a) as area,
-                        CASE WHEN (datos->>'brigada_pesada')::boolean THEN '{"id": 2, "descripcion": "PESADA"}'::json 
+                        CASE WHEN (datos->>'brigada_pesada')::boolean THEN '{"id": 2, "descripcion": "PESADA"}'::json
                         ELSE '{"id": 1, "descripcion": "LIVIANA"}'::json END as brigada_pesada,
-						'x'::text as observaciones,
-						'x'::text as entregado_por_persona,
+                                                'x'::text as observaciones,
+                                                'x'::text as entregado_por_persona,
                         ("substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 10)::date)::text AS fecha_entregado,
-						'x'::text as revisado_por_persona,
+                                                'x'::text as revisado_por_persona,
                         ("substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 10)::date)::text AS fecha_revisado,
-						'x'::text as sector,
+                                                'x'::text as sector,
                         ((datos->>'hora_salida_base')::timestamp)::text as hora_salida_base,
                         ((datos->>'hora_llegada_terreno')::timestamp)::text as hora_llegada_terreno,
                         ((datos->>'hora_salida_terreno')::timestamp)::text as hora_salida_terreno,
                         ((datos->>'hora_llegada_base')::timestamp)::text as hora_llegada_base,
-                        
+
                         (datos->>'alimentador')::varchar as alimentador,
                         (datos->>'comuna')::varchar as comuna,
                         (datos->>'nro_documento')::varchar as num_documento,
-                        (select array_agg(flexiapp)	from
+                        (select array_agg(flexiapp)     from
                           (select flexiapp from json_to_recordset((datos->>'flexiapps')::json) as x(flexiapp varchar))
                           as flexiapp) as flexiapp,
-						(SELECT json_build_object('id', id, 'nombre', nombre, 'id_tipo_recargo', 
-						id_tipo_recargo, 'porcentaje', porcentaje, 'nombre_corto', nombre_corto) as recargo_hora
-						FROM obras.recargos WHERE id = (datos->>'recargo_hora')::integer) as recargo_hora,
+                                                (SELECT json_build_object('id', id, 'nombre', nombre, 'id_tipo_recargo',
+                                                id_tipo_recargo, 'porcentaje', porcentaje, 'nombre_corto', nombre_corto) as recargo_hora
+                                                FROM obras.recargos WHERE id = (datos->>'recargo_hora')::integer) as recargo_hora,
                         (datos->>'referencia')::varchar as referencia,
                         (datos->>'nro_oc')::varchar as numero_oc,
                         (datos->>'nro_documento')::varchar as centrality,
                         (select array_agg(det_actividad) from
                         (select row_to_json(detalle) as det_actividad from
-                        (select row_to_json(top) as tipo_operacion, 
-                          row_to_json(ta) as tipo_actividad, 
+                        (select row_to_json(top) as tipo_operacion,
+                          row_to_json(ta) as tipo_actividad,
                           json_build_object('id', ma.id, 'actividad', ma.actividad, 'tipo_actividad', row_to_json(ta),
                           'uc_instalacion', ma.uc_instalacion, 'uc_retiro', ma.uc_retiro, 'uc_traslado', ma.uc_traslado,
                           'descripcion', ma.descripcion, 'unidad', row_to_json(mu)) as actividad,
-                          a.cantidad, null as encabezado_reporte, 
+                          a.cantidad, null as encabezado_reporte,
                           case when top.id = 1 then ma.uc_instalacion
                           when top.id = 2 then ma.uc_retiro
                           when top.id = 3 then ma.uc_traslado
@@ -2415,16 +2420,21 @@ exports.getReporteDeFaenaById = async (req, res) => {
                           (case when top.id = 1 then ma.uc_instalacion
                           when top.id = 2 then ma.uc_retiro
                           when top.id = 3 then ma.uc_traslado
-                          else 0 end)*a.cantidad as total
+                          else 0 end)*a.cantidad as total,
+						  a.actividad_ref as observacion
                           from
-                        (select "tActividad" as tipo_actividad,"tOperacion" as tipo_operacion,"mActividad" as actividad,cantidad 
-                        from json_to_recordset((datos->>'det_actividad')::json) 
-                        as x("tActividad" integer, "tOperacion" integer, "mActividad" integer, cantidad numeric)) a
+                        (select "tActividad" as tipo_actividad,"tOperacion" as tipo_operacion,"mActividad" as actividad,cantidad, actividad_ref
+                        from json_to_recordset((datos->>'det_actividad')::json)
+                        as x("tActividad" integer, "tOperacion" integer, "mActividad" integer, cantidad numeric, actividad_ref text)) a
                         join obras.maestro_actividades ma on a.actividad = ma.id
                         join obras.tipo_operacion top on a.tipo_operacion = top.id
                         join obras.tipo_actividad ta on a.tipo_actividad = ta.id
                         join obras.maestro_unidades mu on ma.id_unidad = mu.id) as detalle) b) as det_actividad,
-                        null as det_otros
+                        (select array_agg(datos) from
+                        (select row_to_json(a) as datos from
+                        (select glosa, valor_unitario as unitario_pesos, cantidad, valor_unitario*cantidad as total_pesos
+                        from json_to_recordset((datos->>'det_otros')::json) 
+                        as x(glosa text, valor_unitario numeric, cantidad numeric)) a) b) as det_otros
                         FROM movil.reporte_diario
                         WHERE id = ${id_reporte} AND (datos->>'fecha_reporte')::varchar is not null;`;
         const { QueryTypes } = require('sequelize');
