@@ -1091,7 +1091,14 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
             
           const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
 
-          const repo_movil = id_reporte_movil?await MovilReporteDiario.update({ estado: 'PROCESADO' }, { where: { id: id_reporte_movil }, transaction: t }):null;
+          console.log('reporte diario movil', { estado: 'PROCESADO', 
+            id_reporte_procesado: Number(encabezado_reporte_diario.id),
+            fecha_update: fechahoy, 
+            usuario_rut_update: user_name });
+          const repo_movil = id_reporte_movil?await MovilReporteDiario.update({ estado: 'PROCESADO', 
+            id_reporte_procesado: Number(encabezado_reporte_diario.id),
+            fecha_update: fechahoy, 
+            usuario_rut_update: user_name }, { where: { id: id_reporte_movil }, transaction: t }):null;
     
           await t.commit();
         } catch (error) {
@@ -1459,13 +1466,40 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
       #swagger.description = 'Borra un encabezado de reporte diario y sus detalles por ID' */
   try{
     const id = req.params.id;
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
+    const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+    //determina el usario que está modificando
+    let id_usuario = req.userId;
+    let user_name;
+    let sql = "select username from _auth.users where id = " + id_usuario;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      user_name = data[0].username;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
 
     //Primer debe eliminar el detalle actividad por id de encabezado, luego borrar el detalle otros y por ultimo el encabezado
-    const sequelize = db.sequelize;
+
     const result = await sequelize.transaction(async () => {
         let salida = {};
         await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
         await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id } } );
+        console.log('MovilReporteDiario', { estado: 'NUEVO', 
+          id_reporte_procesado: null,
+          fecha_update: fechahoy,
+          usuario_rut_update: user_name, 
+          id_obra_asignada: null });
+
+        await MovilReporteDiario.update({ estado: 'NUEVO', 
+          id_reporte_procesado: null,
+          fecha_update: fechahoy,
+          usuario_rut_update: user_name, 
+          id_obra_asignada: null }, { where: { id_reporte_procesado: Number(id) } });
         await EncabezadoReporteDiario.destroy({
           where: { id: id }
         }).then(data => {
@@ -2232,7 +2266,9 @@ exports.findAllReportesDeFaena = async (req, res) => {
           id: z.coerce.number(),
           fecha_reporte: z.string(),
           jefe_faena: z.string().optional().nullable(),
-          referencia: z.coerce.string()
+          referencia: z.coerce.string(),
+          id_obra_asignada: z.coerce.number().optional().nullable(),
+          codigo_obra: z.coerce.string().optional().nullable(),
         })
 
         const IArrayReporteFaenaSchema = z.array(IReporteFaenaSchema);
@@ -2240,8 +2276,13 @@ exports.findAllReportesDeFaena = async (req, res) => {
         const sql = `SELECT id,
               (datos->>'fecha_reporte')::varchar as fecha_reporte,
               (SELECT nombre FROM obras.jefes_faena WHERE rut = datos->>'jefe_faena') as jefe_faena,
-            (datos->>'referencia')::varchar as referencia
-              FROM movil.reporte_diario 
+            (datos->>'referencia')::varchar as referencia,
+            id_obra_asignada, 
+            (CASE WHEN id_obra_asignada is not null
+				THEN (SELECT codigo_obra FROM obras.obras WHERE id = id_obra_asignada )
+	        ELSE
+				(datos->>'codigo_cged')::text || ' / ' || (datos->>'nro_documento')::text END)::text as codigo_obra
+            FROM movil.reporte_diario 
             WHERE (datos->>'fecha_reporte')::varchar is not null 
                         AND (datos->>'jefe_faena') is not null ${condicion_estado} ${condicion_id_obra}`;
         const { QueryTypes } = require('sequelize');
@@ -2465,7 +2506,7 @@ exports.getReporteDeFaenaById = async (req, res) => {
 }
 
 /*********************************************************************************** */
-/* Obtiene un reporte diario de faena por id de reporte
+/* Asigna un reporte diario de faena a una Obra
 */
 exports.grabaRepoFaenaAObra = async (req, res) => {
   // metodo PUT
@@ -2486,6 +2527,10 @@ exports.grabaRepoFaenaAObra = async (req, res) => {
       id_obra: id_obra, 
       id_reporte: id_reporte});
 
+      console.log('datInput', datInput);
+    const id_usuario = req.userId;
+    console.log('id_usuario', id_usuario);
+
     /*await MovilReporteDiario.update({ id_obra_asignada: datInput.id_obra }, {
       where: { id: datInput.id_reporte }
     }).then(data => {
@@ -2502,8 +2547,20 @@ exports.grabaRepoFaenaAObra = async (req, res) => {
     })*/
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize
-      const sql = `UPDATE movil.reporte_diario SET id_obra_asignada = ${datInput.id_obra}, estado = 'ASIGNADO', 
-      fecha_update = "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp
+      let sql = "select username from _auth.users where id = " + id_usuario;
+      await sequelize.query(sql, {
+        type: QueryTypes.SELECT
+      }).then(data => {
+        user_name = data[0].username;
+      }).catch(err => {
+        res.status(500).send(err.message );
+        return;
+      })
+
+
+      sql = `UPDATE movil.reporte_diario SET id_obra_asignada = ${datInput.id_obra}, estado = 'ASIGNADO', 
+      fecha_update = "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp,
+      usuario_rut_update = '${user_name}'
        WHERE id = ${datInput.id_reporte};`;
       const repoMovil = await sequelize.query(sql, { type: QueryTypes.UPDATE });
       if (repoMovil) {
@@ -2518,6 +2575,7 @@ exports.grabaRepoFaenaAObra = async (req, res) => {
 
   }
   catch (error) {
+    console.log('error, grabaRepoFaenaAObra', error);
     if (error instanceof ZodError) {
       //console.log('ZodError -> ', error);
       const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
@@ -2526,4 +2584,61 @@ exports.grabaRepoFaenaAObra = async (req, res) => {
     }
     res.status(500).send(error);
   }
+}
+
+/*********************************************************************************** */
+/* Desasigna un reporte diario de faena desde una Obra
+*/
+exports.desasignaRepoFaenaAObra = async (req, res) => {
+  // metodo PUT
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Desasigna el reporte diario a una obra específica' */
+      try {
+
+          const IDataInputSchema = z.object({
+            id_reporte: z.coerce.number()
+          });
+          const id_reporte = req.params.id_reporte;
+      
+          const datInput = IDataInputSchema.parse({
+            id_reporte: id_reporte});
+
+          const id_usuario = req.userId;
+
+          const { QueryTypes } = require('sequelize');
+          const sequelize = db.sequelize
+          let sql = "select username from _auth.users where id = " + id_usuario;
+            await sequelize.query(sql, {
+              type: QueryTypes.SELECT
+            }).then(data => {
+              user_name = data[0].username;
+            }).catch(err => {
+              res.status(500).send(err.message );
+              return;
+            })
+
+          sql = `UPDATE movil.reporte_diario SET id_obra_asignada = null, estado = 'NUEVO', 
+          fecha_update = "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp,
+          usuario_rut_update = '${user_name}' 
+           WHERE id = ${datInput.id_reporte};`;
+          const repoMovil = await sequelize.query(sql, { type: QueryTypes.UPDATE });
+          if (repoMovil) {
+            res.status(200).send(repoMovil);
+            return;
+          }else
+          {
+            res.status(500).send("Error en la consulta (servidor backend)");
+            return;
+          }        
+    
+      }
+      catch (error) {
+        if (error instanceof ZodError) {
+          //console.log('ZodError -> ', error);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+      }
 }
