@@ -28,8 +28,20 @@ module.exports = (sequelize, Sequelize) => {
         datos: {
             type: Sequelize.JSON,
             field: 'datos'
-        }
         },
+        id_obra_asignada: {
+            type: Sequelize.BIGINT,
+            field: 'id_obra_asignada'
+        },
+        id_reporte_procesado: {
+            type: Sequelize.BIGINT,
+            field: 'id_reporte_procesado'
+        },
+        usuario_rut_update: {
+            type: Sequelize.STRING,
+            field: 'usuario_rut_update'
+        }
+    },
         {
             schema: "movil",
         });
