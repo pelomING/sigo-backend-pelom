@@ -20,7 +20,8 @@ app.use(
   cors({
     credentials: true,
     origin: ["http://localhost:4200", 
-    "http://localhost:59214", 
+    "http://localhost:59214",
+    "http://localhost:5037", 
     "http://181.42.20.52", 
     "http://186.11.3.23", 
     "https://siscop.up.railway.app", 
