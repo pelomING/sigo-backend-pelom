@@ -2407,7 +2407,7 @@ exports.getReporteDeFaenaById = async (req, res) => {
           }).optional().nullable(),
           referencia: z.coerce.string(),
           numero_oc: z.coerce.string().optional().nullable(),
-          centrality: z.coerce.number().optional().nullable(),
+          centrality: z.coerce.string().optional().nullable(),
           det_actividad: z.array(IDetActividadSchema).optional().nullable(),
           det_otros: z.array(IDetOtrosSchema).optional().nullable()
         })

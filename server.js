@@ -30,7 +30,9 @@ app.use(
     "https://pelom-ing-test.up.railway.app",
     "https://front-reportes-diarios-desarrollo.up.railway.app",
     "http://cl.pelomingenieria.front-reportes-diarios",
-    "https://cl.pelomingenieria.front-reportes-diarios"
+    "https://cl.pelomingenieria.front-reportes-diarios",
+    "https://cl.pelomingenieria.reportesdiarios",
+    "http://cl.pelomingenieria.reportesdiarios"
   ],
   })
 );
