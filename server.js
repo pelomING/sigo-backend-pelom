@@ -44,7 +44,8 @@ app.use(
     "http://cl.pelomingenieria.front-reportes-diarios",
     "https://cl.pelomingenieria.front-reportes-diarios",
     "https://cl.pelomingenieria.reportesdiarios",
-    "http://cl.pelomingenieria.reportesdiarios"
+    "http://cl.pelomingenieria.reportesdiarios",
+    "https://reportes-pelom-production.up.railway.app"
   ],
   })
 );
