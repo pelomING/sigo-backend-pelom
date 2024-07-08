@@ -19,7 +19,8 @@ const Origen_cors = db.backendCors;
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:4200", 
+    origin: ["http://localhost:4200",
+    "http://localhost:8100", 
     "http://localhost:59214",
     "http://localhost:5037",
     "http://localhost:5554",

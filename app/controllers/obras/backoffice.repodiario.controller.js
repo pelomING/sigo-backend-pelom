@@ -2139,6 +2139,7 @@ exports.creaReporteDiarioMovil = async (req, res) => {
     const IDataInputSchema = z.object({
       jefe_faena: z.string(),
       sdi: z.string().optional(),
+      cged: z.string().optional().nullable(),
       gestor_cliente: z.string().optional().nullable(),
       id_area: z.number(),
       brigada_pesada: z.boolean(),
@@ -2281,7 +2282,7 @@ exports.findAllReportesDeFaena = async (req, res) => {
             (CASE WHEN id_obra_asignada is not null
 				THEN (SELECT codigo_obra FROM obras.obras WHERE id = id_obra_asignada )
 	        ELSE
-				(datos->>'codigo_cged')::text || ' / ' || (datos->>'nro_documento')::text END)::text as codigo_obra
+				(datos->>'cged')::text || ' / ' || (datos->>'nro_documento')::text END)::text as codigo_obra
             FROM movil.reporte_diario 
             WHERE (datos->>'fecha_reporte')::varchar is not null 
                         AND (datos->>'jefe_faena') is not null ${condicion_estado} ${condicion_id_obra}`;
