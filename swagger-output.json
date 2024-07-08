@@ -2428,6 +2428,93 @@
         }
       }
     },
+    "/api/obras/backoffice/material/v1/creamovimientobodega": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Crea movimiento en bodega",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id_obra": {
+                    "type": "number",
+                    "example": 1
+                  },
+                  "reserva": {
+                    "type": "number",
+                    "example": 1111111
+                  },
+                  "nro_guia": {
+                    "type": "number",
+                    "example": 1111111
+                  },
+                  "material": {
+                    "type": "object",
+                    "properties": {
+                      "sap_material": {
+                        "type": "object",
+                        "properties": {
+                          "codigo_sap": {
+                            "type": "number",
+                            "example": 111
+                          },
+                          "descripcion": {
+                            "type": "string",
+                            "example": "Descripción del material"
+                          },
+                          "unidad": {
+                            "type": "string",
+                            "example": "UN"
+                          }
+                        }
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 10
+                      }
+                    }
+                  },
+                  "tipo_movimiento": {
+                    "type": "string",
+                    "example": "IN_MANDANTE"
+                  },
+                  "sentido": {
+                    "type": "string",
+                    "example": "ENTRADA"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/v1/allvisitaterreno": {
       "get": {
         "tags": [
