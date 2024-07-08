@@ -1,7 +1,10 @@
 const db = require("../../models");
+const z = require('zod');
+const ZodError = z.ZodError;
 const EncabezadoReporteDiario = db.encabezadoReporteDiario;
 const DetalleReporteDiarioActividad = db.detalleReporteDiarioActividad;
-const DetalleRporteDiarioOtrasActividades = db.detalleReporteDiarioOtrasActividades; 
+const DetalleRporteDiarioOtrasActividades = db.detalleReporteDiarioOtrasActividades;
+const MovilReporteDiario = db.movilReporteDiario;
 const tipoOperacion = db.tipoOperacion;
 const maestroActividad = db.maestroActividad;
 const Obra = db.obra;
@@ -10,6 +13,42 @@ const ObrasHistorialCambios = db.obrasHistorialCambios;
 const JefesFaena = db.jefesFaena;
 const TipoActividad = db.tipoActividad;
 const TipoTrabajo = db.tipoTrabajo;
+
+
+const customErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.invalid_type) {
+    if (issue.received === "undefined") {
+      return { message: "Es requerido" };
+    }
+    if (issue.received === "null") {
+      return { message: "No puede ser nulo" };
+    }
+    if (issue.expected === "string") {
+      return { message: "Debe ser una cadena de texto" };
+    }
+    if (issue.expected === "number") {
+      return { message: "Debe ser un numero" };
+    }
+    if (issue.expected === "date") {
+      return { message: "Debe ser una fecha" };
+    }
+  }
+  if (issue.code === z.ZodIssueCode.invalid_string) {
+    if (issue.validation === "email") {
+      return { message: "El formato no es correcto, debe ser un email" };
+    }
+    return { message: "El formato no es correcto" };
+  }
+  if (issue.code === z.ZodIssueCode.too_small) {
+    return { message: `debe ser mayor que ${issue.minimum}` };
+  }
+  if (issue.code === z.ZodIssueCode.custom) {
+    return { message: `menor-que-${(issue.params || {}).minimum}` };
+  }
+  return { message: ctx.defaultError };
+};
+
+z.setErrorMap(customErrorMap);
 
 const sql_all_reportes_diarios = `SELECT 
                         rd.id, 
@@ -465,7 +504,7 @@ exports.findUltimoEncabezadoReporteDiarioByIdObra = async (req, res) => {
        const encabezadoReporte = await sequelize.query(sql, { replacements: param, type: QueryTypes.SELECT });
        let salida = [];
        if (encabezadoReporte) {
-        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
         const fecha_hoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
 
          for (const element of encabezadoReporte) {
@@ -771,6 +810,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         }
       };
       const id_obra = req.body.id_obra;
+      const id_reporte_movil = req.body.id_reporte_movil;
 
       let jefe_faena;
       if (!req.body.jefe_faena){
@@ -959,7 +999,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
         })
 
         //determina fecha actual
-        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
         const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
         const fec_new = Number(req.body.fecha_reporte.substring(0,4) + req.body.fecha_reporte.substring(5,7) + req.body.fecha_reporte.substring(8,10))
@@ -1050,6 +1090,15 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
           const obra_creada = obra?await Obra.update(obra, { where: { id: id_obra }, transaction: t }):null;
             
           const obra_historial_creado = obra_historial?await ObrasHistorialCambios.create(obra_historial, { transaction: t }):null;
+
+          console.log('reporte diario movil', { estado: 'PROCESADO', 
+            id_reporte_procesado: Number(encabezado_reporte_diario.id),
+            fecha_update: fechahoy, 
+            usuario_rut_update: user_name });
+          const repo_movil = id_reporte_movil?await MovilReporteDiario.update({ estado: 'PROCESADO', 
+            id_reporte_procesado: Number(encabezado_reporte_diario.id),
+            fecha_update: fechahoy, 
+            usuario_rut_update: user_name }, { where: { id: id_reporte_movil }, transaction: t }):null;
     
           await t.commit();
         } catch (error) {
@@ -1283,7 +1332,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
 
 
     //determina fecha actual
-    const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
     const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
     //estado visita agendada = 2
@@ -1417,13 +1466,40 @@ exports.deleteEncabezadoReporteDiario = async (req, res) => {
       #swagger.description = 'Borra un encabezado de reporte diario y sus detalles por ID' */
   try{
     const id = req.params.id;
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
+    const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+    //determina el usario que está modificando
+    let id_usuario = req.userId;
+    let user_name;
+    let sql = "select username from _auth.users where id = " + id_usuario;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      user_name = data[0].username;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
 
     //Primer debe eliminar el detalle actividad por id de encabezado, luego borrar el detalle otros y por ultimo el encabezado
-    const sequelize = db.sequelize;
+
     const result = await sequelize.transaction(async () => {
         let salida = {};
         await DetalleReporteDiarioActividad.destroy( { where: { id_encabezado_rep: id } } );
         await DetalleRporteDiarioOtrasActividades.destroy( { where: { id_encabezado_rep: id } } );
+        console.log('MovilReporteDiario', { estado: 'NUEVO', 
+          id_reporte_procesado: null,
+          fecha_update: fechahoy,
+          usuario_rut_update: user_name, 
+          id_obra_asignada: null });
+
+        await MovilReporteDiario.update({ estado: 'NUEVO', 
+          id_reporte_procesado: null,
+          fecha_update: fechahoy,
+          usuario_rut_update: user_name, 
+          id_obra_asignada: null }, { where: { id_reporte_procesado: Number(id) } });
         await EncabezadoReporteDiario.destroy({
           where: { id: id }
         }).then(data => {
@@ -1995,4 +2071,575 @@ exports.findAllTipoTrabajo = async (req, res) => {
   } catch (error) {
     res.status(500).send(error);
   }
+}
+
+exports.creaReporteDiarioMovil = async (req, res) => {
+  //metodo POST
+  /*  #swagger.tags = ['Obras - Movil - Reporte diario']
+    #swagger.description = 'Crea un nuevo Reporte Diario' 
+    #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos encabezado reporte diario',
+            required: true,
+            schema: {
+                    "jefe_faena": "19113380-3",
+                    "sdi": "11111",
+                    "gestor_cliente": "Nombre gestor",
+                    "id_area": 1,
+                    "brigada_pesada": true,
+                    "fecha_reporte": "2024-06-19",
+                    "hora_salida_base": "YYYY-MM-DDTHH:NN:SS",
+                    "hora_llegada_terreno": "YYYY-MM-DDTHH:NN:SS",
+                    "hora_salida_terreno": "YYYY-MM-DDTHH:NN:SS",
+                    "hora_llegada_base": "YYYY-MM-DDTHH:NN:SS",
+                    "alimentador": "Nombre alimentador",
+                    "comuna": "07301",
+                    "nro_documento": "1111111",
+                    "flexiapps": [
+                      {
+                        "flexiapp": "1111111"
+                      },
+                      {
+                        "flexiapp": "1111111"
+                      }
+                    ],
+                    "recargo_hora": 3,
+                    "referencia": "Observación",
+                    "nro_oc": "1111111",
+                    "det_actividad": [
+                      {
+                        "tActividad": 16,
+                        "tOperacion": 1,
+                        "mActividad": 376,
+                        "cantidad": 1,
+                        actividad_ref: "Descripción actividad (opcional)"
+                      },
+                      {
+                        "tActividad": 13,
+                        "tOperacion": 1,
+                        "mActividad": 201,
+                        "cantidad": 5,
+                        actividad_ref: "Descripción actividad (opcional)"
+                      }
+                    ],
+                    "det_otros": [
+                      { "glosa": "test Glosa", 
+                       "valor_unitario": 50, 
+                       "cantidad": 4 },
+                      { "glosa": "test 2 Glosa", 
+                       "valor_unitario": 100, 
+                       "cantidad": 1 }
+                    ]
+                 }
+    }*/
+
+  try {
+
+    
+    const IDataInputSchema = z.object({
+      jefe_faena: z.string(),
+      sdi: z.string().optional(),
+      cged: z.string().optional().nullable(),
+      gestor_cliente: z.string().optional().nullable(),
+      id_area: z.number(),
+      brigada_pesada: z.boolean(),
+      fecha_reporte: z.string(),
+      hora_salida_base: z.string(),
+      hora_llegada_terreno: z.string(),
+      hora_salida_terreno: z.string(),
+      hora_llegada_base: z.string(),
+      alimentador: z.string(),
+      comuna: z.string().optional(),
+      nro_documento: z.string().optional().nullable(),
+      flexiapps: z.array(z.object({
+        flexiapp: z.string()
+      })).optional(),
+      recargo_hora: z.number().optional(),
+      referencia: z.string(),
+      nro_oc: z.string().optional().nullable(),
+      det_actividad: z.array(z.object({
+        tActividad: z.number(),
+        tOperacion: z.number(),
+        mActividad: z.number(),
+        cantidad: z.number(),
+        actividad_ref: z.string().optional().nullable(),
+      })).optional(),
+      det_otros: z.array(z.object({
+        glosa: z.string(),
+        valor_unitario: z.number().gte(1),
+        cantidad: z.number().gt(0)
+      }))
+    })
+
+    const datos = IDataInputSchema.parse(req.body);
+    console.log('datos',req.body);
+
+    //determina el usario que está modificando
+    let id_usuario = req.userId;
+    let user_name;
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    sql = "select username from _auth.users where id = " + id_usuario;
+    await sequelize.query(sql, {
+      type: QueryTypes.SELECT
+    }).then(data => {
+      user_name = data[0].username;
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })
+
+    if (!datos) {
+      res.status(400).send({ message: "No se recibieron datos" });
+      return;
+    }
+
+    const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
+    const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
+
+
+    const movil_reporteDiario = {
+      usuario_rut: user_name,
+      fecha_insert: fechahoy,
+      fecha_update: fechahoy,
+      estado: 'NUEVO',
+      datos: datos
+    
+    }
+
+    
+    const t = await sequelize.transaction();
+    let salida = {};
+    try {
+      salida = {"error": false, "message": "Reporte diario ingresado ok"};
+      await MovilReporteDiario.create(movil_reporteDiario, { transaction: t });
+      await t.commit();
+    } catch (error) {
+      salida = { error: true, message: error }
+      await t.rollback();
+    }
+    if (salida.error) {
+      console.log("error (1)", salida.message);
+      if (salida.message.parent.detail.slice(0,28) === 'Key (id_obra, fecha_reporte)') {
+        res.status(400).send('Ya existe un reporte diario para esta fecha en esta obra');
+      }else{
+        res.status(400).send(salida.message);
+      }
+    }else {
+      res.status(200).send(salida);
+    }
+
+  } catch (error) {
+    console.log("error (2)", error);
+    res.status(500).send(error);
+  }
+}
+
+/*********************************************************************************** */
+/* Obtiene todos los reportes diarios que viene de faena
+*/
+exports.findAllReportesDeFaena = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Devuelve todos los reportes diarios NUEVOS que viene de faena' */
+      try {
+
+        let condicion_estado = '';
+        if (req.query.estado) {
+          if (req.query.estado === 'NUEVO') {
+            condicion_estado = `AND estado = 'NUEVO'`
+          }
+          if (req.query.estado === 'ASIGNADO') {
+            condicion_estado = `AND estado = 'ASIGNADO'`
+          }
+          if (req.query.estado === 'PROCESADO') {
+            condicion_estado = `AND estado = 'PROCESADO'`
+          }
+          if (req.query.estado === 'ERROR') {
+            condicion_estado = `AND estado = 'ERROR'`
+          }
+        }
+        let condicion_id_obra = '';
+        if (req.query.id_obra) {
+          condicion_id_obra = `AND id_obra_asignada = ${req.query.id_obra}`
+        }
+      
+        const IReporteFaenaSchema = z.object({
+          id: z.coerce.number(),
+          fecha_reporte: z.string(),
+          jefe_faena: z.string().optional().nullable(),
+          referencia: z.coerce.string(),
+          id_obra_asignada: z.coerce.number().optional().nullable(),
+          codigo_obra: z.coerce.string().optional().nullable(),
+        })
+
+        const IArrayReporteFaenaSchema = z.array(IReporteFaenaSchema);
+       
+        const sql = `SELECT id,
+              (datos->>'fecha_reporte')::varchar as fecha_reporte,
+              (SELECT nombre FROM obras.jefes_faena WHERE rut = datos->>'jefe_faena') as jefe_faena,
+            (datos->>'referencia')::varchar as referencia,
+            id_obra_asignada, 
+            (CASE WHEN id_obra_asignada is not null
+				THEN (SELECT codigo_obra FROM obras.obras WHERE id = id_obra_asignada )
+	        ELSE
+				(datos->>'cged')::text || ' / ' || (datos->>'nro_documento')::text END)::text as codigo_obra
+            FROM movil.reporte_diario 
+            WHERE (datos->>'fecha_reporte')::varchar is not null 
+                        AND (datos->>'jefe_faena') is not null ${condicion_estado} ${condicion_id_obra}`;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const reporteFaena = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (reporteFaena) {
+          const data = IArrayReporteFaenaSchema.parse(reporteFaena);
+          if (data.length > 0) 
+            res.status(200).send(data);
+          else
+            res.status(200).send([]);
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+      } catch (error) {
+        if (error instanceof ZodError) {
+          console.log(error.issues);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+      }
+}
+
+/*********************************************************************************** */
+/* Obtiene un reporte diario de faena por id de reporte
+*/
+exports.getReporteDeFaenaById = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Obtiene un reporte diario de faena por id de reporte' */
+      try {
+        const IIdReporteSchema = z.coerce.number().gt(0);
+
+        const id_reporte = IIdReporteSchema.parse(req.query.id_reporte);
+
+        const IDetActividadSchema = z.object({
+          tipo_operacion: z.object({
+            id: z.coerce.number(),
+            nombre: z.coerce.string(),
+            clase: z.coerce.string()
+          }),
+          tipo_actividad: z.object({
+            id: z.coerce.number(),
+            descripcion: z.coerce.string()
+          }),
+          actividad: z.object({
+            id: z.coerce.number(),
+            actividad: z.coerce.string(),
+            tipo_actividad: z.object({
+              id: z.coerce.number(),
+              descripcion: z.coerce.string()
+            }),
+            uc_instalacion: z.coerce.number(),
+            uc_retiro: z.coerce.number(),
+            uc_traslado: z.coerce.number(),
+            descripcion: z.coerce.string(),
+            unidad: z.object({
+              id: z.coerce.number(),
+              nombre: z.coerce.string(),
+              codigo_corto: z.coerce.string()
+            })
+          }),
+          cantidad: z.coerce.number(),
+          unitario: z.coerce.number(),
+          total: z.coerce.number(),
+          observacion: z.coerce.string()
+        })
+        const IDetOtrosSchema = z.object({
+          glosa: z.coerce.string(),
+          unitario_pesos: z.coerce.number(),
+          cantidad: z.coerce.number(),
+          total_pesos: z.coerce.number()
+        })
+        /*Obligatorios:
+          id
+          fecha_reporte
+          brigada_pesada
+          fecha_entregado
+          fecha_revisado
+          hora_salida_base
+          hora_llegada_terreno
+          hora_salida_terreno
+          hora_llegada_base
+          alimentador
+          referencia
+    
+    */
+        const IReporteFaenaSchema = z.object({
+          id: z.coerce.number(),
+          fecha_reporte: z.string(),
+          jefe_faena: z.object({
+                        id: z.coerce.number(),
+                        nombre: z.coerce.string(),
+                        rut: z.coerce.string()}).optional().nullable(),
+          sdi: z.coerce.string().optional().nullable(),
+          area: z.object({
+                        id: z.coerce.number(),
+                        descripcion: z.coerce.string()}).optional().nullable(),
+          brigada_pesada: z.object({
+                        id: z.coerce.number(),
+                        descripcion: z.coerce.string()}),
+          fecha_entregado: z.coerce.string(),
+          fecha_revisado: z.coerce.string(),
+          hora_salida_base: z.coerce.string(),
+          hora_llegada_terreno: z.coerce.string(),
+          hora_salida_terreno: z.coerce.string(),
+          hora_llegada_base: z.coerce.string(),
+          alimentador: z.coerce.string(),
+          comuna: z.coerce.string().optional().nullable(),
+          num_documento: z.coerce.string().optional().nullable(),
+          flexiapp: z.array(z.coerce.string()).optional().nullable(),
+          recargo_hora: z.object({
+                        id: z.coerce.number(),
+                        nombre: z.coerce.string(),
+                        id_tipo_recargo: z.coerce.number(),
+                        porcentaje: z.coerce.number(),
+                        nombre_corto: z.coerce.string()
+          }).optional().nullable(),
+          referencia: z.coerce.string(),
+          numero_oc: z.coerce.string().optional().nullable(),
+          centrality: z.coerce.string().optional().nullable(),
+          det_actividad: z.array(IDetActividadSchema).optional().nullable(),
+          det_otros: z.array(IDetOtrosSchema).optional().nullable()
+        })
+        const IArrayReporteFaenaSchema = z.array(IReporteFaenaSchema);
+        const sql = `SELECT id, null as id_estado_pago, null as estado, null as codigo_pelom,
+                                                (select json_build_object('id', id, 'codigo_obra', codigo_obra) as id_obra from obras.obras where id = id_obra_asignada) as id_obra,
+
+                        (datos->>'fecha_reporte')::varchar as fecha_reporte,
+                        (select row_to_json(a) from (SELECT id, nombre, rut FROM obras.jefes_faena WHERE rut = datos->>'jefe_faena') a) as jefe_faena,
+                        (datos->>'sdi')::varchar as sdi,
+                                                'x'::text as supervisor,
+                                                '1'::text as ito_mandante,
+                        (SELECT row_to_json(a) FROM (SELECT * FROM obras.tipo_trabajo WHERE id = (datos->>'id_area')::integer) a) as area,
+                        CASE WHEN (datos->>'brigada_pesada')::boolean THEN '{"id": 2, "descripcion": "PESADA"}'::json
+                        ELSE '{"id": 1, "descripcion": "LIVIANA"}'::json END as brigada_pesada,
+                                                'x'::text as observaciones,
+                                                'x'::text as entregado_por_persona,
+                        ("substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 10)::date)::text AS fecha_entregado,
+                                                'x'::text as revisado_por_persona,
+                        ("substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 10)::date)::text AS fecha_revisado,
+                                                'x'::text as sector,
+                        ((datos->>'hora_salida_base')::timestamp)::text as hora_salida_base,
+                        ((datos->>'hora_llegada_terreno')::timestamp)::text as hora_llegada_terreno,
+                        ((datos->>'hora_salida_terreno')::timestamp)::text as hora_salida_terreno,
+                        ((datos->>'hora_llegada_base')::timestamp)::text as hora_llegada_base,
+
+                        (datos->>'alimentador')::varchar as alimentador,
+                        (datos->>'comuna')::varchar as comuna,
+                        (datos->>'nro_documento')::varchar as num_documento,
+                        (select array_agg(flexiapp)     from
+                          (select flexiapp from json_to_recordset((datos->>'flexiapps')::json) as x(flexiapp varchar))
+                          as flexiapp) as flexiapp,
+                                                (SELECT json_build_object('id', id, 'nombre', nombre, 'id_tipo_recargo',
+                                                id_tipo_recargo, 'porcentaje', porcentaje, 'nombre_corto', nombre_corto) as recargo_hora
+                                                FROM obras.recargos WHERE id = (datos->>'recargo_hora')::integer) as recargo_hora,
+                        (datos->>'referencia')::varchar as referencia,
+                        (datos->>'nro_oc')::varchar as numero_oc,
+                        (datos->>'nro_documento')::varchar as centrality,
+                        (select array_agg(det_actividad) from
+                        (select row_to_json(detalle) as det_actividad from
+                        (select row_to_json(top) as tipo_operacion,
+                          row_to_json(ta) as tipo_actividad,
+                          json_build_object('id', ma.id, 'actividad', ma.actividad, 'tipo_actividad', row_to_json(ta),
+                          'uc_instalacion', ma.uc_instalacion, 'uc_retiro', ma.uc_retiro, 'uc_traslado', ma.uc_traslado,
+                          'descripcion', ma.descripcion, 'unidad', row_to_json(mu)) as actividad,
+                          a.cantidad, null as encabezado_reporte,
+                          case when top.id = 1 then ma.uc_instalacion
+                          when top.id = 2 then ma.uc_retiro
+                          when top.id = 3 then ma.uc_traslado
+                          else 0 end as unitario,
+                          (case when top.id = 1 then ma.uc_instalacion
+                          when top.id = 2 then ma.uc_retiro
+                          when top.id = 3 then ma.uc_traslado
+                          else 0 end)*a.cantidad as total,
+						  a.actividad_ref as observacion
+                          from
+                        (select "tActividad" as tipo_actividad,"tOperacion" as tipo_operacion,"mActividad" as actividad,cantidad, actividad_ref
+                        from json_to_recordset((datos->>'det_actividad')::json)
+                        as x("tActividad" integer, "tOperacion" integer, "mActividad" integer, cantidad numeric, actividad_ref text)) a
+                        join obras.maestro_actividades ma on a.actividad = ma.id
+                        join obras.tipo_operacion top on a.tipo_operacion = top.id
+                        join obras.tipo_actividad ta on a.tipo_actividad = ta.id
+                        join obras.maestro_unidades mu on ma.id_unidad = mu.id) as detalle) b) as det_actividad,
+                        (select array_agg(datos) from
+                        (select row_to_json(a) as datos from
+                        (select glosa, valor_unitario as unitario_pesos, cantidad, valor_unitario*cantidad as total_pesos
+                        from json_to_recordset((datos->>'det_otros')::json) 
+                        as x(glosa text, valor_unitario numeric, cantidad numeric)) a) b) as det_otros
+                        FROM movil.reporte_diario
+                        WHERE id = ${id_reporte} AND (datos->>'fecha_reporte')::varchar is not null;`;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const reporteFaena = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (reporteFaena) {
+          const data = IArrayReporteFaenaSchema.parse(reporteFaena);
+          if (data.length > 0) 
+            res.status(200).send(data[0]);
+          else
+            res.status(200).send({});
+          return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+       
+      } catch (error) {
+        if (error instanceof ZodError) {
+          //console.log('ZodError -> ', error);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+      }
+}
+
+/*********************************************************************************** */
+/* Asigna un reporte diario de faena a una Obra
+*/
+exports.grabaRepoFaenaAObra = async (req, res) => {
+  // metodo PUT
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Graba el reporte diario a una obra específica' */
+
+
+  try {
+
+    const IDataInputSchema = z.object({
+      id_obra: z.coerce.number(),
+      id_reporte: z.coerce.number()
+    });
+    const id_reporte = req.params.id_reporte;
+    const id_obra = req.body.id_obra;
+
+    const datInput = IDataInputSchema.parse({
+      id_obra: id_obra, 
+      id_reporte: id_reporte});
+
+      console.log('datInput', datInput);
+    const id_usuario = req.userId;
+    console.log('id_usuario', id_usuario);
+
+    /*await MovilReporteDiario.update({ id_obra_asignada: datInput.id_obra }, {
+      where: { id: datInput.id_reporte }
+    }).then(data => {
+      if (data[0] === 1) {
+        res.status(200).send({ message: "Reporte diario movil actualizado" } );
+        return;
+      } else {
+        res.status(400).send(`No existe un reporte con id ${datInput.id_reporte}` );
+        return;
+      }
+    }).catch(err => {
+      res.status(500).send(err.message );
+      return;
+    })*/
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize
+      let sql = "select username from _auth.users where id = " + id_usuario;
+      await sequelize.query(sql, {
+        type: QueryTypes.SELECT
+      }).then(data => {
+        user_name = data[0].username;
+      }).catch(err => {
+        res.status(500).send(err.message );
+        return;
+      })
+
+
+      sql = `UPDATE movil.reporte_diario SET id_obra_asignada = ${datInput.id_obra}, estado = 'ASIGNADO', 
+      fecha_update = "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp,
+      usuario_rut_update = '${user_name}'
+       WHERE id = ${datInput.id_reporte};`;
+      const repoMovil = await sequelize.query(sql, { type: QueryTypes.UPDATE });
+      if (repoMovil) {
+        res.status(200).send(repoMovil);
+        return;
+      }else
+      {
+        res.status(500).send("Error en la consulta (servidor backend)");
+        return;
+      } 
+    
+
+  }
+  catch (error) {
+    console.log('error, grabaRepoFaenaAObra', error);
+    if (error instanceof ZodError) {
+      //console.log('ZodError -> ', error);
+      const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+      res.status(400).send(mensaje);  //bad request
+      return;
+    }
+    res.status(500).send(error);
+  }
+}
+
+/*********************************************************************************** */
+/* Desasigna un reporte diario de faena desde una Obra
+*/
+exports.desasignaRepoFaenaAObra = async (req, res) => {
+  // metodo PUT
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Desasigna el reporte diario a una obra específica' */
+      try {
+
+          const IDataInputSchema = z.object({
+            id_reporte: z.coerce.number()
+          });
+          const id_reporte = req.params.id_reporte;
+      
+          const datInput = IDataInputSchema.parse({
+            id_reporte: id_reporte});
+
+          const id_usuario = req.userId;
+
+          const { QueryTypes } = require('sequelize');
+          const sequelize = db.sequelize
+          let sql = "select username from _auth.users where id = " + id_usuario;
+            await sequelize.query(sql, {
+              type: QueryTypes.SELECT
+            }).then(data => {
+              user_name = data[0].username;
+            }).catch(err => {
+              res.status(500).send(err.message );
+              return;
+            })
+
+          sql = `UPDATE movil.reporte_diario SET id_obra_asignada = null, estado = 'NUEVO', 
+          fecha_update = "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp,
+          usuario_rut_update = '${user_name}' 
+           WHERE id = ${datInput.id_reporte};`;
+          const repoMovil = await sequelize.query(sql, { type: QueryTypes.UPDATE });
+          if (repoMovil) {
+            res.status(200).send(repoMovil);
+            return;
+          }else
+          {
+            res.status(500).send("Error en la consulta (servidor backend)");
+            return;
+          }        
+    
+      }
+      catch (error) {
+        if (error instanceof ZodError) {
+          //console.log('ZodError -> ', error);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+      }
 }

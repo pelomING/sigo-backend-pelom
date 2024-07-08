@@ -124,6 +124,7 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/material/v1/obtiene_numero_solicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getNumeroPedido);
     app.post("/api/obras/backoffice/material/v1/creasolicitudmaterial", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createPedidoMaterial);
     app.get("/api/obras/backoffice/material/v1/materialesporsolicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorPedido);
+    app.get("/api/obras/backoffice/material/v1/exportarexcelporpedido", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelMaterialPorPedido);
     app.get("/api/obras/backoffice/material/v1/totalmaterialsolicitadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialSolicitadoPorObra);
     app.get("/api/obras/backoffice/material/v1/totalmaterialreservadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialReservadoPorObra);
 
@@ -135,8 +136,10 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/material/v1/allreservas", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getAllReservas);
     app.get("/api/obras/backoffice/material/v1/bom_inicial_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomZero);
     app.get("/api/obras/backoffice/material/v1/bom_actual_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomFinal);
-
+    app.get("/api/obras/backoffice/material/v1/exportarexcel", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelReserva);
+    app.get("/api/obras/backoffice/material/v1/exportarexceltodo", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelReservaPorObra);
     app.post("/api/obras/backoffice/material/v1/crealistafaena", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createListaFaena);
+    app.post("/api/obras/backoffice/material/v1/creamovimientobodega", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createMovimientoBodega);
 
     //app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo);
     //app.post("/api/obras/backoffice/v1/creabomindividual", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomIndividual);
@@ -192,6 +195,16 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/repodiario/v1/allareas", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllTipoTrabajo);
 
     app.get("/api/obras/backoffice/repodiario/v1/allrecargoshora", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllRecargosHoraExtra);
+
+    app.post("/api/obras/movil/repodiario/v1/upload_reportediario", [authJwt.verifyToken, authJwt.createObrasBackofficeRepodiario], backofficeRepodiarioController.creaReporteDiarioMovil);
+
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdefaena", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllReportesDeFaena);
+
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdefaenaactividad", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.getReporteDeFaenaById);
+
+    app.put("/api/obras/backoffice/repodiario/v1/asignareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.grabaRepoFaenaAObra);
+
+    app.put("/api/obras/backoffice/repodiario/v1/liberareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.desasignaRepoFaenaAObra);
 
 }
 

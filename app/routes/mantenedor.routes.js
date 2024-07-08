@@ -112,7 +112,7 @@ module.exports = function(app) {
       try {
 
 
-        let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        let fecha_hoy = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
         const year =  fecha_hoy.slice(6, 10)
         const month = fecha_hoy.slice(3, 5)
         const newDirectory = req.body.nuevodirectorio;

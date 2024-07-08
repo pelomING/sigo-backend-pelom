@@ -19,8 +19,20 @@ const Origen_cors = db.backendCors;
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:4200", 
-    "http://localhost:59214", 
+    origin: ["http://localhost:4200",
+    "http://localhost:8100", 
+    "http://localhost:59214",
+    "http://localhost:5037",
+    "http://localhost:5554",
+    "http://localhost:5555",
+    "http://localhost:5556",
+    "http://localhost:5557",
+    "https://localhost:59214",
+    "https://localhost:5037",
+    "https://localhost:5554",
+    "https://localhost:5555",
+    "https://localhost:5556",
+    "https://localhost:5557",
     "http://181.42.20.52", 
     "http://186.11.3.23", 
     "https://siscop.up.railway.app", 
@@ -29,6 +41,10 @@ app.use(
     "https://pelom-ing-testobras.up.railway.app",
     "https://pelom-ing-test.up.railway.app",
     "https://front-reportes-diarios-desarrollo.up.railway.app",
+    "http://cl.pelomingenieria.front-reportes-diarios",
+    "https://cl.pelomingenieria.front-reportes-diarios",
+    "https://cl.pelomingenieria.reportesdiarios",
+    "http://cl.pelomingenieria.reportesdiarios"
   ],
   })
 );

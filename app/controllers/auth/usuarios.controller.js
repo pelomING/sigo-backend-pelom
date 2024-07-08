@@ -226,7 +226,7 @@ exports.resetPassword = async (req, res) => {
             {
                 salida = {"error": false, "message": "Reset de password OK!"};
                 //Para resetear la password se usará el mismo nombre de usuario como password
-                const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+                const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
                 const fecha_hoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2)
                 const password = bcrypt.hashSync(req.body.username, 8);
                 await user.update({ password: password, fecha_password: fecha_hoy }, { where: { id: user.id }, transaction: t });

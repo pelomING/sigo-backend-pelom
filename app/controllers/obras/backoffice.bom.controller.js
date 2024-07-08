@@ -1,6 +1,7 @@
 const db = require("../../models");
-const z = require('zod');
+const fs = require('fs');
 const excel = require("exceljs");
+const z = require('zod');
 const ZodError = z.ZodError;
 
 const Bom = db.bom;
@@ -14,6 +15,39 @@ const MaestroMateriales = db.maestroMateriales;
 /*                                                                                 */
 /*                                                                                 */
 /***********************************************************************************/
+
+
+const IReservaSchema = z.coerce.number().gt(0).int();
+const ICodigoSapSchema = z.coerce.number().int().gt(0);
+const IDescripcionSapSchema = z.string().min(1);
+const IUnidadSapSchema = z.string().min(1);
+const ICantidadMaterialSchema = z.coerce.number().gt(0);
+
+const ISapMaterialSchema = z.object({
+  codigo_sap: ICodigoSapSchema,
+  descripcion: IDescripcionSapSchema,
+  unidad: IUnidadSapSchema,
+});
+
+const IMaterialCantidadSchema = z.object({
+  sap_material: ISapMaterialSchema,
+  cantidad: ICantidadMaterialSchema
+});
+
+const IMaterialCantidadUsuarioSchema = IMaterialCantidadSchema.extend({
+  fecha_ingreso: z.coerce.string(),
+  rut_usuario: z.coerce.string(),
+  persona: z.coerce.string()
+})
+
+
+const IReservaHeaderSchema = z.object({
+  reserva: IReservaSchema,
+  id_obra: z.coerce.number(),
+  fecha_hora: z.coerce.string(),
+  rut_usuario: z.coerce.string(),
+  persona: z.coerce.string()
+});
 
 const customErrorMap = (issue, ctx) => {
   if (issue.code === z.ZodIssueCode.invalid_type) {
@@ -181,7 +215,7 @@ exports.findBomByParametros = async (req, res) => {
       const IDataOutputSchema = z.object({
         id: z.coerce.number(),
         id_obra: z.coerce.number(),
-        cod_reserva: z.coerce.number(),
+        cod_reserva: IReservaSchema,
         sap_material: IMaestroMaterialSchema,
         cantidad_requerida: z.coerce.number(),
         fecha_ingreso: z.coerce.string(),
@@ -240,7 +274,7 @@ exports.findBomByParametros = async (req, res) => {
       const IDataOutputSchema = z.object({
         id: z.coerce.number(),
         id_obra: z.coerce.number(),
-        cod_reserva: z.coerce.number(),
+        cod_reserva: IReservaSchema,
         sap_material: IMaestroMaterialSchema,
         cantidad_requerida: z.coerce.number(),
         fecha_ingreso: z.coerce.string(),
@@ -450,19 +484,24 @@ exports.findBomByParametros = async (req, res) => {
           id_obra: z.coerce.number().int().positive(),
           reserva: z.coerce.number().int().positive(),
         })*/
-        const IDataMaterialesSchema = z.object({
+        /*const IDataMaterialesSchema = z.object({
           codigo_sap: z.coerce.number().int().gt(0),
           cantidad: z.coerce.number().gt(-1)
         });
-        const IArrayDataMaterialesSchema = z.array(IDataMaterialesSchema);
+        const IArrayDataMaterialesSchema = z.array(IDataMaterialesSchema);*/
 
-        const IDataInputSchema = z.object(
+        /*const IDataInputSchema = z.object(
           {
             id_obra: z.coerce.number().int().positive(),
             reserva: z.coerce.number().int().positive(),
             materiales: IArrayDataMaterialesSchema
           }
-        )
+        )*/
+        const IDataInputSchema = z.object({
+          id_obra: z.coerce.number().int().positive(),
+          reserva: IReservaSchema,
+          materiales: z.array(IMaterialCantidadSchema),
+        })
 
         const inputDatos = {
           materiales: req.body.materiales,
@@ -478,7 +517,7 @@ exports.findBomByParametros = async (req, res) => {
             const sequelize = db.sequelize;
 
             let todoOk = false;
-            let materiales = bom.materiales;
+            let materiales = bom.materiales.map(material => {const salida = {"codigo_sap": material.sap_material.codigo_sap, "cantidad": material.cantidad}; return salida;});
             //reemplaza las comas por puntos, por si hay alguna cantidad decimal
             //materiales = materiales.replace(",", ".");
             //console.log('materiales -> ',materiales);
@@ -698,22 +737,22 @@ exports.findBomByParametros = async (req, res) => {
           try {
 
             const IDataExcelSchema = z.object({
-              codigo_sap: z.coerce.number().int().gt(0),
-              cantidad: z.coerce.number().gt(0)
+              codigo_sap: ICodigoSapSchema,
+              cantidad: z.coerce.number().gte(0)
             });
             const IArrayDataExcelSchema = z.array(IDataExcelSchema);
 
-            const IDataMaterialSalidaSchema = z.object({
+            /*const IDataMaterialSalidaSchema = z.object({
               codigo_sap: z.coerce.number().int().gt(0),
               descripcion: z.string().min(1),
               unidad: z.string().min(1),
               cantidad: z.coerce.number().gt(0)
-            })
+            })*/
             
 
             const IDataOutputSchema = z.object({
-              reserva: z.number().int().gt(0),
-              materiales: z.array(IDataMaterialSalidaSchema),
+              reserva: IReservaSchema,
+              materiales: z.array(IMaterialCantidadSchema),
             })
 
             const INombreHojaSchema = z.coerce.number();
@@ -749,7 +788,8 @@ exports.findBomByParametros = async (req, res) => {
             } catch (error) {
               if (error instanceof ZodError) {
                 console.log('INombreHojaSchema -> ', error.issues);
-                const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                //const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                const mensaje = 'El nombre de la hoja excel debe ser el número de reserva'
                 res.status(400).send(mensaje);  //bad request
                 return;
               }
@@ -779,8 +819,9 @@ exports.findBomByParametros = async (req, res) => {
               materiales = IArrayDataExcelSchema.parse(jsonData);
             } catch (error) {
               if (error instanceof ZodError) {
-                console.log('IArrayDataExcelSchema -> ', error.issues);
-                const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                //console.log('IArrayDataExcelSchema -> ', error.issues);
+                //const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+                const mensaje = 'El formato del archivo excel es incorrecto, revisar por favor'
                 res.status(400).send(mensaje);  //bad request
                 return;
               }
@@ -854,20 +895,20 @@ exports.findBomByParametros = async (req, res) => {
               res.status(500).send("Error en la consulta (servidor backend)");
               return;
             }
-
             let sql_detalle = `SELECT 
-                                  m.codigo_sap, 
-                                  mm.descripcion, 
-                                  mu.codigo_corto as unidad,
+                                  json_build_object('codigo_sap',m.codigo_sap,
+	                                                  'descripcion', mm.descripcion,
+                                                    'unidad', mu.codigo_corto) 
+                                  as sap_material,
                                   m.cantidad 
                                 FROM 
-                                (SELECT UNNEST(array[${codigos_sap}]) as codigo_sap, 
+	                                  (SELECT UNNEST(array[${codigos_sap}]) as codigo_sap, 
                                         UNNEST(array[${cantidades}]) as cantidad) m
                                 JOIN obras.maestro_materiales mm
                                 ON mm.codigo_sap = m.codigo_sap
                                 JOIN obras.maestro_unidades mu
                                 ON mm.id_unidad = mu.id
-                                ORDER BY codigo_sap`;
+                                ORDER BY m.codigo_sap`;
             const detalle = await sequelize.query(sql_detalle, { type: QueryTypes.SELECT });
             if (detalle) {
               const data = {
@@ -1534,6 +1575,339 @@ exports.findBomByParametros = async (req, res) => {
     }
 
   }
+   /***********************************************************************************/
+  /* Obtiene archivo excel de materiales para un pedido
+  ;
+  */
+ exports.getExcelMaterialPorPedido = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Genera archivo excel de materiales para un pedido' */
+      try {
+        const dataInput = {
+          id: req.query.id_solicitud
+        }
+
+        const IDataInputSchema = z.object({
+          id: z.coerce.number(),
+        });
+
+        const IDatoObraSchema = z.object({
+
+          codigo_obra: z.coerce.string(),
+          nombre_obra: z.coerce.string(),
+          nombre_supervisor: z.coerce.string(),
+          rut_supervisor: z.coerce.string(),
+          email_supervisor: z.coerce.string(),
+          zona: z.coerce.string()
+          
+        })
+
+        const IDatoMaterialesSchema = z.object({
+          sap_material: ISapMaterialSchema,
+          cantidad: z.coerce.number(),
+          fecha_ingreso: z.coerce.string(),
+          rut_usuario: z.coerce.string(),
+          persona: z.coerce.string()
+          
+        })
+
+        const IDataOutputSchema = z.object({
+          id_obra: z.coerce.number(),
+          obra: IDatoObraSchema,
+          solicitud: z.coerce.number(),
+          materiales: z.array(IDatoMaterialesSchema),
+        });
+
+        let id_usuario = req.userId;
+        let rut_usuario;
+        let nombre_persona;
+        let zona_usuario;
+        let email_usuario;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const sql_usuario = `select username, (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                          CASE
+                              WHEN p.apellido_2 IS NULL THEN ''::character varying
+                              ELSE p.apellido_2
+                          END::text AS persona, z.nombre as zona, u.email from _auth.users u join _auth.personas p
+									        JOIN _comun.base b on p.base = b.id
+								          JOIN _comun.paquete pa on b.id_paquete = pa.id
+								          JOIN _comun.zonal z on pa.id_zonal = z.id
+                              on u.username = p.rut
+                              WHERE u.id = ${id_usuario}`;
+        await sequelize.query(sql_usuario, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          rut_usuario = data[0].username;
+          nombre_persona = data[0].persona;
+          zona_usuario = data[0].zona;
+          email_usuario = data[0].email;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const id = validated.id;
+        const sql = `SELECT id_obra, (SELECT row_to_json(dato) as dato_obra FROM
+							(SELECT codigo_obra, nombre_obra, sc.nombre as nombre_supervisor, sc.rut as rut_supervisor, u.email as email_supervisor
+              , z.nombre as zona
+							FROM obras.obras o JOIN obras.oficina_supervisor os
+							ON o.oficina = os.id JOIN obras.supervisores_contratista sc
+							ON os.supervisor = sc.id  JOIN _comun.zonal z ON o.zona = z.id
+							JOIN _auth.users u ON u.username = replace(sc.rut, '.', '') 
+							WHERE o.id = id_obra) dato) obra, solicitud, array_agg(datos) as materiales
+              FROM
+              (SELECT DISTINCT ON (msd.pedido, msd.codigo_sap_material) 
+                          msd.id,
+                          msd.id_obra,
+                          msd.pedido as solicitud,
+						  json_build_object('sap_material', row_to_json(mm), 
+								'cantidad', msd.cantidad_requerida_new, 
+								'fecha_ingreso', msd.fecha_movimiento::text,
+								'rut_usuario', msd.rut_usuario, 
+								'persona', (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+		                          CASE
+		                              WHEN p.apellido_2 IS NULL THEN ''::character varying
+		                              ELSE p.apellido_2
+		                          END::text) as datos
+                        FROM obras.mat_solicitudes_detalle msd
+                        JOIN _auth.personas p ON msd.rut_usuario::text = p.rut::text
+                      LEFT JOIN (SELECT codigo_sap, texto_breve, descripcion, mu.codigo_corto as unidad
+                        FROM obras.maestro_materiales mm join obras.maestro_unidades mu
+                        ON mm.id_unidad = mu.id) mm 
+                      ON msd.codigo_sap_material = mm.codigo_sap 
+                        WHERE msd.pedido = ${id}
+                        ORDER BY msd.pedido, msd.codigo_sap_material, msd.fecha_movimiento desc) A
+                      GROUP BY id_obra, solicitud`;
+        
+        let resultado_consulta = {};
+        const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (pedidos) {
+          const data = IArrayDataOutputSchema.parse(pedidos);
+          if (data.length > 0)
+            resultado_consulta = data[0];
+          //res.status(200).send(data);
+          //return;
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+        //Ir a la parte Excel
+        const materiales = resultado_consulta.materiales;
+
+        console.log('resultado_consulta', resultado_consulta)
+
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
+        const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2);
+        const nombre_archivo = `SOLICITUD_MATERIAL_${resultado_consulta.obra.codigo_obra}_${fechahoy}.xlsx`;
+  
+      // Crear un nuevo libro de Excel
+      const workbook = new excel.Workbook();
+      workbook.creator = nombre_persona;
+      workbook.lastModifiedBy = nombre_persona;
+      workbook.created = new Date();
+      workbook.modified = new Date();
+      workbook.lastPrinted = new Date();
+      const worksheet = workbook.addWorksheet('materiales');
+  
+      for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+          //worksheet.getCell(`A${i}`).value = i;
+          if (i === 1) {
+              worksheet.getColumn(i).width = 3;
+          } else  {
+              worksheet.getColumn(i).width = 8;
+          }
+      }
+  
+      worksheet.getCell('B3').value = 'SOLICITUD DE MATERIAL - PROYECTO CGE';
+      worksheet.mergeCells('B3:K3');
+      worksheet.getCell('B3').alignment = { vertical: 'middle', horizontal: 'center' };
+      worksheet.getCell('B3').font = { bold: true, size: 12, color: { argb: 'FF000000' } };
+  
+      worksheet.getCell('B5').value = 'Nombre Solicitante'
+      worksheet.getCell('B5').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B5:C5');
+      worksheet.getCell('B6').value = 'Zona Solicitante'
+      worksheet.getCell('B6').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B6:C6');
+      worksheet.getCell('B7').value = 'Email Solicitante'
+      worksheet.getCell('B7').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B7:C7');
+  
+      worksheet.getCell('I5').value = 'RUT'
+      worksheet.getCell('I5').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.getCell('I6').value = 'Fono'
+      worksheet.getCell('I6').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.getCell('I7').value = 'Fecha'
+      worksheet.getCell('I7').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+
+
+      worksheet.getCell('D5').value = nombre_persona
+      worksheet.getCell('D5').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D5:H5');
+      worksheet.getCell('D6').value = zona_usuario
+      worksheet.getCell('D6').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D6:H6');
+      worksheet.getCell('D7').value = email_usuario
+      worksheet.getCell('D7').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D7:H7');
+
+      worksheet.getCell('B9').value = 'Nombre Supervisor'
+      worksheet.getCell('B9').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B9:C9');
+      worksheet.getCell('B10').value = 'Zona Supervisor'
+      worksheet.getCell('B10').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B10:C10');
+      worksheet.getCell('B11').value = 'Email Supervisor'
+      worksheet.getCell('B11').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells('B11:C11');
+  
+      worksheet.getCell('I9').value = 'RUT'
+      worksheet.getCell('I9').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.getCell('I10').value = 'Fono'
+      worksheet.getCell('I10').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      //worksheet.getCell('I11').value = 'Fecha'
+      //worksheet.getCell('I11').font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+
+      worksheet.getCell('D9').value = resultado_consulta.obra.nombre_supervisor
+      worksheet.getCell('D9').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D9:H9');
+      worksheet.getCell('D10').value = resultado_consulta.obra.zona
+      worksheet.getCell('D10').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D10:H10');
+      worksheet.getCell('D11').value = resultado_consulta.obra.email_supervisor
+      worksheet.getCell('D11').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('D11:H11');
+
+      worksheet.getCell('J9').value = resultado_consulta.obra.rut_supervisor
+      worksheet.getCell('J9').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('J9:K9');
+      worksheet.getCell('J10').value = ''
+      worksheet.getCell('J10').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      worksheet.mergeCells('J10:K10');
+      //worksheet.getCell('J7').value = fechahoy
+      //worksheet.getCell('J7').font = { bold: true, size: 10, color: { argb: 'FF000000' }, underline: 'single' };
+      //worksheet.mergeCells('J7:K7');
+  
+      const rowInicial = 15;
+  
+      worksheet.getCell(`B${rowInicial}`).value = 'Id'
+      worksheet.getCell(`B${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      
+      worksheet.getCell(`C${rowInicial}`).value = 'Código'
+      worksheet.getCell(`C${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+  
+      worksheet.getCell(`D${rowInicial}`).value = 'Descripción'
+      worksheet.getCell(`D${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+      worksheet.mergeCells(`D${rowInicial}:I${rowInicial}`);
+      worksheet.getCell(`D${rowInicial}`).alignment = { vertical: 'middle', horizontal: 'center' };
+  
+      worksheet.getCell(`J${rowInicial}`).value = 'Cant.'
+      worksheet.getCell(`J${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+  
+      worksheet.getCell(`K${rowInicial}`).value = 'Unidad'
+      worksheet.getCell(`K${rowInicial}`).font = { bold: true, size: 10, color: { argb: 'FF000000' } };
+  
+      for (const columna of ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']) {
+          worksheet.getCell(`${columna}${rowInicial}`).border = { 
+              top: { style: "double", color: {argb:'045565'} }, 
+              left: { style: "double", color: {argb:'045565'} }, 
+              bottom: { style: "double", color: {argb:'045565'} }, 
+              right: { style: "double", color: {argb:'045565'} } };
+          worksheet.getCell(`${columna}${rowInicial}`).fill = {
+                  type: 'pattern',
+                  pattern:'solid',
+                  fgColor:{argb:'28D4F6'}
+                };
+      }
+  
+      
+      let cont = 1;
+      for (const elemento of materiales) {
+          worksheet.getCell(`B${rowInicial + cont}`).value = `${cont}`;
+          worksheet.getCell(`C${rowInicial + cont}`).value = `${elemento.sap_material.codigo_sap}`;
+          worksheet.getCell(`D${rowInicial + cont}`).value = `${elemento.sap_material.descripcion}`;
+          worksheet.getCell(`J${rowInicial + cont}`).value = `${elemento.cantidad}`;
+          worksheet.getCell(`K${rowInicial + cont}`).value = `${elemento.sap_material.unidad}`;
+          worksheet.mergeCells(`D${rowInicial + cont}:I${rowInicial + cont}`);
+  
+          for (const columna of ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']) {
+              worksheet.getCell(`${columna}${rowInicial + cont}`).border = { 
+                  left: { style: "thin" }, 
+                  bottom: { style: "thin" }, 
+                  right: { style: "thin" } };
+          }
+          
+          cont += 1;
+      }
+  
+      // Leer la imagen en formato base64
+      const imagePath = './public/assets/images/pelom-logo.png';
+      const imageData = fs.readFileSync(imagePath);
+      const imageBase64 = imageData.toString('base64');
+  
+      // Agregar la imagen al workbook
+      const imageId = workbook.addImage({
+          base64: imageBase64,
+          extension: 'png',
+      });
+  
+      const imageRecuadroPath = './public/assets/images/recuadro1.png';
+      const imageRecuadroData = fs.readFileSync(imageRecuadroPath);
+      const imageRecuadroBase64 = imageRecuadroData.toString('base64');
+      const recuadroID = workbook.addImage({
+          base64: imageRecuadroBase64,
+          extension: 'png',
+      });
+  
+      // Definir la posición y tamaño de la imagen
+      worksheet.addImage(imageId, {
+          tl: { col: 1, row: 0 },  // Top left corner
+          ext: { width: 170, height: 38 }  // Width and height in points
+      });
+  
+      worksheet.addImage(recuadroID, {
+          tl: { col: 1, row: 4 },  // Top left corner
+          ext: { width: 565, height: 70 }  // Width and height in points
+      });
+
+      // res is a Stream object
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=" + `${nombre_archivo}.xlsx`
+      );
+      
+      return workbook.xlsx.write(res).then(function () {
+        res.status(200).end();
+      });
+  
+      // Guardar el archivo de Excel
+      //await workbook.xlsx.writeFile('test.xlsx');
+      //console.log('Archivo Excel creado con imagen.');
+      
+
+
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.log(error.issues);
+        const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+        res.status(400).send(mensaje);  //bad request
+        return;
+      }
+      console.log(error);
+      res.status(500).send(error);
+    }
+   
+ }
   /***********************************************************************************/
   /* Obtiene listado de todo el materiale que se ha solictado para una obra
   ;
@@ -1551,29 +1925,27 @@ exports.findBomByParametros = async (req, res) => {
           id_obra: z.coerce.number(),
         });
 
-        const ISapMaterialSchema = z.object({
-          codigo_sap: z.coerce.number(),
-          descripcion: z.coerce.string(),
-          unidad: z.coerce.string()          
+        const IMaterialCantidadConPedidosSchema = IMaterialCantidadSchema.extend({
+          pedidos: z.array(z.coerce.number())
         })
 
         const IDataOutputSchema = z.object({
           id_obra: z.coerce.number(),
-          sap_material: ISapMaterialSchema,
-          cantidad: z.coerce.number(),
-          pedidos: z.array(z.coerce.number())
+          materiales: z.array(IMaterialCantidadConPedidosSchema)
         });
 
         const IArrayDataOutputSchema = z.array(IDataOutputSchema);
 
         const validated = IDataInputSchema.parse(dataInput);
         
-        const sql = `SELECT ${validated.id_obra} as id_obra, 
-                            json_build_object('codigo_sap', n.codigo_sap_material, 
-                            'descripcion', mm.descripcion, 'unidad', mu.codigo_corto) as sap_material,
-                        sum(n.cantidad_requerida_new) AS cantidad,
-                        array_agg(n.pedido) as pedidos
-                      FROM ( SELECT DISTINCT ON (m.pedido, m.codigo_sap_material) m.pedido,
+        const sql = `SELECT id_obra, array_agg(material) as materiales
+                            FROM
+                          (SELECT n.id_obra, json_build_object(
+                                      'sap_material', json_build_object('codigo_sap', n.codigo_sap_material, 
+                                                      'descripcion', mm.descripcion, 'unidad', mu.codigo_corto),
+                                      'cantidad', sum(n.cantidad_requerida_new),
+                                      'pedidos', array_agg(n.pedido)) as material
+                                              FROM ( SELECT DISTINCT ON (m.pedido, m.codigo_sap_material) m.id_obra, m.pedido,
                                 m.codigo_sap_material,
                                 m.cantidad_requerida_new
                               FROM ( SELECT msd.id,
@@ -1591,14 +1963,18 @@ exports.findBomByParametros = async (req, res) => {
                               ORDER BY m.pedido, m.codigo_sap_material, m.fecha_movimiento DESC) n
                           JOIN obras.maestro_materiales mm ON n.codigo_sap_material = mm.codigo_sap
                           JOIN obras.maestro_unidades mu ON mm.id_unidad = mu.id
-                      GROUP BY n.codigo_sap_material, mm.descripcion, mu.codigo_corto
-                      ORDER BY codigo_sap_material;`;
+                      GROUP BY n.id_obra, n.codigo_sap_material, mm.descripcion, mu.codigo_corto
+                      ORDER BY codigo_sap_material) A
+                          GROUP BY id_obra`;
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
         if (pedidos) {
           const data = IArrayDataOutputSchema.parse(pedidos);
-          res.status(200).send(data);
+          if (data.length > 0) 
+            res.status(200).send(data[0]);
+          else
+            res.status(200).send({});
           return;
         }else
         {
@@ -1632,53 +2008,56 @@ exports.findBomByParametros = async (req, res) => {
           id_obra: z.coerce.number(),
         });
 
-        const ISapMaterialSchema = z.object({
-          codigo_sap: z.coerce.number(),
-          descripcion: z.coerce.string(),
-          unidad: z.coerce.string()          
+        const IMaterialParaReservaConReservasSchema = IMaterialCantidadSchema.extend({
+          reservas: z.array(IReservaSchema)
         })
 
         const IDataOutputSchema = z.object({
           id_obra: z.coerce.number(),
-          sap_material: ISapMaterialSchema,
-          cantidad: z.coerce.number(),
-          reservas: z.array(z.coerce.number())                    
-        });
+          materiales: z.array(IMaterialParaReservaConReservasSchema)
+        })
 
         const IArrayDataOutputSchema = z.array(IDataOutputSchema);
 
         const validated = IDataInputSchema.parse(dataInput);
 
-        const sql = `SELECT ${validated.id_obra} as id_obra, json_build_object('codigo_sap', n.codigo_sap_material, 
-                            'descripcion', mm.descripcion, 'unidad', mu.codigo_corto) as sap_material,
-                      sum(n.cantidad_requerida_new) AS cantidad,
-                      array_agg(n.cod_reserva) as reservas
-                    FROM ( SELECT DISTINCT ON (m.cod_reserva, m.codigo_sap_material) m.cod_reserva,
-                              m.codigo_sap_material,
-                              m.cantidad_requerida_new
-                            FROM ( SELECT mbi.id,
-                                      mbi.id_obra,
-                                      mbi.cod_reserva,
-                                      mbi.codigo_sap_material,
-                                      mbi.cantidad_requerida_old,
-                                      mbi.cantidad_requerida_new,
-                                      mbi.tipo_movimiento,
-                                      mbi.fecha_movimiento,
-                                      mbi.rut_usuario
-                                    FROM obras.mat_bom_ingresos mbi
-                                      JOIN obras.mat_bom_reservas mbr ON mbi.cod_reserva = mbr.reserva
-                                    WHERE mbr.id_obra = ${validated.id_obra}) m
-                            ORDER BY m.cod_reserva, m.codigo_sap_material, m.fecha_movimiento DESC) n
-                      JOIN obras.maestro_materiales mm ON n.codigo_sap_material = mm.codigo_sap
-                      JOIN obras.maestro_unidades mu ON mm.id_unidad = mu.id
-                    GROUP BY n.codigo_sap_material, mm.descripcion, mu.codigo_corto
-                    ORDER BY n.codigo_sap_material;`;
+        const sql = `SELECT id_obra, array_agg(material) as materiales
+                            FROM
+                          (SELECT n.id_obra, json_build_object(
+                                      'sap_material', json_build_object('codigo_sap', n.codigo_sap_material, 
+                                                      'descripcion', mm.descripcion, 'unidad', mu.codigo_corto),
+                                      'cantidad', sum(n.cantidad_requerida_new),
+                                      'reservas', array_agg(n.cod_reserva)) as material
+                                              FROM ( SELECT DISTINCT ON (m.cod_reserva, m.codigo_sap_material) m.id_obra, m.cod_reserva,
+                                                        m.codigo_sap_material,
+                                                        m.cantidad_requerida_new
+                                                      FROM ( SELECT mbi.id,
+                                                                mbi.id_obra,
+                                                                mbi.cod_reserva,
+                                                                mbi.codigo_sap_material,
+                                                                mbi.cantidad_requerida_old,
+                                                                mbi.cantidad_requerida_new,
+                                                                mbi.tipo_movimiento,
+                                                                mbi.fecha_movimiento,
+                                                                mbi.rut_usuario
+                                                              FROM obras.mat_bom_ingresos mbi
+                                                                JOIN obras.mat_bom_reservas mbr ON mbi.cod_reserva = mbr.reserva
+                                                              WHERE mbr.id_obra = ${validated.id_obra}) m
+                                                      ORDER BY m.cod_reserva, m.codigo_sap_material, m.fecha_movimiento DESC) n
+                                                JOIN obras.maestro_materiales mm ON n.codigo_sap_material = mm.codigo_sap
+                                                JOIN obras.maestro_unidades mu ON mm.id_unidad = mu.id
+                                              GROUP BY n.id_obra, n.codigo_sap_material, mm.descripcion, mu.codigo_corto
+                                              ORDER BY n.codigo_sap_material) A
+                          GROUP BY id_obra`;
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const reservados = await sequelize.query(sql, { type: QueryTypes.SELECT });
         if (reservados) {
           const data = IArrayDataOutputSchema.parse(reservados);
-          res.status(200).send(data);
+          if (data.length > 0) 
+            res.status(200).send(data[0]);
+          else
+            res.status(200).send({});
           return;
         }else
         {
@@ -1710,58 +2089,75 @@ exports.findBomByParametros = async (req, res) => {
         }
 
         const IDataInputSchema = z.object({
-          cod_reserva: z.coerce.number(),
+          cod_reserva: IReservaSchema,
         });
 
-        const ISapMaterialSchema = z.object({
-          codigo_sap: z.coerce.number(),
-          descripcion: z.coerce.string(),
-          unidad: z.coerce.string()          
+        const IDataOutputSchema = IReservaHeaderSchema.extend({
+          materiales: z.array(IMaterialCantidadUsuarioSchema),
         })
-
-        const IDataOutputSchema = z.object({
-          id: z.coerce.number(),
-          id_obra: z.coerce.number(),
-          reserva: z.coerce.number(),
-          sap_material: ISapMaterialSchema,
-          cantidad: z.coerce.number(),
-          fecha_ingreso: z.coerce.string(),
-          rut_usuario: z.coerce.string(),
-          persona: z.coerce.string()
-        });
 
         const IArrayDataOutputSchema = z.array(IDataOutputSchema);
 
         const validated = IDataInputSchema.parse(dataInput);
 
         const cod_reserva = validated.cod_reserva;
-        const sql = `SELECT DISTINCT ON (mbi.cod_reserva, mbi.codigo_sap_material) 
-                          mbi.id,
-                          mbi.id_obra,
-                          mbi.cod_reserva as reserva,
-                          row_to_json(mm) as sap_material,
-                          mbi.cantidad_requerida_new AS cantidad,
-                          mbi.fecha_movimiento::text AS fecha_ingreso,
-                          mbi.rut_usuario,
-                          (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
-                          CASE
-                              WHEN p.apellido_2 IS NULL THEN ''::character varying
-                              ELSE p.apellido_2
-                          END::text AS persona
-                        FROM obras.mat_bom_ingresos mbi
-                        JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
-                      LEFT JOIN (SELECT mm.codigo_sap, mm.descripcion, mu.codigo_corto as unidad FROM 
-                        obras.maestro_materiales mm JOIN obras.maestro_unidades mu
-                        ON mm.id_unidad = mu.id) mm 
-                      ON mbi.codigo_sap_material = mm.codigo_sap 
-                        WHERE mbi.cod_reserva = ${cod_reserva}
-                        ORDER BY mbi.cod_reserva, mbi.codigo_sap_material, mbi.fecha_movimiento desc;`;
+        const sql = ` SELECT e.reserva,
+                          f.id_obra,
+                          e.fecha_hora::text AS fecha_hora,
+                          e.rut_usuario,
+                          e.persona,
+                          f.materiales
+                        FROM ( SELECT DISTINCT ON (mbi.cod_reserva) mbi.cod_reserva AS reserva,
+                                  mbi.fecha_movimiento AS fecha_hora,
+                                  mbi.rut_usuario,
+                                  (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                                      CASE
+                                          WHEN p.apellido_2 IS NULL THEN ''::character varying
+                                          ELSE p.apellido_2
+                                      END::text AS persona
+                                FROM obras.mat_bom_ingresos mbi
+                                  JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                                ORDER BY mbi.cod_reserva, mbi.fecha_movimiento DESC) e
+                          JOIN ( SELECT b.reserva,
+                                  b.id_obra,
+                                  array_agg(b.material) AS materiales
+                                FROM ( SELECT a.reserva,
+                                          a.id_obra,
+                                          json_build_object('sap_material', a.sap_material, 'cantidad', a.cantidad, 
+                                          'fecha_ingreso', a.fecha_ingreso, 'rut_usuario', a.rut_usuario, 'persona', a.persona) 
+                                            AS material
+                                        FROM ( SELECT DISTINCT ON (mbi.cod_reserva, mbi.codigo_sap_material) mbi.id,
+                                                  mbi.id_obra,
+                                                  mbi.cod_reserva AS reserva,
+                                                  row_to_json(mm.*) AS sap_material,
+                                                  mbi.cantidad_requerida_new AS cantidad,
+                                                  mbi.fecha_movimiento::text AS fecha_ingreso,
+                                                  mbi.rut_usuario,
+                                                  (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                                                      CASE
+                                                          WHEN p.apellido_2 IS NULL THEN ''::character varying
+                                                          ELSE p.apellido_2
+                                                      END::text AS persona
+                                                FROM obras.mat_bom_ingresos mbi
+                                                  JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                                                  LEFT JOIN ( SELECT mm_1.codigo_sap,
+                                                          mm_1.descripcion,
+                                                          mu.codigo_corto AS unidad
+                                                        FROM obras.maestro_materiales mm_1
+                                                          JOIN obras.maestro_unidades mu ON mm_1.id_unidad = mu.id) mm 
+                                                          ON mbi.codigo_sap_material = mm.codigo_sap
+                                                WHERE mbi.cod_reserva = ${cod_reserva}
+                                                ORDER BY mbi.cod_reserva, mbi.codigo_sap_material, mbi.fecha_movimiento DESC) a) b
+                                GROUP BY b.reserva, b.id_obra) f USING (reserva);`;
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const reservas = await sequelize.query(sql, { type: QueryTypes.SELECT });
         if (reservas) {
           const data = IArrayDataOutputSchema.parse(reservas);
-          res.status(200).send(data);
+          if (data.length > 0)
+            res.status(200).send(data[0]);
+          else
+            res.status(200).send({});
           return;
         }else
         {
@@ -1787,19 +2183,13 @@ exports.findBomByParametros = async (req, res) => {
     /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
       #swagger.description = 'Devuelve el listado de todas las reservas disponibles' */
     try {
-      const IDataOutputSchema = z.object({
-        reserva: z.coerce.number(),
-        id_obra: z.coerce.number(),
-        estado: z.coerce.string(),
-        fecha_hora: z.coerce.string(),
-        persona: z.coerce.string(),
-      });
-      const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+      const IArrayDataOutputSchema = z.array(IReservaHeaderSchema);
       
       const sql = `SELECT mbr.reserva as reserva,
-                    mbr.id_obra,
-                    'CARGADA'::text as estado,
+                    mbr.id_obra,                    
                     mbi.fecha_movimiento::text as fecha_hora,
+                    rut_usuario,
                     (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
                       CASE
                         WHEN p.apellido_2 IS NULL THEN ''::character varying
@@ -1912,45 +2302,51 @@ exports.findBomByParametros = async (req, res) => {
           id_obra: z.coerce.number(),
         });
 
+        const IReservaHeaderSinObraSchema = IReservaHeaderSchema.omit({id_obra: true});
+
         const IDataOutputSchema = z.object({
-          reserva: z.coerce.number(),
           id_obra: z.coerce.number(),
-          estado: z.coerce.string(),
-          fecha_hora: z.coerce.string(),
-          persona: z.coerce.string(),
-        });
+          reservas: z.array(IReservaHeaderSinObraSchema),
+        })
 
         const IArrayDataOutputSchema = z.array(IDataOutputSchema);
 
         const validated = IDataInputSchema.parse(dataInput);
 
         const id_obra = validated.id_obra;
-        const sql = `SELECT mbr.reserva as reserva,
-                        mbr.id_obra,
-                        'CARGADA'::text as estado,
-                        mbi.fecha_movimiento::text as fecha_hora,
-                        (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
-                          CASE
-                            WHEN p.apellido_2 IS NULL THEN ''::character varying
-                            ELSE p.apellido_2
-                          END::text AS persona
-                      FROM obras.mat_bom_reservas mbr
-                        JOIN ( SELECT DISTINCT ON (mat_bom_ingresos.cod_reserva) mat_bom_ingresos.cod_reserva,
-                          mat_bom_ingresos.id_obra,
-                          mat_bom_ingresos.fecha_movimiento,
-                          mat_bom_ingresos.rut_usuario
-                          FROM obras.mat_bom_ingresos
-                          ORDER BY mat_bom_ingresos.cod_reserva, mat_bom_ingresos.fecha_movimiento DESC) mbi 
-                          ON mbr.reserva = mbi.cod_reserva AND mbr.id_obra = mbi.id_obra
-                        JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
-                      WHERE mbr.id_obra = ${id_obra}
-                      ORDER BY mbi.fecha_movimiento DESC`;
+        const sql = `SELECT id_obra, 
+                            array_agg(reserva) as reservas
+	                    FROM
+                          (SELECT mbr.id_obra, 
+                                json_build_object('reserva',mbr.reserva,
+                              'fecha_hora', mbi.fecha_movimiento::text,
+                                  'rut_usuario', rut_usuario,
+                                  'persona', (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                                  CASE
+                                    WHEN p.apellido_2 IS NULL THEN ''::character varying
+                                    ELSE p.apellido_2
+                                  END::text) as reserva
+                              FROM obras.mat_bom_reservas mbr
+                                JOIN ( SELECT DISTINCT ON (mat_bom_ingresos.cod_reserva) mat_bom_ingresos.cod_reserva,
+                                  mat_bom_ingresos.id_obra,
+                                  mat_bom_ingresos.fecha_movimiento,
+                                  mat_bom_ingresos.rut_usuario
+                                  FROM obras.mat_bom_ingresos
+                                  ORDER BY mat_bom_ingresos.cod_reserva, mat_bom_ingresos.fecha_movimiento DESC) mbi 
+                                  ON mbr.reserva = mbi.cod_reserva AND mbr.id_obra = mbi.id_obra
+                                JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                              WHERE mbr.id_obra = ${id_obra}
+                              ORDER BY mbi.fecha_movimiento DESC) A
+                            GROUP BY id_obra`;
         const { QueryTypes } = require('sequelize');
         const sequelize = db.sequelize;
         const pedidos = await sequelize.query(sql, { type: QueryTypes.SELECT });
         if (pedidos) {
           const data = IArrayDataOutputSchema.parse(pedidos);
-          res.status(200).send(data);
+          if (data.length > 0) 
+            res.status(200).send(data[0]);
+          else
+            res.status(200).send({id_obra: id_obra, reservas: []});
           return;
         }else
         {
@@ -1968,6 +2364,423 @@ exports.findBomByParametros = async (req, res) => {
     } 
 
   }
+  /***********************************************************************************/
+  /* Genera archivo excel con listado de materiales para una reserva
+  ;
+  */
+  exports.getExcelReserva = async (req, res) => {
+    /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Genera archivo excel con listado de materiales para una reserva' */
+
+
+    const dataInput = {
+      codigo_reserva: req.query.codigo_reserva
+    }
+    try {
+
+        let id_usuario = req.userId;
+        let rut_usuario;
+        let nombre_persona;
+        const { QueryTypes } = require('sequelize');
+        const sequelize = db.sequelize;
+        const sql_usuario = `select username, (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                          CASE
+                              WHEN p.apellido_2 IS NULL THEN ''::character varying
+                              ELSE p.apellido_2
+                          END::text AS persona from _auth.users u join _auth.personas p
+                              on u.username = p.rut
+                              where u.id = ${id_usuario}`;
+        await sequelize.query(sql_usuario, {
+          type: QueryTypes.SELECT
+        }).then(data => {
+          rut_usuario = data[0].username;
+          nombre_persona = data[0].persona;
+        }).catch(err => {
+          res.status(500).send(err.message );
+          return;
+        })
+
+
+        const IDataInputSchema = z.object({
+          codigo_reserva: IReservaSchema,
+        });
+
+        const IDataOutputSchema = IReservaHeaderSchema.extend({
+          nombre_obra: z.string(),
+          materiales: z.array(IMaterialCantidadUsuarioSchema),
+        })
+
+        const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+
+        const validated = IDataInputSchema.parse(dataInput);
+
+        const cod_reserva = validated.codigo_reserva;
+        const sql = ` SELECT e.reserva,
+                          f.id_obra,
+                          (select nombre_obra from obras.obras where id = f.id_obra) nombre_obra,
+                          e.fecha_hora::text AS fecha_hora,
+                          e.rut_usuario,
+                          e.persona,
+                          f.materiales
+                        FROM ( SELECT DISTINCT ON (mbi.cod_reserva) mbi.cod_reserva AS reserva,
+                                  mbi.fecha_movimiento AS fecha_hora,
+                                  mbi.rut_usuario,
+                                  (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                                      CASE
+                                          WHEN p.apellido_2 IS NULL THEN ''::character varying
+                                          ELSE p.apellido_2
+                                      END::text AS persona
+                                FROM obras.mat_bom_ingresos mbi
+                                  JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                                ORDER BY mbi.cod_reserva, mbi.fecha_movimiento DESC) e
+                          JOIN ( SELECT b.reserva,
+                                  b.id_obra,
+                                  array_agg(b.material) AS materiales
+                                FROM ( SELECT a.reserva,
+                                          a.id_obra,
+                                          json_build_object('sap_material', a.sap_material, 'cantidad', a.cantidad, 
+                                          'fecha_ingreso', a.fecha_ingreso, 'rut_usuario', a.rut_usuario, 'persona', a.persona) 
+                                            AS material
+                                        FROM ( SELECT DISTINCT ON (mbi.cod_reserva, mbi.codigo_sap_material) mbi.id,
+                                                  mbi.id_obra,
+                                                  mbi.cod_reserva AS reserva,
+                                                  row_to_json(mm.*) AS sap_material,
+                                                  mbi.cantidad_requerida_new AS cantidad,
+                                                  mbi.fecha_movimiento::text AS fecha_ingreso,
+                                                  mbi.rut_usuario,
+                                                  (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                                                      CASE
+                                                          WHEN p.apellido_2 IS NULL THEN ''::character varying
+                                                          ELSE p.apellido_2
+                                                      END::text AS persona
+                                                FROM obras.mat_bom_ingresos mbi
+                                                  JOIN _auth.personas p ON mbi.rut_usuario::text = p.rut::text
+                                                  LEFT JOIN ( SELECT mm_1.codigo_sap,
+                                                          mm_1.descripcion,
+                                                          mu.codigo_corto AS unidad
+                                                        FROM obras.maestro_materiales mm_1
+                                                          JOIN obras.maestro_unidades mu ON mm_1.id_unidad = mu.id) mm 
+                                                          ON mbi.codigo_sap_material = mm.codigo_sap
+                                                WHERE mbi.cod_reserva = ${cod_reserva}
+                                                ORDER BY mbi.cod_reserva, mbi.codigo_sap_material, mbi.fecha_movimiento DESC) a) b
+                                GROUP BY b.reserva, b.id_obra) f USING (reserva);`;
+
+        let resultado_consulta = {};
+        const reservas = await sequelize.query(sql, { type: QueryTypes.SELECT });
+        if (reservas) {
+          const data = IArrayDataOutputSchema.parse(reservas);
+          if (data.length > 0)
+            resultado_consulta = data[0];
+        }else
+        {
+          res.status(500).send("Error en la consulta (servidor backend)");
+          return;
+        }
+
+
+      // Crear un nuevo documento Excel en memoria
+      let workbook = new excel.Workbook();
+      workbook.creator = nombre_persona;
+      workbook.lastModifiedBy = nombre_persona;
+      workbook.created = new Date();
+      workbook.modified = new Date();
+      workbook.lastPrinted = new Date();
+      let worksheet = workbook.addWorksheet("Reserva");
+
+      worksheet.properties.defaultColWidth = 25;
+      if (resultado_consulta == {}) {
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+        res.setHeader(
+          "Content-Disposition",
+          "attachment; filename=" + "tutorials.xlsx"
+        );
+        
+        return workbook.xlsx.write(res).then(function () {
+          res.status(200).end();
+        });
+      }
+
+      let detalle_material = resultado_consulta.materiales;
+
+      worksheet.addRow(['Nombre Obra', resultado_consulta.nombre_obra])
+      worksheet.getCell('A1').font = { bold: true };
+      worksheet.getCell('A1').border = { top: { style: "bold" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+
+      worksheet.addRow(['Fecha', resultado_consulta.fecha_hora])
+      worksheet.getCell('A2').font = { bold: true };
+      /*
+      worksheet.getCell('A2').fill = {
+        type: 'gradient',
+        gradient: 'path',
+        center:{left:0.5,top:0.5},
+        stops: [
+          {position:0, color:{argb:'FFFF0000'}},
+          {position:1, color:{argb:'FF00FF00'}}
+        ]
+      };*/
+
+      worksheet.addRow(['Responsable', resultado_consulta.rut_usuario + ' ' + resultado_consulta.persona])
+      worksheet.getCell('A3').font = { bold: true };
+
+      worksheet.addRow(['Numero reserva', resultado_consulta.reserva])
+      worksheet.getCell('A4').font = { bold: true };
+      worksheet.getCell('B4').alignment = { horizontal: 'left' };
+      //Saltar una línea
+      worksheet.addRow([])
+
+      // Add Header Row
+      const headerRow = worksheet.addRow(["Código SAP", "Cantidad", "Unidad", "Descripción"]);
+      headerRow.font = { bold: true };
+      headerRow.border = { 
+        top: { style: "double", color: {argb:'045565'} }, 
+        left: { style: "double", color: {argb:'045565'} }, 
+        bottom: { style: "double", color: {argb:'045565'} }, 
+        right: { style: "double", color: {argb:'045565'} } };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern:'solid',
+        fgColor:{argb:'28D4F6'}
+      };
+
+      // Add Array Rows
+      //worksheet.addRows(tutorials);
+      for (const detalle of detalle_material) {
+        const detalleRow = worksheet.addRow([detalle.sap_material.codigo_sap, detalle.cantidad, detalle.sap_material.unidad, detalle.sap_material.descripcion]);
+        detalleRow.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        detalleRow.alignment = { horizontal: 'left' };
+        
+      }
+
+      const firstColumn = worksheet.getColumn(1);
+      firstColumn.width = 40;
+
+
+      // res is a Stream object
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=" + "tutorials.xlsx"
+      );
+      
+      return workbook.xlsx.write(res).then(function () {
+        res.status(200).end();
+      });
+      
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error);
+    }
+  }
+  /***********************************************************************************/
+  /* Genera archivo excel con listado de materiales totales para una obra
+  ;
+  */
+ exports.getExcelReservaPorObra = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Genera archivo excel con listado de materiales totales para una obra' */
+
+
+      const dataInput = {
+        id_obra: req.query.id_obra
+      }
+      try {
+  
+          let id_usuario = req.userId;
+          let rut_usuario;
+          let nombre_persona;
+          const { QueryTypes } = require('sequelize');
+          const sequelize = db.sequelize;
+          const sql_usuario = `select username, (((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                            CASE
+                                WHEN p.apellido_2 IS NULL THEN ''::character varying
+                                ELSE p.apellido_2
+                            END::text AS persona from _auth.users u join _auth.personas p
+                                on u.username = p.rut
+                                where u.id = ${id_usuario}`;
+          await sequelize.query(sql_usuario, {
+            type: QueryTypes.SELECT
+          }).then(data => {
+            rut_usuario = data[0].username;
+            nombre_persona = data[0].persona;
+          }).catch(err => {
+            res.status(500).send(err.message );
+            return;
+          })
+  
+  
+          
+  
+          const IDataInputSchema = z.object({
+            id_obra: z.coerce.number(),
+          });
+  
+          const IMaterialParaReservaConReservasSchema = IMaterialCantidadSchema.extend({
+            reservas: z.array(IReservaSchema)
+          })
+  
+          const IDataOutputSchema = z.object({
+            id_obra: z.coerce.number(),
+            nombre_obra: z.string(),
+            codigo_obra: z.string(),
+            materiales: z.array(IMaterialParaReservaConReservasSchema)
+          })
+  
+          const IArrayDataOutputSchema = z.array(IDataOutputSchema);
+  
+          const validated = IDataInputSchema.parse(dataInput);
+
+          const sql = ` SELECT id_obra, 
+	(select nombre_obra from obras.obras where id = id_obra) nombre_obra,
+    (select codigo_obra from obras.obras where id = id_obra) codigo_obra,
+	array_agg(material) as materiales
+                            FROM
+                          (SELECT n.id_obra, json_build_object(
+                                      'sap_material', json_build_object('codigo_sap', n.codigo_sap_material, 
+                                                      'descripcion', mm.descripcion, 'unidad', mu.codigo_corto),
+                                      'cantidad', sum(n.cantidad_requerida_new),
+                                      'reservas', array_agg(n.cod_reserva)) as material
+                                              FROM ( SELECT DISTINCT ON (m.cod_reserva, m.codigo_sap_material) m.id_obra, m.cod_reserva,
+                                                        m.codigo_sap_material,
+                                                        m.cantidad_requerida_new
+                                                      FROM ( SELECT mbi.id,
+                                                                mbi.id_obra,
+                                                                mbi.cod_reserva,
+                                                                mbi.codigo_sap_material,
+                                                                mbi.cantidad_requerida_old,
+                                                                mbi.cantidad_requerida_new,
+                                                                mbi.tipo_movimiento,
+                                                                mbi.fecha_movimiento,
+                                                                mbi.rut_usuario
+                                                              FROM obras.mat_bom_ingresos mbi
+                                                                JOIN obras.mat_bom_reservas mbr ON mbi.cod_reserva = mbr.reserva
+                                                              WHERE mbr.id_obra = ${validated.id_obra}) m
+                                                      ORDER BY m.cod_reserva, m.codigo_sap_material, m.fecha_movimiento DESC) n
+                                                JOIN obras.maestro_materiales mm ON n.codigo_sap_material = mm.codigo_sap
+                                                JOIN obras.maestro_unidades mu ON mm.id_unidad = mu.id
+                                              GROUP BY n.id_obra, n.codigo_sap_material, mm.descripcion, mu.codigo_corto
+                                              ORDER BY n.codigo_sap_material) A
+                          GROUP BY id_obra`;
+  
+          let resultado_consulta = {};
+          const reservas = await sequelize.query(sql, { type: QueryTypes.SELECT });
+          if (reservas) {
+            const data = IArrayDataOutputSchema.parse(reservas);
+            if (data.length > 0)
+              resultado_consulta = data[0];
+          }else
+          {
+            res.status(500).send("Error en la consulta (servidor backend)");
+            return;
+          }
+  
+  
+        // Crear un nuevo documento Excel en memoria
+        let workbook = new excel.Workbook();
+        workbook.creator = nombre_persona;
+        workbook.lastModifiedBy = nombre_persona;
+        workbook.created = new Date();
+        workbook.modified = new Date();
+        workbook.lastPrinted = new Date();
+        let worksheet = workbook.addWorksheet("Reserva");
+  
+        worksheet.properties.defaultColWidth = 25;
+        if (resultado_consulta == {}) {
+          res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          );
+          res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=" + "tutorials.xlsx"
+          );
+          
+          return workbook.xlsx.write(res).then(function () {
+            res.status(200).end();
+          });
+        }
+  
+        //const nombre_archivo = `Reserva_${resultado_consulta.codigo_obra}_${new Date().toLocaleString()}`
+        const nombre_archivo = `reserva_${resultado_consulta.codigo_obra}`
+        console.log('nombre_archivo', nombre_archivo)
+        let detalle_material = resultado_consulta.materiales;
+  
+        worksheet.addRow(['Nombre Obra', resultado_consulta.nombre_obra])
+        worksheet.getCell('A1').font = { bold: true };
+        worksheet.getCell('A1').border = { top: { style: "bold" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+  
+        worksheet.addRow(['Código obra', resultado_consulta.codigo_obra])
+        worksheet.getCell('A2').font = { bold: true };
+        worksheet.getCell('A2').border = { top: { style: "bold" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        /*
+        worksheet.getCell('A2').fill = {
+          type: 'gradient',
+          gradient: 'path',
+          center:{left:0.5,top:0.5},
+          stops: [
+            {position:0, color:{argb:'FFFF0000'}},
+            {position:1, color:{argb:'FF00FF00'}}
+          ]
+        };*/
+        //Saltar una línea
+        worksheet.addRow([])
+  
+        // Add Header Row
+        const headerRow = worksheet.addRow(["Código SAP", "Cantidad", "Unidad", "Reservas", "Descripción"]);
+        headerRow.font = { bold: true };
+        headerRow.border = { 
+          top: { style: "double", color: {argb:'045565'} }, 
+          left: { style: "double", color: {argb:'045565'} }, 
+          bottom: { style: "double", color: {argb:'045565'} }, 
+          right: { style: "double", color: {argb:'045565'} } };
+        headerRow.fill = {
+          type: 'pattern',
+          pattern:'solid',
+          fgColor:{argb:'28D4F6'}
+        };
+  
+        // Add Array Rows
+        for (const detalle of detalle_material) {
+          const detalleRow = worksheet.addRow([detalle.sap_material.codigo_sap, 
+            detalle.cantidad, 
+            detalle.sap_material.unidad, 
+            detalle.reservas,
+            detalle.sap_material.descripcion, 
+            ]);
+          detalleRow.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+          detalleRow.alignment = { horizontal: 'left' };
+          
+        }
+  
+        const firstColumn = worksheet.getColumn(1);
+        firstColumn.width = 40;
+  
+  
+        // res is a Stream object
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+        res.setHeader(
+          "Content-Disposition",
+          "attachment; filename=" + `${nombre_archivo}.xlsx`
+        );
+        
+        return workbook.xlsx.write(res).then(function () {
+          res.status(200).end();
+        });
+        
+      } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+      }
+   
+ }
 /***********************************************************************************/
   /* Crea listado de materiales para salida a faena desde bodega
   ;
@@ -2254,6 +3067,63 @@ exports.findBomByParametros = async (req, res) => {
         })
     }
   }
+
+  /***********************************************************************************/
+  /* Crea movimiento en bodega
+  ;
+  */
+ exports.createMovimientoBodega = async (req, res) => {
+/*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Crea movimiento en bodega'
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos encabezado reporte diario',
+            required: true,
+            schema: [{
+                    "id_obra": 1,
+                    reserva: 1111111,
+                    nro_guia: 1111111,
+                    material: {
+                          sap_material: {
+                            codigo_sap: 111,
+                            descripcion: "Descripción del material",
+                            unidad: "UN",
+                          },
+                          cantidad: 10
+                        },
+                    tipo_movimiento: "IN_MANDANTE",
+                    sentido: "ENTRADA",
+              }]
+      }
+   */
+      
+      const IDataInputSchema = z.object({
+        id_obra: z.coerce.number().int().positive(),
+        reserva: IReservaSchema,
+        nro_guia: z.coerce.number().int().positive().optional(),
+        material: IMaterialCantidadSchema,
+        tipo_movimiento: z.coerce.string(),
+        sentido: z.coerce.string()
+      })
+
+      const IArrayDataInputSchema = z.array(IDataInputSchema);
+      try {
+
+        const dataInput = IArrayDataInputSchema.parse(req.body);
+        
+        res.status(200).send(dataInput);
+      } catch (error) {
+        console.log('error -> ', error);
+        if (error instanceof ZodError) {
+          console.log(error.issues);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+      }
+
+ }
 
   function obtenerValoresUnicosConSuma(arreglo) {
     const objetoResultante = {};

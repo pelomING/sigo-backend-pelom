@@ -1951,6 +1951,41 @@
         }
       }
     },
+    "/api/obras/backoffice/material/v1/exportarexcelporpedido": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Genera archivo excel de materiales para un pedido",
+        "produces": [
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ],
+        "parameters": [
+          {
+            "name": "id_solicitud",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/material/v1/totalmaterialsolicitadoporobra": {
       "get": {
         "tags": [
@@ -2287,6 +2322,70 @@
         }
       }
     },
+    "/api/obras/backoffice/material/v1/exportarexcel": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Genera archivo excel con listado de materiales para una reserva",
+        "produces": [
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ],
+        "parameters": [
+          {
+            "name": "codigo_reserva",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/material/v1/exportarexceltodo": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Genera archivo excel con listado de materiales totales para una obra",
+        "produces": [
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ],
+        "parameters": [
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/material/v1/crealistafaena": {
       "post": {
         "tags": [
@@ -2305,6 +2404,93 @@
                 },
                 "detalle": {
                   "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/material/v1/creamovimientobodega": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Manejo materiales (bom)"
+        ],
+        "description": "Crea movimiento en bodega",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id_obra": {
+                    "type": "number",
+                    "example": 1
+                  },
+                  "reserva": {
+                    "type": "number",
+                    "example": 1111111
+                  },
+                  "nro_guia": {
+                    "type": "number",
+                    "example": 1111111
+                  },
+                  "material": {
+                    "type": "object",
+                    "properties": {
+                      "sap_material": {
+                        "type": "object",
+                        "properties": {
+                          "codigo_sap": {
+                            "type": "number",
+                            "example": 111
+                          },
+                          "descripcion": {
+                            "type": "string",
+                            "example": "Descripción del material"
+                          },
+                          "unidad": {
+                            "type": "string",
+                            "example": "UN"
+                          }
+                        }
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 10
+                      }
+                    }
+                  },
+                  "tipo_movimiento": {
+                    "type": "string",
+                    "example": "IN_MANDANTE"
+                  },
+                  "sentido": {
+                    "type": "string",
+                    "example": "ENTRADA"
+                  }
                 }
               }
             }
@@ -3320,6 +3506,315 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/movil/repodiario/v1/upload_reportediario": {
+      "post": {
+        "tags": [
+          "Obras - Movil - Reporte diario"
+        ],
+        "description": "Crea un nuevo Reporte Diario",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "jefe_faena": {
+                  "type": "string",
+                  "example": "19113380-3"
+                },
+                "sdi": {
+                  "type": "string",
+                  "example": "11111"
+                },
+                "gestor_cliente": {
+                  "type": "string",
+                  "example": "Nombre gestor"
+                },
+                "id_area": {
+                  "type": "number",
+                  "example": 1
+                },
+                "brigada_pesada": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "fecha_reporte": {
+                  "type": "string",
+                  "example": "2024-06-19"
+                },
+                "hora_salida_base": {
+                  "type": "string",
+                  "example": "YYYY-MM-DDTHH:NN:SS"
+                },
+                "hora_llegada_terreno": {
+                  "type": "string",
+                  "example": "YYYY-MM-DDTHH:NN:SS"
+                },
+                "hora_salida_terreno": {
+                  "type": "string",
+                  "example": "YYYY-MM-DDTHH:NN:SS"
+                },
+                "hora_llegada_base": {
+                  "type": "string",
+                  "example": "YYYY-MM-DDTHH:NN:SS"
+                },
+                "alimentador": {
+                  "type": "string",
+                  "example": "Nombre alimentador"
+                },
+                "comuna": {
+                  "type": "string",
+                  "example": "07301"
+                },
+                "nro_documento": {
+                  "type": "string",
+                  "example": "1111111"
+                },
+                "flexiapps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "flexiapp": {
+                        "type": "string",
+                        "example": "1111111"
+                      }
+                    }
+                  }
+                },
+                "recargo_hora": {
+                  "type": "number",
+                  "example": 3
+                },
+                "referencia": {
+                  "type": "string",
+                  "example": "Observación"
+                },
+                "nro_oc": {
+                  "type": "string",
+                  "example": "1111111"
+                },
+                "det_actividad": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "tActividad": {
+                        "type": "number",
+                        "example": 13
+                      },
+                      "tOperacion": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "mActividad": {
+                        "type": "number",
+                        "example": 201
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 5
+                      },
+                      "actividad_ref": {
+                        "type": "string",
+                        "example": "Descripción actividad (opcional)"
+                      }
+                    }
+                  }
+                },
+                "det_otros": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "glosa": {
+                        "type": "string",
+                        "example": "test 2 Glosa"
+                      },
+                      "valor_unitario": {
+                        "type": "number",
+                        "example": 100
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/reportesdefaena": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Devuelve todos los reportes diarios NUEVOS que viene de faena",
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/reportesdefaenaactividad": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Obtiene un reporte diario de faena por id de reporte",
+        "parameters": [
+          {
+            "name": "id_reporte",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/asignareportediariomovil/{id_reporte}": {
+      "put": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Graba el reporte diario a una obra específica",
+        "parameters": [
+          {
+            "name": "id_reporte",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_obra": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/repodiario/v1/liberareportediariomovil/{id_reporte}": {
+      "put": {
+        "tags": [
+          "Obras - Backoffice - Reporte diario"
+        ],
+        "description": "Desasigna el reporte diario a una obra específica",
+        "parameters": [
+          {
+            "name": "id_reporte",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
