@@ -2540,7 +2540,7 @@ let DeterminaEncabezadoEstadoPago = async (id_obra, ids_reporte, id_estado_pago)
                   row_to_json(c) as comuna, 
                   ubicacion as direccion, 
                   repo.flexiapp as flexiapp, 
-                  fecha_termino::text as fecha_ejecucion, 
+                  (case when fecha_termino::date > now()::date THEN now()::date ELSE fecha_termino::date END)::text as fecha_ejecucion, 
                   initcap(o.jefe_delegacion)::varchar as jefe_delegacion, 
                   json_build_object('id', repo.id_jefe, 'nombre', repo.jefe_faena) as jefe_faena, 
                   repo.num_documento as numero_documento, 
