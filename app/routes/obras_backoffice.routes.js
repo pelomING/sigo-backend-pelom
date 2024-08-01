@@ -204,6 +204,8 @@ module.exports = function(app) {
 
     app.put("/api/obras/backoffice/repodiario/v1/asignareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.grabaRepoFaenaAObra);
 
+    app.put("/api/obras/backoffice/repodiario/v1/anulareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.anularRepoFaenaAObra);
+
     app.put("/api/obras/backoffice/repodiario/v1/liberareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.desasignaRepoFaenaAObra);
 
 }

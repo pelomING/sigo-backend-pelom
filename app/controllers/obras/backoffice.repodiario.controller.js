@@ -2587,6 +2587,71 @@ exports.grabaRepoFaenaAObra = async (req, res) => {
   }
 }
 
+
+
+/*********************************************************************************** */
+/* Asigna un reporte diario de faena a una Obra
+*/
+exports.anularRepoFaenaAObra = async (req, res) => {
+  // metodo PUT
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Graba el reporte diario a una obra específica' */
+
+
+  try {
+
+    const IDataInputSchema = z.object({
+      id_reporte: z.coerce.number()
+    });
+    const id_reporte = req.params.id_reporte;
+
+    const datInput = IDataInputSchema.parse({
+      id_reporte: id_reporte});
+
+    const id_usuario = req.userId;
+
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize
+      let sql = "select username from _auth.users where id = " + id_usuario;
+      await sequelize.query(sql, {
+        type: QueryTypes.SELECT
+      }).then(data => {
+        user_name = data[0].username;
+      }).catch(err => {
+        res.status(500).send(err.message );
+        return;
+      })
+
+
+      sql = `UPDATE movil.reporte_diario SET estado = 'ANULADO', 
+      fecha_update = "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp,
+      usuario_rut_update = '${user_name}'
+       WHERE id = ${datInput.id_reporte};`;
+      const repoMovil = await sequelize.query(sql, { type: QueryTypes.UPDATE });
+      if (repoMovil) {
+        res.status(200).send(repoMovil);
+        return;
+      }else
+      {
+        res.status(500).send("Error en la consulta (servidor backend)");
+        return;
+      } 
+    
+
+  }
+  catch (error) {
+    console.log('error, anularRepoFaenaAObra', error);
+    if (error instanceof ZodError) {
+      //console.log('ZodError -> ', error);
+      const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+      res.status(400).send(mensaje);  //bad request
+      return;
+    }
+    res.status(500).send(error);
+  }
+}
+
+
 /*********************************************************************************** */
 /* Desasigna un reporte diario de faena desde una Obra
 */
