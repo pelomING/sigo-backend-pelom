@@ -661,6 +661,79 @@ let deleteObrasBackofficeEstadoPago = async (req, res, next) => {
 
 }
 
+let readObrasBackofficeMateriales = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.materiales';
+  let crud = 'leer';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+      next();
+  }
+}
+
+let createObrasBackofficeMateriales = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.materiales';
+  let crud = 'crear';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+      }
+  });
+
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+    next();
+  }
+}
+
+let updateObrasBackofficeMateriales = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.materiales';
+  let crud = 'actualizar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+    user_id: id_user,
+    codigo: codigo_api,
+    [crud]: true
+  }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+    next();
+  }
+}
+
+let deleteObrasBackofficeMateriales = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.materiales';
+  let crud = 'borrar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+  next();
+  }
+}
+
 const authJwt = {
   verifyToken,
   isAdmin,
@@ -694,6 +767,10 @@ const authJwt = {
   readObrasBackofficeEstadoPago,
   createObrasBackofficeEstadoPago,
   updateObrasBackofficeEstadoPago,
-  deleteObrasBackofficeEstadoPago
+  deleteObrasBackofficeEstadoPago,
+  readObrasBackofficeMateriales,
+  createObrasBackofficeMateriales,
+  updateObrasBackofficeMateriales,
+  deleteObrasBackofficeMateriales
 };
 module.exports = authJwt;
