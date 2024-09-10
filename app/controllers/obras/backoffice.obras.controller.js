@@ -1251,6 +1251,10 @@ exports.genera_resumen = async function genera_resumen(cron=false) {
       resumen_maule_sur: [],
       resumen_mnorte_tipo_obra: [],
       resumen_msur_tipo_obra: [],
+
+      resumen_reportes_movil: [],
+      resumen_reporte_mnorte: [],
+      resumen_reporte_msur: []
     }
 
 
@@ -1626,6 +1630,168 @@ exports.genera_resumen = async function genera_resumen(cron=false) {
     }
     //res.status(200).send(respuesta);
 
+
+    sql = `SELECT estado_reporte, cantidad, CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+                    END AS porcentaje, CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'bg-pink-500' 
+              WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'bg-yellow-500' WHEN estado_reporte = 'REVISADO OK'
+              THEN 'bg-green-500' ELSE 'bg-white-500' END as "bg-color", 
+              CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'text-pink-500' 
+              WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'text-yellow-500' WHEN estado_reporte = 'REVISADO OK'
+              THEN 'text-green-500' ELSE 'text-white-500' END as "text-color"
+              FROM
+            (SELECT a.glosa as estado_reporte, sum(a.cuenta) as cantidad,
+              (SELECT count(rd.estado) as cuenta 
+              FROM movil.reporte_diario rd JOIN _auth.personas p
+              ON rd.usuario_rut = p.rut JOIN _comun.base b ON b.id = p.base
+              JOIN _comun.paquete pa ON pa.id = b.id_paquete 
+              JOIN _comun.zonal z ON z.id = pa.id_zonal
+              WHERE b.id_paquete <> 99 AND rd.estado IN ('NUEVO', 'PROCESADO', 'ASIGNADO')) as total
+              
+              
+              FROM
+            (SELECT s.zona, s.glosa, s.id_estado, CASE WHEN w.cuenta IS NULL THEN 0 ELSE w.cuenta END AS cuenta FROM
+            (SELECT s.id as id_estado, z.id as id_zona, z.nombre as zona, s.estado, s.glosa FROM
+            (SELECT 1 as id, 'NUEVO'::text AS estado, 'NO REVISADO' AS glosa
+            UNION
+            SELECT 2 as id, 'ASIGNADO'::text AS estado, 'ASIGNADO A OBRA' AS glosa
+            UNION
+            SELECT 3 as id, 'PROCESADO'::text AS estado, 'REVISADO OK' AS glosa) s, 
+              _comun.zonal z
+              WHERE NOT central
+            ORDER BY z.id, s.id) s 
+            LEFT JOIN
+              
+            (SELECT z.nombre as zona, rd.estado, count(rd.estado) as cuenta 
+              FROM movil.reporte_diario rd JOIN _auth.personas p
+              ON rd.usuario_rut = p.rut JOIN _comun.base b ON b.id = p.base
+              JOIN _comun.paquete pa ON pa.id = b.id_paquete 
+              JOIN _comun.zonal z ON z.id = pa.id_zonal
+              WHERE b.id_paquete <> 99 AND rd.estado IN ('NUEVO', 'PROCESADO', 'ASIGNADO')
+              GROUP BY z.nombre, rd.estado
+              ORDER BY z.nombre, rd.estado DESC) w
+            ON s.zona = w.zona AND s.estado = w.estado) a
+            GROUP BY a.id_estado, a.glosa
+            ORDER BY a.id_estado) a`;
+
+            const resumenTotalReportes = await sequelize.query(sql, { type: QueryTypes.SELECT });
+            if (resumenTotalReportes) {
+              respuesta.resumen_reportes_movil = resumenTotalReportes;
+            } else {
+              //res.status(500).send("Error en la consulta (servidor backend)");
+              return {error: true, message: "Error en la consulta (servidor backend)"};
+            }
+
+
+            sql = `SELECT estado_reporte, cantidad, CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+                    END AS porcentaje, CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'bg-pink-500' 
+              WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'bg-yellow-500' WHEN estado_reporte = 'REVISADO OK'
+              THEN 'bg-green-500' ELSE 'bg-white-500' END as "bg-color", 
+              CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'text-pink-500' 
+              WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'text-yellow-500' WHEN estado_reporte = 'REVISADO OK'
+              THEN 'text-green-500' ELSE 'text-white-500' END as "text-color"
+              FROM
+            (SELECT a.glosa as estado_reporte, sum(a.cuenta) as cantidad,
+              (SELECT count(rd.estado) as cuenta 
+              FROM movil.reporte_diario rd JOIN _auth.personas p
+              ON rd.usuario_rut = p.rut JOIN _comun.base b ON b.id = p.base
+              JOIN _comun.paquete pa ON pa.id = b.id_paquete 
+              JOIN _comun.zonal z ON z.id = pa.id_zonal
+              WHERE b.id_paquete <> 99 AND z.id = 1 AND rd.estado IN ('NUEVO', 'PROCESADO', 'ASIGNADO')) as total
+              
+              
+              FROM
+            (SELECT s.zona, s.glosa, s.id_estado, CASE WHEN w.cuenta IS NULL THEN 0 ELSE w.cuenta END AS cuenta FROM
+            (SELECT s.id as id_estado, z.id as id_zona, z.nombre as zona, s.estado, s.glosa FROM
+            (SELECT 1 as id, 'NUEVO'::text AS estado, 'NO REVISADO' AS glosa
+            UNION
+            SELECT 2 as id, 'ASIGNADO'::text AS estado, 'ASIGNADO A OBRA' AS glosa
+            UNION
+            SELECT 3 as id, 'PROCESADO'::text AS estado, 'REVISADO OK' AS glosa) s, 
+              _comun.zonal z
+              WHERE NOT central
+            ORDER BY z.id, s.id) s 
+            LEFT JOIN
+              
+            (SELECT z.nombre as zona, rd.estado, count(rd.estado) as cuenta 
+              FROM movil.reporte_diario rd JOIN _auth.personas p
+              ON rd.usuario_rut = p.rut JOIN _comun.base b ON b.id = p.base
+              JOIN _comun.paquete pa ON pa.id = b.id_paquete 
+              JOIN _comun.zonal z ON z.id = pa.id_zonal
+              WHERE b.id_paquete <> 99 AND z.id = 1 AND rd.estado IN ('NUEVO', 'PROCESADO', 'ASIGNADO')
+              GROUP BY z.nombre, rd.estado
+              ORDER BY z.nombre, rd.estado DESC) w
+            ON s.zona = w.zona AND s.estado = w.estado) a
+            GROUP BY a.id_estado, a.glosa
+            ORDER BY a.id_estado) a`;
+
+            const resumenMnorteReportes = await sequelize.query(sql, { type: QueryTypes.SELECT });
+            if (resumenMnorteReportes) {
+              respuesta.resumen_reporte_mnorte = resumenMnorteReportes;
+            } else {
+              //res.status(500).send("Error en la consulta (servidor backend)");
+              return {error: true, message: "Error en la consulta (servidor backend)"};
+            }
+
+
+            
+            sql = `SELECT estado_reporte, cantidad, CASE
+            WHEN a.total = 0 THEN 0::numeric
+            ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
+                    END AS porcentaje, CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'bg-pink-500' 
+              WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'bg-yellow-500' WHEN estado_reporte = 'REVISADO OK'
+              THEN 'bg-green-500' ELSE 'bg-white-500' END as "bg-color", 
+              CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'text-pink-500' 
+              WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'text-yellow-500' WHEN estado_reporte = 'REVISADO OK'
+              THEN 'text-green-500' ELSE 'text-white-500' END as "text-color"
+              FROM
+            (SELECT a.glosa as estado_reporte, sum(a.cuenta) as cantidad,
+              (SELECT count(rd.estado) as cuenta 
+              FROM movil.reporte_diario rd JOIN _auth.personas p
+              ON rd.usuario_rut = p.rut JOIN _comun.base b ON b.id = p.base
+              JOIN _comun.paquete pa ON pa.id = b.id_paquete 
+              JOIN _comun.zonal z ON z.id = pa.id_zonal
+              WHERE b.id_paquete <> 99 AND z.id = 2 AND rd.estado IN ('NUEVO', 'PROCESADO', 'ASIGNADO')) as total
+              
+              
+              FROM
+            (SELECT s.zona, s.glosa, s.id_estado, CASE WHEN w.cuenta IS NULL THEN 0 ELSE w.cuenta END AS cuenta FROM
+            (SELECT s.id as id_estado, z.id as id_zona, z.nombre as zona, s.estado, s.glosa FROM
+            (SELECT 1 as id, 'NUEVO'::text AS estado, 'NO REVISADO' AS glosa
+            UNION
+            SELECT 2 as id, 'ASIGNADO'::text AS estado, 'ASIGNADO A OBRA' AS glosa
+            UNION
+            SELECT 3 as id, 'PROCESADO'::text AS estado, 'REVISADO OK' AS glosa) s, 
+              _comun.zonal z
+              WHERE NOT central
+            ORDER BY z.id, s.id) s 
+            LEFT JOIN
+              
+            (SELECT z.nombre as zona, rd.estado, count(rd.estado) as cuenta 
+              FROM movil.reporte_diario rd JOIN _auth.personas p
+              ON rd.usuario_rut = p.rut JOIN _comun.base b ON b.id = p.base
+              JOIN _comun.paquete pa ON pa.id = b.id_paquete 
+              JOIN _comun.zonal z ON z.id = pa.id_zonal
+              WHERE b.id_paquete <> 99 AND z.id = 2 AND rd.estado IN ('NUEVO', 'PROCESADO', 'ASIGNADO')
+              GROUP BY z.nombre, rd.estado
+              ORDER BY z.nombre, rd.estado DESC) w
+            ON s.zona = w.zona AND s.estado = w.estado) a
+            GROUP BY a.id_estado, a.glosa
+            ORDER BY a.id_estado) a`;
+
+            const resumenMsurReportes = await sequelize.query(sql, { type: QueryTypes.SELECT });
+            if (resumenMsurReportes) {
+              respuesta.resumen_reporte_msur = resumenMsurReportes;
+            } else {
+              //res.status(500).send("Error en la consulta (servidor backend)");
+              return {error: true, message: "Error en la consulta (servidor backend)"};
+            }
+
+
+
     if (generarLogResumen) {
 
         sql = `INSERT INTO obras.log_resumen_obras (codigo, datos, fecha_hora)
@@ -1634,16 +1800,7 @@ exports.genera_resumen = async function genera_resumen(cron=false) {
 
         const crea_log = await sequelize.query(sql, { type: QueryTypes.INSERT });
     }
-    /*
-    if (crea_log) {
-      //res.status(200).send(crea_log);
-      console.log("crea_log", crea_log);
-    } else {
-      //res.status(500).send("Error en la consulta (servidor backend)");
-      console.log("Error en crea_log", crea_log);
-      return {error: true, message: "Error en la consulta (servidor backend)"};
-    }
-    */
+
 
 
     return respuesta;

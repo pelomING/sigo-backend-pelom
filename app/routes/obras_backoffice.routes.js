@@ -7,6 +7,7 @@ const backofficeTerrenoController = require("../controllers/obras/backoffice.ter
 const backofficeRepodiarioController = require("../controllers/obras/backoffice.repodiario.controller");
 const backofficeEstadopagoController = require("../controllers/obras/backoffice.estadopago.controller");
 const backofficeUsoController = require("../controllers/obras/backoffice.usosistema.controller");
+const backofficeMaterialController = require("../controllers/obras/backoffice.material.controller");
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -298,4 +299,16 @@ module.exports = function(app) {
     // GET /api/obras/backoffice/usosistema/v1/changelog
     app.get("/api/obras/backoffice/usosistema/v1/changelog", [authJwt.verifyToken], backofficeUsoController.getChangeLog);
 
+
+
+    ///****************************************** Integración DAIA (materiales) ***********************      */
+    app.get("/api/obras/backoffice/materialdaia/v1/materialdisponibleporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialDisponibleByObra);
+
+    app.post("/api/obras/backoffice/materialdaia/v1/ingresasolicitud", [authJwt.verifyToken, authJwt.createObrasBackofficeMateriales], backofficeMaterialController.postIngresaSolicitud);
+
+    app.get("/api/obras/backoffice/materialdaia/v1/solicitudfaenaporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getSolicitudMaterialFaenaPorObra);
+
+    app.get("/api/obras/backoffice/materialdaia/v1/materialporsolicitudfaena", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialPorSolicitudFaena);
+
+    app.get("/api/obras/backoffice/materialdaia/v1/materialdisponibleexcludeobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialDisponibleExcludeObra);
 }
