@@ -1634,10 +1634,10 @@ exports.genera_resumen = async function genera_resumen(cron=false) {
     sql = `SELECT estado_reporte, cantidad, CASE
             WHEN a.total = 0 THEN 0::numeric
             ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
-                    END AS porcentaje, CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'bg-pink-500' 
+                    END AS porcentaje, CASE WHEN  estado_reporte = 'PENDIENTE' THEN 'bg-pink-500' 
               WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'bg-yellow-500' WHEN estado_reporte = 'REVISADO OK'
               THEN 'bg-green-500' ELSE 'bg-white-500' END as "bg-color", 
-              CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'text-pink-500' 
+              CASE WHEN  estado_reporte = 'PENDIENTE' THEN 'text-pink-500' 
               WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'text-yellow-500' WHEN estado_reporte = 'REVISADO OK'
               THEN 'text-green-500' ELSE 'text-white-500' END as "text-color"
               FROM
@@ -1653,7 +1653,7 @@ exports.genera_resumen = async function genera_resumen(cron=false) {
               FROM
             (SELECT s.zona, s.glosa, s.id_estado, CASE WHEN w.cuenta IS NULL THEN 0 ELSE w.cuenta END AS cuenta FROM
             (SELECT s.id as id_estado, z.id as id_zona, z.nombre as zona, s.estado, s.glosa FROM
-            (SELECT 1 as id, 'NUEVO'::text AS estado, 'NO REVISADO' AS glosa
+            (SELECT 1 as id, 'NUEVO'::text AS estado, 'PENDIENTE' AS glosa
             UNION
             SELECT 2 as id, 'ASIGNADO'::text AS estado, 'ASIGNADO A OBRA' AS glosa
             UNION
@@ -1687,10 +1687,10 @@ exports.genera_resumen = async function genera_resumen(cron=false) {
             sql = `SELECT estado_reporte, cantidad, CASE
             WHEN a.total = 0 THEN 0::numeric
             ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
-                    END AS porcentaje, CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'bg-pink-500' 
+                    END AS porcentaje, CASE WHEN  estado_reporte = 'PENDIENTE' THEN 'bg-pink-500' 
               WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'bg-yellow-500' WHEN estado_reporte = 'REVISADO OK'
               THEN 'bg-green-500' ELSE 'bg-white-500' END as "bg-color", 
-              CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'text-pink-500' 
+              CASE WHEN  estado_reporte = 'PENDIENTE' THEN 'text-pink-500' 
               WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'text-yellow-500' WHEN estado_reporte = 'REVISADO OK'
               THEN 'text-green-500' ELSE 'text-white-500' END as "text-color"
               FROM
@@ -1706,7 +1706,7 @@ exports.genera_resumen = async function genera_resumen(cron=false) {
               FROM
             (SELECT s.zona, s.glosa, s.id_estado, CASE WHEN w.cuenta IS NULL THEN 0 ELSE w.cuenta END AS cuenta FROM
             (SELECT s.id as id_estado, z.id as id_zona, z.nombre as zona, s.estado, s.glosa FROM
-            (SELECT 1 as id, 'NUEVO'::text AS estado, 'NO REVISADO' AS glosa
+            (SELECT 1 as id, 'NUEVO'::text AS estado, 'PENDIENTE' AS glosa
             UNION
             SELECT 2 as id, 'ASIGNADO'::text AS estado, 'ASIGNADO A OBRA' AS glosa
             UNION
@@ -1741,10 +1741,10 @@ exports.genera_resumen = async function genera_resumen(cron=false) {
             sql = `SELECT estado_reporte, cantidad, CASE
             WHEN a.total = 0 THEN 0::numeric
             ELSE (a.cantidad::numeric / a.total::numeric * 100::numeric)::numeric(5,2)
-                    END AS porcentaje, CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'bg-pink-500' 
+                    END AS porcentaje, CASE WHEN  estado_reporte = 'PENDIENTE' THEN 'bg-pink-500' 
               WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'bg-yellow-500' WHEN estado_reporte = 'REVISADO OK'
               THEN 'bg-green-500' ELSE 'bg-white-500' END as "bg-color", 
-              CASE WHEN  estado_reporte = 'NO REVISADO' THEN 'text-pink-500' 
+              CASE WHEN  estado_reporte = 'PENDIENTE' THEN 'text-pink-500' 
               WHEN estado_reporte = 'ASIGNADO A OBRA' THEN 'text-yellow-500' WHEN estado_reporte = 'REVISADO OK'
               THEN 'text-green-500' ELSE 'text-white-500' END as "text-color"
               FROM
@@ -1760,7 +1760,7 @@ exports.genera_resumen = async function genera_resumen(cron=false) {
               FROM
             (SELECT s.zona, s.glosa, s.id_estado, CASE WHEN w.cuenta IS NULL THEN 0 ELSE w.cuenta END AS cuenta FROM
             (SELECT s.id as id_estado, z.id as id_zona, z.nombre as zona, s.estado, s.glosa FROM
-            (SELECT 1 as id, 'NUEVO'::text AS estado, 'NO REVISADO' AS glosa
+            (SELECT 1 as id, 'NUEVO'::text AS estado, 'PENDIENTE' AS glosa
             UNION
             SELECT 2 as id, 'ASIGNADO'::text AS estado, 'ASIGNADO A OBRA' AS glosa
             UNION
