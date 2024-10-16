@@ -108,17 +108,18 @@ exports.lee_daia = async (req, res) => {
                     if (!newDato) {
                         console.log('Formato incorrecto', validated.error.issues, 'Se deja para revisión manual');
                         await ConexionDaia.update( {estado: 3, observacion: 'Formato incorrecto'}, {where: {id: elemento.id}});
-                        return;
+                        continue;
                     }
                     const obra = await Obra.findOne({where: {codigo_obra: newDato.codigo_obra}});
                     // si no encuentra la obra, debe arrojar un error
                     if (!obra) {
                         console.log('No se encontro la obra', newDato.codigo_obra);
                         await ConexionDaia.update( {estado: 3, observacion: 'No se encontro la obra'}, {where: {id: elemento.id}});
-                        return;
+                        continue;
                     }
 
                     // revisar que todos los codigo sap en detalle se encuentren en maestro materiales
+                    let valido = true;
                     for (const d of newDato.detalle) {
                         const where = {where: {codigo_sap: d.sap_material.codigo_sap}};
                         console.log('where', where);
@@ -126,8 +127,13 @@ exports.lee_daia = async (req, res) => {
                         if (!material) {
                             console.log('No se encontro el material', d.codigo_sap);
                             await ConexionDaia.update( {estado: 3, observacion: 'No se encontro el material código: '+d.sap_material.codigo_sap}, {where: {id: elemento.id}});
-                            return;
+                            valido = false;
+                            break;
                         }
+                    }
+
+                    if (!valido) {
+                        continue;
                     }
 
                     const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
@@ -302,24 +308,49 @@ exports.getMaterialDisponibleExcludeObra = async (req, res) => {
         id_obra: z.coerce.number(),
       });
 
+      const IObraOutputSchema = z.object({
+        id_obra: z.coerce.number(),
+        codigo_obra: z.coerce.string(),
+        nombre_obra: z.coerce.string()
+      });
+      const IObraCantidadOutputSchema = z.object({
+        obra: IObraOutputSchema,
+        cantidad: z.coerce.number()
+      })
+      const IStockSchema = z.array(IObraCantidadOutputSchema);
+
+      const IDataMaterialSchema = z.object({
+        descripcion: z.coerce.string(),
+        unidad: z.coerce.string()
+      })
+
+      const IDataOutputSchema = z.object({
+        codigo_sap_material: z.coerce.number(),
+        stock: IStockSchema,
+        material: IDataMaterialSchema
+      })
+    
+
       /*
       const IMaterialCantidadConPedidosSchema = IMaterialCantidadSchema.extend({
         pedidos: z.array(z.coerce.number())
       })
       */
 
+      /*
       const IDataOutputSchema = z.object({
         id_obra: z.coerce.number(),
         codigo_obra: z.coerce.string(),
         materiales: z.array(IMaterialCantidadSchema)
       });
+      */
 
       const IArrayDataOutputSchema = z.array(IDataOutputSchema);
 
       //const validated = IDataInputSchema.parse(dataInput);
       const validated = IDataInputSchema.safeParse(dataInput);
       const condicion = validated.success ? `AND o.id <> ${validated.data.id_obra}` : '';
-      
+      /*
       const sql = condicion ? `SELECT f.id_obra, f.codigo_obra, array_agg(material) as materiales FROM 
       (SELECT d.*, json_build_object('sap_material', row_to_json(mm), 'cantidad', d.cantidad) as material FROM 
       (SELECT o.id as id_obra, mtd.valor as codigo_obra, mb.codigo_sap_material, 
@@ -329,7 +360,27 @@ exports.getMaterialDisponibleExcludeObra = async (req, res) => {
       GROUP BY o.id, mtd.valor, mb.codigo_sap_material) d LEFT JOIN 
       (SELECT codigo_sap, descripcion, mu.codigo_corto as unidad FROM obras.maestro_materiales mm 
       join obras.maestro_unidades mu ON mm.id_unidad = mu.id) mm ON d.codigo_sap_material = mm.codigo_sap 
-      ORDER BY d.id_obra,d.codigo_sap_material) f GROUP BY f.id_obra, f.codigo_obra` : '';
+      ORDER BY d.id_obra,d.codigo_sap_material) f GROUP BY f.id_obra, f.codigo_obra` : '';*/
+
+
+      const sql = condicion ? `SELECT x.codigo_sap_material, x.stock, 
+      json_build_object('descripcion', mm.descripcion, 'unidad', mm.unidad) as material 
+      FROM 
+      (SELECT codigo_sap_material, array_agg(material) as stock	
+        FROM (SELECT codigo_sap_material, json_build_object('obra', c.obra, 'cantidad', c.cantidad) material
+        	FROM (SELECT json_build_object('id_obra', b.id_obra, 'codigo_obra', b.codigo_obra, 'nombre_obra', b.nombre_obra) as obra,	
+          b.codigo_sap_material, b.cantidad 
+      FROM 
+      (SELECT o.id as id_obra, o.codigo_obra, o.nombre_obra, mb.codigo_sap_material, sum(mb.cantidad) as cantidad 
+        FROM material.movimientos_bodega mb 
+        JOIN material.movimiento_tipo_doc mtd ON mb.id = mtd.id_movimiento 
+        JOIN obras.obras o ON mtd.valor = o.codigo_obra 
+      WHERE mtd.id_tipo_doc = 1 AND mb.tipo_movimiento = 'IN_MANDANTE' ${condicion} 
+      GROUP BY o.id, mtd.valor, mb.codigo_sap_material) b) c) d GROUP BY codigo_sap_material) x 
+        LEFT JOIN 
+      (SELECT codigo_sap, descripcion, mu.codigo_corto as unidad FROM obras.maestro_materiales mm 
+      join obras.maestro_unidades mu ON mm.id_unidad = mu.id) mm ON x.codigo_sap_material = mm.codigo_sap 
+      ORDER BY mm.descripcion` : '';
 
       if (sql) {
         const { QueryTypes } = require('sequelize');

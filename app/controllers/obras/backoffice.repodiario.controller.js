@@ -2708,3 +2708,50 @@ exports.desasignaRepoFaenaAObra = async (req, res) => {
         res.status(500).send(error);
       }
 }
+
+
+/*********************************************************************************** */
+/* Obtiene Reporte de las UC por jefe de faena
+*/
+exports.informeUC = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Obtiene Reporte de las UC por jefe de faena' */
+  try {
+
+    const informeUCSchema = z.object({
+      zona: z.coerce.string(),
+      nombre: z.coerce.string(),
+      periodo: z.coerce.string(),
+      mes: z.coerce.string(),
+      total_uc: z.coerce.number(),
+      uc_en_edp: z.coerce.number(),
+    });
+
+    const IArrayInformeUCSchema = z.array(informeUCSchema);
+
+    const sql = "SELECT zona, nombre, periodo, mes, total_uc, uc_en_edp	FROM obras.uc_por_faena;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const informeUC = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    if (informeUC) {
+          const data = IArrayInformeUCSchema.parse(informeUC);
+          if (data.length > 0) 
+            res.status(200).send(data);
+          else
+            res.status(200).send([]);
+          return;
+    }else
+    {
+      res.status(500).send("Error en la consulta (servidor backend)");
+      return;
+    }
+  } catch (error) {
+    if (error instanceof ZodError) {
+      //console.log('ZodError -> ', error);
+      const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+      res.status(400).send(mensaje);  //bad request
+      return;
+    }
+    res.status(500).send(error);
+  }
+}
