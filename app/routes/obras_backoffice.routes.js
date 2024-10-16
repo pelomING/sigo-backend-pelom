@@ -209,6 +209,8 @@ module.exports = function(app) {
 
     app.put("/api/obras/backoffice/repodiario/v1/liberareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.desasignaRepoFaenaAObra);
 
+    app.get("/api/obras/backoffice/repodiario/v1/informe_uc", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.informeUC);
+
 }
 
 
