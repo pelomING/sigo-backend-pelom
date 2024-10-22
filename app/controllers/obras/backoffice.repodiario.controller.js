@@ -2718,18 +2718,41 @@ exports.informeUC = async (req, res) => {
       #swagger.description = 'Obtiene Reporte de las UC por jefe de faena' */
   try {
 
+    const IDetalleActividadSchema = z.object({
+      clase: z.coerce.string(),
+      tipo: z.coerce.string(),
+      actividad: z.coerce.string(),
+      unidad: z.coerce.string(),
+      cantidad: z.coerce.number(),
+      unitario: z.coerce.number()
+    })
+
+    const IReporteSchema = z.object({
+      id: z.coerce.number(),
+      detalle: z.array(IDetalleActividadSchema)
+    })
+
+    const IActividadReportadaSchema = z.object({
+      columna: z.coerce.string(),
+      periodo: z.coerce.string(),
+      reportes: z.array(IReporteSchema)
+    })
+
     const informeUCSchema = z.object({
       zona: z.coerce.string(),
       nombre: z.coerce.string(),
       periodo: z.coerce.string(),
       mes: z.coerce.string(),
+      reportado_uc: z.coerce.number(),
       total_uc: z.coerce.number(),
       uc_en_edp: z.coerce.number(),
+      actividades: z.array(IActividadReportadaSchema)
     });
 
     const IArrayInformeUCSchema = z.array(informeUCSchema);
 
-    const sql = "SELECT zona, nombre, periodo, mes, total_uc, uc_en_edp	FROM obras.uc_por_faena;";
+    const sql = "SELECT zona, nombre, periodo, mes, reportado_uc, total_uc, uc_en_edp, actividades \
+    FROM obras.uc_por_faena_detalle;";
     const { QueryTypes } = require('sequelize');
     const sequelize = db.sequelize;
     const informeUC = await sequelize.query(sql, { type: QueryTypes.SELECT });
@@ -2746,8 +2769,9 @@ exports.informeUC = async (req, res) => {
       return;
     }
   } catch (error) {
+    console.log('error, informeUC', error);
     if (error instanceof ZodError) {
-      //console.log('ZodError -> ', error);
+      console.log('ZodError -> ', error);
       const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
       res.status(400).send(mensaje);  //bad request
       return;

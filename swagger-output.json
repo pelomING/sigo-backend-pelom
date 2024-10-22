@@ -3833,7 +3833,7 @@
         "tags": [
           "Obras - Backoffice - Reporte diario"
         ],
-        "description": "Desasigna_ el reporte diario a una obra específica",
+        "description": "Desasigna el reporte diario a una obra específica",
         "parameters": [
           {
             "name": "id_reporte",
@@ -3864,7 +3864,7 @@
     "/api/obras/backoffice/repodiario/v1/informe_uc": {
       "get": {
         "tags": [
-          "Obras - Backoffice - Informe UC"
+          "Obras - Backoffice - Reporte diario"
         ],
         "description": "Obtiene Reporte de las UC por jefe de faena",
         "responses": {
