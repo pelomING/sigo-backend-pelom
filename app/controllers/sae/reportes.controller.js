@@ -54,7 +54,8 @@ exports.findAllJornadas = async (req, res) => {
                       null as tipo_turno, 
                       case when rj.coordenadas is not null then rj.coordenadas->>'latitude' else null end as latitude, 
                       case when rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude, 
-                      'NULO' as paquete 
+                      'NULO' as paquete,
+                      CASE WHEN rj.id_estado_resultado is null THEN 'PENDIENTE' ELSE 'LISTO' END as procesado 
                   FROM 
                       sae.reporte_jornada rj 
                   JOIN _auth.personas pe1 
@@ -87,7 +88,8 @@ exports.findAllJornadas = async (req, res) => {
                           (select nombre from _comun.tipo_turno where id = rj.tipo_turno) else null end as tipo_turno, 
                       case when rj.coordenadas is not null then rj.coordenadas->>'latitude' else null end as latitude, 
                       case when rj.coordenadas is not null then rj.coordenadas->>'longitude' else null end as longitude, 
-                      br.paquete as paquete 
+                      br.paquete as paquete,
+                      CASE WHEN rj.id_estado_resultado is null THEN 'PENDIENTE' ELSE 'LISTO' END as procesado 
                   FROM 
                       sae.reporte_jornada rj 
                   JOIN _auth.personas pe1 
@@ -155,7 +157,8 @@ exports.findAllJornadas = async (req, res) => {
                 coordenadas: {
                   latitude: String(element.latitude),
                   longitude: String(element.longitude)
-                }
+                },
+                procesado: String(element.procesado)
 
               }
               salida.push(detalle_salida);
@@ -357,27 +360,29 @@ exports.findAllJornadas = async (req, res) => {
       #swagger.description = 'Devuelve todos los eventos' */
     try {
       const condicion = req.query.vertodo==='true'?'':'and e.id_estado_resultado is null';
-      const sql = `SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 \
-      is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case \
-      when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, (substr(t.inicio::text,1,5) || ' - ' || \
-      substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, null as hora_inicio, \
-      null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when e.coordenadas is not null  \
-      then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else \
-      null end as longitude, e.trabajo_solicitado, e.trabajo_realizado, e.patente FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on \
-      e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join \
-      _comun.paquete p on e.id_paquete = p.id WHERE brigada is null and e.estado <> 0 ${condicion} UNION \
-      SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, \
-      (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, \
-      e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as \
-      nombre_ayudante, br.turno as turno, br.paquete as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, hora_inicio, \
-      hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where id = e.tipo_turno) \
-      else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas where codigo = e.comuna ) else null \
-      end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' else null end as latitude, case when \
-      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude, e.trabajo_solicitado, e.trabajo_realizado, e.patente FROM sae.reporte_eventos e JOIN _auth.personas pe1 \
-      on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo \
-      join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, \
-      (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join \
-      _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br \
+      const sql = `SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 
+      is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case 
+      when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as nombre_ayudante, (substr(t.inicio::text,1,5) || ' - ' || 
+      substr(t.fin::text,1,5)) as turno, p.nombre as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, null as hora_inicio, 
+      null as hora_termino, null as brigada, null as tipo_turno, null as comuna, null as despachador, case when e.coordenadas is not null  
+      then e.coordenadas->>'latitude' else null end as latitude, case when e.coordenadas is not null then e.coordenadas->>'longitude' else 
+      null end as longitude, e.trabajo_solicitado, e.trabajo_realizado, e.patente, 
+      CASE WHEN e.id_estado_resultado is null THEN 'PENDIENTE' ELSE 'LISTO' END as procesado FROM sae.reporte_eventos e JOIN _auth.personas pe1 on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on 
+      e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo join _comun.turnos t on e.codigo_turno = t.id join 
+      _comun.paquete p on e.id_paquete = p.id WHERE brigada is null and e.estado <> 0 ${condicion} UNION 
+      SELECT e.id, e.numero_ot, et.descripcion as tipo_evento, e.rut_maestro, 
+      (pe1.nombres || ' ' || pe1.apellido_1 || case when pe1.apellido_2 is null then '' else ' ' || trim(pe1.apellido_2) end) as nombre_maestro, 
+      e.rut_ayudante, (pe2.nombres || ' ' || pe2.apellido_1 || case when pe2.apellido_2 is null then '' else ' ' || trim(pe2.apellido_2) end) as 
+      nombre_ayudante, br.turno as turno, br.paquete as paquete, e.requerimiento, e.direccion, e.fecha_hora::text, e.estado, hora_inicio, 
+      hora_termino, br.brigada as brigada, case when tipo_turno is not null then (select nombre from _comun.tipo_turno where id = e.tipo_turno) 
+      else null end as tipo_turno, case when e.comuna is not null then (select nombre from _comun.comunas where codigo = e.comuna ) else null 
+      end as comuna, e.despachador, case when e.coordenadas is not null then e.coordenadas->>'latitude' else null end as latitude, case when 
+      e.coordenadas is not null then e.coordenadas->>'longitude' else null end as longitude, e.trabajo_solicitado, 
+      e.trabajo_realizado, e.patente, CASE WHEN e.id_estado_resultado is null THEN 'PENDIENTE' ELSE 'LISTO' END as procesado FROM sae.reporte_eventos e JOIN _auth.personas pe1 
+      on e.rut_maestro = pe1.rut JOIN _auth.personas pe2 on e.rut_ayudante = pe2.rut join _comun.eventos_tipo et on e.tipo_evento = et.codigo 
+      join (SELECT br.id, b.nombre as base, p.nombre as paquete, (substr(t.inicio::text,1,5) || ' - ' || substr(t.fin::text,1,5)) as turno, 
+      (substr(t.inicio::text,1,5) || '-' || substr(t.fin::text,1,5)) || ' (' || b.nombre || ')' as brigada FROM _comun.brigadas  br join 
+      _comun.base b on br.id_base = b.id join _comun.paquete p on b.id_paquete = p.id join _comun.turnos t on br.id_turno = t.id) as br 
       on e.brigada = br.id WHERE e.brigada is not null and e.estado <> 0 ${condicion} order by fecha_hora desc, id desc;`;
       const { QueryTypes } = require('sequelize');
       const sequelize = db.sequelize;
@@ -438,7 +443,8 @@ exports.findAllJornadas = async (req, res) => {
                 },
                 trabajo_solicitado: String(element.trabajo_solicitado),
                 trabajo_realizado: String(element.trabajo_realizado),
-                patente: String(element.patente)
+                patente: String(element.patente),
+                procesado: String(element.procesado)
 
               }
               salida.push(detalle_salida);
