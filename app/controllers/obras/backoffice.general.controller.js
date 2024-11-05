@@ -344,7 +344,7 @@ exports.findAllComuna = async (req, res) => {
     try {
       const Op = db.Sequelize.Op;
       const data = await Comuna.findAll({
-        where: { provincia: { [Op.like]: '07%' } },
+        where: {[Op.or]: [{ provincia: { [Op.like]: '06%' } }, { provincia: { [Op.like]: '07%' } }]},
         order: [['nombre', 'ASC']],
       });
       res.status(200).send(data);
