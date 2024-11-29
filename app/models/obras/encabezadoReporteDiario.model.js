@@ -75,6 +75,15 @@ module.exports = (sequelize, Sequelize) => {
         },
         recargo_hora: {
             type: Sequelize.INTEGER
+        },
+        referencia: {
+            type: Sequelize.STRING
+        },
+        numero_oc: {
+            type: Sequelize.STRING
+        },
+        centrality: {
+            type: Sequelize.STRING
         }
     },
         {
