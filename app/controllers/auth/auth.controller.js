@@ -46,7 +46,7 @@ exports.signin = async (req, res) => {
       #swagger.description = 'Login de usuario' */
   try {
     const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
-    const fechoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12)
+    const fechoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12,20)
   
 
     const userFuncion = await UsuariosFunciones.findOne({
