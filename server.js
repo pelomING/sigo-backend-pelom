@@ -21,6 +21,7 @@ app.use(
     "http://localhost:59214", 
     "http://181.42.20.52", 
     "http://186.11.3.23", 
+    "http://151.101.2.15",
     "https://siscop.up.railway.app", 
     "https://pelom-ing.up.railway.app",
     "https://pelom-ing-dev.up.railway.app",
