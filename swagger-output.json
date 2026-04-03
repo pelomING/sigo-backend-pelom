@@ -118,6 +118,11 @@
         "description": "crea una persona",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -174,6 +179,11 @@
         ],
         "description": "Crea un nuevo usuario",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -235,6 +245,11 @@
         "description": "Cambio de contraseña",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -280,6 +295,11 @@
         "description": "Resetea password para un usuario",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "description": "Resetea password para un usuario",
@@ -322,6 +342,11 @@
         "description": "Crea un estado para sae",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -359,6 +384,13 @@
           "SAE - Mantenedores"
         ],
         "description": "Devuelve todos los estados que puede tomar un reporte",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -381,6 +413,13 @@
           "SAE - Mantenedores"
         ],
         "description": "Devuelve todas las bases del sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -403,6 +442,13 @@
           "SAE - Mantenedores"
         ],
         "description": "Devuelve todos los clientes sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -425,6 +471,13 @@
           "SAE - Mantenedores"
         ],
         "description": "Devuelve todos los tipo de funcion del personal sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -447,6 +500,13 @@
           "SAE - Mantenedores"
         ],
         "description": "Devuelve todas las oficinas del sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -502,6 +562,11 @@
         "description": "ejecuta un comando",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -537,6 +602,11 @@
         ],
         "description": "crea directorio",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -702,6 +772,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todos los tipo de Obra",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -724,6 +801,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todos los tipo de Operación",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -746,6 +830,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todos los tipo de Actividad",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -768,6 +859,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todas las actividades dentro del Maestro Actividades",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -791,6 +889,11 @@
         ],
         "description": "Devuelve una actividad dentro del Maestro Actividades buscando por ID",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -824,6 +927,11 @@
         "description": "Devuelve todas las actividades que coincidan (select like) con el campo actividad dentro del Maestro Actividades",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "actividad",
             "in": "query",
             "type": "string"
@@ -854,6 +962,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todas las zonales",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -876,6 +991,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todas las delegaciones",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -898,6 +1020,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todos los tipo de Trabajo",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -920,6 +1049,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todas las empresas contratistas",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -942,6 +1078,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todos los coordinadores contratistas",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -964,6 +1107,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todas las comunas",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -986,6 +1136,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todos los estados de Obra",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1008,6 +1165,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todos los estados de Visita Terreno",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1030,6 +1194,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todos los segmentos",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1052,6 +1223,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todas las Oficinas",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1074,6 +1252,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todas los recargos por distancia",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1096,6 +1281,13 @@
           "Obras - General"
         ],
         "description": "Devuelve el resumen general de las operaciones Pelom",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1118,6 +1310,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todos los usuarios",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1140,6 +1339,13 @@
           "Obras - General"
         ],
         "description": "Devuelve todas los materiales",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1166,6 +1372,11 @@
         ],
         "description": "Devuelve todas las obras de la tabla de obras",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "vista",
             "in": "query",
@@ -1195,6 +1406,11 @@
         ],
         "description": "Crea una nueva obra",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -1366,6 +1582,11 @@
             "type": "string"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "description": "Datos básicos de una obra",
@@ -1531,6 +1752,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1556,6 +1782,11 @@
         ],
         "description": "Paraliza una obra, pasando el campo paralizada a true",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -1610,6 +1841,11 @@
         ],
         "description": "Cierre de una obra",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -1677,6 +1913,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1702,6 +1943,11 @@
         ],
         "description": "Devuelve una obra por código de obra",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "codigo_obra",
             "in": "query",
@@ -1730,6 +1976,13 @@
           "Obras - Backoffice - Obras"
         ],
         "description": "Obtiene el código de obra en caso de que sea de tipo emergencia",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1752,6 +2005,13 @@
           "Obras - Backoffice - Obras"
         ],
         "description": "Obtiene el resumen informartivo de obras",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1774,6 +2034,13 @@
           "Obras - Backoffice - Manejo materiales (bom)"
         ],
         "description": "Devuelve el listado de obras para un pedido",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1800,6 +2067,11 @@
         ],
         "description": "Devuelve el listado de pedidos para una obra",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -1833,6 +2105,11 @@
         "description": "Devuelve el numero de pedido",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -1864,6 +2141,11 @@
         ],
         "description": "Ingresa un grupo de materiales para generan un pedido de material",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -1927,6 +2209,11 @@
         "description": "Devuelve el listado de materiales para un pedido",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_solicitud",
             "in": "query",
             "type": "string"
@@ -1962,6 +2249,11 @@
         ],
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_solicitud",
             "in": "query",
             "type": "string"
@@ -1993,6 +2285,11 @@
         ],
         "description": "Devuelve el listado de todo el materiale que se ha solictado para una obra",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -2026,6 +2323,11 @@
         "description": "Devuelve el listado de todo el material que tiene reserva para una obra",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -2057,6 +2359,11 @@
         ],
         "description": "Modifica una solicitud a estado GENERADA",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_solicitud",
             "in": "query",
@@ -2095,6 +2402,11 @@
         "description": "Devuelve el listado de reservas dentro del bom para una obra",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -2126,6 +2438,11 @@
         ],
         "description": "Ingresa un grupo de materiales en el bom de una sola vez Version 2",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -2175,6 +2492,11 @@
         ],
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "file",
             "in": "formData",
             "type": "file",
@@ -2209,6 +2531,11 @@
         "description": "Devuelve el listado de materiales para una reserva",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "codigo_reserva",
             "in": "query",
             "type": "string"
@@ -2239,6 +2566,13 @@
           "Obras - Backoffice - Manejo materiales (bom)"
         ],
         "description": "Devuelve el listado de todas las reservas disponibles",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2265,6 +2599,11 @@
         ],
         "description": "Devuelve todos los registros del Bom inicial de acuerdo al id de obra",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -2297,6 +2636,11 @@
         ],
         "description": "Devuelve todos los registros del Bom final de acuerdo al id de obra",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -2333,6 +2677,11 @@
         ],
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "codigo_reserva",
             "in": "query",
             "type": "string"
@@ -2365,6 +2714,11 @@
         ],
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -2393,6 +2747,11 @@
         ],
         "description": "Crea un listado de materiales para salida a faena desde bodega",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -2434,6 +2793,13 @@
           "Obras - Backoffice - Visita Terreno"
         ],
         "description": "Devuelve todas las visitas a terreno",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2457,6 +2823,11 @@
         ],
         "description": "Devuelve las visitas a terreno por ID de obra (id_obra)",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -2489,6 +2860,11 @@
         ],
         "description": "Crea una visita a terreno",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -2566,6 +2942,11 @@
             "type": "string"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "description": "Datos para actualizar visita terreno",
@@ -2636,6 +3017,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -2660,6 +3046,13 @@
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Devuelve todos los ancabezados de reporte diario",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2683,6 +3076,11 @@
         ],
         "description": "Devuelve todos los ancabezados de reporte diario por parametro: id de reporte, id_obra, fecha_reporte\r  , debe indicarse al menos uno",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -2728,6 +3126,11 @@
         "description": "Consulta el ultimo de encabezado de reporte diario por id de obra",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -2759,6 +3162,11 @@
         ],
         "description": "Crea un encabezado de reporte diario",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -2958,6 +3366,11 @@
             "type": "string"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "description": "Datos encabezado reporte diario",
@@ -3150,6 +3563,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -3177,6 +3595,13 @@
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Devuelve todos los registros de detalle de reportes diarios",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -3200,6 +3625,11 @@
         ],
         "description": "Devuelve un registro de detalle de reportes diarios por ID",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -3232,6 +3662,11 @@
         ],
         "description": "Devuelve un registro de detalle de reportes diarios por parámetros: id_obra, id_encabezado_rep,\r  debe tener al menos un parámetro",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -3267,6 +3702,11 @@
         "description": "Devuelve un registro de detalle de reportes diarios otras actividades por parámetros: id_obra, id_encabezado_rep,\r  debe tener al menos un parámetro",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -3299,6 +3739,13 @@
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Devuelve todos los jefes de faena",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -3321,6 +3768,13 @@
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Devuelve todos los tipo de operación",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -3343,6 +3797,13 @@
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Devuelve todos los tipo de actividad",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -3366,6 +3827,11 @@
         ],
         "description": "Devuelve todas las actividades dentro del Maestro Actividades",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_tipo_actividad",
             "in": "query",
@@ -3394,6 +3860,13 @@
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Devuelve todos los tipo de Trabajo",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -3416,6 +3889,13 @@
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Devuelve todas los recargos por hora extra",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -3439,6 +3919,11 @@
         ],
         "description": "Crea un nuevo Reporte Diario",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -3602,6 +4087,11 @@
         "description": "Devuelve todos los reportes diarios NUEVOS que viene de faena",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "estado",
             "in": "query",
             "type": "string"
@@ -3639,6 +4129,11 @@
         "description": "Obtiene un reporte diario de faena por id de reporte",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_reporte",
             "in": "query",
             "type": "string"
@@ -3674,6 +4169,11 @@
             "name": "id_reporte",
             "in": "path",
             "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
             "type": "string"
           },
           {
@@ -3720,6 +4220,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -3747,6 +4252,13 @@
           "Obras - Backoffice - Estado de Pago"
         ],
         "description": "Devuelve todos los tipos de recargo",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -3769,6 +4281,13 @@
           "Obras - Backoffice - Estado de Pago"
         ],
         "description": "Devuelve todos los Recargos",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -3792,6 +4311,11 @@
         ],
         "description": "Genera un nuevo encabezado para estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -3835,6 +4359,11 @@
         "description": "Obtiene todas las actividades no adicionales para un estado de pago",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -3871,6 +4400,11 @@
         ],
         "description": "Obtiene todas las actividades adicionales para un estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -3909,6 +4443,11 @@
         "description": "Obtiene todas las actividades adicionales y normales que tengan hora extra para un estado de pago",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -3945,6 +4484,11 @@
         ],
         "description": "Obtiene la explicación de los recargos en hora extra",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -3983,6 +4527,11 @@
         "description": "Obtiene la tabla de los avances de estado de pago",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -4014,6 +4563,11 @@
         ],
         "description": "Obtiene los totales y subtotales de acuerdo a lo que viene de los detalles de actividades",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
@@ -4051,6 +4605,11 @@
         ],
         "description": "Crea un estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -4236,6 +4795,11 @@
         ],
         "description": "Crea un estado de pago Versión 2",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -4426,6 +4990,11 @@
         "description": "Lista los estados de pago por id_obra",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -4457,6 +5026,11 @@
         ],
         "description": "Obtiene todos los datos para completar un informe de estado de pago historico por id del estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_estado_pago",
             "in": "query",
@@ -4493,6 +5067,11 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
             "type": "string"
           },
           {
@@ -4587,6 +5166,13 @@
           "Obras - Backoffice - Estado de Pago"
         ],
         "description": "Lista todos los estados de pago gestionados",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4615,6 +5201,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -4640,6 +5231,11 @@
         ],
         "description": "Devuelve todos los encabezados de reporte diario para id de estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_estado_pago",
             "in": "query",
@@ -4668,6 +5264,13 @@
           "Obras - Backoffice - Uso del Sistema"
         ],
         "description": "Lista un resumen de los login hechos en el sistema dentro de un período",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4690,6 +5293,13 @@
           "Obras - Backoffice - Uso del Sistema"
         ],
         "description": "Lista un resumen del ingreso de obras en el sistema en los dias recientes",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4712,6 +5322,13 @@
           "Obras - Backoffice - Uso del Sistema"
         ],
         "description": "Lista cantidad de obras sin reporte recietes",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4734,6 +5351,13 @@
           "Obras - Backoffice - Uso del Sistema"
         ],
         "description": "Devuelve el listado de reportes diarios por día",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4756,6 +5380,13 @@
           "Obras - Backoffice - Uso del Sistema"
         ],
         "description": "Devuelve todos los cambios realizados al programa (Change Log)",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4781,6 +5412,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todos los paquetes en sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4803,6 +5441,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todos la relación zona-paquete-base en sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4825,6 +5470,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todos usuarios de la app móvil sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4847,6 +5499,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todos los turnos de la app móvil sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4869,6 +5528,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todos los tipos de eventos",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4891,6 +5557,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todos usuarios de la app móvil sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4913,6 +5586,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todas las camionetas",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4935,6 +5615,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todas las bases sae",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4957,6 +5644,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todas las comunas",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4979,6 +5673,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todos los tipo de turnos",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -5001,6 +5702,13 @@
           "SAE - Móvil"
         ],
         "description": "Devuelve todas las brigadas",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -5028,6 +5736,11 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
             "type": "string"
           },
           {
@@ -5097,6 +5810,11 @@
             "type": "string"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -5157,6 +5875,11 @@
         "description": "Devuelve todas las jornadas. Si se especifica vertodo=true devuelve todas las jornadas, en caso contrario devuelve solo las jornadas pendientes",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "vertodo",
             "in": "query",
             "type": "string"
@@ -5189,6 +5912,11 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
             "type": "string"
           },
           {
@@ -5270,6 +5998,11 @@
         ],
         "description": "Crea una nueva jornada",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -5357,6 +6090,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -5382,6 +6120,11 @@
         ],
         "description": "Devuelve todos los eventos",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "vertodo",
             "in": "query",
@@ -5411,6 +6154,11 @@
         ],
         "description": "Crea una evento nuevo",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -5527,6 +6275,11 @@
             "type": "string"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "description": "Datos para actualizar, No son obligatorios, llenar sólo los que se necesiten",
@@ -5637,6 +6390,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -5661,6 +6419,13 @@
           "SAE - Backoffice - Reportes"
         ],
         "description": "Devuelve todos los estados de resultado",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -5684,6 +6449,11 @@
         ],
         "description": "Crea un estado resultado",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -5760,6 +6530,11 @@
         "description": "Devuelve el resumen de eventos por paquete y rango de fechas",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_paquete",
             "in": "query",
             "type": "string"
@@ -5801,6 +6576,11 @@
         ],
         "description": "Devuelve el resumen de turnos por paquete y rango de fechas",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_paquete",
             "in": "query",
@@ -5844,6 +6624,11 @@
         "description": "Devuelve el resumen de eventos por paquete y rango de fechas",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "fecha_inicial",
             "in": "query",
             "type": "string"
@@ -5881,6 +6666,11 @@
         "description": "Devuelve el resumen de turnos por paquete y rango de fechas",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "fecha_inicial",
             "in": "query",
             "type": "string"
@@ -5917,6 +6707,11 @@
         ],
         "description": "Ingresa las observaciones para un estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -5966,6 +6761,11 @@
             "type": "string"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -6012,6 +6812,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -6036,6 +6841,13 @@
           "SAE - Backoffice - Reportes - CRUD Observaciones"
         ],
         "description": "Devuelve todas las observaciones ",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -6059,6 +6871,11 @@
         ],
         "description": "Devuelve las observacion por campos",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -6092,6 +6909,13 @@
           "SAE - Backoffice - Reportes - CRUD Observaciones"
         ],
         "description": "Devuelve las observaciones no procesadas",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -6114,6 +6938,13 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Devuelve los cargos fijo por semana",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -6137,6 +6968,11 @@
         ],
         "description": "Devuelve la permanencia total óptima por brigada entre fechas",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "fecha_ini",
             "in": "query",
@@ -6172,6 +7008,11 @@
         "description": "Devuelve la permanencia semanal por brigada",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "fecha_ini",
             "in": "query",
             "type": "string"
@@ -6205,6 +7046,11 @@
         ],
         "description": "Devuelve las horas extra realizadas",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "fecha_ini",
             "in": "query",
@@ -6240,6 +7086,11 @@
         "description": "Devuelve los turnos adicionales",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "fecha_ini",
             "in": "query",
             "type": "string"
@@ -6273,6 +7124,11 @@
         ],
         "description": "Devuelve los turnos de contingencia",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "fecha_ini",
             "in": "query",
@@ -6308,6 +7164,11 @@
         "description": "Devuelve la produccion PxQ",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "fecha_ini",
             "in": "query",
             "type": "string"
@@ -6341,6 +7202,11 @@
         ],
         "description": "Devuelve la tabla de cobros adicionales para el EDP",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "fecha_ini",
             "in": "query",
@@ -6376,6 +7242,11 @@
         "description": "Devuelve la tabla de descuentos para el EDP",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "fecha_ini",
             "in": "query",
             "type": "string"
@@ -6410,6 +7281,11 @@
         "description": "Devuelve la tabla de resumen para el EDP",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "fecha_ini",
             "in": "query",
             "type": "string"
@@ -6443,6 +7319,11 @@
         ],
         "description": "Ingresa los cobros adicionales para un estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -6498,6 +7379,11 @@
             "type": "string"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -6550,6 +7436,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -6574,6 +7465,13 @@
           "SAE - Backoffice - Reportes - CRUD Cobros Adicionales"
         ],
         "description": "Devuelve todos los cobros adicionales ",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -6597,6 +7495,11 @@
         ],
         "description": "Devuelve los cobros adicionales por campos",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -6630,6 +7533,13 @@
           "SAE - Backoffice - Reportes - CRUD Cobros Adicionales"
         ],
         "description": "Devuelve los cobros adicionales no procesados",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -6653,6 +7563,11 @@
         ],
         "description": "Ingresa los descuentos para un estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -6708,6 +7623,11 @@
             "type": "string"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -6760,6 +7680,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -6784,6 +7709,13 @@
           "SAE - Backoffice - Reportes - CRUD Descuentos"
         ],
         "description": "Devuelve todos los descuentos ",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -6807,6 +7739,11 @@
         ],
         "description": "Devuelve los descuentos por campos",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -6840,6 +7777,13 @@
           "SAE - Backoffice - Reportes - CRUD Descuentos"
         ],
         "description": "Devuelve los descuentos no procesados",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -6862,6 +7806,13 @@
           "SAE - Backoffice - Reportes - CRUD Horas Extras"
         ],
         "description": "Devuelve la lsita de brigadas para seleccionar dentro del módulo de horas extra",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -6885,6 +7836,11 @@
         ],
         "description": "Ingresa las horas extra para un estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -6940,6 +7896,11 @@
             "type": "string"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -6992,6 +7953,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -7016,6 +7982,13 @@
           "SAE - Backoffice - Reportes - CRUD Horas Extras"
         ],
         "description": "Devuelve todos los registros de hora extra ",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -7039,6 +8012,11 @@
         ],
         "description": "Devuelve los registros de hora extra por campos",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -7072,6 +8050,13 @@
           "SAE - Backoffice - Reportes - CRUD Horas Extras"
         ],
         "description": "Devuelve los registros de hora extra no procesados",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -7095,6 +8080,11 @@
         ],
         "description": "Devuelve el detalle de PxQ para planilla Excel, se debe ingresar el id_paquete en la url ?id_paquete=[id_paquete]",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "fecha_ini",
             "in": "query",
@@ -7137,6 +8127,11 @@
         ],
         "description": "Realiza el cierre de un estado de pago",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -7206,6 +8201,13 @@
           "SAE - Backoffice - Reportes - EDP"
         ],
         "description": "Obtiene el historico de estados de pago",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "401": {
             "description": "Unauthorized"
@@ -7226,6 +8228,11 @@
         ],
         "description": "Devuelve la permanencia semanal por brigada",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_estado_pago",
             "in": "query",
@@ -7259,6 +8266,11 @@
         "description": "Devuelve las horas extra realizadas",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_estado_pago",
             "in": "query",
             "type": "string"
@@ -7291,6 +8303,11 @@
         "description": "Devuelve las observacion por campos",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_estado_resultado",
             "in": "query",
             "type": "string"
@@ -7319,6 +8336,11 @@
         ],
         "description": "Devuelve los turnos adicionales",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_estado_pago",
             "in": "query",
@@ -7352,6 +8374,11 @@
         "description": "Devuelve los turnos de contingencia",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_estado_pago",
             "in": "query",
             "type": "string"
@@ -7383,6 +8410,11 @@
         ],
         "description": "Devuelve la produccion PxQ",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_estado_pago",
             "in": "query",
@@ -7416,6 +8448,11 @@
         "description": "Devuelve la tabla de cobros adicionales para el EDP",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_estado_pago",
             "in": "query",
             "type": "string"
@@ -7447,6 +8484,11 @@
         ],
         "description": "Devuelve la tabla de descuentos para el EDP",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_estado_pago",
             "in": "query",
@@ -7480,6 +8522,11 @@
         "description": "Devuelve la tabla de resumen para el EDP",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_estado_pago",
             "in": "query",
             "type": "string"
@@ -7511,6 +8558,11 @@
         ],
         "description": "Devuelve el detalle de PxQ para planilla Excel, se debe ingresar el id_paquete en la url ?id_paquete=[id_paquete]",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_paquete",
             "in": "query",
@@ -7547,6 +8599,13 @@
           "SAE - Backoffice - Reportes"
         ],
         "description": "Devuelve el resumen de las operaciones de SAE",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -7569,6 +8628,13 @@
           "SAE - Backoffice - Panel de Control"
         ],
         "description": "Devuelve la cantidad de eventos por zonal maule norte y sur",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -7591,6 +8657,13 @@
           "SAE - Backoffice - Panel de Control"
         ],
         "description": "Devuelve la cantidad de eventos por zonal maule norte y sur organizado por mes",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
