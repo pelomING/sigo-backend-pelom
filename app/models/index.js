@@ -82,6 +82,13 @@ db.backendCors = require("./deploy/backendCors.model.js")(sequelize, Sequelize);
 /***********FRONTEND ********* */
 db.verHomepage = require("./frontend/verHomepage.model.js")(sequelize, Sequelize);
 
+/***********MATERIAL ***********/
+db.conexionDaia = require("./material/conexionDaia.model.js")(sequelize, Sequelize);
+db.movimientosBodega = require("./material/movimientosBodega.model.js")(sequelize, Sequelize);
+db.movimientoTipoDoc = require("./material/movimientoTipoDoc.model.js")(sequelize, Sequelize);
+db.solicitudMaterialEncabezado = require("./material/solicitudMaterialEncabezado.model.js")(sequelize, Sequelize);
+db.solicitudMaterialDetalle = require("./material/solicitudMaterialDetalle.model.js")(sequelize, Sequelize);
+
 /*****  OBRAS */
 db.bom = require("./obras/bom.model.js")(sequelize, Sequelize);
 db.coordinadorContratista = require("./obras/coordinadorContratista.model.js")(sequelize, Sequelize);
@@ -99,6 +106,7 @@ db.estadoVisita = require("./obras/estadoVisita.model.js")(sequelize, Sequelize)
 db.jefesFaena = require("./obras/jefesFaena.model.js")(sequelize, Sequelize);
 db.logMovimiento = require("./obras/logMovimiento.model.js")(sequelize, Sequelize);
 db.maestroActividad = require("./obras/maestroActividad.model.js")(sequelize, Sequelize);
+db.maestroMateriales = require("./obras/maestroMateriales.model.js")(sequelize, Sequelize);
 db.movilReporteDiario = require("./obras/movilReporteDiario.model.js")(sequelize, Sequelize);
 db.obra = require("./obras/obra.model.js")(sequelize, Sequelize);
 db.obrasCierres = require("./obras/obrasCierres.model.js")(sequelize, Sequelize);

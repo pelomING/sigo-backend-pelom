@@ -7,6 +7,7 @@ const backofficeTerrenoController = require("../controllers/obras/backoffice.ter
 const backofficeRepodiarioController = require("../controllers/obras/backoffice.repodiario.controller");
 const backofficeEstadopagoController = require("../controllers/obras/backoffice.estadopago.controller");
 const backofficeUsoController = require("../controllers/obras/backoffice.usosistema.controller");
+const backofficeMaterialController = require("../controllers/obras/backoffice.material.controller");
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -139,6 +140,7 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/material/v1/exportarexcel", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelReserva);
     app.get("/api/obras/backoffice/material/v1/exportarexceltodo", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelReservaPorObra);
     app.post("/api/obras/backoffice/material/v1/crealistafaena", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createListaFaena);
+    app.post("/api/obras/backoffice/material/v1/creamovimientobodega", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createMovimientoBodega);
 
     //app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo);
     //app.post("/api/obras/backoffice/v1/creabomindividual", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomIndividual);
@@ -203,7 +205,11 @@ module.exports = function(app) {
 
     app.put("/api/obras/backoffice/repodiario/v1/asignareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.grabaRepoFaenaAObra);
 
+    app.put("/api/obras/backoffice/repodiario/v1/anulareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.anularRepoFaenaAObra);
+
     app.put("/api/obras/backoffice/repodiario/v1/liberareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.desasignaRepoFaenaAObra);
+
+    app.get("/api/obras/backoffice/repodiario/v1/informe_uc", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.informeUC);
 
 }
 
@@ -295,4 +301,16 @@ module.exports = function(app) {
     // GET /api/obras/backoffice/usosistema/v1/changelog
     app.get("/api/obras/backoffice/usosistema/v1/changelog", [authJwt.verifyToken], backofficeUsoController.getChangeLog);
 
+
+
+    ///****************************************** Integración DAIA (materiales) ***********************      */
+    app.get("/api/obras/backoffice/materialdaia/v1/materialdisponibleporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialDisponibleByObra);
+
+    app.post("/api/obras/backoffice/materialdaia/v1/ingresasolicitud", [authJwt.verifyToken, authJwt.createObrasBackofficeMateriales], backofficeMaterialController.postIngresaSolicitud);
+
+    app.get("/api/obras/backoffice/materialdaia/v1/solicitudfaenaporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getSolicitudMaterialFaenaPorObra);
+
+    app.get("/api/obras/backoffice/materialdaia/v1/materialporsolicitudfaena", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialPorSolicitudFaena);
+
+    app.get("/api/obras/backoffice/materialdaia/v1/materialdisponibleexcludeobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialDisponibleExcludeObra);
 }

@@ -2139,6 +2139,7 @@ exports.creaReporteDiarioMovil = async (req, res) => {
     const IDataInputSchema = z.object({
       jefe_faena: z.string(),
       sdi: z.string().optional(),
+      cged: z.string().optional().nullable(),
       gestor_cliente: z.string().optional().nullable(),
       id_area: z.number(),
       brigada_pesada: z.boolean(),
@@ -2281,7 +2282,7 @@ exports.findAllReportesDeFaena = async (req, res) => {
             (CASE WHEN id_obra_asignada is not null
 				THEN (SELECT codigo_obra FROM obras.obras WHERE id = id_obra_asignada )
 	        ELSE
-				(datos->>'codigo_cged')::text || ' / ' || (datos->>'nro_documento')::text END)::text as codigo_obra
+				(datos->>'cged')::text || ' / ' || (datos->>'nro_documento')::text END)::text as codigo_obra
             FROM movil.reporte_diario 
             WHERE (datos->>'fecha_reporte')::varchar is not null 
                         AND (datos->>'jefe_faena') is not null ${condicion_estado} ${condicion_id_obra}`;
@@ -2586,6 +2587,71 @@ exports.grabaRepoFaenaAObra = async (req, res) => {
   }
 }
 
+
+
+/*********************************************************************************** */
+/* Asigna un reporte diario de faena a una Obra
+*/
+exports.anularRepoFaenaAObra = async (req, res) => {
+  // metodo PUT
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Graba el reporte diario a una obra específica' */
+
+
+  try {
+
+    const IDataInputSchema = z.object({
+      id_reporte: z.coerce.number()
+    });
+    const id_reporte = req.params.id_reporte;
+
+    const datInput = IDataInputSchema.parse({
+      id_reporte: id_reporte});
+
+    const id_usuario = req.userId;
+
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize
+      let sql = "select username from _auth.users where id = " + id_usuario;
+      await sequelize.query(sql, {
+        type: QueryTypes.SELECT
+      }).then(data => {
+        user_name = data[0].username;
+      }).catch(err => {
+        res.status(500).send(err.message );
+        return;
+      })
+
+
+      sql = `UPDATE movil.reporte_diario SET estado = 'ANULADO', 
+      fecha_update = "substring"(((now()::timestamp without time zone AT TIME ZONE 'utc'::text) AT TIME ZONE 'america/santiago'::text)::text, 1, 19)::timestamp,
+      usuario_rut_update = '${user_name}'
+       WHERE id = ${datInput.id_reporte};`;
+      const repoMovil = await sequelize.query(sql, { type: QueryTypes.UPDATE });
+      if (repoMovil) {
+        res.status(200).send(repoMovil);
+        return;
+      }else
+      {
+        res.status(500).send("Error en la consulta (servidor backend)");
+        return;
+      } 
+    
+
+  }
+  catch (error) {
+    console.log('error, anularRepoFaenaAObra', error);
+    if (error instanceof ZodError) {
+      //console.log('ZodError -> ', error);
+      const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+      res.status(400).send(mensaje);  //bad request
+      return;
+    }
+    res.status(500).send(error);
+  }
+}
+
+
 /*********************************************************************************** */
 /* Desasigna un reporte diario de faena desde una Obra
 */
@@ -2641,4 +2707,75 @@ exports.desasignaRepoFaenaAObra = async (req, res) => {
         }
         res.status(500).send(error);
       }
+}
+
+
+/*********************************************************************************** */
+/* Obtiene Reporte de las UC por jefe de faena
+*/
+exports.informeUC = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Reporte diario']
+      #swagger.description = 'Obtiene Reporte de las UC por jefe de faena' */
+  try {
+
+    const IDetalleActividadSchema = z.object({
+      clase: z.coerce.string(),
+      tipo: z.coerce.string(),
+      actividad: z.coerce.string(),
+      unidad: z.coerce.string(),
+      cantidad: z.coerce.number(),
+      unitario: z.coerce.number()
+    })
+
+    const IReporteSchema = z.object({
+      id: z.coerce.number(),
+      detalle: z.array(IDetalleActividadSchema)
+    })
+
+    const IActividadReportadaSchema = z.object({
+      columna: z.coerce.string(),
+      periodo: z.coerce.string(),
+      reportes: z.array(IReporteSchema)
+    })
+
+    const informeUCSchema = z.object({
+      zona: z.coerce.string(),
+      nombre: z.coerce.string(),
+      periodo: z.coerce.string(),
+      mes: z.coerce.string(),
+      reportado_uc: z.coerce.number(),
+      total_uc: z.coerce.number(),
+      uc_en_edp: z.coerce.number(),
+      actividades: z.array(IActividadReportadaSchema)
+    });
+
+    const IArrayInformeUCSchema = z.array(informeUCSchema);
+
+    const sql = "SELECT zona, nombre, periodo, mes, reportado_uc, total_uc, uc_en_edp, actividades \
+    FROM obras.uc_por_faena_detalle;";
+    const { QueryTypes } = require('sequelize');
+    const sequelize = db.sequelize;
+    const informeUC = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    if (informeUC) {
+          const data = IArrayInformeUCSchema.parse(informeUC);
+          if (data.length > 0) 
+            res.status(200).send(data);
+          else
+            res.status(200).send([]);
+          return;
+    }else
+    {
+      res.status(500).send("Error en la consulta (servidor backend)");
+      return;
+    }
+  } catch (error) {
+    console.log('error, informeUC', error);
+    if (error instanceof ZodError) {
+      console.log('ZodError -> ', error);
+      const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+      res.status(400).send(mensaje);  //bad request
+      return;
+    }
+    res.status(500).send(error);
+  }
 }

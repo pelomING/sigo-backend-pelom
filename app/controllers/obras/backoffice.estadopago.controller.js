@@ -1122,6 +1122,7 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
       #swagger.description = 'Lista los estados de pago por id_obra' */
       try {
         const id_obra = req.query.id_obra;
+        /*
         const campos = [
             'id_obra'
           ];
@@ -1133,6 +1134,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
               return;
             }
           };
+          */
+         const condicion_id_obra = id_obra&&id_obra !== '0'?`WHERE id_obra = ${id_obra}`:``;
         const sql = `SELECT 
                         eep.id, 
                         eep.id_obra, 
@@ -1159,7 +1162,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         eep.valor_uc,
                         eep.numero_oc,
                         eep.referencia,
-                        eep.centrality 
+                        eep.centrality,
+                        ((eep.subtotal1+eep.subtotal2+eep.subtotal3)*1.19)::bigint as total_con_iva 
                     FROM 
                         obras.encabezado_estado_pago eep 
                     LEFT JOIN obras.delegaciones d 
@@ -1178,8 +1182,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         ON eep.coordinador = cc.id 
                     JOIN obras.obras o 
                         ON eep.id_obra = o.id 
-                    WHERE 
-                        id_obra = ${id_obra} ;`;
+                    ${condicion_id_obra} 
+                    ORDER BY o.id, eep.id;`;
 
             const { QueryTypes } = require('sequelize');
             const sequelize = db.sequelize;
@@ -1199,7 +1203,7 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         solicitado_por: element.solicitado_por?String(element.solicitado_por):null,
                         ot: element.ot?String(element.ot):null,
                         sdi: element.sdi?String(element.sdi):null,
-                        supervisor_pelom: element.supervisor_pelom,
+                        supervisor_pelom: element.supervisor,
                         coordinador: element.coordinador,
                         comuna: element.comuna,
                         direccion: element.direccion?String(element.direccion):null,
@@ -1216,7 +1220,8 @@ exports.getAllEstadosPagoByIdObra = async (req, res) => {
                         numero_oc: element.numero_oc?String(element.numero_oc):null,
                         referencia: element.referencia?String(element.referencia):null,
                         centrality: element.centrality?String(element.centrality):null,
-                        estado: element.estado?Number(element.estado):null
+                        estado: element.estado?Number(element.estado):null,
+                        total_con_iva: Number(element.total_con_iva)
 
                       }
                       salida.push(detalle_salida);
@@ -2540,7 +2545,8 @@ let DeterminaEncabezadoEstadoPago = async (id_obra, ids_reporte, id_estado_pago)
                   row_to_json(c) as comuna, 
                   ubicacion as direccion, 
                   repo.flexiapp as flexiapp, 
-                  fecha_termino::text as fecha_ejecucion, 
+                  (SELECT MAX(erd.fecha_reporte) as fecha FROM obras.encabezado_reporte_diario erd
+                    WHERE erd.fecha_reporte IS NOT NULL ${condicion_reporte})::text as fecha_ejecucion, 
                   initcap(o.jefe_delegacion)::varchar as jefe_delegacion, 
                   json_build_object('id', repo.id_jefe, 'nombre', repo.jefe_faena) as jefe_faena, 
                   repo.num_documento as numero_documento, 

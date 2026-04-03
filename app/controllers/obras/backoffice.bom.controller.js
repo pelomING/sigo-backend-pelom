@@ -3068,6 +3068,63 @@ exports.findBomByParametros = async (req, res) => {
     }
   }
 
+  /***********************************************************************************/
+  /* Crea movimiento en bodega
+  ;
+  */
+ exports.createMovimientoBodega = async (req, res) => {
+/*  #swagger.tags = ['Obras - Backoffice - Manejo materiales (bom)']
+      #swagger.description = 'Crea movimiento en bodega'
+      #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Datos encabezado reporte diario',
+            required: true,
+            schema: [{
+                    "id_obra": 1,
+                    reserva: 1111111,
+                    nro_guia: 1111111,
+                    material: {
+                          sap_material: {
+                            codigo_sap: 111,
+                            descripcion: "Descripción del material",
+                            unidad: "UN",
+                          },
+                          cantidad: 10
+                        },
+                    tipo_movimiento: "IN_MANDANTE",
+                    sentido: "ENTRADA",
+              }]
+      }
+   */
+      
+      const IDataInputSchema = z.object({
+        id_obra: z.coerce.number().int().positive(),
+        reserva: IReservaSchema,
+        nro_guia: z.coerce.number().int().positive().optional(),
+        material: IMaterialCantidadSchema,
+        tipo_movimiento: z.coerce.string(),
+        sentido: z.coerce.string()
+      })
+
+      const IArrayDataInputSchema = z.array(IDataInputSchema);
+      try {
+
+        const dataInput = IArrayDataInputSchema.parse(req.body);
+        
+        res.status(200).send(dataInput);
+      } catch (error) {
+        console.log('error -> ', error);
+        if (error instanceof ZodError) {
+          console.log(error.issues);
+          const mensaje = error.issues.map(issue => 'Error en campo: '+issue.path[0]+' -> '+issue.message).join('; ');
+          res.status(400).send(mensaje);  //bad request
+          return;
+        }
+        res.status(500).send(error);
+      }
+
+ }
+
   function obtenerValoresUnicosConSuma(arreglo) {
     const objetoResultante = {};
 

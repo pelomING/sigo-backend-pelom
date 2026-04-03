@@ -19,8 +19,21 @@ const Origen_cors = db.backendCors;
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:4200", 
-    "http://localhost:59214", 
+    origin: ["http://localhost:4200",
+    "http://localhost:3000",
+    "http://localhost:8100", 
+    "http://localhost:59214",
+    "http://localhost:5037",
+    "http://localhost:5554",
+    "http://localhost:5555",
+    "http://localhost:5556",
+    "http://localhost:5557",
+    "https://localhost:59214",
+    "https://localhost:5037",
+    "https://localhost:5554",
+    "https://localhost:5555",
+    "https://localhost:5556",
+    "https://localhost:5557",
     "http://181.42.20.52", 
     "http://186.11.3.23", 
     "https://siscop.up.railway.app", 
@@ -30,7 +43,10 @@ app.use(
     "https://pelom-ing-test.up.railway.app",
     "https://front-reportes-diarios-desarrollo.up.railway.app",
     "http://cl.pelomingenieria.front-reportes-diarios",
-    "https://cl.pelomingenieria.front-reportes-diarios"
+    "https://cl.pelomingenieria.front-reportes-diarios",
+    "https://cl.pelomingenieria.reportesdiarios",
+    "http://cl.pelomingenieria.reportesdiarios",
+    "https://reportes-pelom-production.up.railway.app"
   ],
   })
 );
@@ -122,11 +138,12 @@ require('./app/routes/sae_paneldecontrol.routes')(app);
 
 
 
-const Tiempo = process.env.CRON_TIEMPO || 10;
+const Tiempo = process.env.CRON_TIEMPO || 2;
 //Se propgrama el cron
 const job = nodeCron.schedule('*/' + Tiempo + ' * * * *', () => {
   console.log('se ejecuta la funcion por cron ' + '*/' + Tiempo + ' * * * *');
   cronObras.resumenObras();
+  cronObras.lectura_daia();
 })
 job.start();
 // set port, listen for requests
