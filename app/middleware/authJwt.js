@@ -7,6 +7,7 @@ const VerificaAuth = db.verificaAuth;
 let verifyToken = (req, res, next) => {
 
   let token = req.session.token;
+  console.log('token -> ', token);
 
   if (!token) {
     return res.status(403).send("No está autenticado");
