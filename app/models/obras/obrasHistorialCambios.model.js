@@ -23,6 +23,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         datos: {
             type: Sequelize.JSON
+        },
+        observacion: {
+            type: Sequelize.STRING
         }
         },
         {

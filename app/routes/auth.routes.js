@@ -33,7 +33,27 @@ module.exports = function(app) {
   //crea un nuevo usuario
   app.post("/api/usuarios/v1/creausuario", [authJwt.verifyToken, authJwt.isSistema], usuariosController.createUser);
 
+  //crea un full usuario
+  app.post("/api/usuarios/v1/creafullusuario", [authJwt.verifyToken, authJwt.isSistema], usuariosController.createFullUser);
+
+  //Lista los usaruarios generales
+  //app.get("/api/usuarios/v1/lista_usuarios", [authJwt.verifyToken, authJwt.isSistema], usuariosController.findAllUsuariosGeneral);
+  app.get("/api/usuarios/v1/lista_usuarios", [authJwt.verifyToken, authJwt.isSistema], usuariosController.findAllUsuariosGeneral);
+
+  app.get("/api/usuarios/v1/lista_roles", [authJwt.verifyToken, authJwt.isSistema], usuariosController.findAllRoles);
+
+
+  app.put("/api/usuarios/v1/updatefullusuario/:rut", [authJwt.verifyToken, authJwt.isSistema], usuariosController.updateFullUser);
+  
+  app.post("/api/usuarios/v1/desactivausuario", [authJwt.verifyToken, authJwt.isSistema], usuariosController.desactivaUser);
+
   // cambio de password, debe ingresar la password actual y la nueva
   app.post("/api/ajustes/v1/cambiapassword", [authJwt.verifyToken], ajustesController.cambioPassword);
+
+  //Resetea password para un usuario
+  //app.post("/api/ajustes/v1/resetpassword", [authJwt.verifyToken, authJwt.isSupervisorOrAdminOrSistema], usuariosController.resetPassword);
+  app.post("/api/ajustes/v1/resetpassword", usuariosController.resetPassword);
+
+  
 
 };

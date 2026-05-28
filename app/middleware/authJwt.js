@@ -5,23 +5,24 @@ const User = db.user;
 const VerificaAuth = db.verificaAuth;
 
 let verifyToken = (req, res, next) => {
-  let token = req.session.token;
 
+  //let token = req.session.token;
+  let token = req.headers['authorization'];
   if (!token) {
-    return res.status(403).send({
-      error: true,
-      message: "No está autenticado",
-    });
+    return res.status(403).send("No está autenticado");
   }
+  //debo quitar el Bearer
+  token = token.replace('Bearer ', '');
+  //console.log('headers -> ', req.headers);
+  console.log('token -> ', token);
+
+  
 
   jwt.verify(token,
              config.secret,
              (err, decoded) => {
               if (err) {
-                return res.status(401).send({
-                  error: true,
-                  message: "No autorizado!",
-                });
+                return res.status(401).send("No autorizado!");
               }
               req.userId = decoded.id;
               next();
@@ -39,15 +40,9 @@ let isAdmin = async (req, res, next) => {
       }
     }
 
-    return res.status(403).send({
-      error: true,
-      message: "Debe ser Administrador",
-    });
+    return res.status(403).send("Debe ser Administrador");
   } catch (error) {
-    return res.status(500).send({
-      error: true,
-      message: "No es posible validar el rol",
-    });
+    return res.status(500).send("No es posible validar el rol");
   }
 };
 
@@ -63,15 +58,9 @@ let isSistema = async (req, res, next) => {
       }
     }
 
-    return res.status(403).send({
-      error: true,
-      message: "Debe ser usuario de Sistema",
-    });
+    return res.status(403).send("Debe ser usuario de Sistema");
   } catch (error) {
-    return res.status(500).send({
-      error: true,
-      message: "No es posible validar el rol",
-    });
+    return res.status(500).send("No es posible validar el rol");
   }
 };
 
@@ -86,15 +75,9 @@ let isTecnico = async (req, res, next) => {
       }
     }
 
-    return res.status(403).send({
-      error: true,
-      message: "Debe ser Tecnico",
-    });
+    return res.status(403).send("Debe ser Tecnico");
   } catch (error) {
-    return res.status(500).send({
-      error: true,
-      message: "No es posible determinar el rol",
-    });
+    return res.status(500).send("No es posible determinar el rol");
   }
 };
 
@@ -109,15 +92,9 @@ let isSupervisor = async (req, res, next) => {
       }
     }
 
-    return res.status(403).send({
-      error: true,
-      message: "Debe ser Supervisor",
-    });
+    return res.status(403).send("Debe ser Supervisor");
   } catch (error) {
-    return res.status(500).send({
-      error: true,
-      message: "No es posible determinar el rol",
-    });
+    return res.status(500).send("No es posible determinar el rol");
   }
 };
 
@@ -241,10 +218,7 @@ let readObrasBackofficeTerreno = async (req, res, next) => {
           }
         });
         if (!verificaAuth) {
-          return res.status(403).send({
-            error: true,
-            message: "No tiene permiso para realizar esta operación"
-          })
+          return res.status(403).send("No tiene permiso para realizar esta operación")
         }else{
             next();
         }
@@ -263,10 +237,7 @@ let createObrasBackofficeTerreno = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
       next();
   }
@@ -285,10 +256,7 @@ let updateObrasBackofficeTerreno = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
       next();
   }
@@ -307,10 +275,7 @@ let deleteObrasBackofficeTerreno = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
       next();
   }
@@ -329,10 +294,7 @@ let readObrasBackofficeBom = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
       next();
   }
@@ -352,10 +314,7 @@ let createObrasBackofficeBom = async (req, res, next) => {
   });
 
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
     next();
   }
@@ -374,10 +333,7 @@ let updateObrasBackofficeBom = async (req, res, next) => {
     }
     });
     if (!verificaAuth) {
-      return res.status(403).send({
-        error: true,
-        message: "No tiene permiso para realizar esta operación"
-      })
+      return res.status(403).send("No tiene permiso para realizar esta operación")
     }else{
       next();
     }
@@ -396,10 +352,7 @@ let deleteObrasBackofficeBom = async (req, res, next) => {
     }
     });
     if (!verificaAuth) {
-    return res.status(403).send({
-    error: true,
-    message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
     }else{
     next();
     }
@@ -418,10 +371,7 @@ let readObrasBackofficeGeneral = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
       next();
   }
@@ -441,10 +391,7 @@ let createObrasBackofficeGeneral = async (req, res, next) => {
   });
 
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
     next();
   }
@@ -463,10 +410,7 @@ let updateObrasBackofficeGeneral = async (req, res, next) => {
   }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
     next();
   }
@@ -485,10 +429,7 @@ let deleteObrasBackofficeGeneral = async (req, res, next) => {
   }
   });
   if (!verificaAuth) {
-  return res.status(403).send({
-  error: true,
-  message: "No tiene permiso para realizar esta operación"
-  })
+  return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
   next();
   }
@@ -507,10 +448,7 @@ let readObrasBackofficeObras = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
       next();
   }
@@ -530,10 +468,7 @@ let createObrasBackofficeObras = async (req, res, next) => {
   });
 
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
     next();
   }
@@ -552,10 +487,7 @@ let updateObrasBackofficeObras = async (req, res, next) => {
   }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
     next();
   }
@@ -574,10 +506,7 @@ let deleteObrasBackofficeObras = async (req, res, next) => {
   }
   });
   if (!verificaAuth) {
-  return res.status(403).send({
-  error: true,
-  message: "No tiene permiso para realizar esta operación"
-  })
+  return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
   next();
   }
@@ -596,10 +525,7 @@ let readObrasBackofficeRepodiario = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
       next();
   }
@@ -619,10 +545,7 @@ let createObrasBackofficeRepodiario = async (req, res, next) => {
   });
 
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
     next();
   }
@@ -641,10 +564,7 @@ let updateObrasBackofficeRepodiario = async (req, res, next) => {
   }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
     next();
   }
@@ -663,10 +583,7 @@ let deleteObrasBackofficeRepodiario = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
   next();
   }
@@ -685,10 +602,7 @@ let readObrasBackofficeEstadoPago = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
       next();
   }
@@ -708,10 +622,7 @@ let createObrasBackofficeEstadoPago = async (req, res, next) => {
   });
 
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
     next();
   }
@@ -730,10 +641,7 @@ let updateObrasBackofficeEstadoPago = async (req, res, next) => {
   }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
     next();
   }
@@ -752,14 +660,84 @@ let deleteObrasBackofficeEstadoPago = async (req, res, next) => {
     }
   });
   if (!verificaAuth) {
-    return res.status(403).send({
-      error: true,
-      message: "No tiene permiso para realizar esta operación"
-    })
+    return res.status(403).send("No tiene permiso para realizar esta operación")
   }else{
   next();
   }
 
+}
+
+let readObrasBackofficeMateriales = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.materiales';
+  let crud = 'leer';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+      next();
+  }
+}
+
+let createObrasBackofficeMateriales = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.materiales';
+  let crud = 'crear';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+      }
+  });
+
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+    next();
+  }
+}
+
+let updateObrasBackofficeMateriales = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.materiales';
+  let crud = 'actualizar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+    user_id: id_user,
+    codigo: codigo_api,
+    [crud]: true
+  }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+    next();
+  }
+}
+
+let deleteObrasBackofficeMateriales = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.materiales';
+  let crud = 'borrar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+  next();
+  }
 }
 
 const authJwt = {
@@ -795,6 +773,10 @@ const authJwt = {
   readObrasBackofficeEstadoPago,
   createObrasBackofficeEstadoPago,
   updateObrasBackofficeEstadoPago,
-  deleteObrasBackofficeEstadoPago
+  deleteObrasBackofficeEstadoPago,
+  readObrasBackofficeMateriales,
+  createObrasBackofficeMateriales,
+  updateObrasBackofficeMateriales,
+  deleteObrasBackofficeMateriales
 };
 module.exports = authJwt;

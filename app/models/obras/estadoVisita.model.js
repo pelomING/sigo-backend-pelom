@@ -9,7 +9,11 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false,
             unique: true
-          }
+          },
+        estado_obra_resultante: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+        }
         },
         {
             schema: "obras",
