@@ -6,11 +6,17 @@ const VerificaAuth = db.verificaAuth;
 
 let verifyToken = (req, res, next) => {
 
-  let token = req.session.token;
-
+  //let token = req.session.token;
+  let token = req.headers['authorization'];
   if (!token) {
     return res.status(403).send("No está autenticado");
   }
+  //debo quitar el Bearer
+  token = token.replace('Bearer ', '');
+  //console.log('headers -> ', req.headers);
+  console.log('token -> ', token);
+
+  
 
   jwt.verify(token,
              config.secret,
