@@ -6,6 +6,7 @@ const LoginHistorial = db.loginHistorial;
 const Op = db.Sequelize.Op;
 const bcrypt = require("bcryptjs");
 const sequelize = db.sequelize;
+const UsuariosGeneral = db.usuariosGeneral;
 
 
 /*********************************************************************************** */
@@ -129,6 +130,66 @@ exports.findAllPersonas = async (req, res) => {
     }
   }
   /*********************************************************************************** */
+/*********************************************************************************** */
+/* Consulta los roles
+
+*/
+  exports.findAllRoles = async (req, res) => {
+    /*  #swagger.tags = ['Autenticación']
+      #swagger.description = 'Devuelve todos los roles' */
+    await Role.findAll().then(data => {
+        res.status(200).send(data);
+    }).catch(err => {
+        res.status(500).send( err.message );
+    })
+  }
+/*********************************************************************************** */
+
+
+/*********************************************************************************** */
+
+ exports.findAllUsuariosGeneral = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Autenticación']
+        #swagger.description = 'Devuelve todos los usuarios' */
+  try {
+    
+    const Op = db.Sequelize.Op;
+    const data = await UsuariosGeneral.findAll(
+      { where:  { funcion: { [Op.ne]: 'sistema' } } , order: [['rut', 'ASC']] });
+    let salida;
+    if (data) {
+      salida = [];
+      for (const element of data) {
+
+            const password_defecto = bcrypt.compareSync(
+              element.rut,
+              element.password
+            );
+            const detalle_salida = {
+              rut: element.rut,
+              persona: element.persona,
+              rol: element.rol,
+              email: element.email,
+              activo: element.activo,
+              base: element.base,
+              funcion: element.funcion,
+              password_defecto: password_defecto,
+              fecha_password: element.fecha_password
+            }
+            salida.push(detalle_salida);
+      };
+    }
+    if (salida===undefined){
+      res.status(500).send("Error en la consulta (servidor backend)");
+    }else{
+      res.status(200).send(salida);
+    }
+  } catch (err) {
+    res.status(500).send( err.message );
+  }
+}
+/*********************************************************************************** */
   
 /*********************************************************************************** */
 /* Crea un nuevo usuario
@@ -200,6 +261,171 @@ exports.createUser = async (req, res) => {
         }
 }
 /*********************************************************************************** */
+
+exports.createFullUser = async (req, res) => {
+  /*  #swagger.tags = ['Autenticación']
+        #swagger.description = 'Crea un nueva persona + usuario' 
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Crea persona y usuario',
+            required: true,
+            schema: {
+                rut: "rut del usuario, sin puntos y guion",
+                apellido_1: "primer apellido",
+                apellido_2: "segundo apellido",
+                nombres: "nombres",
+                base: "base en la que trabaja",
+                id_funcion: "funcion del usuario",
+                id_rol: "rol del usuario",
+                email: "usuario@email.com"
+            }
+        }
+        */
+  let salir = false;
+    const campos = [
+      'rut', 'apellido_1', 'nombres', 'base', 'id_funcion', 'email', 'id_rol'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send( "No puede estar nulo el campo " + element
+        );
+        return;
+      }
+    };
+
+    const persona = {
+        rut: req.body.rut,
+        apellido_1: req.body.apellido_1,
+        apellido_2: req.body.apellido_2,
+        nombres: req.body.nombres,
+        base: req.body.base,
+        cliente: req.body.cliente?req.body.cliente:1,
+        id_funcion: req.body.id_funcion,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.rut, 8),
+        id_rol: req.body.id_rol,
+        activo: true
+    };
+
+    //let sql_crea = `INSERT INTO _auth.personas (rut, apellido_1, apellido_2, nombres, base, cliente, id_funcion, activo)
+	  //VALUES ('${persona.rut}', '${persona.apellido_1}', '${persona.apellido_2}', '${persona.nombres}', '${persona.base}', ${persona.cliente?persona.cliente:1}, '${persona.id_funcion}', true);`
+    
+    let sql_crea = `WITH inserta_user AS (INSERT INTO _auth.users (username, email, password, fecha_password)
+	  VALUES ('${persona.rut}', '${persona.email}', '${persona.password}', now()) RETURNING id),
+	  inserta_rol AS (INSERT INTO _auth.user_roles ("roleId", "userId") SELECT '${persona.id_rol}', id FROM inserta_user) 
+    SELECT 'Ingresado correctamente!';`;
+
+
+    //Verifica el rut se encuentra en la tabla usuario
+    await User.findAll({where: {username: req.body.rut}}).then(data => {
+      //el rut ya existe
+      if (data.length > 0) {
+        salir = true;
+        res.status(403).send( 'El Rut ya se encuentra ingresado en la base' );
+      }
+    }).catch(err => {
+        salir = true;
+        res.status(500).send( err.message );
+    })
+  
+    if (salir) {
+      return;
+    }
+  
+    //Verifica el rut se encuentra en la tabla persona
+    await Persona.findAll({where: {rut: req.body.rut}}).then(data => {
+      //el rut ya existe en Persona
+      if (data.length > 0) {
+        sql_crea = `UPDATE _auth.personas SET apellido_1 = '${persona.apellido_1}', apellido_2 = '${persona.apellido_2}', 
+        nombres = '${persona.nombres}', base = '${persona.base}', 
+        cliente = ${persona.cliente?persona.cliente:1}, id_funcion = '${persona.id_funcion}', activo = true
+        WHERE rut = '${persona.rut}';` + sql_crea;
+      } else {
+       sql_crea = `INSERT INTO _auth.personas (rut, apellido_1, apellido_2, nombres, base, cliente, id_funcion, activo)
+	      VALUES ('${persona.rut}', '${persona.apellido_1}', '${persona.apellido_2}', '${persona.nombres}', 
+        '${persona.base}', ${persona.cliente?persona.cliente:1}, '${persona.id_funcion}', true);` + sql_crea;
+
+      }
+    }).catch(err => {
+        salir = true;
+        res.status(500).send( err.message );
+    })
+    if (salir) {
+      return;
+    }
+
+    
+  
+    await sequelize.query(sql_crea).then(data => {
+      res.status(200).send( 'Ingresado correctamente' );
+    }).catch(err => {
+        res.status(500).send( err.message );
+    })
+
+}
+
+/*********************************************************************************** */
+
+exports.updateFullUser = async (req, res) => {
+  /*  #swagger.tags = ['Autenticación']
+        #swagger.description = 'Actualiza persona + usuario' 
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Actualiza persona y usuario',
+            required: true,
+            schema: {
+                apellido_1: "primer apellido",
+                apellido_2: "segundo apellido",
+                nombres: "nombres",
+                base: "base en la que trabaja",
+                id_funcion: "funcion del usuario",
+                id_rol: "rol del usuario",
+                email: "usuario@email.com"
+            }
+        }
+        */
+  let salir = false;
+    const campos = [
+      'apellido_1', 'nombres', 'base', 'id_funcion', 'email', 'id_rol'
+    ];
+    for (const element of campos) {
+      if (!req.body[element]) {
+        res.status(400).send( "No puede estar nulo el campo " + element
+        );
+        return;
+      }
+    };
+    let rut = req.params.rut;
+
+    const persona = {
+        rut: rut,
+        apellido_1: req.body.apellido_1,
+        apellido_2: req.body.apellido_2,
+        nombres: req.body.nombres,
+        base: req.body.base,
+        cliente: req.body.cliente?req.body.cliente:1,
+        id_funcion: req.body.id_funcion,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.rut, 8),
+        id_rol: req.body.id_rol,
+    };
+
+    let sql_crea = `UPDATE _auth.personas SET apellido_1 = '${persona.apellido_1}', apellido_2 = '${persona.apellido_2}', 
+        nombres = '${persona.nombres}', base = '${persona.base}', 
+        cliente = ${persona.cliente?persona.cliente:1}, id_funcion = '${persona.id_funcion}'
+        WHERE rut = '${persona.rut}';`;
+
+    sql_crea = `UPDATE _auth.users SET email = '${persona.email}' WHERE username = '${persona.rut}';` + sql_crea;
+ 
+  
+    await sequelize.query(sql_crea).then(data => {
+      res.status(200).send( 'Ingresado correctamente' );
+    }).catch(err => {
+        res.status(500).send( err.message );
+    })
+
+}
+
 /* Resetea password para un usuario
   app.post("/api/usuarios/v1/resetpassword", usuariosController.resetPassword);
 */
@@ -242,6 +468,49 @@ exports.resetPassword = async (req, res) => {
             } 
             catch (error) {
               console.log("error rest password -> ", error);
+                salida = { error: true, message: error }
+                await t.rollback();
+              
+            }
+            if (salida.error) {
+              res.status(500).send(salida.message);
+            }else {
+              res.status(200).send(salida);
+            }
+          }
+        } catch (error) {
+          res.status(500).send( error.message );
+        }
+}
+
+
+exports.desactivaUser = async (req, res) => { 
+    /*  #swagger.tags = ['Autenticación']
+        #swagger.description = 'Desactiva un usuario'
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Desactiva un usuario',
+            required: true,
+            schema: {
+                rut: "rut del usuario, sin puntos"
+            }
+        }
+        */
+        try {
+          const persona = await Persona.findOne({where: {rut: req.body.rut}});
+          if (!persona) {
+            res.status(404).send( 'Rut no encontrado' );
+          } else {
+            let salida = {};
+            const t = await sequelize.transaction();
+            try 
+            {
+                salida = {"error": false, "message": "Desactivado OK!"};
+                await persona.update({ activo: false }, { where: { rut: persona.rut }, transaction: t });
+                await t.commit();
+            } 
+            catch (error) {
+              //console.log("error rest password -> ", error);
                 salida = { error: true, message: error }
                 await t.rollback();
               

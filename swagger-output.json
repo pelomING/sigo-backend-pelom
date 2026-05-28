@@ -237,6 +237,263 @@
         }
       }
     },
+    "/api/usuarios/v1/creafullusuario": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Crea un nueva persona + usuario",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Crea persona y usuario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rut": {
+                  "type": "string",
+                  "example": "rut del usuario, sin puntos y guion"
+                },
+                "apellido_1": {
+                  "type": "string",
+                  "example": "primer apellido"
+                },
+                "apellido_2": {
+                  "type": "string",
+                  "example": "segundo apellido"
+                },
+                "nombres": {
+                  "type": "string",
+                  "example": "nombres"
+                },
+                "base": {
+                  "type": "string",
+                  "example": "base en la que trabaja"
+                },
+                "id_funcion": {
+                  "type": "string",
+                  "example": "funcion del usuario"
+                },
+                "id_rol": {
+                  "type": "string",
+                  "example": "rol del usuario"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "usuario@email.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/usuarios/v1/lista_usuarios": {
+      "get": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Devuelve todos los usuarios",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/usuarios/v1/lista_roles": {
+      "get": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Devuelve todos los roles",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/usuarios/v1/updatefullusuario/{rut}": {
+      "put": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Actualiza persona + usuario",
+        "parameters": [
+          {
+            "name": "rut",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Actualiza persona y usuario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "apellido_1": {
+                  "type": "string",
+                  "example": "primer apellido"
+                },
+                "apellido_2": {
+                  "type": "string",
+                  "example": "segundo apellido"
+                },
+                "nombres": {
+                  "type": "string",
+                  "example": "nombres"
+                },
+                "base": {
+                  "type": "string",
+                  "example": "base en la que trabaja"
+                },
+                "id_funcion": {
+                  "type": "string",
+                  "example": "funcion del usuario"
+                },
+                "id_rol": {
+                  "type": "string",
+                  "example": "rol del usuario"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "usuario@email.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/usuarios/v1/desactivausuario": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Desactiva un usuario",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Desactiva un usuario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rut": {
+                  "type": "string",
+                  "example": "rut del usuario, sin puntos"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/ajustes/v1/cambiapassword": {
       "post": {
         "tags": [
@@ -295,11 +552,6 @@
         "description": "Resetea password para un usuario",
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
             "name": "body",
             "in": "body",
             "description": "Resetea password para un usuario",
@@ -318,12 +570,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -2795,6 +3041,11 @@
         "description": "Crea movimiento en bodega",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "description": "Datos encabezado reporte diario",
@@ -4307,6 +4558,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -4372,6 +4628,13 @@
           "Obras - Backoffice - Reporte diario"
         ],
         "description": "Obtiene Reporte de las UC por jefe de faena",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -5556,6 +5819,11 @@
         "description": "Devuelve el listado de todo el materiales que están disponibles para una obra",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -5587,6 +5855,11 @@
         ],
         "description": "Ingresa una solicitud de material",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -5658,6 +5931,11 @@
         "description": "Devuelve el listado de solicitudes para una obra",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_obra",
             "in": "query",
             "type": "string"
@@ -5690,6 +5968,11 @@
         "description": "Devuelve el listado de materiales para una solicitud a faena",
         "parameters": [
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "id_solicitud",
             "in": "query",
             "type": "string"
@@ -5721,6 +6004,11 @@
         ],
         "description": "Devuelve el listado de todo el materiales que están disponibles para una obra",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id_obra",
             "in": "query",
