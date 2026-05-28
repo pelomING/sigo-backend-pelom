@@ -141,12 +141,12 @@ require('./app/routes/sae_paneldecontrol.routes')(app);
 
 const Tiempo = process.env.CRON_TIEMPO || 2;
 //Se propgrama el cron
-const job = nodeCron.schedule('*/' + Tiempo + ' * * * *', () => {
-  console.log('se ejecuta la funcion por cron ' + '*/' + Tiempo + ' * * * *');
-  cronObras.resumenObras();
-  cronObras.lectura_daia();
-})
-job.start();
+//const job = nodeCron.schedule('*/' + Tiempo + ' * * * *', () => {
+//  console.log('se ejecuta la funcion por cron ' + '*/' + Tiempo + ' * * * *');
+//  cronObras.resumenObras();
+//  cronObras.lectura_daia();
+//})
+//job.start();
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 const NodeEnv = process.env.PUBLIC_DOMAIN || "local";
