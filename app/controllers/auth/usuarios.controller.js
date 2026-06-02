@@ -481,12 +481,14 @@ exports.updateFullUser = async (req, res) => {
 
     salida = {"error": false, "message": "Usuario ingresado correctamente"};
 
-    let sql_crea = `UPDATE _auth.personas SET apellido_1 = '${persona.apellido_1}', apellido_2 = '${persona.apellido_2}', 
+    let sql_update = `UPDATE _auth.personas SET apellido_1 = '${persona.apellido_1}', apellido_2 = '${persona.apellido_2}', 
         nombres = '${persona.nombres}', base = '${persona.base}', 
         cliente = ${persona.cliente?persona.cliente:1}, id_funcion = '${persona.id_funcion}'
         WHERE rut = '${persona.rut}';`;
 
-    sql_crea = `UPDATE _auth.users SET email = '${persona.email}' WHERE username = '${persona.rut}';` + sql_crea;
+    let sql_rol = `UPDATE _auth.user_roles SET "roleId" = '${persona.id_rol}' WHERE "userId" = (SELECT id FROM _auth.users WHERE username = '${persona.rut}');`;
+
+    sql_crea = `UPDATE _auth.users SET email = '${persona.email}' WHERE username = '${persona.rut}';${sql_update}${sql_rol};`;
  
   
     await sequelize.query(sql_crea).then(data => {
