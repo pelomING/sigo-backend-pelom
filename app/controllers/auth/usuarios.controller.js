@@ -190,6 +190,75 @@ exports.findAllPersonas = async (req, res) => {
   }
 }
 /*********************************************************************************** */
+
+exports.findAllUsuariosGeneral_V2 = async (req, res) => {
+  //metodo GET
+  /*  #swagger.tags = ['Autenticación']
+        #swagger.description = 'Devuelve todos los usuarios' */
+
+    try {
+      const sql = `SELECT u.username AS rut,
+                upper((((p.nombres::text || ' '::text) || p.apellido_1::text) || ' '::text) ||
+                    CASE
+                        WHEN p.apellido_2 IS NULL THEN ''::character varying
+                        ELSE p.apellido_2
+                    END::text) AS persona,
+              json_build_object('id', r.id, 'nombre', r.descripcion) as rol,
+                u.email,
+                p.activo,
+              row_to_json(b.*) AS base,
+              row_to_json(tfp.*) AS funcion,
+                u.password,
+                u.fecha_password,
+              UPPER(p.apellido_1) as apellido_1,
+              UPPER(p.apellido_2) as apellido_2,
+              UPPER(p.nombres) as nombres
+              FROM _auth.users u
+                JOIN _auth.user_roles ur ON u.id = ur."userId"
+                JOIN _auth.roles r ON ur."roleId" = r.id
+                JOIN _auth.personas p ON u.username::text = p.rut::text
+                JOIN _comun.base b ON p.base = b.id
+                JOIN _comun.tipo_funcion_personal tfp ON p.id_funcion = tfp.id
+              ORDER BY u.username;`;
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      const usuario = await sequelize.query(sql, { type: QueryTypes.SELECT });
+      let salida = [];
+      if (usuario) {
+        for (const element of usuario) {
+              const password_defecto = bcrypt.compareSync(
+                element.rut,
+                element.password
+              );
+  
+              const detalle_salida = {
+  
+                rut: element.rut,
+                persona: element.persona,
+                rol: element.rol,
+                email: element.email,
+                activo: element.activo,
+                base: element.base,
+                funcion: element.funcion,
+                password_defecto: password_defecto,
+                fecha_password: element.fecha_password,
+                apellido_1: element.apellido_1,
+                apellido_2: element.apellido_2,
+                nombres: element.nombres
+              }
+              salida.push(detalle_salida);
+        };
+      }
+      if (salida===undefined){
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }else{
+        res.status(200).send(salida);
+      }
+    } catch (error) {
+      res.status(500).send(error);
+    }
+    
+  }
   
 /*********************************************************************************** */
 /* Crea un nuevo usuario
@@ -287,7 +356,7 @@ exports.createFullUser = async (req, res) => {
     ];
     for (const element of campos) {
       if (!req.body[element]) {
-        res.status(400).send( "No puede estar nulo el campo " + element
+        res.status(400).send( {"error": true, "message": "No puede estar nulo el campo " + element }
         );
         return;
       }
@@ -321,17 +390,18 @@ exports.createFullUser = async (req, res) => {
       //el rut ya existe
       if (data.length > 0) {
         salir = true;
-        res.status(403).send( 'El Rut ya se encuentra ingresado en la base' );
+        res.status(403).send( {"error": true, "message": 'El Rut ya se encuentra ingresado en la base'}  );
       }
     }).catch(err => {
         salir = true;
-        res.status(500).send( err.message );
+        res.status(500).send( {"error": true, "message": err.message} );
     })
   
     if (salir) {
       return;
     }
   
+    salida = {"error": false, "message": "Usuario ingresado correctamente"};
     //Verifica el rut se encuentra en la tabla persona
     await Persona.findAll({where: {rut: req.body.rut}}).then(data => {
       //el rut ya existe en Persona
@@ -348,7 +418,7 @@ exports.createFullUser = async (req, res) => {
       }
     }).catch(err => {
         salir = true;
-        res.status(500).send( err.message );
+        res.status(500).send( {"error": true, "message": err.message}  );
     })
     if (salir) {
       return;
@@ -357,9 +427,9 @@ exports.createFullUser = async (req, res) => {
     
   
     await sequelize.query(sql_crea).then(data => {
-      res.status(200).send( 'Ingresado correctamente' );
+      res.status(200).send( salida );
     }).catch(err => {
-        res.status(500).send( err.message );
+        res.status(500).send( {"error": true, "message": err.message} );
     })
 
 }
@@ -390,8 +460,7 @@ exports.updateFullUser = async (req, res) => {
     ];
     for (const element of campos) {
       if (!req.body[element]) {
-        res.status(400).send( "No puede estar nulo el campo " + element
-        );
+        res.status(400).send({"error": true, "message": "No puede estar nulo el campo " + element}  );
         return;
       }
     };
@@ -410,18 +479,22 @@ exports.updateFullUser = async (req, res) => {
         id_rol: req.body.id_rol,
     };
 
-    let sql_crea = `UPDATE _auth.personas SET apellido_1 = '${persona.apellido_1}', apellido_2 = '${persona.apellido_2}', 
+    salida = {"error": false, "message": "Usuario ingresado correctamente"};
+
+    let sql_update = `UPDATE _auth.personas SET apellido_1 = '${persona.apellido_1}', apellido_2 = '${persona.apellido_2}', 
         nombres = '${persona.nombres}', base = '${persona.base}', 
         cliente = ${persona.cliente?persona.cliente:1}, id_funcion = '${persona.id_funcion}'
         WHERE rut = '${persona.rut}';`;
 
-    sql_crea = `UPDATE _auth.users SET email = '${persona.email}' WHERE username = '${persona.rut}';` + sql_crea;
+    let sql_rol = `UPDATE _auth.user_roles SET "roleId" = '${persona.id_rol}' WHERE "userId" = (SELECT id FROM _auth.users WHERE username = '${persona.rut}');`;
+
+    sql_crea = `UPDATE _auth.users SET email = '${persona.email}' WHERE username = '${persona.rut}';${sql_update}${sql_rol};`;
  
   
     await sequelize.query(sql_crea).then(data => {
-      res.status(200).send( 'Ingresado correctamente' );
+      res.status(200).send( salida );
     }).catch(err => {
-        res.status(500).send( err.message );
+        res.status(500).send( {"error": true, "message": err.message} );
     })
 
 }
@@ -499,7 +572,7 @@ exports.desactivaUser = async (req, res) => {
         try {
           const persona = await Persona.findOne({where: {rut: req.body.rut}});
           if (!persona) {
-            res.status(404).send( 'Rut no encontrado' );
+            res.status(404).send( {"error": true, "message": 'Rut no encontrado'}  );
           } else {
             let salida = {};
             const t = await sequelize.transaction();
@@ -516,12 +589,56 @@ exports.desactivaUser = async (req, res) => {
               
             }
             if (salida.error) {
-              res.status(500).send(salida.message);
+              res.status(500).send(salida);
             }else {
               res.status(200).send(salida);
             }
           }
         } catch (error) {
-          res.status(500).send( error.message );
+          res.status(500).send( { error: true, message: error.Boolean } );
+        }
+}
+
+
+
+exports.activaUser = async (req, res) => { 
+    /*  #swagger.tags = ['Autenticación']
+        #swagger.description = 'Activa un usuario'
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Activa un usuario',
+            required: true,
+            schema: {
+                rut: "rut del usuario, sin puntos"
+            }
+        }
+        */
+        try {
+          const persona = await Persona.findOne({where: {rut: req.body.rut}});
+          if (!persona) {
+            res.status(404).send( {"error": true, "message": 'Rut no encontrado'}  );
+          } else {
+            let salida = {};
+            const t = await sequelize.transaction();
+            try 
+            {
+                salida = {"error": false, "message": "Activado OK!"};
+                await persona.update({ activo: true }, { where: { rut: persona.rut }, transaction: t });
+                await t.commit();
+            } 
+            catch (error) {
+              //console.log("error rest password -> ", error);
+                salida = { error: true, message: error }
+                await t.rollback();
+              
+            }
+            if (salida.error) {
+              res.status(500).send(salida);
+            }else {
+              res.status(200).send(salida);
+            }
+          }
+        } catch (error) {
+          res.status(500).send( { error: true, message: error.Boolean } );
         }
 }

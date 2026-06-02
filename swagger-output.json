@@ -341,6 +341,35 @@
         }
       }
     },
+    "/api/usuarios/v2/lista_usuarios": {
+      "get": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Devuelve todos los usuarios",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/usuarios/v1/lista_roles": {
       "get": {
         "tags": [
@@ -463,6 +492,53 @@
             "name": "body",
             "in": "body",
             "description": "Desactiva un usuario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rut": {
+                  "type": "string",
+                  "example": "rut del usuario, sin puntos"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/usuarios/v1/activausuario": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "description": "Activa un usuario",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Activa un usuario",
             "required": true,
             "schema": {
               "type": "object",
