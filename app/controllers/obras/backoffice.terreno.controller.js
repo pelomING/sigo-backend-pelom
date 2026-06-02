@@ -156,7 +156,7 @@ exports.createVisitaTerreno = async (req, res) => {
 
         //let fecha_visita = new Date(req.body.fecha_visita).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
         //fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
-        let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        let fecha_hoy = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
         fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
 
     
@@ -195,7 +195,7 @@ exports.createVisitaTerreno = async (req, res) => {
                     fecha_modificacion: fecha_hoy
         
                 }
-                const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+                const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
                 const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
                 //estado visita agendada = 4  Estado de Obra: visita reportada exitosa (4)
@@ -277,7 +277,7 @@ exports.updateVisitaTerreno = async (req, res) => {
         }
         //let fecha_visita = new Date(req.body.fecha_visita).toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
         //fecha_visita = fecha_visita.slice(6,10) + "-" + fecha_visita.slice(3,5) + "-" + fecha_visita.slice(0,2)
-        let fecha_hoy = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"}).slice(0, 10);
+        let fecha_hoy = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"}).slice(0, 10);
         fecha_hoy = fecha_hoy.slice(6,10) + "-" + fecha_hoy.slice(3,5) + "-" + fecha_hoy.slice(0,2)
 
         let id_obra;
@@ -345,7 +345,7 @@ exports.updateVisitaTerreno = async (req, res) => {
 
             if (visita != undefined) {
 
-                const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+                const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
                 const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
                 //Determinar el estado al que debe cambiar la obra
@@ -475,7 +475,7 @@ exports.deleteVisitaTerreno = async (req, res) => {
         })
 
         //determina fecha actual
-        const c = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+        const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
         const fechahoy = c.substring(6,10) + '-' + c.substring(3,5) + '-' + c.substring(0,2) + ' ' + c.substring(12);
 
         const estado_obra = 1  //forzar estado de obra a ingresada (1)

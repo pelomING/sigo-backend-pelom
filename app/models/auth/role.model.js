@@ -11,6 +11,10 @@ module.exports = (sequelize, Sequelize) => {
       sistema: {
         type: Sequelize.BOOLEAN,
         allowNull: false
+      },
+      descripcion: {
+        type: Sequelize.STRING,
+        allowNull: false
       }
     },
     {

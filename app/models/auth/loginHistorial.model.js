@@ -22,6 +22,9 @@ module.exports = (sequelize, Sequelize) => {
         fecha_hora: {
             type: Sequelize.STRING,
             allowNull: false
+        },
+        comentario: {
+            type: Sequelize.STRING,
         }
     },
     {
