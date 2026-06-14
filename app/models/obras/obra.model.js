@@ -88,7 +88,10 @@ module.exports = (sequelize, Sequelize) => {
         },
         recargo_distancia: {
             type: Sequelize.INTEGER
-        }
+        },
+        descuento_uc: {
+            type: Sequelize.NUMBER
+        },
         },
         {
             schema: "obras",
