@@ -57,6 +57,7 @@ exports.findAllObra = async (req, res) => {
                   row_to_json(tob.*) AS tipo_obra,
                   row_to_json(s.*) AS segmento,
                   o.eliminada,
+                  o.descuento_uc,
                       CASE
                           WHEN erd.cuenta IS NULL THEN 0::bigint
                           ELSE erd.cuenta
@@ -217,6 +218,7 @@ exports.findAllObra = async (req, res) => {
                 cantidad_reportes: Number(element.cantidad_reportes),
                 reportes_pendientes: Number(element.reportes_pendientes),
                 jefe_delegacion: element.jefe_delegacion?String(element.jefe_delegacion):null,
+                descuento_uc: Number(element.descuento_uc),
                 cantidad_estados_pago: Number(element.cantidad_estados_pago),
                 codigo_estados: element.codigo_estados?element.codigo_estados:null,
                 codigos_pelom: element.codigos_pelom?element.codigos_pelom:null,
@@ -277,7 +279,8 @@ exports.createObra = async (req, res) => {
                 segmento: 1,
                 jefe_delegacion: "nombre jefe delegacion",
                 oficina: {'id':1,'oficina':'Curicó','supervisor':'Eduardo Soto'},
-                recargo_distancia: {'id':7,'nombre':'Menos de 30km','porcentaje':0}
+                recargo_distancia: {'id':7,'nombre':'Menos de 30km','porcentaje':0},
+                descuento_uc: 10
             }
         }
       */
@@ -378,7 +381,8 @@ exports.createObra = async (req, res) => {
           eliminada: false,
           jefe_delegacion: req.body.jefe_delegacion,
           oficina: req.body.oficina?req.body.oficina.id:null,
-          recargo_distancia: req.body.recargo_distancia?req.body.recargo_distancia.id:null
+          recargo_distancia: req.body.recargo_distancia?req.body.recargo_distancia.id:null,
+          descuento_uc: req.body.descuento_uc?req.body.descuento_uc:0
 
       }
       const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
@@ -470,7 +474,8 @@ exports.updateObra = async (req, res) => {
                 segmento: 1,
                 jefe_delegacion: "nombre jefe delegacion",
                 oficina: {'id':1,'oficina':'Curicó','supervisor':'Eduardo Soto'},
-                recargo_distancia: {'id':7,'nombre':'Menos de 30km','porcentaje':0}
+                recargo_distancia: {'id':7,'nombre':'Menos de 30km','porcentaje':0},
+                descuento_uc: 10
             }
         }
       */
@@ -533,7 +538,8 @@ exports.updateObra = async (req, res) => {
       segmento: req.body.segmento?req.body.segmento:undefined,
       jefe_delegacion: req.body.jefe_delegacion?req.body.jefe_delegacion:undefined,
       oficina: req.body.oficina?req.body.oficina.id:undefined,
-      recargo_distancia: req.body.recargo_distancia?req.body.recargo_distancia.id:undefined
+      recargo_distancia: req.body.recargo_distancia?req.body.recargo_distancia.id:undefined,
+      descuento_uc: req.body.descuento_uc?req.body.descuento_uc:undefined
 
   }
         const c = new Date().toLocaleString("es-CL", {"hour12": false, timeZone: "America/Santiago"});
@@ -982,7 +988,7 @@ exports.findObraById = async (req, res) => {
     o.gestor_cliente, numero_aviso, numero_oc, monto, cantidad_uc, fecha_llegada::text, fecha_inicio::text, \
     fecha_termino::text, row_to_json(tt) as tipo_trabajo, persona_envia_info, cargo_persona_envia_info, \
     row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
-    ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
+    ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, descuento_uc \
     case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, case when erd.pendiente \
     is null then 0 else erd.pendiente end as reportes_pendientes, o.jefe_delegacion, (select count(id) as \
     cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
@@ -1043,7 +1049,8 @@ exports.findObraById = async (req, res) => {
               recargo_distancia: element.recargo_distancia, //json
               fecha_estado: String(element.fecha_estado),
               obra_paralizada: element.obra_paralizada?element.obra_paralizada:null,
-              obras_cierres: element.obras_cierres?element.obras_cierres:null
+              obras_cierres: element.obras_cierres?element.obras_cierres:null,
+              descuento_uc: Number(element.descuento_uc)
             }
             salida.push(detalle_salida);
       };
@@ -1078,7 +1085,7 @@ exports.findObraByCodigo = async (req, res) => {
         row_to_json(ec) as empresa_contratista, row_to_json(cc) as coordinador_contratista, row_to_json(c) as comuna, \
         ubicacion, row_to_json(eo) as estado, row_to_json(tob) as tipo_obra, row_to_json(s) as segmento, eliminada, \
         case when erd.cuenta is null then 0 else erd.cuenta end as cantidad_reportes, case when erd.pendiente \
-        is null then 0 else erd.pendiente end as reportes_pendientes, o.jefe_delegacion, (select count(id) as \
+        is null then 0 else erd.pendiente end as reportes_pendientes, o.jefe_delegacion, o.descuento_uc, (select count(id) as \
         cantidad_estados_pago FROM obras.encabezado_estado_pago WHERE id_obra = 6) as cantidad_estados_pago, \
         row_to_json(ofi) as oficina, row_to_json(rec) as recargo_distancia, ohc.fecha_hora::text as fecha_estado, row_to_json(op) as \
         obra_paralizada, row_to_json(oc) as obras_cierres FROM obras.obras o left join (select distinct on (id_obra) id_obra, fecha_hora from \
@@ -1138,7 +1145,8 @@ exports.findObraByCodigo = async (req, res) => {
               recargo_distancia: element.recargo_distancia, //json
               fecha_estado: String(element.fecha_estado),
               obra_paralizada: element.obra_paralizada?element.obra_paralizada:null,
-              obras_cierres: element.obras_cierres?element.obras_cierres:null
+              obras_cierres: element.obras_cierres?element.obras_cierres:null,
+              descuento_uc: Number(element.descuento_uc)
             }
             salida.push(detalle_salida);
       };

@@ -2013,7 +2013,7 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
                     e.cantidad, 
                     case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' 
                     then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, 
-                    (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    (SELECT (precio*(100 - e.descuento_uc)/100)::integer AS precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
                     e.porcentaje as porcentaje, 
                     e.recargo_distancia,
                     e.descripcion_hextra,
@@ -2027,7 +2027,7 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
                           rec1.porcentaje as recargo_distancia,
                           rec1.nombre as descripcion_distancia, 
                           case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
-                          o.oficina 
+                          o.oficina, o.descuento_uc 
                     FROM obras.encabezado_reporte_diario erd 
                       JOIN obras.detalle_reporte_diario_actividad drda 
                             ON erd.id = drda.id_encabezado_rep 
@@ -2047,7 +2047,8 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
                         rec.porcentaje, 
                         rec1.porcentaje, 
 				   		          rec1.nombre,
-                        o.oficina
+                        o.oficina,
+                        o.descuento_uc
                   ) e 
                 JOIN obras.maestro_actividades ma 
                     ON e.id_actividad = ma.id 
@@ -2125,7 +2126,7 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
                     e.cantidad, 
                     case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' 
                           then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, 
-                    (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    (SELECT  (precio*(100 - e.descuento_uc)/100)::integer AS precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
                     e.porcentaje as porcentaje, 
                     e.recargo_distancia 
                 FROM 
@@ -2136,7 +2137,7 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
                         case when rec.nombre_corto is null then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto, 
                         rec1.porcentaje as recargo_distancia, 
                         case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
-                        o.oficina 
+                        o.oficina, o.descuento_uc 
                             FROM 
                                 obras.encabezado_reporte_diario erd 
                             JOIN obras.detalle_reporte_diario_actividad drda 
@@ -2155,7 +2156,8 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
                                 rec.nombre_corto, 
                                 rec.porcentaje, 
                                 rec1.porcentaje, 
-                                o.oficina
+                                o.oficina,
+                                o.descuento_uc
                     ) e 
                 JOIN obras.maestro_actividades ma 
                       ON e.id_actividad = ma.id 
@@ -2176,7 +2178,7 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
                     'CU'::varchar, 
                     cantidad, 
                     uc_unitaria::double precision as unitario, 
-                    (SELECT precio FROM obras.valor_uc where oficina = o.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    (SELECT  (precio*(100 - o.descuento_uc)/100)::integer AS precio FROM obras.valor_uc where oficina = o.oficina order by oficina, fecha desc limit 1) as valor_uc, 
                     case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
                     rec1.porcentaje as recargo_distancia 
                 FROM 
@@ -2256,7 +2258,7 @@ let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
                     e.cantidad, 
                     case when top.clase = 'I' then ma.uc_instalacion when top.clase = 'R' 
                         then ma.uc_retiro when top.clase = 'T' then ma.uc_traslado else 999::double precision end as unitario, 
-                    (SELECT precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    (SELECT  (precio*(100 - e.descuento_uc)/100)::integer AS precio FROM obras.valor_uc where oficina = e.oficina order by oficina, fecha desc limit 1) as valor_uc, 
                     e.porcentaje as porcentaje, 
                     e.recargo_distancia 
                 FROM 
@@ -2267,7 +2269,7 @@ let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
                         case when rec.nombre_corto is null then ''::varchar else ('(' || rec.nombre_corto || ') ')::varchar end as nombre_corto, 
                         rec1.porcentaje as recargo_distancia, 
                         case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
-                        o.oficina 
+                        o.oficina, o.descuento_uc 
                             FROM 
                                 obras.encabezado_reporte_diario erd 
                             JOIN obras.detalle_reporte_diario_actividad drda 
@@ -2286,7 +2288,8 @@ let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
                                 rec.nombre_corto, 
                                 rec.porcentaje, 
                                 rec1.porcentaje, 
-                                o.oficina
+                                o.oficina,
+                                o.descuento_uc
                     ) e 
                 JOIN obras.maestro_actividades ma 
                     ON e.id_actividad = ma.id 
@@ -2306,7 +2309,7 @@ let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
                     'CU'::varchar, 
                     cantidad, 
                     uc_unitaria::double precision as unitario, 
-                    (SELECT precio FROM obras.valor_uc where oficina = o.oficina order by oficina, fecha desc limit 1) as valor_uc, 
+                    (SELECT  (precio*(100 - o.descuento_uc)/100)::integer AS precio FROM obras.valor_uc where oficina = o.oficina order by oficina, fecha desc limit 1) as valor_uc, 
                     case when rec.porcentaje is null then 0 else rec.porcentaje end as porcentaje, 
                     rec1.porcentaje as recargo_distancia 
                 FROM 
@@ -2557,7 +2560,7 @@ let DeterminaEncabezadoEstadoPago = async (id_obra, ids_reporte, id_estado_pago)
                   rec.nombre as recargo_nombre, 
                   rec.porcentaje as recargo_porcentaje,
                   case when tob.no_exige_oc then 1::integer else 0::integer end no_exige_oc,${condicion_codigo_pelom}, 
-                  (SELECT precio 
+                  (SELECT (precio*(100 - o.descuento_uc)/100)::integer AS precio
                     FROM obras.valor_uc 
                     WHERE oficina = o.oficina 
                     ORDER BY oficina, fecha desc 

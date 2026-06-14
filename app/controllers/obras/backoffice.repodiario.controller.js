@@ -972,7 +972,7 @@ exports.createEncabezadoReporteDiario_V2 = async (req, res) => {
 
         //Determina el valor de la UC para esa obra
         let valor_uc = 0;
-        sql = "SELECT vu.precio AS valor_uc FROM obras.obras o	JOIN obras.oficina_supervisor os ON o.oficina = os.id JOIN obras.valor_uc vu ON os.oficina = vu.id WHERE o.id = " + id_obra + ";";
+        sql = "SELECT (vu.precio*(100 - o.descuento_uc)/100)::integer AS valor_uc FROM obras.obras o	JOIN obras.oficina_supervisor os ON o.oficina = os.id JOIN obras.valor_uc vu ON os.oficina = vu.id WHERE o.id = " + id_obra + ";";
         await sequelize.query(sql, {
           type: QueryTypes.SELECT
         }).then(data => {
@@ -1292,7 +1292,7 @@ exports.updateEncabezadoReporteDiario_V2 = async (req, res) => {
 
     //Determina el valor de la UC para esa obra
     let valor_uc = 0;
-    sql = "SELECT vu.precio AS valor_uc FROM obras.obras o	JOIN obras.oficina_supervisor os ON o.oficina = os.id JOIN obras.valor_uc vu ON os.oficina = vu.id WHERE o.id = " + id_obra + ";";
+    sql = "SELECT (vu.precio*(100 - o.descuento_uc)/100)::integer AS valor_uc FROM obras.obras o	JOIN obras.oficina_supervisor os ON o.oficina = os.id JOIN obras.valor_uc vu ON os.oficina = vu.id WHERE o.id = " + id_obra + ";";
     await sequelize.query(sql, {
       type: QueryTypes.SELECT
     }).then(data => {

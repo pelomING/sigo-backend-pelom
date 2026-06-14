@@ -1866,6 +1866,10 @@
                       "example": 0
                     }
                   }
+                },
+                "descuento_uc": {
+                  "type": "number",
+                  "example": 10
                 }
               }
             }
@@ -2041,6 +2045,10 @@
                       "example": 0
                     }
                   }
+                },
+                "descuento_uc": {
+                  "type": "number",
+                  "example": 10
                 }
               }
             }
