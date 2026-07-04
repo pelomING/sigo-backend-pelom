@@ -79,6 +79,18 @@ exports.findAllObra = async (req, res) => {
                           WHEN cep.cuenta IS NULL THEN null
                           ELSE cep.codigos_pelom
                       END AS codigos_pelom,
+                      CASE
+                          WHEN cot.cuenta IS NULL THEN 0::bigint
+                          ELSE cot.cuenta
+                      END AS cantidad_cotizaciones,
+                  CASE
+                          WHEN cot.cuenta IS NULL THEN null
+                          ELSE cot.cod_cotizaciones
+                      END AS codigo_cotizaciones,
+					        CASE
+                          WHEN cot.cuenta IS NULL THEN null
+                          ELSE cot.codigos_pelom
+                      END AS codigos_cotizacion_pelom,
                   row_to_json(ofi.*) AS oficina,
                   row_to_json(rec.*) AS recargo_distancia,
                   ohc.fecha_hora::text AS fecha_estado,
@@ -139,6 +151,15 @@ exports.findAllObra = async (req, res) => {
                               array_agg(codigo_pelom) as codigos_pelom
                         FROM obras.encabezado_estado_pago
                         GROUP BY encabezado_estado_pago.id_obra) cep ON o.id = cep.id_obra
+                  LEFT JOIN ( SELECT encabezado_cotizacion.id_obra,
+                          count(encabezado_cotizacion.id) AS cuenta,
+                              CASE
+                                  WHEN count(encabezado_cotizacion.id) > 0 THEN true
+                                  ELSE false
+                              END AS hay_dato, array_agg(json_build_object('id', id, 'codigo_pelom', codigo_pelom)) as cod_cotizaciones,
+                              array_agg(codigo_pelom) as codigos_pelom
+                        FROM obras.encabezado_cotizacion
+                        GROUP BY encabezado_cotizacion.id_obra) cot ON o.id = cot.id_obra
                   LEFT JOIN ( SELECT visitas_terreno.id_obra,
                               CASE
                                   WHEN count(visitas_terreno.id_obra) > 0 THEN true
@@ -222,6 +243,9 @@ exports.findAllObra = async (req, res) => {
                 cantidad_estados_pago: Number(element.cantidad_estados_pago),
                 codigo_estados: element.codigo_estados?element.codigo_estados:null,
                 codigos_pelom: element.codigos_pelom?element.codigos_pelom:null,
+                cantidad_cotizaciones: Number(element.cantidad_cotizaciones),
+                codigo_cotizaciones: element.codigo_cotizaciones?element.codigo_cotizaciones:null,
+                codigos_pelom_cotizaciones: element.codigos_pelom_cotizaciones?element.codigos_pelom_cotizaciones:null,
                 oficina: element.oficina, //json
                 recargo_distancia: element.recargo_distancia, //json
                 fecha_estado: String(element.fecha_estado),

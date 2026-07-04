@@ -740,6 +740,81 @@ let deleteObrasBackofficeMateriales = async (req, res, next) => {
   }
 }
 
+
+let readObrasBackofficeCotizaciones = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.cotizaciones';
+  let crud = 'leer';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+      next();
+  }
+}
+
+let createObrasBackofficeCotizaciones = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.cotizaciones';
+  let crud = 'crear';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+      }
+  });
+
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+    next();
+  }
+}
+
+let updateObrasBackofficeCotizaciones = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.cotizaciones';
+  let crud = 'actualizar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+    user_id: id_user,
+    codigo: codigo_api,
+    [crud]: true
+  }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+    next();
+  }
+}
+
+let deleteObrasBackofficeCotizaciones = async (req, res, next) => {
+  let id_user = req.userId;
+  let codigo_api = 'obras.backoffice.cotizaciones';
+  let crud = 'borrar';
+  const verificaAuth = await VerificaAuth.findOne({
+    where: {
+      user_id: id_user,
+      codigo: codigo_api,
+      [crud]: true
+    }
+  });
+  if (!verificaAuth) {
+    return res.status(403).send("No tiene permiso para realizar esta operación")
+  }else{
+  next();
+  }
+}
+
+
 const authJwt = {
   verifyToken,
   isAdmin,
@@ -777,6 +852,10 @@ const authJwt = {
   readObrasBackofficeMateriales,
   createObrasBackofficeMateriales,
   updateObrasBackofficeMateriales,
-  deleteObrasBackofficeMateriales
+  deleteObrasBackofficeMateriales,
+  readObrasBackofficeCotizaciones,
+  createObrasBackofficeCotizaciones,
+  updateObrasBackofficeCotizaciones,
+  deleteObrasBackofficeCotizaciones
 };
 module.exports = authJwt;

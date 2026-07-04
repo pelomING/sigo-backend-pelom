@@ -144,7 +144,7 @@ const Tiempo = process.env.CRON_TIEMPO || 2;
 const job = nodeCron.schedule('*/' + Tiempo + ' * * * *', () => {
   console.log('se ejecuta la funcion por cron ' + '*/' + Tiempo + ' * * * *');
   cronObras.resumenObras();
-  cronObras.lectura_daia();
+  //cronObras.lectura_daia();
 })
 job.start();
 // set port, listen for requests
