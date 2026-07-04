@@ -727,7 +727,7 @@ exports.creaEstadoPago = async (req, res) => {
       centrality: req.body.centrality?String(req.body.centrality):undefined,
 
     }
-    console.log('datos -> ', datos)
+    //console.log('datos -> ', datos)
     if (!datos.flexiapp) {
       res.status(400).send("No puede estar vacio el campo flexiapp. Por favor ingrese al menos un flexiapp en algún reporte diario");
       return
@@ -2002,7 +2002,7 @@ exports.findAllEncabezadoReporteDiarioByIdEstadoPago = async (req, res) => {
 
 let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
   try {
-    console.log('listadoActividadesByIdObra - ids_reporte -> ',ids_reporte);
+    //console.log('listadoActividadesByIdObra - ids_reporte -> ',ids_reporte);
     const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
 
     const sql = `SELECT 
@@ -2101,7 +2101,7 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
               }
               return retorna;
   }catch (error) {
-    console.log('error, listadoActividadesAdicionalesByIdObra', error);
+    //console.log('error, listadoActividadesAdicionalesByIdObra', error);
     const retorna = {
       error: true,
       detalle: error
@@ -2114,7 +2114,7 @@ let listadoActividadesByIdObra = async (id_obra, ids_reporte) => {
 let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
   try {
 
-    console.log('listadoActividadesAdicionalesByIdObra - ids_reporte -> ',ids_reporte);
+    //console.log('listadoActividadesAdicionalesByIdObra - ids_reporte -> ',ids_reporte);
     const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
 
     const sql = `SELECT 
@@ -2247,7 +2247,7 @@ let listadoActividadesAdicionalesByIdObra = async (id_obra, ids_reporte) => {
 let listadoActividadesHoraExtraByIdObra = async (id_obra, ids_reporte) => {
   try 
   {
-    console.log('listadoActividadesHoraExtraByIdObra - ids_reporte -> ',ids_reporte);
+    //console.log('listadoActividadesHoraExtraByIdObra - ids_reporte -> ',ids_reporte);
     const condicion_reporte = ids_reporte?`AND erd.id in (${ids_reporte})`:"";
 
     const sql = `SELECT 
@@ -2512,7 +2512,7 @@ let DeterminaEncabezadoEstadoPago = async (id_obra, ids_reporte, id_estado_pago)
       attributes: ['codigo_pelom']
     }):undefined;
 
-    console.log('codigo_pelom -> ', codigo_pelom);
+    //console.log('codigo_pelom -> ', codigo_pelom);
     let condicion_codigo_pelom;
     if (codigo_pelom) {
       condicion_codigo_pelom = `'${codigo_pelom.dataValues.codigo_pelom}'::text as codigo_pelom`;

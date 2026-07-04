@@ -1394,6 +1394,35 @@
         }
       }
     },
+    "/api/obras/backoffice/general/v1/allsupervisores": {
+      "get": {
+        "tags": [
+          "Obras - General"
+        ],
+        "description": "Devuelve todos los supervisores",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/obras/backoffice/general/v1/allcoordinadorcontratistas": {
       "get": {
         "tags": [
@@ -6095,6 +6124,390 @@
           },
           {
             "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/cotizaciones/v1/allcotizacionesbyparametros": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Cotizaciones"
+        ],
+        "description": "Devuelve todos los encabezados de cotizacion por parametro\r  , debe indicarse al menos uno",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id_obra",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "fecha_cotizacion",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "mostrar_todos",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/cotizaciones/v1/creacotizacion": {
+      "post": {
+        "tags": [
+          "Obras - Backoffice - Cotizaciones"
+        ],
+        "description": "Crea un encabezado de cotización",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_obra": {
+                  "type": "number",
+                  "example": 1
+                },
+                "codigo_cotizacion": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "solicitado_por": {
+                  "type": "string",
+                  "example": "Nombre apellido"
+                },
+                "direccion": {
+                  "type": "string",
+                  "example": "direccion"
+                },
+                "fecha_ejecucion": {
+                  "type": "string",
+                  "example": "2026-10-25"
+                },
+                "jefe_faena": {
+                  "type": "number",
+                  "example": 1
+                },
+                "supervisor": {
+                  "type": "number",
+                  "example": 1
+                },
+                "detalle_actividad": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "clase": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "tipo": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "actividad": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 3
+                      }
+                    }
+                  }
+                },
+                "detalle_otros": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "glosa": {
+                        "type": "string",
+                        "example": "descripcion de la tarea 2"
+                      },
+                      "uc_unitaria": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "uc_total": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "unitario_pesos": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "total_pesos": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/cotizaciones/v1/updatecotizacion/{id}": {
+      "put": {
+        "tags": [
+          "Obras - Backoffice - Cotizaciones"
+        ],
+        "description": "Actualiza un encabezado de cotización",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Datos encabezado reporte diario",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_obra": {
+                  "type": "number",
+                  "example": 1
+                },
+                "codigo_cotizacion": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "solicitado_por": {
+                  "type": "string",
+                  "example": "Nombre apellido"
+                },
+                "direccion": {
+                  "type": "string",
+                  "example": "direccion"
+                },
+                "fecha_ejecucion": {
+                  "type": "string",
+                  "example": "2026-10-25"
+                },
+                "jefe_faena": {
+                  "type": "number",
+                  "example": 1
+                },
+                "supervisor": {
+                  "type": "number",
+                  "example": 1
+                },
+                "detalle_actividad": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "clase": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "tipo": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "actividad": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 3
+                      }
+                    }
+                  }
+                },
+                "detalle_otros": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "glosa": {
+                        "type": "string",
+                        "example": "descripcion de la tarea 2"
+                      },
+                      "uc_unitaria": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "cantidad": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "uc_total": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "unitario_pesos": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "total_pesos": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/cotizaciones/v1/deletecotizacion/{id}": {
+      "delete": {
+        "tags": [
+          "Obras - Backoffice - Cotizaciones"
+        ],
+        "description": "Borra un encabezado de cotización y sus detalles por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/obras/backoffice/cotizaciones/v1/cotizacionporid": {
+      "get": {
+        "tags": [
+          "Obras - Backoffice - Cotizaciones"
+        ],
+        "description": "Obtiene todos los datos para completar la cotización por id ",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "id_cotizacion",
             "in": "query",
             "type": "string"
           }

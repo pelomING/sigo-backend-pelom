@@ -16,6 +16,7 @@ const TipoOperacion = db.tipoOperacion;
 const TipoActividad = db.tipoActividad;
 const MaestroActividad = db.maestroActividad;
 const UsuariosFunciones = db.usuariosFunciones;
+const Supervisor = db.supervisor;
 
 const customErrorMap = (issue, ctx) => {
   if (issue.code === z.ZodIssueCode.invalid_type) {
@@ -587,4 +588,27 @@ exports.findAllMaestroMateriales = async (req, res) => {
       res.status(500).send(error);
   }
 }
+
+/*********************************************************************************** */
+/* Obtiene todos los Supervisores
+*/
+exports.findAllSupervisores = async (req, res) => {
+  /*  #swagger.tags = ['Obras - General']
+      #swagger.description = 'Devuelve todos los supervisores' */
+  try {
+    await Supervisor.findAll({
+      order: [
+        ['nombre', 'ASC']
+      ]
+    }).then(data => {
+      res.status(200).send(data);
+    }).catch(err => {
+        res.status(500).send(err.message );
+    })
+  }catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+}
+
 

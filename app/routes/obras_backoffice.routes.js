@@ -8,6 +8,7 @@ const backofficeRepodiarioController = require("../controllers/obras/backoffice.
 const backofficeEstadopagoController = require("../controllers/obras/backoffice.estadopago.controller");
 const backofficeUsoController = require("../controllers/obras/backoffice.usosistema.controller");
 const backofficeMaterialController = require("../controllers/obras/backoffice.material.controller");
+const backofficeCotizacionController = require("../controllers/obras/backoffice.cotizacion.controller");
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -50,6 +51,9 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/general/v1/allempresacontratistas", [authJwt.verifyToken], backofficeGeneralController.findAllEmpresaContratista);
 
 
+    app.get("/api/obras/backoffice/general/v1/allsupervisores", [authJwt.verifyToken], backofficeGeneralController.findAllSupervisores);
+
+
     app.get("/api/obras/backoffice/general/v1/allcoordinadorcontratistas", [authJwt.verifyToken], backofficeGeneralController.findAllCoordinadorContratista);
 
 
@@ -76,6 +80,8 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/general/v1/allusuarios", [authJwt.verifyToken], backofficeGeneralController.findAllUsuariosFunciones);
 
     app.get("/api/obras/backoffice/general/v1/allmaestromaterial", [authJwt.verifyToken], backofficeGeneralController.findAllMaestroMateriales);
+
+
 
     
 
@@ -313,4 +319,19 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/materialdaia/v1/materialporsolicitudfaena", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialPorSolicitudFaena);
 
     app.get("/api/obras/backoffice/materialdaia/v1/materialdisponibleexcludeobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialDisponibleExcludeObra);
+
+
+    ///****************************************** Cotizaciones ***********************      */
+
+    //app.post("/api/obras/backoffice/cotizaciones/v1/ingresacotizacion", [authJwt.verifyToken, authJwt.createObrasBackofficeCotizaciones], backofficeCotizacionController.postIngresarCotizacion);
+    app.get("/api/obras/backoffice/cotizaciones/v1/allcotizacionesbyparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeCotizaciones], backofficeCotizacionController.findAllEncabezadoCotizacionByParametros);
+
+    app.post("/api/obras/backoffice/cotizaciones/v1/creacotizacion", [authJwt.verifyToken, authJwt.createObrasBackofficeCotizaciones], backofficeCotizacionController.createEncabezadoCotizacion);
+
+    app.put("/api/obras/backoffice/cotizaciones/v1/updatecotizacion/:id", [authJwt.verifyToken, authJwt.updateObrasBackofficeCotizaciones], backofficeCotizacionController.updateEncabezadoCotizacion);
+
+    app.delete("/api/obras/backoffice/cotizaciones/v1/deletecotizacion/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeCotizaciones], backofficeCotizacionController.deleteEncabezadoCotizacion);
+
+    app.get("/api/obras/backoffice/cotizaciones/v1/cotizacionporid", [authJwt.verifyToken, authJwt.createObrasBackofficeCotizaciones], backofficeCotizacionController.getHistoricoEstadosPagoByIdCotizacion);
+
 }
