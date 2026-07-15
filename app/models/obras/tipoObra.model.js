@@ -19,6 +19,9 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false,
             unique: true
+          },
+          no_exige_oc: {
+            type: Sequelize.BOOLEAN
           }
         },
         {
