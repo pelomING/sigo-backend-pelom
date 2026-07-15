@@ -64,7 +64,8 @@ exports.findAllTipoObra = async (req, res) => {
               id: Number(element.id),
               descripcion: String(element.descripcion),
               bg_color: String(element.bg_color),
-              txt_color: String(element.txt_color)
+              txt_color: String(element.txt_color),
+              no_exige_oc: Boolean(element.no_exige_oc)
             }
             salida.push(detalle_salida);
           }

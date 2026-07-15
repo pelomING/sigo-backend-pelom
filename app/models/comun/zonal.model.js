@@ -7,6 +7,10 @@ module.exports = (sequelize, Sequelize) => {
           nombre: {
             type: Sequelize.STRING,
             allowNull: false
+          },
+          central: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false
           }
     },
     {

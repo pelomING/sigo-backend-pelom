@@ -329,7 +329,7 @@ exports.createObra = async (req, res) => {
         return;
       }
       */
-      if (!/^CGED-\d+$/.test(req.body.codigo_obra) && !/^E-\d{10}$/.test(req.body.codigo_obra)) {
+      if (!/^CGED-\d+$/.test(req.body.codigo_obra) && !/^E-\d{10}$/.test(req.body.codigo_obra) && !/^PE-CYM-\d{8}$/.test(req.body.codigo_obra)) {
         
         res.status(400).send('El Codigo de Obra tiene un formato incorrecto: debe ser CGED-XXXXXXX o E-XXXXXXXX');
         return;
@@ -386,7 +386,7 @@ exports.createObra = async (req, res) => {
           delegacion: req.body.delegacion,
           gestor_cliente: req.body.gestor_cliente,
           numero_aviso: req.body.numero_aviso,
-          numero_oc: req.body.numero_oc,
+          numero_oc: req.body.numero_oc?req.body.numero_oc:'',
           monto: 0,
           cantidad_uc: req.body.cantidad_uc,
           fecha_llegada: req.body.fecha_llegada,
@@ -399,7 +399,7 @@ exports.createObra = async (req, res) => {
           coordinador_contratista: req.body.coordinador_contratista,
           comuna: req.body.comuna,
           ubicacion: req.body.ubicacion,
-          estado: 1,
+          estado: 4,  //estado nueva
           tipo_obra: req.body.tipo_obra,
           segmento: req.body.segmento,
           eliminada: false,
@@ -1216,6 +1216,35 @@ exports.getCodigoObraEmergencia = async (req, res) => {
     res.status(500).send(error);
   }
 }
+
+/*********************************************************************************** */
+/* Obtiene el código de obra automático para las obras que no son emergencia
+    GET /api/obras/backoffice/v1/codigodeobra-notemergencia
+*/
+exports.getCodigoObraNotEmergencia = async (req, res) => {
+  /*  #swagger.tags = ['Obras - Backoffice - Obras']
+      #swagger.description = 'Obtiene el código de obra automático para las obras que no son emergencia' */
+  try {
+
+      const sql = `select case when maximo is null then 'PE-CYM-00000001'::text else 
+                    ('PE-CYM-' || to_char(maximo+1, 'FM09999999'))::text end as valor from 
+                    (select max(cod) as maximo FROM
+                    (SELECT substring(codigo_cged_temp,8)::bigint as cod FROM obras.obras 
+                    WHERE substring(codigo_cged_temp,1,7) = 'PE-CYM-') as a) as b`;
+
+      const { QueryTypes } = require('sequelize');
+      const sequelize = db.sequelize;
+      const codigoNotEmergencia = await sequelize.query(sql, { type: QueryTypes.SELECT });
+      if (codigoNotEmergencia) {
+        res.status(200).send(codigoNotEmergencia);
+      }else{
+        res.status(500).send("Error en la consulta (servidor backend)");
+      }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
 /*********************************************************************************** */
 /* Obtiene el resumen informartivo de obras
     GET /api/obras/backoffice/v1/resumenobras
