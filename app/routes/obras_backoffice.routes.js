@@ -1,10 +1,14 @@
 const { authJwt } = require("../middleware");
+const uploadJs = require("../middleware/upload");
 const backofficeGeneralController = require("../controllers/obras/backoffice.general.controller");
 const backofficeObrasController = require("../controllers/obras/backoffice.obras.controller");
 const backofficeBomController = require("../controllers/obras/backoffice.bom.controller");
 const backofficeTerrenoController = require("../controllers/obras/backoffice.terreno.controller");
 const backofficeRepodiarioController = require("../controllers/obras/backoffice.repodiario.controller");
 const backofficeEstadopagoController = require("../controllers/obras/backoffice.estadopago.controller");
+const backofficeUsoController = require("../controllers/obras/backoffice.usosistema.controller");
+const backofficeMaterialController = require("../controllers/obras/backoffice.material.controller");
+const backofficeCotizacionController = require("../controllers/obras/backoffice.cotizacion.controller");
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -47,6 +51,9 @@ module.exports = function(app) {
     app.get("/api/obras/backoffice/general/v1/allempresacontratistas", [authJwt.verifyToken], backofficeGeneralController.findAllEmpresaContratista);
 
 
+    app.get("/api/obras/backoffice/general/v1/allsupervisores", [authJwt.verifyToken], backofficeGeneralController.findAllSupervisores);
+
+
     app.get("/api/obras/backoffice/general/v1/allcoordinadorcontratistas", [authJwt.verifyToken], backofficeGeneralController.findAllCoordinadorContratista);
 
 
@@ -64,9 +71,17 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/general/v1/alloficinasupervisor", [authJwt.verifyToken], backofficeGeneralController.findAllOficinas);
 
+
     app.get("/api/obras/backoffice/general/v1/allrecargospordistancia", [authJwt.verifyToken], backofficeGeneralController.findAllRecargosDistancia);
 
+    
     app.get("/api/obras/backoffice/general/v1/resumengeneral", [authJwt.verifyToken], backofficeGeneralController.getResumenGeneral);
+
+    app.get("/api/obras/backoffice/general/v1/allusuarios", [authJwt.verifyToken], backofficeGeneralController.findAllUsuariosFunciones);
+
+    app.get("/api/obras/backoffice/general/v1/allmaestromaterial", [authJwt.verifyToken], backofficeGeneralController.findAllMaestroMateriales);
+
+
 
     
 
@@ -99,6 +114,9 @@ module.exports = function(app) {
     /* Obtiene el código de obra en caso de que sea de tipo emergencia*/
     app.get("/api/obras/backoffice/v1/codigodeobraemergencia", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeObrasController.getCodigoObraEmergencia);
 
+    /* Obtiene el código de obra en caso de que NO sea de tipo emergencia*/
+    app.get("/api/obras/backoffice/v1/codigodeobra-notemergencia", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeObrasController.getCodigoObraNotEmergencia);
+
     /* Obtiene el resumen informartivo de obras*/
     app.get("/api/obras/backoffice/v1/resumenobras", [authJwt.verifyToken, authJwt.readObrasBackofficeObras], backofficeObrasController.getResumenObras);
 
@@ -108,22 +126,35 @@ module.exports = function(app) {
 /******* BOM ******************************************************************** */    
 
 { /*** BOM ** */
-    app.get("/api/obras/backoffice/v1/allbom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findAllBom);
+    //app.get("/api/obras/backoffice/v1/allbom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findAllBom);
+    //app.get("/api/obras/backoffice/v1/bomporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findBomByParametros);
 
+    app.get("/api/obras/backoffice/material/v1/allobrasparabom", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getAllObrasParaBom);
+    app.get("/api/obras/backoffice/material/v1/solicitudesmaterialporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getPedidosPorObra);
+    app.get("/api/obras/backoffice/material/v1/obtiene_numero_solicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getNumeroPedido);
+    app.post("/api/obras/backoffice/material/v1/creasolicitudmaterial", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createPedidoMaterial);
+    app.get("/api/obras/backoffice/material/v1/materialesporsolicitud", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorPedido);
+    app.get("/api/obras/backoffice/material/v1/exportarexcelporpedido", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelMaterialPorPedido);
+    app.get("/api/obras/backoffice/material/v1/totalmaterialsolicitadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialSolicitadoPorObra);
+    app.get("/api/obras/backoffice/material/v1/totalmaterialreservadoporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getTotalMaterialReservadoPorObra);
 
-    app.get("/api/obras/backoffice/v1/bomporparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.findBomByParametros);
+    app.put("/api/obras/backoffice/material/v1/actualizasolicitud", [authJwt.verifyToken, authJwt.updateObrasBackofficeBom], backofficeBomController.generaOcancelaSolicitud);
+    app.get("/api/obras/backoffice/material/v1/reservasporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getReservasPorObra);
+    app.post("/api/obras/backoffice/material/v2/crea_reserva_material", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo_v2);
+    app.post("/api/obras/backoffice/material/v1/reserva_upload", [authJwt.verifyToken, authJwt.createObrasBackofficeBom, uploadJs.upload.single('file')], backofficeBomController.createBomFromExcel);
+    app.get("/api/obras/backoffice/material/v1/materialesporreserva", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getMaterialPorReserva);
+    app.get("/api/obras/backoffice/material/v1/allreservas", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getAllReservas);
+    app.get("/api/obras/backoffice/material/v1/bom_inicial_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomZero);
+    app.get("/api/obras/backoffice/material/v1/bom_actual_por_obra", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getBomFinal);
+    app.get("/api/obras/backoffice/material/v1/exportarexcel", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelReserva);
+    app.get("/api/obras/backoffice/material/v1/exportarexceltodo", [authJwt.verifyToken, authJwt.readObrasBackofficeBom], backofficeBomController.getExcelReservaPorObra);
+    app.post("/api/obras/backoffice/material/v1/crealistafaena", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createListaFaena);
+    app.post("/api/obras/backoffice/material/v1/creamovimientobodega", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createMovimientoBodega);
 
-
-    app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo);
-
-
-    app.post("/api/obras/backoffice/v1/creabomindividual", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomIndividual);
-
-
-    app.delete("/api/obras/backoffice/v1/eliminabomporreserva/:reserva", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByReserva);
-
-
-    app.delete("/api/obras/backoffice/v1/eliminamaterialbom/:reserva/:cod_sap", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByMaterial);
+    //app.post("/api/obras/backoffice/v1/creabom", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomMasivo);
+    //app.post("/api/obras/backoffice/v1/creabomindividual", [authJwt.verifyToken, authJwt.createObrasBackofficeBom], backofficeBomController.createBomIndividual);
+    //app.delete("/api/obras/backoffice/v1/eliminabomporreserva/:reserva", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByReserva);
+    //app.delete("/api/obras/backoffice/v1/eliminamaterialbom/:reserva/:cod_sap", [authJwt.verifyToken, authJwt.deleteObrasBackofficeBom], backofficeBomController.deleteBomByMaterial);
 }
 
 { /*** VISITA TERRENOS ** */
@@ -175,6 +206,20 @@ module.exports = function(app) {
 
     app.get("/api/obras/backoffice/repodiario/v1/allrecargoshora", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllRecargosHoraExtra);
 
+    app.post("/api/obras/movil/repodiario/v1/upload_reportediario", [authJwt.verifyToken, authJwt.createObrasBackofficeRepodiario], backofficeRepodiarioController.creaReporteDiarioMovil);
+
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdefaena", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.findAllReportesDeFaena);
+
+    app.get("/api/obras/backoffice/repodiario/v1/reportesdefaenaactividad", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.getReporteDeFaenaById);
+
+    app.put("/api/obras/backoffice/repodiario/v1/asignareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.grabaRepoFaenaAObra);
+
+    app.put("/api/obras/backoffice/repodiario/v1/anulareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.anularRepoFaenaAObra);
+
+    app.put("/api/obras/backoffice/repodiario/v1/liberareportediariomovil/:id_reporte", [authJwt.verifyToken, authJwt.updateObrasBackofficeRepodiario], backofficeRepodiarioController.desasignaRepoFaenaAObra);
+
+    app.get("/api/obras/backoffice/repodiario/v1/informe_uc", [authJwt.verifyToken, authJwt.readObrasBackofficeRepodiario], backofficeRepodiarioController.informeUC);
+
 }
 
 
@@ -198,6 +243,10 @@ module.exports = function(app) {
     // Obtiene todas las actividades adicionales y normales que tengan hora extra para un estado de pago
     app.get("/api/obras/backoffice/estadopago/v1/allactividadesconhoraextra", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllActividadesHoraExtraByIdObra);
 
+    /* Obtiene la explicación de los recargos en hora extra
+    GET /api/obras/backoffice/estadopago/v1/getallrecargoextra*/
+    app.get("/api/obras/backoffice/estadopago/v1/getallrecargoextra", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllRecargoExtra);
+
     // Obtiene la tabla de los avances de estado de pago
     //GET /api/obras/backoffice/estadopago/v1/avancesestadopago
     app.get("/api/obras/backoffice/estadopago/v1/avancesestadopago", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.avancesEstadoPago);
@@ -209,6 +258,9 @@ module.exports = function(app) {
 
     // Graba un estado de pago
     app.post("/api/obras/backoffice/estadopago/v1/creaestadopago", [authJwt.verifyToken, authJwt.createObrasBackofficeEstadoPago], backofficeEstadopagoController.creaEstadoPago);
+
+    // Graba un estado de pago Version 2
+    app.post("/api/obras/backoffice/estadopago/v2/creaestadopago", [authJwt.verifyToken, authJwt.createObrasBackofficeEstadoPago], backofficeEstadopagoController.creaEstadoPago_v2);
 
     // Lista los estados de pago por id_obra  GET /api/obras/backoffice/estadopago/v1/listaestadospago
     app.get("/api/obras/backoffice/estadopago/v1/listaestadospago", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.getAllEstadosPagoByIdObra);
@@ -225,6 +277,64 @@ module.exports = function(app) {
     // GET /api/obras/backoffice/estadopago/v1/allestadospagogestion
     app.get("/api/obras/backoffice/estadopago/v1/allestadospagogestion", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.allestadospagogestion);
 
+    // Elimina un estado de pago
+    // DELETE /api/obras/backoffice/estadopago/v1/borraestadopago
+    app.delete("/api/obras/backoffice/estadopago/v1/borraestadopago/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeEstadoPago], backofficeEstadopagoController.borraEstadoPago);
 
+
+    //Consulta los reportes diarios asociados a un estado de pago
+    app.get("/api/obras/backoffice/estadopago/v1/reportesdiarios", [authJwt.verifyToken, authJwt.readObrasBackofficeEstadoPago], backofficeEstadopagoController.findAllEncabezadoReporteDiarioByIdEstadoPago);
+
+
+
+///****************************************** Uso del Sistema ***********************      */
+
+    // Lista un resumen de los login hechos en el sistema dentro de un período
+    // GET /api/obras/backoffice/usosistema/v1/alllogin
+    app.get("/api/obras/backoffice/usosistema/v1/alllogin", [authJwt.verifyToken], backofficeUsoController.getAllLoginSistema);
+
+
+    // Lista un resumen del ingreso de obras en el sistema en los dias recientes
+    // GET /api/obras/backoffice/usosistema/v1/resumenobrasrecientes
+    app.get("/api/obras/backoffice/usosistema/v1/resumenobrasrecientes", [authJwt.verifyToken], backofficeUsoController.getObrasIngresadasResumen);
+
+    // Lista cantidad de obras sin reporte recietes
+    // GET /api/obras/backoffice/usosistema/v1/resumenobrasinreportes
+    app.get("/api/obras/backoffice/usosistema/v1/resumenobrasinreportes", [authJwt.verifyToken], backofficeUsoController.getObrasSinRepDiario);
+
+    //Lista de los reportes diarios en los últimos días
+    // GET /api/obras/backoffice/usosistema/v1/reportesdiarios_pordia
+    app.get("/api/obras/backoffice/usosistema/v1/reportesdiarios_pordia", [authJwt.verifyToken], backofficeUsoController.getReportesDiariosPorDia);
+
+    //Lista de los cambios realizados al programa
+    // GET /api/obras/backoffice/usosistema/v1/changelog
+    app.get("/api/obras/backoffice/usosistema/v1/changelog", [authJwt.verifyToken], backofficeUsoController.getChangeLog);
+
+
+
+    ///****************************************** Integración DAIA (materiales) ***********************      */
+    app.get("/api/obras/backoffice/materialdaia/v1/materialdisponibleporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialDisponibleByObra);
+
+    app.post("/api/obras/backoffice/materialdaia/v1/ingresasolicitud", [authJwt.verifyToken, authJwt.createObrasBackofficeMateriales], backofficeMaterialController.postIngresaSolicitud);
+
+    app.get("/api/obras/backoffice/materialdaia/v1/solicitudfaenaporobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getSolicitudMaterialFaenaPorObra);
+
+    app.get("/api/obras/backoffice/materialdaia/v1/materialporsolicitudfaena", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialPorSolicitudFaena);
+
+    app.get("/api/obras/backoffice/materialdaia/v1/materialdisponibleexcludeobra", [authJwt.verifyToken, authJwt.readObrasBackofficeMateriales], backofficeMaterialController.getMaterialDisponibleExcludeObra);
+
+
+    ///****************************************** Cotizaciones ***********************      */
+
+    //app.post("/api/obras/backoffice/cotizaciones/v1/ingresacotizacion", [authJwt.verifyToken, authJwt.createObrasBackofficeCotizaciones], backofficeCotizacionController.postIngresarCotizacion);
+    app.get("/api/obras/backoffice/cotizaciones/v1/allcotizacionesbyparametros", [authJwt.verifyToken, authJwt.readObrasBackofficeCotizaciones], backofficeCotizacionController.findAllEncabezadoCotizacionByParametros);
+
+    app.post("/api/obras/backoffice/cotizaciones/v1/creacotizacion", [authJwt.verifyToken, authJwt.createObrasBackofficeCotizaciones], backofficeCotizacionController.createEncabezadoCotizacion);
+
+    app.put("/api/obras/backoffice/cotizaciones/v1/updatecotizacion/:id", [authJwt.verifyToken, authJwt.updateObrasBackofficeCotizaciones], backofficeCotizacionController.updateEncabezadoCotizacion);
+
+    app.delete("/api/obras/backoffice/cotizaciones/v1/deletecotizacion/:id", [authJwt.verifyToken, authJwt.deleteObrasBackofficeCotizaciones], backofficeCotizacionController.deleteEncabezadoCotizacion);
+
+    app.get("/api/obras/backoffice/cotizaciones/v1/cotizacionporid", [authJwt.verifyToken, authJwt.createObrasBackofficeCotizaciones], backofficeCotizacionController.getHistoricoEstadosPagoByIdCotizacion);
 
 }

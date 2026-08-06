@@ -19,6 +19,7 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+.vscode/
 
 # Visual Studio Code
 .vscode/*
@@ -39,6 +40,9 @@ testem.log
 /old-modules
 *.bat
 *.zip
+*.pdf
+*.xls
+*.xlsx
 
 # System files
 .DS_Store

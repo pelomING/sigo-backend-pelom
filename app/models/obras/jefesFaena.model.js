@@ -9,6 +9,11 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false,
             unique: true
+          },
+          rut: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            unique: true
           }
         },
         {

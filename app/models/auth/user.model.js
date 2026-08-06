@@ -13,6 +13,9 @@ module.exports = (sequelize, Sequelize) => {
       password: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      fecha_password: {
+        type: Sequelize.DATE,
       }
     },
     {

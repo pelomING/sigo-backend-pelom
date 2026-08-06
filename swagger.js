@@ -31,7 +31,8 @@ const endpointsFiles = [
   './app/routes/mantenedor.routes.js', 
   './app/routes/obras_backoffice.routes.js',
   './app/routes/sae_movil.routes.js',
-  './app/routes/sae_reportes.routes.js'
+  './app/routes/sae_reportes.routes.js',
+  './app/routes/sae_paneldecontrol.routes'
 ];
 
 /* NOTE: if you use the express Router, you must pass in the 

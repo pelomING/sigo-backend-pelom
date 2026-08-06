@@ -122,7 +122,8 @@ exports.findAllClientes = async (req, res) => {
 exports.findAllTipofuncionPersonal = async (req, res) => {
   /*  #swagger.tags = ['SAE - Mantenedores']
       #swagger.description = 'Devuelve todos los tipo de funcion del personal sae' */
-  await TipoFuncionPersonal.findAll({where: {sistema: false}}).then(data => {
+  //await TipoFuncionPersonal.findAll({where: {sistema: false}}).then(data => {
+  await TipoFuncionPersonal.findAll().then(data => {
       res.status(200).send(data);
   }).catch(err => {
       res.status(500).send( err.message );

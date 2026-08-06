@@ -10,7 +10,23 @@ const storage = multer.diskStorage({
   }
 });
 
-// Create the multer instance
-const upload = multer({ storage: storage });
+const storageMemory = multer.memoryStorage();
 
-module.exports = upload;
+// Create the multer instance
+const upload = multer({ storage: storageMemory, fileFilter: ( req, file, cb) => {
+    // Verificar tipo MIME del archivo
+    if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+        file.mimetype === 'application/vnd.ms-excel') {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipo de archivo no permitido. Por favor, sube un archivo Excel.'));
+    }
+  } 
+});
+
+const uploadJs = {
+  upload,
+  storageMemory
+}
+
+module.exports = uploadJs

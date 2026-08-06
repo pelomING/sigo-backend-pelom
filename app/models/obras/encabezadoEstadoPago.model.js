@@ -111,6 +111,18 @@ module.exports = (sequelize, Sequelize) => {
         },
         detalle_horaextra : {
             type: Sequelize.ARRAY(Sequelize.JSON)
+        },
+        numero_oc : {
+            type: Sequelize.STRING
+        },
+        recargos_extra : {
+            type: Sequelize.ARRAY(Sequelize.JSON)
+        },
+        referencia : {
+            type: Sequelize.STRING
+        },
+        centrality: {
+            type: Sequelize.STRING
         }
     },
         {

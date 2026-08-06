@@ -18,6 +18,12 @@ module.exports = (sequelize, Sequelize) => {
       },
       nombres: {
         type: Sequelize.STRING
+      },
+      fecha_password: {
+        type: Sequelize.DATE
+      },
+      cod_mensaje: {
+        type: Sequelize.INTEGER
       }
     },
     {
